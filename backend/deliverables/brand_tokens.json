@@ -1,0 +1,15 @@
+{
+  "name": "Argus",
+  "accent": "#6366f1",
+  "accent_rgb": [99, 102, 241],
+  "accent_muted": "#312e81",
+  "base": "#030712",
+  "elevated": "#0b1220",
+  "text_primary": "#0f172a",
+  "text_secondary": "#475569",
+  "text_muted": "#64748b",
+  "surface": "#f8fafc",
+  "elevated": "#ffffff",
+  "border": "#e2e8f0",
+  "callout_border": "#6366f1"
+}

@@ -1,0 +1,99 @@
+@import "../styles/tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-canvas font-sans text-argus-primary antialiased;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Session workspace: evidence | answer | trust */
+.workspace-grid {
+  display: grid;
+  grid-template-areas: "evidence answer trust";
+  grid-template-columns: 268px minmax(0, 1fr) 256px;
+  gap: 24px;
+  align-items: start;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.workspace-grid [data-area="evidence"] {
+  grid-area: evidence;
+}
+
+.workspace-grid [data-area="answer"] {
+  grid-area: answer;
+}
+
+.workspace-grid [data-area="trust"] {
+  grid-area: trust;
+}
+
+@media (max-width: 1279px) {
+  .workspace-grid {
+    grid-template-areas: "answer trust";
+    grid-template-columns: minmax(0, 1fr) 240px;
+  }
+  .workspace-grid [data-area="evidence"] {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .workspace-grid {
+    grid-template-areas: "answer" "trust";
+    grid-template-columns: 1fr;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    gap: 16px;
+  }
+
+  /* Bottom-sheet style rail on small screens */
+  .workspace-grid [data-area="trust"] {
+    position: sticky;
+    bottom: 0;
+    z-index: 30;
+    margin: 0 -16px -8px;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    max-height: min(52vh, 420px);
+    overflow-y: auto;
+    border-radius: 16px 16px 0 0;
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+    background: var(--bg-canvas);
+    box-shadow: 0 -12px 40px rgba(10, 10, 15, 0.12);
+  }
+}
+
+.workspace-rail {
+  position: sticky;
+  top: calc(56px + 16px);
+  max-height: calc(100vh - 56px - 32px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.workspace-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.workspace-answer {
+  min-width: 0;
+  max-height: calc(100vh - 56px - 48px);
+  overflow-y: auto;
+}
+
+@media (max-width: 1023px) {
+  .workspace-answer {
+    max-height: none;
+    overflow-y: visible;
+  }
+}

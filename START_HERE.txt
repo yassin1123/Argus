@@ -1,0 +1,13 @@
+Argus — start here (after extracting argus.zip)
+==============================================
+
+1. Read README.md        ← what Argus is, the problem, how it works (diagram), example output, stack.
+2. Read ZIP_PACKAGE.md   ← Docker, frontend, DB migrations, codebase map, full API list, troubleshooting.
+   Optional: CODEBASE_OVERVIEW.md — folders and data flow.
+3. Copy .env.example to .env (project root) and set OPENAI_API_KEY.
+4. Copy .env.example to frontend/.env.local and set NEXT_PUBLIC_API_URL=http://localhost:8000
+5. Run: docker compose up --build   then in another terminal: cd frontend && npm install && npm run dev
+6. Open http://localhost:3000 — verify http://localhost:8000/api/health returns {"status":"ok"}
+
+Optional smoke test (Compose up):  bash tools/smoke_check.sh
+Rebuild argus.zip:                  python tools/package_argus_zip.py

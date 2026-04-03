@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>{{ doc.cover_title }}</title>
+  <style>
+    :root {
+      --argus-accent: {{ brand.accent | default('#6366f1') }};
+      --argus-callout-border: {{ brand.callout_border | default('#6366f1') }};
+      --argus-text: {{ brand.text_primary | default('#0f172a') }};
+      --argus-text-sec: {{ brand.text_secondary | default('#475569') }};
+      --argus-text-muted: {{ brand.text_muted | default('#64748b') }};
+      --argus-border: {{ brand.border | default('#e2e8f0') }};
+      --argus-surface: {{ brand.surface | default('#f8fafc') }};
+      --argus-elevated: {{ brand.elevated | default('#ffffff') }};
+    }
+    @page { margin: 1.9cm; }
+    body {
+      font-family: "Segoe UI", "Inter", Helvetica, Arial, sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.55;
+      color: var(--argus-text);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    h1, h2, h3, .label {
+      font-family: "Segoe UI", "Inter", Helvetica, Arial, sans-serif;
+      font-weight: 600;
+    }
+    h1 {
+      font-size: 26pt;
+      margin-top: 0;
+      color: var(--argus-text);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    h2 {
+      font-size: 11pt;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--argus-text-sec);
+      margin-top: 2.25rem;
+      border-bottom: 1px solid var(--argus-border);
+      padding-bottom: 0.4rem;
+    }
+    h3 { font-size: 10.5pt; color: var(--argus-text); margin-top: 1.35rem; margin-bottom: 0.4rem; }
+    .cover {
+      min-height: 68vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      page-break-after: always;
+      border-left: 5px solid var(--argus-accent);
+      padding-left: 1.5rem;
+    }
+    .cover .meta { color: var(--argus-text-muted); font-size: 10pt; margin-top: 1.25rem; }
+    .exec-block {
+      background: linear-gradient(135deg, var(--argus-surface) 0%, var(--argus-elevated) 100%);
+      border: 1px solid var(--argus-border);
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      margin: 1.5rem 0;
+    }
+    .callout {
+      background: var(--argus-surface);
+      border-left: 4px solid var(--argus-callout-border);
+      padding: 14px 18px;
+      margin: 1.35rem 0;
+      font-size: 11.5pt;
+      line-height: 1.45;
+    }
+    ul.insights { margin: 0.5rem 0; padding-left: 1.2rem; }
+    ul.insights li { margin-bottom: 0.45rem; }
+    table.criteria {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 9.5pt;
+    }
+    table.criteria th, table.criteria td {
+      border: 1px solid var(--argus-border);
+      padding: 9px 11px;
+      vertical-align: top;
+    }
+    table.criteria th {
+      background: var(--argus-surface);
+      text-align: left;
+      color: var(--argus-text);
+      font-weight: 600;
+    }
+    .finding {
+      margin-bottom: 1.35rem;
+      padding: 0.85rem 1rem;
+      border-radius: 5px;
+      border: 1px solid var(--argus-border);
+      background: var(--argus-elevated);
+    }
+    .muted { color: var(--argus-text-muted); font-size: 9pt; }
+    .appendix { page-break-before: always; }
+    .footnote {
+      font-size: 8.5pt;
+      color: var(--argus-text-muted);
+      border-top: 1px solid var(--argus-border);
+      margin-top: 2rem;
+      padding-top: 0.75rem;
+    }
+    pre.verify { font-size: 8pt; white-space: pre-wrap; background: var(--argus-surface); padding: 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+{% if variant == "client" %}
+<div class="cover">
+  <p class="label" style="color:var(--argus-text-muted);">Decision summary</p>
+  <h1>{{ doc.cover_title }}</h1>
+  <p class="meta">{{ doc.cover_date }} · {{ doc.cover_project }}</p>
+  <p class="meta">{{ doc.cover_subtitle }}</p>
+</div>
+{% else %}
+<div class="cover">
+  <h1>{{ doc.cover_title }}</h1>
+  <p class="meta">{{ doc.cover_subtitle }}</p>
+  <p class="meta">{{ doc.cover_date }} · Project: {{ doc.cover_project }}</p>
+</div>
+{% endif %}
+
+<div class="exec-block">
+  <h2 style="margin-top:0;border:none;padding:0;">Executive summary</h2>
+  <ul class="insights">
+    {% for x in doc.exec_insights %}
+    <li>{{ x }}</li>
+    {% endfor %}
+  </ul>
+  {% if not doc.exec_insights %}
+  <p class="muted">No executive insights block was stored; see key findings below.</p>
+  {% endif %}
+</div>
+
+<p class="callout"><strong>Recommendation:</strong> {{ doc.exec_recommendation }}</p>
+
+<h3>Key risks (top)</h3>
+<ul>
+  {% for r in doc.exec_risks %}
+  <li>{{ r }}</li>
+  {% endfor %}
+</ul>
+
+<h2>Key question</h2>
+<p>{{ doc.key_question }}</p>
+
+<h2>Findings</h2>
+{% for f in doc.findings %}
+<div class="finding">
+  <h3>{{ f.title }}</h3>
+  <p>{{ f.explanation }}</p>
+  {% if f.evidence_refs %}
+  <p class="muted">Evidence / claim refs: {{ f.evidence_refs }}</p>
+  {% endif %}
+  <p><em>{{ f.mini_conclusion }}</em></p>
+</div>
+{% endfor %}
+
+<h2>Decision criteria</h2>
+{% if doc.criteria_rows %}
+<table class="criteria">
+  <tr><th>Criteria</th><th>Score</th><th>Notes</th></tr>
+  {% for row in doc.criteria_rows %}
+  <tr>
+    <td>{{ row.criterion }}</td>
+    <td>{{ row.score }}</td>
+    <td>{{ row.notes }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="muted">No criteria table in consulting payload.</p>
+{% endif %}
+
+<h2>Recommendation</h2>
+<p>{{ doc.recommendation_body }}</p>
+
+<h2>Risks</h2>
+<ul>
+  {% for r in doc.risks_body %}
+  <li>{{ r }}</li>
+  {% endfor %}
+</ul>
+
+{% if variant == "memo" and verification_json %}
+<h2>Verification (working memo)</h2>
+<pre class="verify">{{ verification_json }}</pre>
+{% endif %}
+
+<div class="appendix">
+  <h2>Appendix — Sources</h2>
+  <ul>
+    {% for s in doc.appendix_sources %}
+    <li>{{ s }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Appendix — Claim mapping</h2>
+  <table class="criteria">
+    <tr><th>Claim</th><th>Evidence object ids</th></tr>
+    {% for row in doc.appendix_claim_map %}
+    <tr><td>{{ row.claim }}</td><td>{{ row.evidence }}</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% if doc.caveats %}
+<h2>Limitations</h2>
+<p>{{ doc.caveats }}</p>
+{% endif %}
+
+<p class="footnote">Argus deliverable · Generated {{ doc.cover_date }} · Claims should be verified against cited sources.</p>
+
+</body>
+</html>

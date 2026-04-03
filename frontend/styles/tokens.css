@@ -1,0 +1,68 @@
+/**
+ * Argus Series A — design tokens (light, warm canvas)
+ */
+:root {
+  /* Background */
+  --bg-canvas: #fafaf8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f5f5f3;
+  --bg-overlay: #eeeeed;
+  --bg-ink-wash: rgba(10, 10, 15, 0.03);
+
+  /* Text */
+  --text-primary: #0a0a0f;
+  --text-secondary: #3d4451;
+  --text-tertiary: #8892a4;
+  --text-disabled: #c4cbda;
+  --text-inverse: #fafaf8;
+  --text-accent: #2d6be4;
+  --text-gold: #c9a84c;
+
+  /* Border */
+  --border-subtle: #e4e4e0;
+  --border-moderate: #ccccc8;
+  --border-strong: #2d6be4;
+  --border-gold: #c9a84c;
+
+  /* Semantic */
+  --semantic-success: #1a7f5a;
+  --semantic-success-subtle: #edfaf4;
+  --semantic-success-border: #a3d9c4;
+  --semantic-warning: #a06020;
+  --semantic-warning-subtle: #fff8ed;
+  --semantic-warning-border: #f0c888;
+  --semantic-danger: #b02020;
+  --semantic-danger-subtle: #fff0f0;
+  --semantic-danger-border: #f0aaaa;
+  --semantic-neutral: #3d4451;
+  --semantic-neutral-subtle: #f0f1f4;
+
+  /* Medium-High confidence (blue tier) */
+  --semantic-info-subtle: #eef3fd;
+  --semantic-info-border: #b4ccfa;
+
+  /* Shadows (warm-tinted) */
+  --shadow-xs: 0 1px 2px rgba(10, 10, 15, 0.04);
+  --shadow-sm: 0 1px 4px rgba(10, 10, 15, 0.06), 0 2px 8px rgba(10, 10, 15, 0.04);
+  --shadow-md: 0 4px 12px rgba(10, 10, 15, 0.08), 0 2px 6px rgba(10, 10, 15, 0.05);
+  --shadow-lg: 0 8px 24px rgba(10, 10, 15, 0.1), 0 4px 10px rgba(10, 10, 15, 0.06);
+  --shadow-xl: 0 20px 48px rgba(10, 10, 15, 0.12), 0 8px 16px rgba(10, 10, 15, 0.07);
+  --shadow-recommendation: 0 2px 0 0 #c9a84c, 0 8px 24px rgba(201, 168, 76, 0.12);
+
+  /* Radius scale */
+  --radius-btn: 10px;
+  --radius-sm: 12px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

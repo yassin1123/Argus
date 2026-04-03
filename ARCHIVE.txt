@@ -1,0 +1,74 @@
+Argus source archive (argus.zip)
+================================
+
+WHAT IS IN THE ZIP
+------------------
+Full application source: backend (FastAPI, Celery, multi-agent pipeline,
+structured inference layer, workspace/presentation assembly, intake + chat,
+pipeline_events + export cache migrations, Postgres access, PDF/PPTX deliverables,
+tests), frontend (Next.js 14 App Router, workspace UI, intake + chat pages),
+Docker Compose, SQL migrations 001–010, .env template, START_HERE.txt, and docs.
+
+No secrets: packager skips .env* except .env.example / .env.sample.
+No node_modules, no Python venv, no .next build, no .git.
+
+START HERE AFTER EXTRACTING (read in this order)
+------------------------------------------------
+0. START_HERE.txt  — numbered pointer.
+1. README.md       — What Argus is, problem/insight, diagram, example output, stack, run commands.
+   CODEBASE_OVERVIEW.md — optional folder map.
+2. ZIP_PACKAGE.md  — Deep runbook: codebase map, workspace + SSE APIs,
+                     migrations 007–010, intake + chat, troubleshooting, curl E2E.
+3. .env.example    — Copy to .env (root) and frontend/.env.local; set OPENAI_API_KEY.
+
+FULLY RUNNING FROM THE ZIP ONLY
+-------------------------------
+Prerequisites: Docker Desktop, Node.js 20+, OpenAI API key.
+
+  cp .env.example .env
+  # Edit .env: OPENAI_API_KEY=sk-...
+
+  docker compose up --build
+
+  # Second terminal:
+  cd frontend
+  cp ../.env.example .env.local
+  # NEXT_PUBLIC_API_URL=http://localhost:8000
+
+  npm install
+  npm run dev
+
+  Open http://localhost:3000
+
+Verify: http://localhost:8000/api/health  →  {"status":"ok"}
+
+EXISTING POSTGRES VOLUME (upgrade from older zip)
+-------------------------------------------------
+If the DB volume was created before migrations 007/008 existed, apply manually:
+
+  psql "$DATABASE_URL" -f backend/db/migrations/007_pipeline_events.sql
+  psql "$DATABASE_URL" -f backend/db/migrations/008_export_artifact_cache.sql
+
+(See ZIP_PACKAGE.md §5. Fresh installs get these on first container init.)
+
+REGENERATE THE ZIP (from a full dev tree)
+-----------------------------------------
+  python tools/package_argus_zip.py
+
+Creates argus.zip at the repo root (overwrites). Excludes node_modules, .next,
+.git, .cursor, caches, and local .env secrets (keeps .env.example).
+
+NOT INCLUDED (install locally)
+------------------------------
+- node_modules/     → cd frontend && npm install
+- Python venv     → optional; Docker image has backend deps
+- .env / .env.local → copy from .env.example only
+
+LAYOUT
+------
+  backend/       main.py, api/, agents/, core/inference/, presentations/, db/migrations/,
+                 deliverables/, tasks/, tests/, config/
+  frontend/      app/, components/, lib/, styles/, tailwind.config.ts
+  tools/         package_argus_zip.py, e2e_pipeline.ps1, smoke_check.sh, wslconfig.example
+  docker-compose.yml, README.md, ZIP_PACKAGE.md, CODEBASE_OVERVIEW.md, START_HERE.txt,
+  .env.example, .gitignore

@@ -1,0 +1,1 @@
+ALTER TABLE claim_support_rows ADD COLUMN IF NOT EXISTS weak_flag BOOLEAN NOT NULL DEFAULT false;
