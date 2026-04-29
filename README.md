@@ -241,24 +241,3 @@ CI runs the same suite plus a Docker Compose demo smoke test on every push.
 | [`tools/`](tools/) | Build, smoke check, e2e scripts |
 
 For commands and curl samples, also see [`ZIP_PACKAGE.md`](ZIP_PACKAGE.md). For codebase change-points, [`CODEBASE_OVERVIEW.md`](CODEBASE_OVERVIEW.md).
-
----
-
-<details>
-<summary><strong>CV bullet</strong> · short and long versions</summary>
-
-**Short (one-line):**
-
-> Built **Argus** — a full-stack AI decision engine (FastAPI · Celery · Redis · PostgreSQL/pgvector · Next.js) that turns uploaded documents and strategic questions into verified, citation-backed reports with verifier agents, confidence scoring, and exportable client deliverables.
-
-**Long (one paragraph — résumé bullet or LinkedIn summary):**
-
-> Built **Argus** — a full-stack AI decision engine using FastAPI, Celery, Redis, PostgreSQL/pgvector and Next.js — converting uploaded documents and strategic questions into evidence-backed reports with verifier agents, confidence scoring, and exportable client deliverables (PDF, PPTX, memo). Multi-agent pipeline (planner → researcher → analyst → critic → verifier → writer) with strict claim-to-evidence linking, contradiction-capped confidence, a normalized evidence graph, and a deterministic demo mode for evaluation without API keys. CI covers backend tests, frontend type-check + build, and a Docker Compose smoke test against the seeded demo. See [`docs/day-one.md`](docs/day-one.md) for how the architecture maps to a real client deployment.
-
-</details>
-
----
-
-<sub>
-Argus is a portfolio project. All client names ("ExampleCo") and engagement data are fictionalized. Source data in the seeded case study is illustrative — see <a href="docs/case-studies/germany-vs-france/README.md">the case study README</a> for an honest accounting of what's real and what's demo.
-</sub>
