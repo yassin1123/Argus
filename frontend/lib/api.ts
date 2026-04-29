@@ -1,4 +1,4 @@
-import type { Session, SessionDetail } from "./types";
+import type { EvidenceGraph, Session, SessionDetail } from "./types";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -106,6 +106,14 @@ export async function getSession(id: string): Promise<SessionDetail> {
     cache: "no-store",
   });
   if (!res.ok) throw new Error("Failed to load session");
+  return res.json();
+}
+
+export async function getEvidenceGraph(id: string): Promise<EvidenceGraph> {
+  const res = await fetch(`${BASE_URL}/api/workspaces/${id}/graph`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to load evidence graph");
   return res.json();
 }
 

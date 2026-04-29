@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatedExpand } from "@/components/ui/AnimatedExpand";
 import RetrievalHitsPanel from "@/components/Report/RetrievalHitsPanel";
 import { formatSourceLabel } from "@/lib/formatters";
+import { useSelection } from "@/lib/SelectionContext";
 import type { EvidenceObjectRow, RetrievalTaskSnapshot, SessionDetail } from "@/lib/types";
 import { EvidenceCard } from "./EvidenceCard";
 
@@ -11,10 +12,25 @@ const EVIDENCE_PREVIEW = 6;
 
 export default function EvidenceRail({ session }: { session: SessionDetail }) {
   const [showAllEvidence, setShowAllEvidence] = useState(false);
+  const { selectedClaimId, setSelectedClaim } = useSelection();
   const hits = session.metadata?.retrieval_hits;
   const hasHits = Array.isArray(hits) && hits.length > 0;
   const hasFiles = (session.uploaded_files?.length ?? 0) > 0;
-  const evidenceList = session.evidence_objects ?? [];
+  const evidenceListAll = session.evidence_objects ?? [];
+
+  // When a claim is selected, narrow the rail to evidence supporting that claim.
+  const filteredEvidenceIds = useMemo(() => {
+    if (!selectedClaimId) return null;
+    const row = (session.report?.claim_support ?? []).find(
+      (r) => r.claim_id === selectedClaimId
+    );
+    return row?.evidence_object_ids ? new Set(row.evidence_object_ids) : null;
+  }, [selectedClaimId, session.report?.claim_support]);
+
+  const evidenceList =
+    filteredEvidenceIds && filteredEvidenceIds.size > 0
+      ? evidenceListAll.filter((e) => filteredEvidenceIds.has(e.id))
+      : evidenceListAll;
   const hasEvidence = evidenceList.length > 0;
   const sev = session.metadata?.contradiction_severity;
   const showContradiction =
@@ -40,9 +56,25 @@ export default function EvidenceRail({ session }: { session: SessionDetail }) {
         {hasEvidence ? (
           <span className="rounded-full bg-argus-neutral-subtle px-2 py-0.5 text-[10px] font-semibold text-argus-neutral">
             {evidenceList.length}
+            {filteredEvidenceIds ? ` of ${evidenceListAll.length}` : ""}
           </span>
         ) : null}
       </div>
+
+      {selectedClaimId && filteredEvidenceIds ? (
+        <div className="flex items-center justify-between gap-2 rounded-argus-sm border border-argus-info-border bg-argus-info-subtle px-2.5 py-1.5 text-[11px] text-argus-accent">
+          <span className="truncate">
+            Filtered by <span className="font-medium">{selectedClaimId}</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedClaim(null)}
+            className="text-[10px] font-medium uppercase tracking-wide hover:underline"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
 
       {!hasFiles && !hasHits && !hasEvidence && !showContradiction && (
         <div className="rounded-[14px] border border-argus-border-subtle bg-surface p-4 text-sm text-argus-secondary shadow-argus-sm">

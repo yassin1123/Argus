@@ -51,15 +51,57 @@ CLAIM LINKING: claim_ids in executive_insights, recommendation_claim_ids, and ke
 exactly the "claim_id" strings from analysis.key_claims (never invent). If analysis has key_claims, you must
 fill recommendation_claim_ids (at least one) and executive_insights (at least one item).
 
-QUALITY RULES (mandatory):
-- recommendation must be ONE specific, actionable sentence ("Do X first because Y"), not "consider X".
-- summary must include at least one specific number or timeframe drawn from linked claims / evidence.
-- key_reasons: each item should imply what, why it matters, and what supports it (without inventing new facts).
-- next_steps must be time-bound where possible ("Within 30 days: ...", "Within 90 days: ...").
-- what_would_change_our_mind must name concrete thresholds or observations that would flip the call.
-- evidence_ledger_summary must name the strongest 2–3 sources by title (from analysis / research only).
+QUALITY RULES (mandatory — these are the difference between consultant-speak and a usable plan):
 
-FORBIDDEN in the recommendation sentence: vague hedges ("might", "perhaps", "consider") as the main verb.
+RECOMMENDATION:
+- ONE specific sentence naming the option chosen (e.g. "Enter Germany first via a 6-month Mittelstand pilot in NRW + Bavaria" — NOT "Pursue a phased approach").
+- Must reference at least one specific entity: country, segment, channel, vendor, dollar amount, or timeline drawn from linked claims.
+- Must answer "what to do," not "what to consider."
+
+SUMMARY (2-4 sentences):
+- Sentence 1: the recommendation, sharper than the headline.
+- Sentence 2: the single biggest reason supported by evidence (cite a number).
+- Sentence 3: the single biggest risk and the gate that mitigates it.
+- Optional sentence 4: what to do this week.
+
+KEY_REASONS (4-7 items):
+- Each starts with a verb-of-finding ("Concentrates 41% of...", "Cuts procurement cycle by 2.4 months...").
+- Each names a specific number, ratio, threshold, or timeframe from the evidence.
+- Avoid generic phrases like "the market is large" — replace with the actual size.
+
+NEXT_STEPS (5-9 items, this is the Action Plan):
+- Each step MUST start with a time-bound prefix: "This week:", "Within 30 days:", "Within 90 days:", "By month 6:", etc.
+- Each step MUST name an action verb ("Recruit", "Sign", "Stand up", "Run", "Validate", "Negotiate", "Decommission") — not "explore" or "consider."
+- Each step SHOULD name a measurable output: a number of accounts, a signed document, a launched feature, a dashboard, a hire.
+- Include at least one "kill check" step that ties back to kill_criteria (e.g. "Month 5: review 6-anchor pipeline; if 0 LOIs, kill phase-2 plan.").
+- The first 2 steps should be doable this week with the team that exists.
+
+DECISION_CRITERIA (4-8):
+- Use weight high|medium|low to differentiate; not all "high".
+- "how_met" must reference an evidence id or a specific number, not paraphrase.
+
+OPTIONS_MATRIX (2-4):
+- "fit" should be a one-line verdict, not a paragraph (e.g. "Best at this team size; longer cycles." or "Faster TAM growth, harder to capture at 12 HC.").
+- 3-5 pros and 3-5 cons each, each pro/con is one phrase or sentence.
+- Always include a "do nothing / status quo" option if defensible.
+
+KILL_CRITERIA (3-6):
+- Each starts "If <observable> by <timepoint>, then <action>." (e.g. "If 0 of 6 anchors move to LOI by month 5, halt build-out and re-plan.")
+- These are the bright lines that make this plan falsifiable.
+
+WHAT_WOULD_CHANGE_OUR_MIND:
+- Name concrete thresholds or observations: "Direct evidence that French procurement cycles exceed German cycles in our verticals", not "more data".
+
+EVIDENCE_LEDGER_SUMMARY:
+- Name the 2-3 strongest source titles. State sample sizes (n=) where the evidence is empirical.
+- State the weakest claim explicitly (verifier-flagged) with its claim_id.
+
+FORBIDDEN in any field — these phrases mark a generic LLM answer, not a real plan:
+- "phased approach", "leverage synergies", "best practices", "explore opportunities"
+- "consider", "perhaps", "might want to" — as the main verb of recommendation or next_steps
+- Any sentence that could appear unchanged in a different industry's report.
+
+If the analysis lacks the specifics to meet these rules, populate the field with the best available specifics and flag the gap in caveats. Don't pad with generic prose.
 """
 
 

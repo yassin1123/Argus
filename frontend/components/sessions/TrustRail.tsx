@@ -1,6 +1,7 @@
 "use client";
 
 import AgentTimeline from "@/components/Report/AgentTimeline";
+import SelectedClaimCard from "@/components/sessions/SelectedClaimCard";
 import { Button } from "@/components/ui/Button";
 import type { ExportFormat } from "@/lib/api";
 import { formatPipelineStage } from "@/lib/formatters";
@@ -181,6 +182,13 @@ export default function TrustRail({
       <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-argus-tertiary">
         Trust & actions
       </p>
+
+      {session.status === "complete" && session.report ? (
+        <SelectedClaimCard
+          claimSupport={session.report.claim_support ?? []}
+          evidenceObjects={session.evidence_objects ?? []}
+        />
+      ) : null}
 
       <div className="rounded-[14px] border border-argus-border-subtle bg-surface p-4 shadow-argus-sm">
         <p className="text-[11px] text-argus-tertiary">

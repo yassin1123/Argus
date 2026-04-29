@@ -1,0 +1,140 @@
+{
+  "id": "22222222-2222-4222-8222-222222222222",
+  "recommendation": "Run a 2-quarter pilot in Germany (Mittelstand logistics + retail in North Rhine-Westphalia and Bavaria) before committing build-out. Park France as a phase-2 expansion contingent on pilot KPIs.",
+  "confidence_level": "medium-high",
+  "summary": "Germany offers the larger absolute opportunity (€18.4B vs France's smaller market), denser ICP clustering, and stickier post-landing economics (117% NRR), but with longer procurement cycles (7.2 months vs 4.8). France grows faster (22% YoY) and is cheaper to staff but the public-sector tailwind is harder to capture with a 12-person team. A sequenced single-country entry beats parallel at this headcount; an anchor-pilot in Germany de-risks the more capital-intensive bet first. Two diligence gates conditioning the full build-out: confirmed unit economics in one reference vertical, and a signed compliance pathway for in-country data residency.",
+  "key_reasons": [
+    "Germany's B2B SaaS market is roughly 1.6x larger than France's, with denser mid-market logistics and retail clusters in NRW and Bavaria.",
+    "Net revenue retention is structurally higher in German Mittelstand (117%) than French mid-market (109%) — stickier once landed.",
+    "Sequenced single-country entry produces 2.3x the qualified pipeline at this team size compared to parallel entry.",
+    "A 2-quarter pilot reliably resolves go/no-go on full entry economics, lowering the cost of being wrong about Germany.",
+    "France's faster growth and lower cost-of-presence are real, but the public-sector framework that drives much of it is hard to capture with 12 headcount.",
+    "GDPR data-residency expectations are stricter in German RFPs (68% vs 41%), which the pilot must validate compliance pathways for early."
+  ],
+  "risks": [
+    "German procurement cycles (7.2 months avg) may exceed the pilot window if anchor accounts are picked poorly.",
+    "Web-sourced market sizing lags real-time filings; treat absolute numbers as directional until validated against named target accounts.",
+    "Two claims rest on partial document coverage (Mittelstand cluster density and pilot success base rates) — see verifier panel.",
+    "Choosing Germany defers French public-sector tailwind capture; a 6-month delay may compound if competitors land first."
+  ],
+  "counterarguments": [
+    "France-first is defensible if the team has stronger French-language GTM talent — language fit can compress procurement faster than market size advantages.",
+    "If the product has a public-sector wedge, France's UGAP framework could be a faster path to revenue than Mittelstand land-and-expand.",
+    "Parallel entry is rarely defensible at 12 headcount, but a 'discovery presence' (1-2 advisors) in France during the German pilot is cheap insurance."
+  ],
+  "next_steps": [
+    "Define pilot KPIs: 6 named anchor accounts, 2 design partners, signed compliance pathway by month 4.",
+    "Stand up data-residency review with counsel; pre-clear in-country hosting options before first RFP.",
+    "Recruit a Munich- or Düsseldorf-based founding GTM hire with Mittelstand network.",
+    "Gate decision on France build-out to month 6 pilot review; do not pre-commit headcount.",
+    "Run a 1-page weekly pipeline review against the 6 named anchors to detect cycle slippage early."
+  ],
+  "sources": [
+    {"title": "Bitkom — German Software Market Outlook 2024", "type": "web"},
+    {"title": "Numeum — French SaaS Market Report 2024", "type": "web"},
+    {"title": "Forrester — European B2B Buying Behavior", "type": "web"},
+    {"title": "DESTATIS — Regional Industry Statistics", "type": "web"},
+    {"title": "IDC — European Cloud Buyer Survey 2024", "type": "web"},
+    {"title": "UGAP — 2024 Annual Report", "type": "web"},
+    {"title": "Mercer — European Compensation Benchmarks 2024", "type": "web"},
+    {"title": "Bessemer — European Expansion Playbook 2024", "type": "web"},
+    {"title": "OpenView — European NRR Benchmarks 2024", "type": "web"}
+  ],
+  "caveats": "This report contains 1 inference-supported claim (pilot success base rates). Two claims rest on partial document coverage and are flagged in the verifier panel. Web-sourced market sizing should be validated against named-account RFPs before full build-out commitment.",
+  "evidence_count": 10,
+  "unsupported_claim_count": 1,
+  "executive_insights": [
+    {"text": "Germany is the larger and stickier market; France grows faster but is harder to capture at 12 headcount.", "claim_ids": ["c1", "c2", "c5"]},
+    {"text": "Sequenced entry beats parallel; an anchor-pilot in Germany resolves the bigger bet first.", "claim_ids": ["c3", "c4"]},
+    {"text": "Compliance posture (data residency) is the gating risk to pre-clear during the pilot.", "claim_ids": ["c6"]}
+  ],
+  "recommendation_claim_ids": ["c1", "c2", "c3", "c4"],
+  "key_risks_structured": [
+    {"text": "Procurement cycle length may exceed pilot window without disciplined anchor-account selection.", "claim_ids": ["c1"]},
+    {"text": "Data-residency expectations may force architecture changes; surface during pilot, not after.", "claim_ids": ["c6"]}
+  ],
+  "decision_criteria": [
+    {"criterion": "Market size", "germany": "€18.4B (1.6x larger)", "france": "~€11.5B"},
+    {"criterion": "YoY growth", "germany": "14%", "france": "22%"},
+    {"criterion": "Procurement cycle", "germany": "7.2 months", "france": "4.8 months"},
+    {"criterion": "Net revenue retention (mid-market)", "germany": "117%", "france": "109%"},
+    {"criterion": "GTM cost (6 FTE)", "germany": "€1.32M/yr", "france": "€1.05M/yr"},
+    {"criterion": "Data-residency RFP rate", "germany": "68%", "france": "41%"}
+  ],
+  "options_matrix": [
+    {"option": "Germany pilot then build", "pros": "larger TAM, stickier, dense ICP", "cons": "longer cycles, higher cost", "fit_score": 0.82},
+    {"option": "France-first", "pros": "faster growth, cheaper, shorter cycles", "cons": "public-sector wedge hard at 12 HC, smaller TAM", "fit_score": 0.61},
+    {"option": "Parallel split", "pros": "hedge", "cons": "halves bandwidth, 2.3x worse pipeline at this HC", "fit_score": 0.34}
+  ],
+  "kill_criteria": [
+    "If 0 of 6 anchor accounts move to LOI by month 5, kill Germany-first and re-plan.",
+    "If data-residency review uncovers >€500k unforecasted hosting cost, escalate before month 4 commit.",
+    "If competitor lands a flagship Mittelstand customer before month 3, re-evaluate ICP segmentation."
+  ],
+  "what_would_change_our_mind": "Direct evidence from named-account RFPs in the target verticals showing French procurement cycles longer than reported, or Mittelstand procurement cycles shorter; either inverts the sequencing logic. Strong existing French-language GTM bench would also weight toward France-first.",
+  "evidence_ledger_summary": "10 evidence objects across 6 research tasks. 9 from external web sources (high or medium confidence), 1 internal pattern (flagged inference). Verifier confirmed 8 of 9 analyst claims as supported; 1 flagged weak (pilot success base rates).",
+  "verification": {
+    "overall_label": "sufficient",
+    "claims_verified_hint": "8 of 9 supported; 1 weak",
+    "claim_assessments": [
+      {"claim_id": "c1", "verdict": "supported", "evidence_ids": ["e0000001-0000-4000-8000-000000000001", "e0000002-0000-4000-8000-000000000002"], "notes": "Multiple corroborating sources for relative market size."},
+      {"claim_id": "c2", "verdict": "supported", "evidence_ids": ["e0000009-0000-4000-8000-000000000009"], "notes": "NRR figure consistent with adjacent benchmarks."},
+      {"claim_id": "c3", "verdict": "supported", "evidence_ids": ["e0000008-0000-4000-8000-000000000008"], "notes": "Bessemer dataset cited; n=47 acceptable for directional claim."},
+      {"claim_id": "c4", "verdict": "weak", "evidence_ids": ["e0000010-0000-4000-8000-000000000010"], "notes": "Inference-only support; treat 80% accuracy figure as directional."},
+      {"claim_id": "c5", "verdict": "supported", "evidence_ids": ["e0000003-0000-4000-8000-000000000003", "e0000007-0000-4000-8000-000000000007"], "notes": "Procurement cycle and cost figures from independent sources align."},
+      {"claim_id": "c6", "verdict": "supported", "evidence_ids": ["e0000005-0000-4000-8000-000000000005"], "notes": "RFP data-residency rate sourced from IDC survey."}
+    ]
+  },
+  "reasoning_graph": {
+    "nodes": [
+      {"id": "c1", "type": "claim", "label": "Germany is 1.6x larger market", "confidence": "high", "verifier_verdict": "supported"},
+      {"id": "c2", "type": "claim", "label": "Mittelstand NRR is structurally higher", "confidence": "medium", "verifier_verdict": "supported"},
+      {"id": "c3", "type": "claim", "label": "Sequenced entry beats parallel at 12 HC", "confidence": "medium", "verifier_verdict": "supported"},
+      {"id": "c4", "type": "claim", "label": "Pilots resolve go/no-go reliably", "confidence": "medium", "verifier_verdict": "weak"},
+      {"id": "c5", "type": "claim", "label": "France faster + cheaper but harder to capture", "confidence": "medium", "verifier_verdict": "supported"},
+      {"id": "c6", "type": "claim", "label": "Data-residency expectations are stricter in DE", "confidence": "medium", "verifier_verdict": "supported"},
+      {"id": "e0000001-0000-4000-8000-000000000001", "type": "evidence", "label": "Bitkom — DE SaaS €18.4B", "confidence": "high"},
+      {"id": "e0000002-0000-4000-8000-000000000002", "type": "evidence", "label": "Numeum — FR 22% YoY", "confidence": "high"},
+      {"id": "e0000003-0000-4000-8000-000000000003", "type": "evidence", "label": "Forrester — DE 7.2mo cycle", "confidence": "high"},
+      {"id": "e0000004-0000-4000-8000-000000000004", "type": "evidence", "label": "DESTATIS — NRW+Bavaria 41%", "confidence": "medium"},
+      {"id": "e0000005-0000-4000-8000-000000000005", "type": "evidence", "label": "IDC — DE 68% residency RFPs", "confidence": "medium"},
+      {"id": "e0000006-0000-4000-8000-000000000006", "type": "evidence", "label": "UGAP — €340M public-sector framework", "confidence": "high"},
+      {"id": "e0000007-0000-4000-8000-000000000007", "type": "evidence", "label": "Mercer — €1.05M vs €1.32M", "confidence": "medium"},
+      {"id": "e0000008-0000-4000-8000-000000000008", "type": "evidence", "label": "Bessemer — 2.3x sequenced pipeline", "confidence": "medium"},
+      {"id": "e0000009-0000-4000-8000-000000000009", "type": "evidence", "label": "OpenView — DE 117% / FR 109% NRR", "confidence": "medium"},
+      {"id": "e0000010-0000-4000-8000-000000000010", "type": "evidence", "label": "Argus pattern — pilot accuracy", "confidence": "medium"},
+      {"id": "s_bitkom", "type": "source", "label": "Bitkom"},
+      {"id": "s_numeum", "type": "source", "label": "Numeum"},
+      {"id": "s_forrester", "type": "source", "label": "Forrester"},
+      {"id": "s_destatis", "type": "source", "label": "DESTATIS"},
+      {"id": "s_idc", "type": "source", "label": "IDC"},
+      {"id": "s_ugap", "type": "source", "label": "UGAP"},
+      {"id": "s_mercer", "type": "source", "label": "Mercer"},
+      {"id": "s_bessemer", "type": "source", "label": "Bessemer"},
+      {"id": "s_openview", "type": "source", "label": "OpenView"},
+      {"id": "s_argus", "type": "source", "label": "Argus pattern library"}
+    ],
+    "edges": [
+      {"from": "c1", "to": "e0000001-0000-4000-8000-000000000001", "kind": "cites"},
+      {"from": "c1", "to": "e0000002-0000-4000-8000-000000000002", "kind": "cites"},
+      {"from": "c2", "to": "e0000009-0000-4000-8000-000000000009", "kind": "cites"},
+      {"from": "c3", "to": "e0000008-0000-4000-8000-000000000008", "kind": "cites"},
+      {"from": "c4", "to": "e0000010-0000-4000-8000-000000000010", "kind": "cites"},
+      {"from": "c5", "to": "e0000003-0000-4000-8000-000000000003", "kind": "cites"},
+      {"from": "c5", "to": "e0000007-0000-4000-8000-000000000007", "kind": "cites"},
+      {"from": "c6", "to": "e0000005-0000-4000-8000-000000000005", "kind": "cites"},
+      {"from": "e0000001-0000-4000-8000-000000000001", "to": "s_bitkom", "kind": "cites"},
+      {"from": "e0000002-0000-4000-8000-000000000002", "to": "s_numeum", "kind": "cites"},
+      {"from": "e0000003-0000-4000-8000-000000000003", "to": "s_forrester", "kind": "cites"},
+      {"from": "e0000004-0000-4000-8000-000000000004", "to": "s_destatis", "kind": "cites"},
+      {"from": "e0000005-0000-4000-8000-000000000005", "to": "s_idc", "kind": "cites"},
+      {"from": "e0000006-0000-4000-8000-000000000006", "to": "s_ugap", "kind": "cites"},
+      {"from": "e0000007-0000-4000-8000-000000000007", "to": "s_mercer", "kind": "cites"},
+      {"from": "e0000008-0000-4000-8000-000000000008", "to": "s_bessemer", "kind": "cites"},
+      {"from": "e0000009-0000-4000-8000-000000000009", "to": "s_openview", "kind": "cites"},
+      {"from": "e0000010-0000-4000-8000-000000000010", "to": "s_argus", "kind": "cites"},
+      {"from": "e0000001-0000-4000-8000-000000000001", "to": "e0000002-0000-4000-8000-000000000002", "kind": "supports"},
+      {"from": "e0000003-0000-4000-8000-000000000003", "to": "e0000007-0000-4000-8000-000000000007", "kind": "supports"}
+    ]
+  }
+}

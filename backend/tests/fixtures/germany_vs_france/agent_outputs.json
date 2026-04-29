@@ -1,0 +1,51 @@
+[
+  {
+    "agent_name": "planner",
+    "input": "Should a B2B SaaS company prioritize Germany or France for its first European market entry?",
+    "output": "{\"objective\": \"Decide between Germany and France as the first European market entry under an 18-month, 12-headcount constraint.\", \"tasks\": [{\"id\": 1, \"branch\": \"market\", \"question\": \"How do the German and French B2B SaaS markets compare on size and growth?\"}, {\"id\": 2, \"branch\": \"market\", \"question\": \"What is the structure of mid-market ICP density in each country?\"}, {\"id\": 3, \"branch\": \"regulation\", \"question\": \"What are the GDPR and data-residency expectations of buyers in each country?\"}, {\"id\": 4, \"branch\": \"competition\", \"question\": \"What are the cost-of-presence and procurement cycle differences?\"}, {\"id\": 5, \"branch\": \"competition\", \"question\": \"How does sequenced vs parallel market entry perform at this team size?\"}, {\"id\": 6, \"branch\": \"market\", \"question\": \"What are post-landing retention and pilot success patterns?\"}], \"decision_criteria\": [\"market size\", \"growth rate\", \"procurement cycle\", \"NRR\", \"GTM cost\", \"compliance fit\"], \"scope\": \"Mid-market B2B SaaS, retail and logistics verticals, 18-month horizon, 12-HC cap.\"}",
+    "duration_ms": 4321,
+    "token_count": 980
+  },
+  {
+    "agent_name": "researcher",
+    "input": "6 tasks, 3 branches",
+    "output": "{\"evidence_count\": 10, \"web_queries\": 14, \"sources\": 9, \"contradictions\": 0, \"branches\": [\"market\", \"competition\", \"regulation\"]}",
+    "duration_ms": 38740,
+    "token_count": 5210
+  },
+  {
+    "agent_name": "analyst",
+    "input": "10 evidence objects across 6 tasks",
+    "output": "{\"key_claims\": 6, \"recommendation_seed\": \"Germany pilot then build\", \"trade_offs\": 3, \"assumptions\": 2}",
+    "duration_ms": 11290,
+    "token_count": 2480
+  },
+  {
+    "agent_name": "critic",
+    "input": "analyst payload",
+    "output": "{\"verdict\": \"revise\", \"revision_instructions\": [{\"severity\": \"medium\", \"note\": \"Strengthen kill criteria; surface compliance pathway as gate.\"}, {\"severity\": \"low\", \"note\": \"Add cost-of-being-wrong framing.\"}]}",
+    "duration_ms": 6750,
+    "token_count": 1340
+  },
+  {
+    "agent_name": "analyst_revision",
+    "input": "applying critic feedback",
+    "output": "{\"key_claims\": 6, \"changes\": [\"added kill_criteria\", \"surfaced compliance pathway as gate\"]}",
+    "duration_ms": 5910,
+    "token_count": 1180
+  },
+  {
+    "agent_name": "verifier",
+    "input": "6 claims",
+    "output": "{\"overall_label\": \"sufficient\", \"supported\": 5, \"weak\": 1, \"unsupported\": 0, \"overstates\": 0}",
+    "duration_ms": 7140,
+    "token_count": 1620
+  },
+  {
+    "agent_name": "writer",
+    "input": "verified analyst payload",
+    "output": "{\"recommendation\": \"Germany pilot then build\", \"executive_insights\": 3, \"options_matrix\": 3, \"kill_criteria\": 3, \"caveats_emitted\": true}",
+    "duration_ms": 8420,
+    "token_count": 2890
+  }
+]

@@ -1,37 +1,73 @@
-# Argus
+# Argus — Evidence-Grounded AI Decision Engine
 
-## 1. What Argus is
+A full-stack AI system for turning messy strategic questions, uploaded documents, and web evidence into verified client-ready reports with citations, confidence, caveats, and exportable deliverables.
 
-**Argus** is an evidence-grounded decision engine. You ask a strategic question; it gathers context from your uploads and optional web research, runs a **multi-agent pipeline** (plan → research → analyze → challenge → verify → write), and returns a **structured report**: clear recommendation, explicit claims tied to sources, confidence and caveats, and exports (PDF, memo, deck). A short **intake** step captures your constraints so the plan matches how *you* frame the decision—not a generic chat reply.
-
----
-
-## 2. The problem
-
-Most “AI for decisions” tools optimize for **fluent prose**, not **accountability**. A single model pass can sound confident while omitting tradeoffs, mixing inference with facts, or citing nothing you can audit. Spreadsheets and slide decks don’t fail loudly—they just don’t **synthesize** across documents and the open web. Search gives fragments; chat gives opinions. Neither reliably produces a **defensible recommendation** with **traceable evidence** and **explicit uncertainty**.
-
----
-
-## 3. The insight
-
-There is a gap between **thinking** (framing, prioritizing, challenging) and **execution** (retrieval, citation, consistency checks). Argus splits the work: specialized agents handle execution under shared rules, while the product flow (intake + workspace + trust rail) keeps the human’s intent in the loop. The goal isn’t more text—it’s **separation of claims from evidence**, **verification passes**, and **artifacts** you can share or revisit without exposing raw IDs and internal noise in the UI.
+![status](https://img.shields.io/badge/status-demo--ready-brightgreen)
+![python](https://img.shields.io/badge/python-3.11+-blue)
+![next.js](https://img.shields.io/badge/next.js-14-black)
+![postgres](https://img.shields.io/badge/postgres+pgvector-15-336791)
+![celery](https://img.shields.io/badge/celery-5.3-37814A)
+![docker](https://img.shields.io/badge/docker-compose-2496ED)
+![ci](https://github.com/yassin1123/Argus/actions/workflows/ci.yml/badge.svg)
 
 ---
 
-## 4. How it works
+## Demo
+
+- **Live demo:** _<link — coming soon>_
+- **3-minute walkthrough:** _<Loom link — coming soon>_
+- **Example use case:** *"Should a SaaS company enter Germany or France first?"*
+- **Full case study:** [`docs/case-studies/germany-vs-france/`](docs/case-studies/germany-vs-france/)
+
+> Want to try it without an API key? Run `make demo` and Argus boots with a pre-seeded workspace and finished example report. See **Quickstart** below.
+
+![Argus workspace — three columns: evidence rail, answer canvas with recommendation and decision criteria, trust rail with verifier verdicts](docs/screenshots/hero.svg)
+
+<sub>Schematic preview of the workspace UI. For a live screenshot, run `make demo` then `node tools/capture_screenshots.js` (see [docs/screenshots/CAPTURE_GUIDE.md](docs/screenshots/CAPTURE_GUIDE.md)).</sub>
+
+---
+
+## The problem
+
+Generic chatbots produce fluent prose that sounds confident while quietly mixing inference with facts and citing nothing you can audit. Consultants are slow and expensive. Spreadsheets and decks don't synthesize across documents and the open web — search gives fragments, chat gives opinions.
+
+Argus produces a **defensible recommendation**: traceable evidence, explicit confidence, surfaced caveats, and exportable deliverables a client can take to a meeting.
+
+---
+
+## Example use case
+
+**Question:** *"Should a SaaS company enter Germany or France first?"*
+
+**What Argus does:**
+1. Generates a focused intake (target ICP, horizon, headcount, compliance posture)
+2. Plans a research agenda (market, competition, regulation)
+3. Pulls evidence from uploaded documents + the web
+4. Synthesizes a recommendation, has a critic challenge it, then revises
+5. Verifier checks every claim against the evidence catalog
+6. Writer produces a consulting-grade memo with confidence levels and caveats
+7. Exports as PDF, memo, or PPTX
+
+**What you get:** a recommendation with every claim linked back to a real source, a trust rail showing verifier verdicts, and a deliverable formatted for a client meeting.
+
+→ Full case study with prompt, evidence, final report, verifier output, and screenshots: [`docs/case-studies/germany-vs-france/`](docs/case-studies/germany-vs-france/)
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph ui [You]
-    Q[Question + optional files/URL]
+  subgraph ui [User]
+    Q[Question + uploads]
     I[Intake Q&A]
     W[Workspace + chat]
   end
-  subgraph api [API]
-    S[Sessions / inputs]
-    C[Celery worker]
+  subgraph api [FastAPI :8000]
+    S[Sessions / inputs / exports]
+    SSE[SSE progress stream]
   end
-  subgraph pipe [Pipeline]
+  subgraph worker [Celery worker]
     P[Planner]
     R[Researcher]
     A[Analyst]
@@ -39,74 +75,64 @@ flowchart LR
     V[Verifier]
     Wr[Writer]
   end
-  subgraph store [Data]
+  subgraph store [Storage]
     DB[(Postgres + pgvector)]
-    Rd[(Redis)]
+    Rd[(Redis broker)]
   end
   Q --> S
   S --> I
-  I --> C
-  W --> C
-  C --> P --> R --> A --> Cr --> V --> Wr
+  I --> S
+  S -->|enqueue| Rd
+  Rd --> P --> R --> A --> Cr --> V --> Wr
   P & R & A & Cr & V & Wr --> DB
-  C <--> Rd
+  S --> DB
   Wr --> W
+  SSE --> W
 ```
 
-High level: a session is created as **draft** → intake saves answers to the DB → **run** enqueues the pipeline on the worker → the UI polls **`GET /api/workspaces/{id}`** and may use **SSE** for live progress → a **report** row and **evidence** graph back the answer surface. Follow-up **chat** can append context and trigger another run when needed.
+| Layer | Tech |
+|-------|------|
+| Frontend | **Next.js 14** (App Router), Tailwind, TypeScript |
+| API | **FastAPI** (Python 3.11+), async, slowapi rate limiting |
+| Worker | **Celery 5.3** + **Redis 7** (broker + result store) |
+| Database | **PostgreSQL 15** + **pgvector** (1536-dim embeddings) |
+| AI Pipeline | Planner → Researcher → Analyst → Critic → Verifier → Writer |
+| LLM | OpenAI (gpt-4o, gpt-4o-mini); optional SerpAPI, Cohere rerank |
+| Exports | **PDF** (WeasyPrint), **PPTX** (python-pptx), memo, structured JSON |
+
+Deep architecture: [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
-## 5. Example output
+## Features
 
-*Illustrative shape of a completed report (wording varies by question and evidence).*
-
-**Recommendation (excerpt)**  
-Proceed with a **limited pilot** in Germany before committing build-out in France, contingent on two diligence gates: confirmed unit economics in one reference vertical and signed pathway to local compliance for your data stack.
-
-**Key reasons**
-
-- Three independent sources support stronger B2B SaaS density and procurement cycles in the German target segment you named.  
-- France shows higher upside in your long-range scenario but with thinner near-term evidence in the uploaded set.  
-- Intake constraints (18-month horizon, fixed headcount) favor a **sequenced** entry over parallel country bets.
-
-**Risks & caveats**
-
-- Web-sourced material may lag filings; treat regulatory notes as **directional** until counsel reviews.  
-- Two claims rest on **partial** document coverage—see trust panel for verifier labels.
-
-**Next steps**  
-Time-bound: (1) run the pilot KPI sheet, (2) book compliance review, (3) freeze scope for France until gate (1) is green.
+| Feature | What it does |
+|---------|--------------|
+| **Client workspace** | Three-column workspace (evidence · answer · trust) framed as a client deliverable |
+| **Document upload + retrieval** | PDF/HTML ingest, pgvector embeddings, hybrid lexical + vector retrieval, optional Cohere rerank |
+| **Evidence graph** | Visual claim → evidence → source → verdict graph (react-flow), color-coded by verifier verdict |
+| **Verifier agent** | Every analyst claim re-checked against the evidence catalog; verdicts (supported / weak / unsupported / overstates) surfaced inline |
+| **Confidence + caveat panel** | Trust rail with confidence label, contradiction-capped score, unsupported-claim count, caveats |
+| **PDF / memo / deck export** | WeasyPrint PDF, structured memo, PPTX deck — all content-hash cached |
+| **SSE progress** | Live agent-by-agent progress with timestamps, durations, and token counters |
+| **One-command run** | `make demo` brings up the whole stack with a seeded example workspace |
+| **Deterministic demo mode** | `DEMO_MODE=1` runs end-to-end with no API key required, using fixture-backed agent outputs |
 
 ---
 
-## 6. Tech stack
+## Quickstart
 
-| Layer | Choice |
-|--------|--------|
-| API | Python 3.11+, **FastAPI** |
-| Jobs | **Celery** + **Redis** |
-| Database | **PostgreSQL** + **pgvector** |
-| Frontend | **Next.js 14** (App Router), **Tailwind** |
-| LLMs | **OpenAI** (required); optional **SerpAPI**, **Cohere** |
-| Exports | **WeasyPrint** (PDF), python-pptx (deck) — API runs in **Docker** on Windows |
-
----
-
-## Clone from GitHub
+### One-command demo (no API key required)
 
 ```bash
 git clone https://github.com/yassin1123/Argus.git
 cd Argus
+make demo
 ```
 
-Then follow **Run it locally** (copy `.env.example` to `.env` and `frontend/.env.local` — do not commit API keys).
+Open [http://localhost:3000](http://localhost:3000). The homepage will already have three seeded demo engagements you can click into immediately.
 
----
-
-## Run it locally
-
-**Prerequisites:** Docker Desktop, Node.js 20+, an `OPENAI_API_KEY`.
+### Full mode (with your own API key)
 
 ```bash
 cp .env.example .env
@@ -115,56 +141,124 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Second terminal:
-
+Frontend (second terminal):
 ```bash
 cd frontend
-cp ../.env.example .env.local
-# NEXT_PUBLIC_API_URL=http://localhost:8000
-
-npm install
-npm run dev
+cp ../.env.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:8000
+npm install && npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). Health check: [http://localhost:8000/api/health](http://localhost:8000/api/health).
 
-On **first** Postgres init, SQL in `backend/db/migrations/` applies in order (`001` … `010`). Reusing an **old** Docker volume may require running newer migration files manually—see **`ZIP_PACKAGE.md` §5**.
+> First Postgres init applies SQL in `backend/db/migrations/` (`001` … `010`). Reusing an old volume? See [`ZIP_PACKAGE.md` §5](ZIP_PACKAGE.md).
 
-**Optional:** after Compose is up, `bash tools/smoke_check.sh` checks Redis, API health, and the Celery worker.
-
----
-
-## Distribution & docs
-
-| File | Use |
-|------|-----|
-| **`START_HERE.txt`** | Fast pointer after unzipping |
-| **`ZIP_PACKAGE.md`** | Full runbook, API list, migrations, troubleshooting |
-| **`CODEBASE_OVERVIEW.md`** | Repo layout and where to change behavior |
-| **`ARCHIVE.txt`** | One-page manifest |
-
-Rebuild **`argus.zip`**: `python tools/package_argus_zip.py`
+Optional smoke check after Compose is up:
+```bash
+bash tools/smoke_check.sh
+```
 
 ---
 
-## API sketch
+## The pipeline
 
-- `POST /api/sessions` — create draft  
-- `POST /api/sessions/{id}/intake/generate` · `…/submit` — intake  
-- `POST /api/sessions/{id}/run` — enqueue pipeline  
-- `GET /api/workspaces/{id}` — session + `presentation` labels (primary for UI)  
-- `GET /api/workspaces/{id}/events` — SSE progress  
-- `GET|POST /api/sessions/{id}/chat` — follow-up chat  
-- `GET /api/exports/pdf|memo|report|pptx/{id}` — deliverables when complete  
+| Agent | Responsibility | Output |
+|-------|----------------|--------|
+| **Planner** | Breaks the strategic question into 4–8 research tasks with decision criteria and scope | `tasks[]`, `decision_criteria[]`, `scope` |
+| **Researcher** | Executes tasks in parallel; pulls from documents and the web; deduplicates and triages | `EvidenceObject[]` (UUID, quote, source, confidence, is_inference) |
+| **Analyst** | Synthesizes ≥6 key claims, each tied to evidence UUIDs; produces recommendation, trade-offs, assumptions | `key_claims[]`, `recommendation`, `trade_offs`, `assumptions` |
+| **Critic** | Challenges the analysis; flags weak points; issues revision instructions with severity | `verdict`, `revision_instructions[]` |
+| **Analyst (revision)** | Applies critic feedback; re-synthesizes | revised `key_claims[]` |
+| **Verifier** | Re-checks every claim against the evidence catalog | `claim_assessments[]` (verdict + evidence_ids + notes) |
+| **Writer** | Produces final consulting-grade report; **must** link `executive_insights`, `recommendation_claim_ids`, `key_risks_structured` to analyst claim_ids (enforced) | `WriterReportPayload` |
+
+**Evidence gates** ensure every key claim cites a real persisted evidence object — strict mode bans inference-only support. **Contradiction policy** caps confidence when sources disagree.
+
+---
+
+## Engineering quality
+
+- **Deterministic demo mode** — `DEMO_MODE=1` boots the stack with seeded sessions and fixture-backed agent outputs. No API key required to evaluate.
+- **Normalized evidence graph schema** with unit tests covering claim ↔ evidence ↔ source mapping.
+- **Verifier outputs persisted per claim** in `claim_support_rows`, surfaced in the UI with verdicts and entailment scores.
+- **Strict evidence gates** — analyst claims must cite catalog UUIDs; writer must link insights to claim_ids; both enforced and tested.
+- **Dockerized local environment** — one command runs Postgres+pgvector, Redis, FastAPI, Celery worker, and the Next.js dev server.
+- **CI checks** for backend tests, type checks, frontend build, and a Docker Compose demo smoke test.
+- **Full sample case study** included: prompt → evidence → report → verification → exported deliverable.
+
+---
+
+## Why this matters for deployment
+
+Argus is built around the realities of forward-deployed AI work: ambiguous client problems, messy evidence, the need for auditable reasoning, fast iteration, and a polished deliverable a client can actually take to a meeting. The architecture treats *separation of claims from evidence*, *verification passes*, and *exportable artifacts* as first-class concerns — not as bolt-ons.
+
+For the bridge between this portfolio demo and a real engagement — multi-tenancy, auth, audit log, eval set, tracing, cost transparency, and what I'd *deliberately defer* — see [`docs/day-one.md`](docs/day-one.md).
+
+---
+
+## API surface
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/api/sessions` | Create a draft session |
+| `POST` | `/api/sessions/{id}/intake/generate` | Generate clarifying intake questions |
+| `POST` | `/api/sessions/{id}/intake/submit` | Submit intake answers |
+| `POST` | `/api/sessions/{id}/run` | Enqueue the pipeline |
+| `GET` | `/api/workspaces/{id}` | Session detail + presentation labels (primary UI feed) |
+| `GET` | `/api/workspaces/{id}/events` | SSE progress stream |
+| `GET` | `/api/workspaces/{id}/graph` | Normalized evidence graph (claims ↔ evidence ↔ sources) |
+| `GET` `POST` | `/api/sessions/{id}/chat` | Conversational follow-ups |
+| `POST` | `/api/inputs/upload` · `/api/inputs/url` | Document ingest |
+| `GET` | `/api/exports/pdf\|memo\|report\|pptx/{id}` | Deliverables (content-hash cached) |
 
 ---
 
 ## Tests
 
 ```bash
-cd backend
-pip install -r requirements.txt
-pytest tests -q
+make test
+# or:
+cd backend && pip install -r requirements.txt && pytest tests -q
 ```
 
-**Note:** WeasyPrint is easiest inside Docker. Optional web search: set `SERPAPI_KEY` in `.env`. Re-running after **failed**, **insufficient**, or **complete** clears prior pipeline artifacts for that session before a new run.
+CI runs the same suite plus a Docker Compose demo smoke test on every push.
+
+---
+
+## Repository layout
+
+| Path | What lives there |
+|------|------------------|
+| [`backend/api/`](backend/api/) | HTTP routers (sessions, workspaces, chat, inputs, exports, evaluations, reports) |
+| [`backend/agents/`](backend/agents/) | Pipeline agents — `orchestrator.py` is the entry point |
+| [`backend/core/`](backend/core/) | Evidence gates, retrieval, verification, contradiction policy, trust labels |
+| [`backend/db/migrations/`](backend/db/migrations/) | SQL migrations (`001` … `011`) |
+| [`backend/deliverables/`](backend/deliverables/) | PDF / PPTX / memo rendering |
+| [`backend/tests/`](backend/tests/) | pytest suite + fixtures (shared with `DEMO_MODE`) |
+| [`frontend/app/`](frontend/app/) | Next.js App Router pages |
+| [`frontend/components/`](frontend/components/) | Workspace, report, evidence graph, trust rail components |
+| [`docs/case-studies/`](docs/case-studies/) | Worked examples with full inputs, outputs, and deliverables |
+| [`docs/architecture.md`](docs/architecture.md) | Deep architecture diagrams + data flow |
+| [`tools/`](tools/) | Build, smoke check, e2e scripts |
+
+For commands and curl samples, also see [`ZIP_PACKAGE.md`](ZIP_PACKAGE.md). For codebase change-points, [`CODEBASE_OVERVIEW.md`](CODEBASE_OVERVIEW.md).
+
+---
+
+<details>
+<summary><strong>CV bullet</strong> · short and long versions</summary>
+
+**Short (one-line):**
+
+> Built **Argus** — a full-stack AI decision engine (FastAPI · Celery · Redis · PostgreSQL/pgvector · Next.js) that turns uploaded documents and strategic questions into verified, citation-backed reports with verifier agents, confidence scoring, and exportable client deliverables.
+
+**Long (one paragraph — résumé bullet or LinkedIn summary):**
+
+> Built **Argus** — a full-stack AI decision engine using FastAPI, Celery, Redis, PostgreSQL/pgvector and Next.js — converting uploaded documents and strategic questions into evidence-backed reports with verifier agents, confidence scoring, and exportable client deliverables (PDF, PPTX, memo). Multi-agent pipeline (planner → researcher → analyst → critic → verifier → writer) with strict claim-to-evidence linking, contradiction-capped confidence, a normalized evidence graph, and a deterministic demo mode for evaluation without API keys. CI covers backend tests, frontend type-check + build, and a Docker Compose smoke test against the seeded demo. See [`docs/day-one.md`](docs/day-one.md) for how the architecture maps to a real client deployment.
+
+</details>
+
+---
+
+<sub>
+Argus is a portfolio project. All client names ("ExampleCo") and engagement data are fictionalized. Source data in the seeded case study is illustrative — see <a href="docs/case-studies/germany-vs-france/README.md">the case study README</a> for an honest accounting of what's real and what's demo.
+</sub>

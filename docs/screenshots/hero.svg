@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 720" width="1440" height="720" role="img" aria-label="Argus workspace mockup — three columns: evidence, answer, trust rail">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0e0e12"/>
+      <stop offset="100%" stop-color="#16161c"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c1c24"/>
+      <stop offset="100%" stop-color="#191921"/>
+    </linearGradient>
+    <filter id="soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="720" fill="url(#bg)"/>
+
+  <!-- Header -->
+  <rect x="0" y="0" width="1440" height="56" fill="#0a0a0e" stroke="#26262e" stroke-width="0"/>
+  <text x="32" y="34" font-family="ui-serif, Georgia, serif" font-size="18" fill="#e8e8ec" font-weight="600">Argus</text>
+  <text x="92" y="34" font-family="ui-sans-serif, system-ui" font-size="12" fill="#7c7c8a">Demo · ExampleCo · Confidential</text>
+  <circle cx="1392" cy="28" r="11" fill="#22c55e" opacity="0.85"/>
+  <text x="1316" y="33" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a">complete</text>
+
+  <!-- Three columns -->
+  <!-- Evidence rail (left) -->
+  <rect x="24" y="80" width="320" height="616" rx="10" fill="url(#card)" stroke="#26262e"/>
+  <text x="44" y="116" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">EVIDENCE · 10 OBJECTS</text>
+  <g font-family="ui-sans-serif, system-ui" fill="#c4c4d0">
+    <rect x="44" y="132" width="280" height="64" rx="6" fill="#22222b" stroke="#2e2e38"/>
+    <circle cx="58" cy="148" r="4" fill="#22c55e"/>
+    <text x="70" y="152" font-size="10" fill="#7c7c8a">BITKOM · HIGH</text>
+    <text x="58" y="172" font-size="11">Germany B2B SaaS €18.4B…</text>
+
+    <rect x="44" y="208" width="280" height="64" rx="6" fill="#22222b" stroke="#2e2e38"/>
+    <circle cx="58" cy="224" r="4" fill="#22c55e"/>
+    <text x="70" y="228" font-size="10" fill="#7c7c8a">NUMEUM · HIGH</text>
+    <text x="58" y="248" font-size="11">France 22% YoY growth…</text>
+
+    <rect x="44" y="284" width="280" height="64" rx="6" fill="#22222b" stroke="#2e2e38"/>
+    <circle cx="58" cy="300" r="4" fill="#22c55e"/>
+    <text x="70" y="304" font-size="10" fill="#7c7c8a">FORRESTER · HIGH</text>
+    <text x="58" y="324" font-size="11">German cycle 7.2 months…</text>
+
+    <rect x="44" y="360" width="280" height="64" rx="6" fill="#22222b" stroke="#2e2e38"/>
+    <circle cx="58" cy="376" r="4" fill="#f59e0b"/>
+    <text x="70" y="380" font-size="10" fill="#7c7c8a">DESTATIS · MEDIUM</text>
+    <text x="58" y="400" font-size="11">NRW + Bavaria 41% mid-mkt…</text>
+
+    <rect x="44" y="436" width="280" height="64" rx="6" fill="#22222b" stroke="#2e2e38"/>
+    <circle cx="58" cy="452" r="4" fill="#f59e0b"/>
+    <text x="70" y="456" font-size="10" fill="#7c7c8a">IDC · MEDIUM</text>
+    <text x="58" y="476" font-size="11">68% DE residency RFPs…</text>
+
+    <rect x="44" y="512" width="280" height="64" rx="6" fill="#22222b" stroke="#2e2e38"/>
+    <circle cx="58" cy="528" r="4" fill="#7c7c8a"/>
+    <text x="70" y="532" font-size="10" fill="#7c7c8a">ARGUS PATTERN · INFERENCE</text>
+    <text x="58" y="552" font-size="11">Pilot accuracy base rates…</text>
+  </g>
+
+  <!-- Answer canvas (center) -->
+  <rect x="362" y="80" width="704" height="616" rx="10" fill="url(#card)" stroke="#26262e"/>
+
+  <!-- Tabs -->
+  <g font-family="ui-sans-serif, system-ui" font-size="12">
+    <rect x="386" y="100" width="0" height="0" />
+    <text x="386" y="124" fill="#e8e8ec" font-weight="600">Answer</text>
+    <line x1="386" y1="132" x2="438" y2="132" stroke="#a78bfa" stroke-width="2"/>
+    <text x="466" y="124" fill="#7c7c8a">Graph</text>
+    <text x="528" y="124" fill="#7c7c8a">Audit</text>
+    <text x="586" y="124" fill="#7c7c8a">Sources</text>
+    <line x1="386" y1="148" x2="1042" y2="148" stroke="#26262e" stroke-width="1"/>
+  </g>
+
+  <!-- Recommendation card -->
+  <rect x="386" y="168" width="656" height="120" rx="8" fill="#1f1f28" stroke="#3a2f5c" stroke-width="1.5"/>
+  <text x="406" y="194" font-family="ui-sans-serif, system-ui" font-size="11" fill="#a78bfa" letter-spacing="1.5">RECOMMENDATION · MEDIUM-HIGH CONFIDENCE</text>
+  <text x="406" y="226" font-family="ui-serif, Georgia, serif" font-size="20" fill="#e8e8ec" font-weight="600">Run a 2-quarter pilot in Germany.</text>
+  <text x="406" y="252" font-family="ui-sans-serif, system-ui" font-size="13" fill="#c4c4d0">Park France as phase-2 contingent on pilot KPIs. Two diligence gates:</text>
+  <text x="406" y="270" font-family="ui-sans-serif, system-ui" font-size="13" fill="#c4c4d0">unit economics in one reference vertical, signed compliance pathway.</text>
+
+  <!-- Executive insights -->
+  <text x="386" y="320" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">EXECUTIVE INSIGHTS</text>
+  <g font-family="ui-sans-serif, system-ui" font-size="13" fill="#c4c4d0">
+    <text x="386" y="346">• Germany is larger and stickier; France grows faster but is harder to capture at 12 HC. <tspan fill="#7c7c8a">[c1, c2, c5]</tspan></text>
+    <text x="386" y="370">• Sequenced entry beats parallel; an anchor-pilot resolves the bigger bet first. <tspan fill="#7c7c8a">[c3, c4]</tspan></text>
+    <text x="386" y="394">• Compliance posture is the gating risk to pre-clear during the pilot. <tspan fill="#7c7c8a">[c6]</tspan></text>
+  </g>
+
+  <!-- Decision criteria -->
+  <text x="386" y="446" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">DECISION CRITERIA</text>
+  <g font-family="ui-sans-serif, system-ui" font-size="12" fill="#c4c4d0">
+    <line x1="386" y1="460" x2="1042" y2="460" stroke="#26262e"/>
+    <text x="386" y="480">Market size</text>
+    <text x="700" y="480">€18.4B (1.6×)</text>
+    <text x="900" y="480">€11.5B</text>
+    <line x1="386" y1="492" x2="1042" y2="492" stroke="#26262e"/>
+    <text x="386" y="512">YoY growth</text>
+    <text x="700" y="512">14%</text>
+    <text x="900" y="512">22%</text>
+    <line x1="386" y1="524" x2="1042" y2="524" stroke="#26262e"/>
+    <text x="386" y="544">Procurement cycle</text>
+    <text x="700" y="544">7.2 months</text>
+    <text x="900" y="544">4.8 months</text>
+    <line x1="386" y1="556" x2="1042" y2="556" stroke="#26262e"/>
+    <text x="386" y="576">Net retention (mid-mkt)</text>
+    <text x="700" y="576">117%</text>
+    <text x="900" y="576">109%</text>
+    <line x1="386" y1="588" x2="1042" y2="588" stroke="#26262e"/>
+    <text x="386" y="608">GTM cost (6 FTE)</text>
+    <text x="700" y="608">€1.32M/yr</text>
+    <text x="900" y="608">€1.05M/yr</text>
+    <line x1="386" y1="620" x2="1042" y2="620" stroke="#26262e"/>
+    <text x="386" y="640">Data-residency RFPs</text>
+    <text x="700" y="640">68%</text>
+    <text x="900" y="640">41%</text>
+    <text x="700" y="500" font-size="10" fill="#7c7c8a">DE</text>
+    <text x="900" y="500" font-size="10" fill="#7c7c8a">FR</text>
+  </g>
+
+  <!-- Trust rail (right) -->
+  <rect x="1084" y="80" width="332" height="616" rx="10" fill="url(#card)" stroke="#26262e"/>
+  <text x="1108" y="116" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">CONFIDENCE</text>
+  <text x="1108" y="148" font-family="ui-serif, Georgia, serif" font-size="22" fill="#e8e8ec" font-weight="600">Medium-high</text>
+
+  <text x="1108" y="186" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">VERIFIER</text>
+  <g font-family="ui-sans-serif, system-ui" font-size="12">
+    <rect x="1108" y="198" width="40" height="22" rx="11" fill="#15321b"/>
+    <text x="1116" y="213" fill="#22c55e">5 ✓</text>
+    <rect x="1156" y="198" width="40" height="22" rx="11" fill="#3a2914"/>
+    <text x="1164" y="213" fill="#f59e0b">1 ⚠</text>
+    <rect x="1204" y="198" width="40" height="22" rx="11" fill="#1a1a22"/>
+    <text x="1212" y="213" fill="#7c7c8a">0 ✗</text>
+  </g>
+  <text x="1108" y="246" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a">8 of 9 supported · 1 weak</text>
+
+  <text x="1108" y="288" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">CAVEATS</text>
+  <text x="1108" y="312" font-family="ui-sans-serif, system-ui" font-size="11" fill="#c4c4d0">Contains 1 inference-supported</text>
+  <text x="1108" y="328" font-family="ui-sans-serif, system-ui" font-size="11" fill="#c4c4d0">claim. Web sourcing may lag</text>
+  <text x="1108" y="344" font-family="ui-sans-serif, system-ui" font-size="11" fill="#c4c4d0">filings — treat as directional.</text>
+
+  <text x="1108" y="386" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a" letter-spacing="1.5">EVIDENCE</text>
+  <text x="1108" y="408" font-family="ui-sans-serif, system-ui" font-size="12" fill="#c4c4d0">10 objects · 9 sources</text>
+  <text x="1108" y="426" font-family="ui-sans-serif, system-ui" font-size="11" fill="#7c7c8a">9 web · 1 internal pattern</text>
+
+  <rect x="1108" y="468" width="280" height="40" rx="6" fill="#a78bfa"/>
+  <text x="1180" y="492" font-family="ui-sans-serif, system-ui" font-size="13" fill="#0a0a0e" font-weight="600" text-anchor="middle">Export PDF</text>
+
+  <rect x="1108" y="516" width="280" height="40" rx="6" fill="#22222b" stroke="#3a3a4a"/>
+  <text x="1180" y="540" font-family="ui-sans-serif, system-ui" font-size="13" fill="#c4c4d0" text-anchor="middle">Export PPTX</text>
+
+  <rect x="1108" y="564" width="280" height="40" rx="6" fill="#22222b" stroke="#3a3a4a"/>
+  <text x="1180" y="588" font-family="ui-sans-serif, system-ui" font-size="13" fill="#c4c4d0" text-anchor="middle">Re-run pipeline</text>
+
+  <!-- Placeholder note -->
+  <text x="720" y="708" font-family="ui-sans-serif, system-ui" font-size="10" fill="#5a5a68" text-anchor="middle">
+    Schematic preview · Run `make demo` and `node tools/capture_screenshots.js` for the live screenshot
+  </text>
+</svg>

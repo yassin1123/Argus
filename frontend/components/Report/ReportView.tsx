@@ -1,6 +1,9 @@
+"use client";
+
+import { useSelection } from "@/lib/SelectionContext";
 import type { Report, SessionDetail } from "@/lib/types";
 import { AuditPanel } from "./AuditPanel";
-import { ClaimTrustPanel } from "./ClaimTrustPanel";
+import CaveatBanner from "./CaveatBanner";
 import { ConsultingFrame } from "./ConsultingFrame";
 import EvidencePanel from "./EvidencePanel";
 import { FindingCard } from "./FindingCard";
@@ -8,6 +11,7 @@ import { NextStepRow } from "./NextStepRow";
 import RecommendationCard from "./RecommendationCard";
 import { RiskCard } from "./RiskCard";
 import { TensionNotice } from "./TensionNotice";
+import VerifierReport from "./VerifierReport";
 
 function SectionLabel({
   children,
@@ -36,9 +40,12 @@ export default function ReportView({
 }) {
   const cp = report.consulting_payload;
   const cs = report.claim_support ?? [];
+  const { setSelectedClaim } = useSelection();
 
   return (
     <article>
+      <CaveatBanner report={report} rows={cs} />
+
       <RecommendationCard report={report} session={session} />
 
       {report.key_reasons?.length ? (
@@ -69,7 +76,11 @@ export default function ReportView({
         </section>
       ) : null}
 
-      {cp && Object.keys(cp).length > 0 ? <ConsultingFrame cp={cp} /> : null}
+      {cp && Object.keys(cp).length > 0 ? (
+        <ConsultingFrame cp={cp} claimSupport={cs} onClaimClick={setSelectedClaim} />
+      ) : null}
+
+      {cs.length > 0 ? <VerifierReport rows={cs} onClaimClick={setSelectedClaim} /> : null}
 
       {report.counterarguments?.length ? (
         <section className="mb-10">
@@ -106,8 +117,6 @@ export default function ReportView({
       ) : null}
 
       <EvidencePanel items={report.evidence_bundle ?? []} />
-
-      {cs.length > 0 ? <ClaimTrustPanel rows={cs} /> : null}
 
       <AuditPanel
         verification={report.verification}

@@ -1,5 +1,6 @@
 import { sanitizeUserFacingText } from "@/lib/formatters";
-import type { ConsultingPayload } from "@/lib/types";
+import type { ClaimSupportRow, ConsultingPayload } from "@/lib/types";
+import ClaimChip from "./ClaimChip";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
@@ -9,7 +10,15 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ConsultingFrame({ cp }: { cp: ConsultingPayload }) {
+export function ConsultingFrame({
+  cp,
+  claimSupport,
+  onClaimClick,
+}: {
+  cp: ConsultingPayload;
+  claimSupport?: ClaimSupportRow[];
+  onClaimClick?: (claimId: string) => void;
+}) {
   const dc = cp.decision_criteria ?? [];
   const om = cp.options_matrix ?? [];
   const kill = cp.kill_criteria ?? [];
@@ -38,6 +47,16 @@ export function ConsultingFrame({ cp }: { cp: ConsultingPayload }) {
             {ei.map((row, i) => (
               <li key={i} className="text-sm leading-relaxed text-argus-secondary">
                 {sanitizeUserFacingText(String(row.text ?? ""))}
+                {claimSupport && onClaimClick && Array.isArray(row.claim_ids) && row.claim_ids.length > 0
+                  ? row.claim_ids.map((cid) => (
+                      <ClaimChip
+                        key={cid}
+                        claimId={cid}
+                        rows={claimSupport}
+                        onClick={onClaimClick}
+                      />
+                    ))
+                  : null}
               </li>
             ))}
           </ul>
@@ -51,6 +70,16 @@ export function ConsultingFrame({ cp }: { cp: ConsultingPayload }) {
             {krs.map((row, i) => (
               <li key={i} className="text-sm leading-relaxed text-argus-secondary">
                 {sanitizeUserFacingText(String(row.text ?? ""))}
+                {claimSupport && onClaimClick && Array.isArray(row.claim_ids) && row.claim_ids.length > 0
+                  ? row.claim_ids.map((cid) => (
+                      <ClaimChip
+                        key={cid}
+                        claimId={cid}
+                        rows={claimSupport}
+                        onClick={onClaimClick}
+                      />
+                    ))
+                  : null}
               </li>
             ))}
           </ul>

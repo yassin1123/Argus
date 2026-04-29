@@ -6,12 +6,24 @@ import httpx
 
 from core.research_utils import normalize_url
 
-SERPAPI_KEY = os.getenv("SERPAPI_KEY")
+def _clean_key(raw: str | None) -> str:
+    """Strip whitespace and trailing inline comments (`#...`) from an env value."""
+    if not raw:
+        return ""
+    s = raw.split("#", 1)[0].strip()
+    return s
+
+
+SERPAPI_KEY = _clean_key(os.getenv("SERPAPI_KEY"))
 
 
 async def search_web_structured(query: str, num_results: int = 5) -> list[dict[str, Any]]:
-    """SerpAPI organic results as dicts (title, url, snippet, position)."""
-    if not SERPAPI_KEY:
+    """SerpAPI organic results as dicts (title, url, snippet, position).
+
+    Returns [] when the key is missing/invalid or any HTTP error occurs, so the
+    pipeline can continue without web search instead of crashing.
+    """
+    if not SERPAPI_KEY or SERPAPI_KEY.startswith("#"):
         return []
     params = {
         "q": query,
@@ -19,10 +31,13 @@ async def search_web_structured(query: str, num_results: int = 5) -> list[dict[s
         "num": num_results,
         "engine": "google",
     }
-    async with httpx.AsyncClient(timeout=20.0) as client:
-        response = await client.get("https://serpapi.com/search", params=params)
-        response.raise_for_status()
-        data = response.json()
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            response = await client.get("https://serpapi.com/search", params=params)
+            response.raise_for_status()
+            data = response.json()
+    except (httpx.HTTPError, httpx.TimeoutException, ValueError):
+        return []
     out: list[dict[str, Any]] = []
     for i, result in enumerate(data.get("organic_results", [])[:num_results]):
         date_str = str(result.get("date") or "")[:80]

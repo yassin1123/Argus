@@ -20,10 +20,21 @@ SYNTHESIS RULES (mandatory):
 - If evidence is weak, say so in the claim text, e.g. "Evidence suggests (limited data) ...".
 - trade_offs MUST cover both main options with at least 3 pros and 3 cons each when the query compares options.
 
+RECOMMENDATION QUALITY (this is what makes the report useful, not generic):
+- The `recommendation` field must name a SPECIFIC course of action: which option, which segment, which sequence, which timeline.
+  Bad:  "Pursue a phased approach to expansion."
+  Good: "Run a 6-month Mittelstand pilot in NRW + Bavaria before committing France build-out."
+- Reference at least one number/timeframe drawn from key_claims in the recommendation sentence.
+- `core_reasoning` must explain WHY this specific path beats the alternatives, citing the strongest 2-3 claim_ids by reference.
+- `key_reasons` must each start with a specific finding ("Concentrates 41% of...", "Cuts cycle by 2.4 months..."), not generic praise of an option.
+- `assumptions` should name what would have to be true for the recommendation to hold (e.g. "Mittelstand procurement cycles do not lengthen materially in 2025").
+
 FORBIDDEN:
 - Never argue "lack of evidence for X therefore choose Y" as the sole logic.
 - Never produce fewer than 6 key_claims when the catalog + appendix together have at least 4 distinct sources/snippets.
 - Never leave trade_offs empty for comparative decisions.
+- Never use the phrases "phased approach", "balanced strategy", "leverage synergies", "best practices" — they signal you haven't picked.
+- Never write a recommendation that could appear unchanged in a different industry's report.
 
 Rules:
 1. Every substantive point must cite evidence_object ids from the catalog in "key_claims".

@@ -11,6 +11,13 @@ export interface Session {
   evidence_count?: number;
   /** Latest report recommendation excerpt for session list cards */
   recommendation_preview?: string | null;
+  /** Demo / engagement framing in metadata (set by the demo seeder). */
+  metadata?: Record<string, unknown> & {
+    client_label?: string;
+    engagement_type?: string;
+    demo?: boolean;
+    stub?: boolean;
+  };
 }
 
 export interface GapReport {
@@ -201,6 +208,45 @@ export interface IntakeQuestionRow {
   placeholder?: string;
 }
 
+export interface EvidenceGraphNode {
+  id: string;
+  type: "claim" | "evidence" | "source";
+  label: string;
+  verifier_verdict?: string;
+  support_type?: string;
+  weak?: boolean;
+  in_recommendation?: boolean;
+  evidence_count?: number;
+  confidence?: string;
+  is_inference?: boolean;
+  source_title?: string;
+  source_url?: string;
+  source_type?: string;
+  quote?: string;
+  url?: string;
+}
+
+export interface EvidenceGraphEdge {
+  from: string;
+  to: string;
+  kind: "cites" | "supports" | "contradicts";
+}
+
+export interface EvidenceGraphStats {
+  claims: number;
+  evidence: number;
+  sources: number;
+  supported: number;
+  weak: number;
+  unsupported: number;
+}
+
+export interface EvidenceGraph {
+  nodes: EvidenceGraphNode[];
+  edges: EvidenceGraphEdge[];
+  stats: EvidenceGraphStats;
+}
+
 export interface SessionDetail extends Session {
   intake_questions?: IntakeQuestionRow[];
   intake_answers?: Array<{ id: string; answer: string }>;
@@ -213,6 +259,11 @@ export interface SessionDetail extends Session {
     research_contradictions?: string[];
     contradiction_severity?: number;
     pipeline_trace?: Array<{ event?: string; detail?: string; at?: string }>;
+    /** Engagement framing — populated by the demo seeder. */
+    client_label?: string;
+    engagement_type?: string;
+    demo?: boolean;
+    stub?: boolean;
   };
   gap_report?: GapReport;
   evidence_objects?: EvidenceObjectRow[];
