@@ -21,9 +21,7 @@ A full-stack AI system for turning messy strategic questions, uploaded documents
 
 > Want to try it without an API key? Run `make demo` and Argus boots with a pre-seeded workspace and finished example report. See **Quickstart** below.
 
-![Argus workspace — three columns: evidence rail, answer canvas with recommendation and decision criteria, trust rail with verifier verdicts](docs/screenshots/hero.svg)
-
-<sub>Schematic preview of the workspace UI. For a live screenshot, run `make demo` then `node tools/capture_screenshots.js` (see [docs/screenshots/CAPTURE_GUIDE.md](docs/screenshots/CAPTURE_GUIDE.md)).</sub>
+![Argus workspace — pipeline timeline, evidence rail, recommendation canvas with the verifier-grounded answer, and a trust rail with exports and per-stage progress](docs/screenshots/hero.png)
 
 ---
 
