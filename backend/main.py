@@ -2,7 +2,7 @@ import os
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -10,7 +10,10 @@ from slowapi.middleware import SlowAPIMiddleware
 
 load_dotenv()
 
-from api import chat, evaluations, exports, inputs, reports, sessions, workspace
+from api import auth as auth_router
+from api import admin, artifacts, chat, engagements, evaluations, exports, inputs, reports, sessions, sources, workspace
+from audit.middleware import audit_middleware
+from auth.dependencies import get_current_user
 from core.limits import limiter
 from db.connection import close_db, init_db
 
@@ -22,6 +25,14 @@ configure_json_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    # Best-effort bucket bootstrap. If MinIO/S3 is unreachable on boot we still
+    # serve health + auth + read endpoints so the app doesn't crash-loop.
+    try:
+        from storage.blob import ensure_bucket
+        ensure_bucket()
+    except Exception as e:  # noqa: BLE001
+        import logging
+        logging.getLogger(__name__).warning("blob bucket bootstrap failed: %s", e)
     yield
     await close_db()
 
@@ -42,13 +53,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
-app.include_router(chat.router, prefix="/api/sessions", tags=["chat"])
-app.include_router(workspace.router, prefix="/api/workspaces", tags=["workspaces"])
-app.include_router(evaluations.router, prefix="/api/evaluations", tags=["evaluations"])
-app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
-app.include_router(inputs.router, prefix="/api/inputs", tags=["inputs"])
-app.include_router(exports.router, prefix="/api/exports", tags=["exports"])
+# Phase 10: append-only audit log on every API call.
+app.middleware("http")(audit_middleware)
+
+# Auth routes are public.
+app.include_router(auth_router.router, prefix="/api/auth", tags=["auth"])
+
+# Everything else requires an authenticated user (or DEMO_MODE bypass).
+PROTECTED = [Depends(get_current_user)]
+app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"], dependencies=PROTECTED)
+app.include_router(chat.router, prefix="/api/sessions", tags=["chat"], dependencies=PROTECTED)
+app.include_router(engagements.router, prefix="/api/engagements", tags=["engagements"], dependencies=PROTECTED)
+app.include_router(workspace.router, prefix="/api/workspaces", tags=["workspaces"], dependencies=PROTECTED)
+app.include_router(evaluations.router, prefix="/api/evaluations", tags=["evaluations"], dependencies=PROTECTED)
+app.include_router(reports.router, prefix="/api/reports", tags=["reports"], dependencies=PROTECTED)
+app.include_router(inputs.router, prefix="/api/inputs", tags=["inputs"], dependencies=PROTECTED)
+app.include_router(sources.router, prefix="/api/sources", tags=["sources"], dependencies=PROTECTED)
+app.include_router(sources.library_router, prefix="/api/library", tags=["library"], dependencies=PROTECTED)
+app.include_router(artifacts.router, prefix="/api/artifacts", tags=["artifacts"], dependencies=PROTECTED)
+app.include_router(exports.router, prefix="/api/exports", tags=["exports"], dependencies=PROTECTED)
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"], dependencies=PROTECTED)
 
 
 @app.get("/api/health")

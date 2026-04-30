@@ -6,94 +6,217 @@
 
 body {
   @apply bg-canvas font-sans text-argus-primary antialiased;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* Tighter tracking on serif headlines (consulting deliverable feel) */
+.font-serif {
+  letter-spacing: -0.012em;
 }
 
 @keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
+  100% { transform: translateX(100%); }
 }
 
-/* Session workspace: evidence | answer | trust */
-.workspace-grid {
+/* ============================================================
+   Argus 3-pane workbench layout
+   nav (64) | source (280) | conversation (flex) | artifacts (340)
+   ============================================================ */
+.argus-shell {
   display: grid;
-  grid-template-areas: "evidence answer trust";
-  grid-template-columns: 268px minmax(0, 1fr) 256px;
-  gap: 24px;
-  align-items: start;
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 24px;
+  grid-template-columns: var(--rail-nav) 1fr;
+  min-height: 100vh;
 }
 
-.workspace-grid [data-area="evidence"] {
-  grid-area: evidence;
+.argus-workbench {
+  display: grid;
+  grid-template-columns: var(--rail-source) minmax(0, 1fr) var(--rail-artifacts);
+  height: calc(100vh - var(--topbar-height));
+  overflow: hidden;
 }
 
-.workspace-grid [data-area="answer"] {
-  grid-area: answer;
+.argus-workbench[data-collapse-source="true"] {
+  grid-template-columns: 0 minmax(0, 1fr) var(--rail-artifacts);
+}
+.argus-workbench[data-collapse-artifacts="true"] {
+  grid-template-columns: var(--rail-source) minmax(0, 1fr) 0;
+}
+.argus-workbench[data-collapse-source="true"][data-collapse-artifacts="true"] {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
 }
 
-.workspace-grid [data-area="trust"] {
-  grid-area: trust;
+.argus-workbench > div {
+  min-width: 0;
+  overflow: hidden;
 }
 
-@media (max-width: 1279px) {
-  .workspace-grid {
-    grid-template-areas: "answer trust";
-    grid-template-columns: minmax(0, 1fr) 240px;
-  }
-  .workspace-grid [data-area="evidence"] {
-    display: none;
-  }
-}
-
-@media (max-width: 1023px) {
-  .workspace-grid {
-    grid-template-areas: "answer" "trust";
-    grid-template-columns: 1fr;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-    gap: 16px;
-  }
-
-  /* Bottom-sheet style rail on small screens */
-  .workspace-grid [data-area="trust"] {
-    position: sticky;
-    bottom: 0;
-    z-index: 30;
-    margin: 0 -16px -8px;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
-    max-height: min(52vh, 420px);
-    overflow-y: auto;
-    border-radius: 16px 16px 0 0;
-    border: 1px solid var(--border-subtle);
-    border-bottom: none;
-    background: var(--bg-canvas);
-    box-shadow: 0 -12px 40px rgba(10, 10, 15, 0.12);
-  }
-}
-
-.workspace-rail {
-  position: sticky;
-  top: calc(56px + 16px);
-  max-height: calc(100vh - 56px - 32px);
+.argus-pane-source,
+.argus-pane-artifacts {
+  background: var(--bg-rail);
+  border-right: 1px solid var(--border-subtle);
   overflow-y: auto;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-moderate) transparent;
 }
 
-.workspace-rail::-webkit-scrollbar {
+.argus-pane-artifacts {
+  border-right: none;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.argus-pane-source[data-hidden="true"],
+.argus-pane-artifacts[data-hidden="true"] {
   display: none;
 }
 
-.workspace-answer {
-  min-width: 0;
-  max-height: calc(100vh - 56px - 48px);
+.argus-pane-center {
+  background: var(--bg-canvas);
   overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-@media (max-width: 1023px) {
-  .workspace-answer {
-    max-height: none;
-    overflow-y: visible;
-  }
+.argus-pane-source::-webkit-scrollbar,
+.argus-pane-artifacts::-webkit-scrollbar,
+.argus-pane-center::-webkit-scrollbar { width: 6px; }
+.argus-pane-source::-webkit-scrollbar-thumb,
+.argus-pane-artifacts::-webkit-scrollbar-thumb,
+.argus-pane-center::-webkit-scrollbar-thumb {
+  background: var(--border-moderate);
+  border-radius: 3px;
+}
+
+.argus-pane-source::-webkit-scrollbar-track,
+.argus-pane-artifacts::-webkit-scrollbar-track,
+.argus-pane-center::-webkit-scrollbar-track { background: transparent; }
+
+/* Top bar (above workbench) */
+.argus-topbar {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  padding: 0 16px;
+  gap: 12px;
+}
+
+/* Citation marker — inline superscript [N] */
+.argus-cite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 4px;
+  margin: 0 1px;
+  font-family: var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  vertical-align: super;
+  border-radius: 3px;
+  border: 1px solid;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 60ms ease, box-shadow 60ms ease;
+  line-height: 1;
+}
+.argus-cite:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.argus-cite[data-trust="firm"]      { color: var(--trust-firm);      background: var(--trust-firm-bg);      border-color: var(--trust-firm-border); }
+.argus-cite[data-trust="credible"]  { color: var(--trust-credible);  background: var(--trust-credible-bg);  border-color: var(--trust-credible-border); }
+.argus-cite[data-trust="web"]       { color: var(--trust-web);       background: var(--trust-web-bg);       border-color: var(--trust-web-border); }
+.argus-cite[data-trust="contested"] { color: var(--trust-contested); background: var(--trust-contested-bg); border-color: var(--trust-contested-border); }
+
+/* NLI verification overlay — layered on top of trust color via box-shadow ring or border style */
+.argus-cite[data-nli="verifying"] {
+  opacity: 0.55;
+  animation: argus-cite-pulse 1.4s ease-in-out infinite;
+}
+.argus-cite[data-nli="weak"] {
+  border-style: dashed;
+}
+.argus-cite[data-nli="unsupported"] {
+  box-shadow: 0 0 0 1.5px var(--trust-contested);
+  border-color: var(--trust-contested);
+  color: var(--trust-contested);
+  background: var(--trust-contested-bg);
+}
+
+@keyframes argus-cite-pulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.85; }
+}
+
+.argus-cite-spinner {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  border-top-color: transparent;
+  animation: argus-cite-spin 0.7s linear infinite;
+}
+@keyframes argus-cite-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Confidence pill — paragraph-level */
+.argus-confidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  font-family: var(--font-inter), ui-sans-serif, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  border: 1px solid;
+}
+.argus-confidence[data-level="high"]      { color: var(--confidence-high);      background: var(--confidence-high-bg);      border-color: var(--trust-firm-border); }
+.argus-confidence[data-level="medium"]    { color: var(--confidence-medium);    background: var(--confidence-medium-bg);    border-color: var(--trust-web-border); }
+.argus-confidence[data-level="contested"] { color: var(--confidence-contested); background: var(--confidence-contested-bg); border-color: var(--trust-contested-border); }
+
+/* Tabular numerals on monospace */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Section labels (small caps, tracked) */
+.argus-label {
+  font-family: var(--font-inter), ui-sans-serif, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* TipTap editor — inline citation marker */
+.argus-cite-mark {
+  display: inline-block;
+  padding: 0 4px;
+  margin: 0 1px;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  vertical-align: super;
+  color: var(--trust-credible);
+  background: var(--trust-credible-bg);
+  border: 1px solid var(--trust-credible-border);
+  border-radius: 3px;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1.4;
+}
+
+/* Legacy compatibility: keep workspace-grid temporarily so old screens don't 404 */
+.workspace-grid {
+  display: grid;
+  grid-template-columns: 268px minmax(0, 1fr) 256px;
+  gap: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
 }

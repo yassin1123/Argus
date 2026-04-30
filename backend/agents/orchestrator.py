@@ -1053,6 +1053,35 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         if report_id:
             await save_claim_evidence_links(report_id, _claim_links_from_verification(report_id, ver_dict))
             await replace_claim_support_rows(session_id, report_id, claim_support)
+            # Phase 7: structured grounder runs as a post-write step.
+            # Phase 8 + Batch 1: NLI verifier streams per-claim — we save the
+            # answer EARLY (state="pending") so the frontend renders citations
+            # as `verifying...`, then patch in NLI results as each claim resolves.
+            try:
+                from agents.nli_verifier import verify_structured_answer
+                from agents.structured_grounder import ground_writer_payload
+                from db.queries import save_structured_answer
+                from storage.chunk_queries import list_chunks_for_session
+
+                grounded = await ground_writer_payload(session_id=session_id, payload=report)
+
+                # Save the grounder's output IMMEDIATELY (NLI hasn't started).
+                # Frontend will see citations as `verifying` until NLI fills in.
+                grounded.verification_state = "pending"
+                await save_structured_answer(report_id, grounded.model_dump(mode="json"))
+
+                chunks_list = await list_chunks_for_session(session_id, limit=200)
+                chunks_by_id = {c["id"]: c for c in chunks_list}
+
+                # Persist after each claim's NLI pairs resolve.
+                async def _persist_progress(answer):
+                    await save_structured_answer(report_id, answer.model_dump(mode="json"))
+
+                grounded = await verify_structured_answer(
+                    grounded, chunks_by_id, on_progress=_persist_progress
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.warning("structured grounder / NLI skipped: %s", e)
 
         trust_payload = build_trust_labels(
             report=report.model_dump(),

@@ -19,19 +19,33 @@ async def create_session(
     status: str = "draft",
     *,
     report_mode: str = "general",
+    created_by_user_id: str | None = None,
 ) -> None:
     async with acquire() as conn:
-        await conn.execute(
-            """
-            INSERT INTO sessions (id, title, query, status, report_mode, updated_at)
-            VALUES ($1::uuid, $2, $3, $4, $5, NOW())
-            """,
-            session_id,
-            title,
-            query,
-            status,
-            report_mode,
-        )
+        async with conn.transaction():
+            await conn.execute(
+                """
+                INSERT INTO sessions (id, title, query, status, report_mode, created_by_user_id, updated_at)
+                VALUES ($1::uuid, $2, $3, $4, $5, $6::uuid, NOW())
+                """,
+                session_id,
+                title,
+                query,
+                status,
+                report_mode,
+                created_by_user_id,
+            )
+            # Creator gets a `lead` membership automatically.
+            if created_by_user_id:
+                await conn.execute(
+                    """
+                    INSERT INTO engagement_memberships (engagement_id, user_id, role, added_by)
+                    VALUES ($1::uuid, $2::uuid, 'lead', $2::uuid)
+                    ON CONFLICT (engagement_id, user_id) DO NOTHING
+                    """,
+                    session_id,
+                    created_by_user_id,
+                )
 
 
 async def save_session_intake_questions(session_id: str, questions: list[Any]) -> None:
@@ -317,20 +331,51 @@ async def update_session_query(session_id: str, query: str, title: str | None = 
             )
 
 
-async def list_sessions() -> list[dict[str, Any]]:
+async def list_sessions(*, user_id: str | None = None) -> list[dict[str, Any]]:
+    """List engagements.
+
+    When user_id is provided, scope to engagements where the user is a member
+    OR where the engagement is a public demo seed (metadata.demo=true).
+    """
     async with acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT s.id, s.title, s.query, s.status, s.created_at, s.updated_at, s.metadata, s.gap_report,
-                   s.pipeline_state, s.report_mode,
-                   (SELECT COUNT(*)::int FROM evidence_objects eo WHERE eo.session_id = s.id) AS evidence_count,
-                   (SELECT LEFT(TRIM(r.recommendation), 220) FROM reports r WHERE r.session_id = s.id LIMIT 1)
-                     AS recommendation_preview
-            FROM sessions s
-            ORDER BY s.created_at DESC
-            """
-        )
-    return [_session_dict(r) for r in rows]
+        if user_id:
+            rows = await conn.fetch(
+                """
+                SELECT DISTINCT s.id, s.title, s.query, s.status, s.created_at, s.updated_at,
+                       s.metadata, s.gap_report, s.pipeline_state, s.report_mode,
+                       (SELECT COUNT(*)::int FROM evidence_objects eo WHERE eo.session_id = s.id) AS evidence_count,
+                       (SELECT LEFT(TRIM(r.recommendation), 220) FROM reports r WHERE r.session_id = s.id LIMIT 1)
+                         AS recommendation_preview,
+                       em.role AS my_role
+                FROM sessions s
+                LEFT JOIN engagement_memberships em
+                  ON em.engagement_id = s.id AND em.user_id = $1::uuid
+                WHERE em.user_id = $1::uuid
+                   OR (s.metadata ->> 'demo')::boolean IS TRUE
+                ORDER BY s.created_at DESC
+                """,
+                user_id,
+            )
+        else:
+            rows = await conn.fetch(
+                """
+                SELECT s.id, s.title, s.query, s.status, s.created_at, s.updated_at, s.metadata, s.gap_report,
+                       s.pipeline_state, s.report_mode,
+                       (SELECT COUNT(*)::int FROM evidence_objects eo WHERE eo.session_id = s.id) AS evidence_count,
+                       (SELECT LEFT(TRIM(r.recommendation), 220) FROM reports r WHERE r.session_id = s.id LIMIT 1)
+                         AS recommendation_preview
+                FROM sessions s
+                ORDER BY s.created_at DESC
+                """
+            )
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        d = _session_dict(r)
+        # Surface the user's role on each engagement (None for public demo seeds).
+        if "my_role" in r.keys():
+            d["my_role"] = r["my_role"]
+        out.append(d)
+    return out
 
 
 async def delete_session(session_id: str) -> bool:
@@ -344,7 +389,8 @@ async def get_session_row(session_id: str) -> dict[str, Any] | None:
         row = await conn.fetchrow(
             """
             SELECT id, title, query, status, created_at, updated_at, metadata, gap_report,
-                   pipeline_state, report_mode, intake_questions, intake_answers
+                   pipeline_state, report_mode, intake_questions, intake_answers,
+                   created_by_user_id
             FROM sessions WHERE id = $1::uuid
             """,
             session_id,
@@ -379,7 +425,7 @@ async def get_session_detail(session_id: str) -> dict[str, Any] | None:
                    key_reasons, risks, counterarguments, next_steps, sources,
                    raw_output, caveats, evidence_bundle, verification,
                    evidence_count, unsupported_claim_count, consulting_payload,
-                   reasoning_graph, claim_support, created_at
+                   reasoning_graph, claim_support, structured_answer, created_at
             FROM reports WHERE session_id = $1::uuid
             """,
             session_id,
@@ -510,12 +556,33 @@ async def get_report(session_id: str) -> dict[str, Any] | None:
                    key_reasons, risks, counterarguments, next_steps, sources,
                    raw_output, caveats, evidence_bundle, verification,
                    evidence_count, unsupported_claim_count, consulting_payload,
-                   reasoning_graph, claim_support, created_at
+                   reasoning_graph, claim_support, structured_answer, created_at
             FROM reports WHERE session_id = $1::uuid
             """,
             session_id,
         )
-    return _report_dict(row) if row else None
+    if not row:
+        return None
+    out = _report_dict(row)
+    sa = row["structured_answer"]
+    if isinstance(sa, str):
+        try:
+            out["structured_answer"] = json.loads(sa)
+        except Exception:
+            out["structured_answer"] = None
+    else:
+        out["structured_answer"] = sa
+    return out
+
+
+async def save_structured_answer(report_id: str, structured_answer: dict[str, Any]) -> None:
+    """Persist (or replace) the structured answer for a report."""
+    async with acquire() as conn:
+        await conn.execute(
+            "UPDATE reports SET structured_answer = $2::jsonb WHERE id = $1::uuid",
+            report_id,
+            json.dumps(structured_answer),
+        )
 
 
 async def save_uploaded_file(
@@ -678,6 +745,7 @@ def _session_dict(row: Any) -> dict[str, Any]:
         iq = json.loads(iq)
     if isinstance(ia, str):
         ia = json.loads(ia)
+    created_by = row.get("created_by_user_id") if "created_by_user_id" in row else None
     return {
         "id": str(row["id"]),
         "title": row["title"],
@@ -693,6 +761,7 @@ def _session_dict(row: Any) -> dict[str, Any]:
         "intake_questions": list(iq) if isinstance(iq, list) else [],
         "intake_answers": list(ia) if isinstance(ia, list) else [],
         "recommendation_preview": _preview_or_none(row.get("recommendation_preview")),
+        "created_by_user_id": str(created_by) if created_by else None,
     }
 
 
@@ -763,6 +832,13 @@ def _report_dict(row: Any) -> dict[str, Any]:
         parsed = _j(csup)
         claim_support = parsed if isinstance(parsed, list) else []
 
+    sa = row.get("structured_answer") if "structured_answer" in row.keys() else None
+    if isinstance(sa, str):
+        try:
+            sa = json.loads(sa)
+        except Exception:
+            sa = None
+
     return {
         "id": str(row["id"]),
         "session_id": str(row["session_id"]),
@@ -783,6 +859,7 @@ def _report_dict(row: Any) -> dict[str, Any]:
         "consulting_payload": consulting_payload,
         "reasoning_graph": reasoning_graph,
         "claim_support": claim_support if isinstance(claim_support, list) else [],
+        "structured_answer": sa,
         "created_at": row["created_at"].isoformat() if row["created_at"] else None,
     }
 

@@ -284,12 +284,42 @@ async def _seed_stub(conn: asyncpg.Connection, stub: dict[str, Any]) -> None:
     print(f"  ✓ seeded stub engagement: {stub['title']}")
 
 
+async def _seed_demo_user(conn: asyncpg.Connection) -> None:
+    """Provision a `demo@argus.local` user so DEMO_MODE has someone to attach to.
+
+    Login (when not using DEMO_MODE bypass):
+      email:    demo@argus.local
+      password: demo-password
+    """
+    try:
+        from passlib.context import CryptContext
+        ctx = CryptContext(schemes=["bcrypt"], bcrypt__rounds=10)
+        demo_hash = ctx.hash("demo-password")
+    except ImportError:
+        # passlib not installed in this env — skip rather than crash.
+        print("  · passlib unavailable — skipping demo user")
+        return
+    try:
+        await conn.execute(
+            """
+            INSERT INTO users (email, password_hash, full_name, role)
+            VALUES ('demo@argus.local', $1, 'Demo User', 'admin')
+            ON CONFLICT (email) DO NOTHING
+            """,
+            demo_hash,
+        )
+        print("  ✓ ensured demo user (demo@argus.local / demo-password)")
+    except asyncpg.UndefinedTableError:
+        print("  · users table missing (run migrations) — skipping demo user")
+
+
 async def main() -> int:
     print("Argus demo seeder")
     print(f"  fixtures: {FIXTURES_DIR}")
 
     conn = await asyncpg.connect(_database_url())
     try:
+        await _seed_demo_user(conn)
         await _clear_existing(conn)
         for entry in DEMO_SESSIONS:
             if entry.get("full"):

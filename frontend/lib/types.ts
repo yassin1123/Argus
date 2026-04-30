@@ -1,3 +1,5 @@
+export type EngagementRole = "lead" | "member" | "viewer";
+
 export interface Session {
   id: string;
   title: string;
@@ -11,6 +13,8 @@ export interface Session {
   evidence_count?: number;
   /** Latest report recommendation excerpt for session list cards */
   recommendation_preview?: string | null;
+  /** The current viewer's role on this engagement, if any. */
+  my_role?: EngagementRole | null;
   /** Demo / engagement framing in metadata (set by the demo seeder). */
   metadata?: Record<string, unknown> & {
     client_label?: string;
@@ -18,6 +22,59 @@ export interface Session {
     demo?: boolean;
     stub?: boolean;
   };
+}
+
+export interface EngagementMember {
+  user_id: string;
+  email: string;
+  full_name: string;
+  role: EngagementRole;
+  added_at?: string | null;
+}
+
+export type TrustLevel = "firm_vetted" | "credible_external" | "web_general" | "contested";
+export type SourceScope = "engagement" | "firm";
+
+export interface SourceItem {
+  id: string;
+  session_id: string | null;
+  filename: string;
+  file_type: string;
+  trust_level: TrustLevel;
+  scope: SourceScope;
+  notes: string;
+  source_url: string | null;
+  original_size: number | null;
+  blob_id: string | null;
+  chunk_count: number;
+  created_at: string | null;
+}
+
+export interface ChunkSearchResult {
+  id: string;
+  session_id: string | null;
+  content: string;
+  source_type: string;
+  position: number;
+  page: number | null;
+  slide: number | null;
+  timestamp_str: string | null;
+  speaker: string | null;
+  section_heading: string | null;
+  source_filename: string;
+  source_url: string | null;
+  trust_level: TrustLevel;
+  score: number;
+  fused_score?: number;
+  rerank_score?: number;
+  snippet?: string | null;
+}
+
+export interface ChunkSearchResponse {
+  mode: "hybrid" | "vector" | "keyword";
+  vector_count: number;
+  keyword_count: number;
+  results: ChunkSearchResult[];
 }
 
 export interface GapReport {
@@ -150,6 +207,59 @@ export interface Report {
   consulting_payload?: ConsultingPayload;
   reasoning_graph?: Record<string, unknown>;
   claim_support?: ClaimSupportRow[];
+  structured_answer?: StructuredAnswer | null;
+}
+
+export type StructuredConfidence = "high" | "medium" | "contested";
+export type NliLabel = "entailment" | "neutral" | "contradiction" | "skipped";
+
+export interface NliResult {
+  chunk_id: string;
+  label: NliLabel;
+  score: number;
+}
+
+export interface GroundedClaim {
+  text: string;
+  chunk_ids: string[];
+  confidence: StructuredConfidence;
+  notes?: string;
+  nli_results?: NliResult[];
+}
+
+export interface StructuredSection {
+  heading?: string;
+  text: string;
+  claims: GroundedClaim[];
+}
+
+export type VerificationState = "pending" | "verifying" | "complete";
+
+export interface StructuredAnswer {
+  tldr: string;
+  sections: StructuredSection[];
+  caveats: string;
+  validation_notes: string[];
+  verification_state?: VerificationState;
+}
+
+// ---- Artifacts ---------------------------------------------------------
+
+export type ArtifactType = "memo" | "deck" | "model" | "chart";
+export type ArtifactStatus = "draft" | "review" | "final";
+
+export interface Artifact {
+  id: string;
+  engagement_id: string;
+  type: ArtifactType;
+  title: string;
+  status: ArtifactStatus;
+  document_json: Record<string, unknown> | null;
+  source_report_id: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
 }
 
 export interface WorkspacePresentationMeta {

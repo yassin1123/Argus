@@ -1,4 +1,8 @@
-"""Public text/JSON completion APIs with timeout, optional fallback, usage logging."""
+"""Public text/JSON completion APIs with timeout, optional fallback, usage logging.
+
+Phase 7: routes through LiteLLM for provider abstraction and writes a row to
+`llm_calls` per call for per-engagement cost tracking.
+"""
 
 from __future__ import annotations
 
@@ -10,8 +14,12 @@ from typing import Any
 from openai import RateLimitError
 
 from core.inference.exceptions import InferenceTimeout
+from core.inference.litellm_client import (
+    chat_complete as _litellm_chat,
+    estimate_cost,
+    record_llm_call,
+)
 from core.inference.usage import log_inference_usage
-from core.llm import get_client
 from core.model_router import TaskModelConfig, resolve
 
 logger = logging.getLogger(__name__)
@@ -27,23 +35,15 @@ async def _chat_create(
     response_format: dict[str, str] | None,
     timeout_seconds: float,
 ) -> Any:
-    client = get_client()
-
-    async def _call() -> Any:
-        kwargs: dict[str, Any] = {
-            "model": model,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "messages": [
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-        }
-        if response_format is not None:
-            kwargs["response_format"] = response_format
-        return await client.chat.completions.create(**kwargs)
-
-    return await asyncio.wait_for(_call(), timeout=timeout_seconds)
+    return await _litellm_chat(
+        model=model,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        system=system,
+        user=user,
+        response_format=response_format,
+        timeout_seconds=timeout_seconds,
+    )
 
 
 def _usage_from_response(resp: Any) -> tuple[int | None, int | None]:
@@ -103,11 +103,23 @@ async def completion_with_config(
                 prompt_tokens=pt,
                 completion_tokens=ct,
             )
+            usd = estimate_cost(model, pt, ct)
+            await record_llm_call(
+                task_kind=task_kind,
+                model=model,
+                prompt_tokens=pt,
+                completion_tokens=ct,
+                latency_ms=int(elapsed_ms),
+                usd_cost=usd,
+                success=True,
+                session_id=session_id,
+            )
             meta = {
                 "model_used": model,
                 "prompt_tokens": pt,
                 "completion_tokens": ct,
                 "latency_ms": elapsed_ms,
+                "usd_cost": usd,
             }
             return text, meta
         except asyncio.TimeoutError as e:

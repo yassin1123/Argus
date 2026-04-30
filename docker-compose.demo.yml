@@ -11,11 +11,16 @@ services:
   backend:
     environment:
       DEMO_MODE: "1"
+      # Phase 1 added auth; demo mode attaches anonymous calls to the seeded
+      # demo user so the CI smoke checks and the no-API-key demo experience
+      # still work without a login round-trip.
+      ARGUS_AUTH_BYPASS: "1"
       OPENAI_API_KEY: ${OPENAI_API_KEY:-demo-no-key}
 
   worker:
     environment:
       DEMO_MODE: "1"
+      ARGUS_AUTH_BYPASS: "1"
       OPENAI_API_KEY: ${OPENAI_API_KEY:-demo-no-key}
 
   seed:

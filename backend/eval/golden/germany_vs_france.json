@@ -1,0 +1,15 @@
+{
+  "id": "germany_vs_france",
+  "prompt": "Should a B2B SaaS company prioritize Germany or France for its first European market entry?",
+  "expected_recommendation_keywords": ["Germany", "France", "pilot", "Mittelstand"],
+  "min_supporting_claims": 3,
+  "min_citation_faithfulness": 0.5,
+  "max_unsupported_pct": 0.4,
+  "banned_phrases": [
+    "phased approach",
+    "leverage synergies",
+    "best practices",
+    "pursue an aggressive strategy"
+  ],
+  "notes": "Seeded fixture. Citation faithfulness measured as fraction of claims with at least one entailment NLI label. Banned phrases regression test."
+}

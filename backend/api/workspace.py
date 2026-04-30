@@ -1,9 +1,11 @@
 import asyncio
 import json
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
+from auth.dependencies import get_current_user
+from auth.permissions import can_read
 from core.evidence_graph import build_ui_evidence_graph
 from core.limits import limiter
 from db.queries import get_session_row, list_pipeline_events_after
@@ -12,21 +14,31 @@ from presentations.workspace import build_workspace_payload
 router = APIRouter()
 
 
+async def _require_read(workspace_id: str, user: dict) -> None:
+    if not await can_read(workspace_id, user):
+        raise HTTPException(status_code=404, detail="Workspace not found")
+
+
 @router.get("/{workspace_id}")
-async def get_workspace(workspace_id: str) -> dict:
+async def get_workspace(workspace_id: str, user: dict = Depends(get_current_user)) -> dict:
     """Primary contract for the session UI: detail rows plus `presentation` labels."""
     data = await build_workspace_payload(workspace_id)
     if not data:
         raise HTTPException(status_code=404, detail="Workspace not found")
+    await _require_read(workspace_id, user)
     return data
 
 
 @router.get("/{workspace_id}/events")
-async def workspace_event_stream(request: Request, workspace_id: str) -> StreamingResponse:
-    """Server-sent events: new `pipeline_events` rows for this workspace (poll fallback in worker)."""
-    row = await get_session_row(workspace_id)
-    if not row:
+async def workspace_event_stream(
+    request: Request,
+    workspace_id: str,
+    user: dict = Depends(get_current_user),
+) -> StreamingResponse:
+    """Server-sent events: new `pipeline_events` rows for this workspace."""
+    if not await get_session_row(workspace_id):
         raise HTTPException(status_code=404, detail="Workspace not found")
+    await _require_read(workspace_id, user)
 
     async def gen():
         after_id = 0
@@ -48,11 +60,16 @@ async def workspace_event_stream(request: Request, workspace_id: str) -> Streami
 
 @router.get("/{workspace_id}/evidence")
 @limiter.limit("120/minute")
-async def get_workspace_evidence(request: Request, workspace_id: str) -> dict:
+async def get_workspace_evidence(
+    request: Request,
+    workspace_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict:
     """Smaller payload: presentation evidence rail + raw evidence_objects."""
     data = await build_workspace_payload(workspace_id)
     if not data:
         raise HTTPException(status_code=404, detail="Workspace not found")
+    await _require_read(workspace_id, user)
     pres = data.get("presentation") or {}
     return {
         "evidence_presentation": pres.get("evidence"),
@@ -62,11 +79,16 @@ async def get_workspace_evidence(request: Request, workspace_id: str) -> dict:
 
 @router.get("/{workspace_id}/graph")
 @limiter.limit("120/minute")
-async def get_workspace_graph(request: Request, workspace_id: str) -> dict:
+async def get_workspace_graph(
+    request: Request,
+    workspace_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict:
     """Normalized evidence graph (claims ↔ evidence ↔ sources) for the UI tab."""
     data = await build_workspace_payload(workspace_id)
     if not data:
         raise HTTPException(status_code=404, detail="Workspace not found")
+    await _require_read(workspace_id, user)
     report = data.get("report") or {}
     return build_ui_evidence_graph(
         reasoning_graph=report.get("reasoning_graph") or {},
