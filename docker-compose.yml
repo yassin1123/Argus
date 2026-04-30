@@ -57,6 +57,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       SERPAPI_KEY: ${SERPAPI_KEY:-}
+      BRAVE_API_KEY: ${BRAVE_API_KEY:-}
       COHERE_API_KEY: ${COHERE_API_KEY:-}
       HUGGINGFACE_API_KEY: ${HUGGINGFACE_API_KEY:-}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
@@ -104,6 +105,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       SERPAPI_KEY: ${SERPAPI_KEY:-}
+      BRAVE_API_KEY: ${BRAVE_API_KEY:-}
       COHERE_API_KEY: ${COHERE_API_KEY:-}
       HUGGINGFACE_API_KEY: ${HUGGINGFACE_API_KEY:-}
       SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me}
