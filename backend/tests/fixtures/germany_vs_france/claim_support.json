@@ -1,0 +1,63 @@
+[
+  {
+    "claim_id": "c1",
+    "claim_text": "Germany's B2B SaaS market is approximately 1.6x the size of France's.",
+    "evidence_object_ids": ["e0000001-0000-4000-8000-000000000001", "e0000002-0000-4000-8000-000000000002"],
+    "support_type": "direct_quote",
+    "verifier_verdict": "supported",
+    "contradiction_flag": false,
+    "entailment_score": 0.91,
+    "weak_or_unsupported": false
+  },
+  {
+    "claim_id": "c2",
+    "claim_text": "Mittelstand B2B SaaS net revenue retention (117%) is structurally higher than French mid-market (109%).",
+    "evidence_object_ids": ["e0000009-0000-4000-8000-000000000009"],
+    "support_type": "direct_quote",
+    "verifier_verdict": "supported",
+    "contradiction_flag": false,
+    "entailment_score": 0.86,
+    "weak_or_unsupported": false
+  },
+  {
+    "claim_id": "c3",
+    "claim_text": "Sequenced single-country entry produces 2.3x the qualified pipeline at 12-headcount caps compared to parallel entry.",
+    "evidence_object_ids": ["e0000008-0000-4000-8000-000000000008"],
+    "support_type": "paraphrase",
+    "verifier_verdict": "supported",
+    "contradiction_flag": false,
+    "entailment_score": 0.82,
+    "weak_or_unsupported": false
+  },
+  {
+    "claim_id": "c4",
+    "claim_text": "Two-quarter pilots in target accounts reliably resolve go/no-go on full entry economics with ~80% accuracy.",
+    "evidence_object_ids": ["e0000010-0000-4000-8000-000000000010"],
+    "support_type": "inference",
+    "verifier_verdict": "weak",
+    "contradiction_flag": false,
+    "entailment_score": 0.58,
+    "weak_or_unsupported": true,
+    "staleness_hint": "Internal pattern; n=12 cases — small sample"
+  },
+  {
+    "claim_id": "c5",
+    "claim_text": "France grows faster (22% vs 14% YoY) and is cheaper to staff but the public-sector tailwind is hard to capture at 12 headcount.",
+    "evidence_object_ids": ["e0000002-0000-4000-8000-000000000002", "e0000003-0000-4000-8000-000000000003", "e0000007-0000-4000-8000-000000000007"],
+    "support_type": "paraphrase",
+    "verifier_verdict": "supported",
+    "contradiction_flag": false,
+    "entailment_score": 0.84,
+    "weak_or_unsupported": false
+  },
+  {
+    "claim_id": "c6",
+    "claim_text": "German enterprise buyers expect in-country data residency at higher rates (68%) than French buyers (41%).",
+    "evidence_object_ids": ["e0000005-0000-4000-8000-000000000005"],
+    "support_type": "direct_quote",
+    "verifier_verdict": "supported",
+    "contradiction_flag": false,
+    "entailment_score": 0.88,
+    "weak_or_unsupported": false
+  }
+]

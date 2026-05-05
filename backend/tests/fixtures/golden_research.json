@@ -1,0 +1,20 @@
+{
+  "findings": [
+    {
+      "task_id": 1,
+      "question": "Test question",
+      "finding": "Grounded claim.",
+      "confidence": "medium",
+      "evidence": [
+        {
+          "chunk_id": "00000000-0000-0000-0000-000000000001",
+          "quote": "sample quote from source",
+          "filename": "fixture.pdf",
+          "similarity": 0.82
+        }
+      ],
+      "web_citations": [],
+      "gaps": ""
+    }
+  ]
+}

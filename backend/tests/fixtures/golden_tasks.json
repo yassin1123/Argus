@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "tasks": [
+    {
+      "id": "gate_smoke",
+      "description": "Analyst JSON must include key_claims with valid evidence_ids when catalog non-empty",
+      "rubric": ["evidence_gates", "consulting_payload_optional"]
+    },
+    {
+      "id": "insufficient_path",
+      "description": "Verifier overall insufficient should not emit full client memo",
+      "rubric": ["session_status_insufficient", "gap_report_present"]
+    },
+    {
+      "id": "claim_support_persisted",
+      "description": "Report carries claim_support JSON and claim_support_rows after verifier for writer/UI",
+      "rubric": ["claim_support_jsonb", "entailment_score_optional"]
+    },
+    {
+      "id": "consulting_mode_branches",
+      "description": "Non-general report_mode enforces branch coverage and min evidence via consulting_modes.yaml",
+      "rubric": ["branch_coverage_rate", "consulting_mode_insufficient"]
+    },
+    {
+      "id": "eval_export",
+      "description": "GET /api/evaluations/export?session_id= returns evaluation metrics for regression",
+      "rubric": ["evaluations_export_json", "rubric_version_2"]
+    }
+  ]
+}

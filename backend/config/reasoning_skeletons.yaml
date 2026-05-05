@@ -1,0 +1,30 @@
+# Required reasoning slots per report_mode. Empty required_slots => no skeleton gate.
+# Analyst must emit reasoning_slots: [{ slot_id, summary, claim_ids (optional) }]
+
+general:
+  label: General decision support
+  required_slots: []
+
+market_entry:
+  label: Market entry
+  required_slots:
+    - market_attractiveness
+    - competition
+    - risks
+    - feasibility
+
+due_diligence:
+  label: Due diligence
+  required_slots:
+    - financial
+    - legal
+    - operational
+    - risks
+
+growth_strategy:
+  label: Growth strategy
+  required_slots:
+    - market_attractiveness
+    - capabilities
+    - competition
+    - risks

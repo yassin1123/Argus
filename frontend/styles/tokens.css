@@ -1,0 +1,98 @@
+/**
+ * Argus — design tokens
+ * Bloomberg/Palantir-grade workbench. Editorial gravity, no consumer-AI gradients.
+ */
+:root {
+  /* ---- Surface (off-white canvas, deep navy ink) ---- */
+  --bg-canvas: #fafaf7;          /* warm off-white application bg */
+  --bg-surface: #ffffff;         /* card/sheet bg */
+  --bg-elevated: #f3f1ec;        /* hover, selected rows */
+  --bg-overlay: #ebe8e1;
+  --bg-rail: #f7f5f0;            /* nav rails (slightly off canvas) */
+  --bg-ink-wash: rgba(10, 22, 40, 0.04);
+
+  /* ---- Ink (deep navy primary) ---- */
+  --text-primary: #0a1628;       /* headlines, body */
+  --text-secondary: #2f3a4d;     /* secondary copy */
+  --text-tertiary: #6b7280;      /* captions, metadata */
+  --text-quaternary: #9ca3af;    /* placeholders */
+  --text-disabled: #d1d5db;
+  --text-inverse: #fafaf7;
+  --text-accent: #c8842d;        /* consulting amber — single restrained accent */
+  --text-oxblood: #7a1f1f;
+  --text-gold: #c8842d;          /* legacy alias */
+
+  /* ---- Border ---- */
+  --border-subtle: #e7e3d9;
+  --border-moderate: #d4cfc1;
+  --border-strong: #0a1628;
+  --border-accent: #c8842d;
+  --border-gold: #c8842d;
+
+  /* ---- Trust colors (RESERVED for citation badges + confidence pills only) ---- */
+  --trust-firm: #15803d;          /* green — firm-vetted */
+  --trust-firm-bg: #ecfdf3;
+  --trust-firm-border: #a4d8b8;
+  --trust-credible: #1d4ed8;      /* blue — external credible */
+  --trust-credible-bg: #eff4ff;
+  --trust-credible-border: #b3c8f5;
+  --trust-web: #b45309;            /* amber — web general */
+  --trust-web-bg: #fef7e6;
+  --trust-web-border: #f0c888;
+  --trust-contested: #b91c1c;      /* red — contested / single-source */
+  --trust-contested-bg: #fef2f2;
+  --trust-contested-border: #f0aaaa;
+
+  /* ---- Confidence (same family as trust) ---- */
+  --confidence-high: var(--trust-firm);
+  --confidence-high-bg: var(--trust-firm-bg);
+  --confidence-medium: var(--trust-web);
+  --confidence-medium-bg: var(--trust-web-bg);
+  --confidence-contested: var(--trust-contested);
+  --confidence-contested-bg: var(--trust-contested-bg);
+
+  /* ---- Semantic (legacy alias for tailwind tokens) ---- */
+  --semantic-success: var(--trust-firm);
+  --semantic-success-subtle: var(--trust-firm-bg);
+  --semantic-success-border: var(--trust-firm-border);
+  --semantic-warning: var(--trust-web);
+  --semantic-warning-subtle: var(--trust-web-bg);
+  --semantic-warning-border: var(--trust-web-border);
+  --semantic-danger: var(--trust-contested);
+  --semantic-danger-subtle: var(--trust-contested-bg);
+  --semantic-danger-border: var(--trust-contested-border);
+  --semantic-neutral: var(--text-secondary);
+  --semantic-neutral-subtle: var(--bg-elevated);
+  --semantic-info-subtle: var(--trust-credible-bg);
+  --semantic-info-border: var(--trust-credible-border);
+
+  /* ---- Shadows (subtle — Bloomberg, not Stripe) ---- */
+  --shadow-xs: 0 1px 1px rgba(10, 22, 40, 0.04);
+  --shadow-sm: 0 1px 2px rgba(10, 22, 40, 0.06);
+  --shadow-md: 0 2px 6px rgba(10, 22, 40, 0.08);
+  --shadow-lg: 0 4px 14px rgba(10, 22, 40, 0.10);
+  --shadow-xl: 0 12px 32px rgba(10, 22, 40, 0.14);
+  --shadow-recommendation: 0 1px 0 0 #c8842d, 0 4px 14px rgba(200, 132, 45, 0.12);
+  --shadow-popover: 0 8px 24px rgba(10, 22, 40, 0.16), 0 2px 6px rgba(10, 22, 40, 0.10);
+
+  /* ---- Radius (tight, professional) ---- */
+  --radius-btn: 4px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 9999px;
+
+  /* ---- Layout constants ---- */
+  --rail-nav: 64px;
+  --rail-source: 280px;
+  --rail-artifacts: 340px;
+  --topbar-height: 48px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

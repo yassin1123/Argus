@@ -1,0 +1,7 @@
+# Screenshots populated in Phase 5.
+# Expected files (capture from `make demo`):
+#   workspace-finished.png      - three-column workspace, Answer tab
+#   trust-rail.png              - trust rail close-up showing confidence + caveats
+#   audit-panel.png             - audit panel with claim verdicts expanded
+#   sse-progress.png            - live processing view (mid-pipeline)
+#   options-matrix.png          - decision matrix in the report

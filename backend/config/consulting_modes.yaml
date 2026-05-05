@@ -1,0 +1,28 @@
+# Required research dimensions (branch ids) per mode. Missing -> insufficient gap hints.
+general:
+  label: General decision support
+  required_branches: []
+  min_evidence_objects: 0
+
+market_entry:
+  label: Market entry
+  required_branches:
+    - market
+    - competition
+    - regulation
+  min_evidence_objects: 2
+
+due_diligence:
+  label: Due diligence
+  required_branches:
+    - financial
+    - legal
+    - operational
+  min_evidence_objects: 3
+
+growth_strategy:
+  label: Growth strategy
+  required_branches:
+    - market
+    - capabilities
+  min_evidence_objects: 2

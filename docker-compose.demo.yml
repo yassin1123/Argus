@@ -1,0 +1,39 @@
+# Demo override — boots the stack with DEMO_MODE=1 (no API key required)
+# and runs a one-shot seeder service that populates Postgres with three
+# demo engagements (one full case study + two stubs).
+#
+# Use:
+#   make demo
+# or:
+#   docker compose -f docker-compose.yml -f docker-compose.demo.yml up --build
+
+services:
+  backend:
+    environment:
+      DEMO_MODE: "1"
+      # Phase 1 added auth; demo mode attaches anonymous calls to the seeded
+      # demo user so the CI smoke checks and the no-API-key demo experience
+      # still work without a login round-trip.
+      ARGUS_AUTH_BYPASS: "1"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-demo-no-key}
+
+  worker:
+    environment:
+      DEMO_MODE: "1"
+      ARGUS_AUTH_BYPASS: "1"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-demo-no-key}
+
+  seed:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["python", "scripts/seed_demo.py"]
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/argus
+      DEMO_MODE: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    restart: "no"
