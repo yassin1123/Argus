@@ -17,3 +17,8 @@ dist/
 htmlcov/
 pgdata/
 .claude/
+
+# Week 1 benchmark raw outputs — only the runner and summary.json/csv are committed.
+backend/eval_runs/**/run_*.json
+backend/eval_runs/**/run_*.md
+backend/eval_runs/**/raw/

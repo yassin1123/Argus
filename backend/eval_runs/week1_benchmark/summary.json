@@ -1,0 +1,97 @@
+{
+  "configs": {
+    "new": {
+      "runs": [
+        {
+          "run_index": 1,
+          "wall_seconds": 546.53,
+          "cost_usd_total": 0.5095,
+          "fallback_hits": [],
+          "claim_support_count": 20,
+          "agent_outputs_count": 9,
+          "evidence_count": 10,
+          "unsupported_claim_count": 0,
+          "confidence_level": "Medium",
+          "recommendation_preview": "Launch a 6-month Mittelstand pilot in North Rhine-Westphalia and Bavaria targeting 6 anchor accounts, then execute go/no-go at month 7 based on 3+ signed LOIs and \u20ac400K+ pipeline."
+        },
+        {
+          "run_index": 2,
+          "wall_seconds": 581.89,
+          "cost_usd_total": 0.5896,
+          "fallback_hits": [],
+          "claim_support_count": 20,
+          "agent_outputs_count": 9,
+          "evidence_count": 10,
+          "unsupported_claim_count": 0,
+          "confidence_level": "Low",
+          "recommendation_preview": "Launch a 6-month Mittelstand pilot in North Rhine-Westphalia and Bavaria, allocating 8 of 12 headcount to Germany and 4 to product/ops support, IF five critical validations pass within 30 days: (1) Germany B2B SaaS market \u2265\u20ac15B, (2) procure"
+        },
+        {
+          "run_index": 3,
+          "wall_seconds": 658.82,
+          "cost_usd_total": 0.6138,
+          "fallback_hits": [],
+          "claim_support_count": 20,
+          "agent_outputs_count": 9,
+          "evidence_count": 10,
+          "unsupported_claim_count": 0,
+          "confidence_level": "Low",
+          "recommendation_preview": "Run a 60-day structured market validation before committing to either Germany or France, then launch a 6-month pilot in the market showing stronger fit, allocating 8 of 12 headcount to that pilot with explicit go/no-go criteria."
+        }
+      ],
+      "aggregate": {
+        "n_runs": 3,
+        "cost_total_usd": 1.7129,
+        "wall_total_seconds": 1787.24,
+        "any_fallbacks": false
+      }
+    },
+    "old": {
+      "runs": [
+        {
+          "run_index": 1,
+          "wall_seconds": 92.39,
+          "cost_usd_total": 0.0974,
+          "fallback_hits": [],
+          "claim_support_count": 5,
+          "agent_outputs_count": 8,
+          "evidence_count": 10,
+          "unsupported_claim_count": 0,
+          "confidence_level": "Medium",
+          "recommendation_preview": "Prioritize entry into the French B2B SaaS market due to its faster growth rate and lower initial costs, while considering a pilot program to mitigate risks."
+        },
+        {
+          "run_index": 2,
+          "wall_seconds": 96.97,
+          "cost_usd_total": 0.1114,
+          "fallback_hits": [],
+          "claim_support_count": 9,
+          "agent_outputs_count": 8,
+          "evidence_count": 10,
+          "unsupported_claim_count": 0,
+          "confidence_level": "Medium",
+          "recommendation_preview": "Prioritize entry into the German market with a pilot program in North Rhine-Westphalia and Bavaria over the next 18 months."
+        },
+        {
+          "run_index": 3,
+          "wall_seconds": 77.4,
+          "cost_usd_total": 0.1061,
+          "fallback_hits": [],
+          "claim_support_count": 9,
+          "agent_outputs_count": 8,
+          "evidence_count": 10,
+          "unsupported_claim_count": 0,
+          "confidence_level": "Medium",
+          "recommendation_preview": "Prioritize a pilot entry into the German market, focusing on the Mittelstand sector in North Rhine-Westphalia and Bavaria, leveraging the 18-month horizon to build a solid foundation before considering expansion into France."
+        }
+      ],
+      "aggregate": {
+        "n_runs": 3,
+        "cost_total_usd": 0.3149,
+        "wall_total_seconds": 266.76,
+        "any_fallbacks": false
+      }
+    }
+  },
+  "generated_at": "2026-05-06T17:37:06Z"
+}

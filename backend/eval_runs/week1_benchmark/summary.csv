@@ -1,0 +1,7 @@
+config,run_index,wall_seconds,cost_usd_total,n_fallback_hits,claim_support_count,agent_outputs_count,evidence_count,unsupported_claim_count,confidence_level,recommendation_preview
+new,1,546.53,0.5095,0,20,9,10,0,Medium,"Launch a 6-month Mittelstand pilot in North Rhine-Westphalia and Bavaria targeting 6 anchor accounts, then execute go/no-go at month 7 based on 3+ signed LOIs and €400K+ pipeline."
+new,2,581.89,0.5896,0,20,9,10,0,Low,"Launch a 6-month Mittelstand pilot in North Rhine-Westphalia and Bavaria, allocating 8 of 12 headcount to Germany and 4 to product/ops support, IF five critical validations pass within 30 days: (1) Germany B2B SaaS market ≥€15B, (2) procure"
+new,3,658.82,0.6138,0,20,9,10,0,Low,"Run a 60-day structured market validation before committing to either Germany or France, then launch a 6-month pilot in the market showing stronger fit, allocating 8 of 12 headcount to that pilot with explicit go/no-go criteria."
+old,1,92.39,0.0974,0,5,8,10,0,Medium,"Prioritize entry into the French B2B SaaS market due to its faster growth rate and lower initial costs, while considering a pilot program to mitigate risks."
+old,2,96.97,0.1114,0,9,8,10,0,Medium,Prioritize entry into the German market with a pilot program in North Rhine-Westphalia and Bavaria over the next 18 months.
+old,3,77.4,0.1061,0,9,8,10,0,Medium,"Prioritize a pilot entry into the German market, focusing on the Mittelstand sector in North Rhine-Westphalia and Bavaria, leveraging the 18-month horizon to build a solid foundation before considering expansion into France."
