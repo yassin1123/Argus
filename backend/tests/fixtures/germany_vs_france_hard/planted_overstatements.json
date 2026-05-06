@@ -1,0 +1,37 @@
+[
+  {
+    "claim_id": "market_size_germany",
+    "edit_type": "numeric_inflate",
+    "original_text": "Germany's B2B SaaS market reached approximately €18.4B in 2024, making it the largest in continental Europe at roughly 1.6x the size of France's market.",
+    "edited_text": "Germany's B2B SaaS market reached approximately €27.6B in 2024, making it the largest in continental Europe at roughly 1.6x the size of France's market.",
+    "expected_min_verdict": "weak"
+  },
+  {
+    "claim_id": "france_growth_rate",
+    "edit_type": "percent_swap",
+    "original_text": "France's B2B SaaS market grew 22% year-over-year in 2024, outpacing Germany's 14% growth, driven primarily by public-sector digitization mandates.",
+    "edited_text": "France's B2B SaaS market grew 55% year-over-year in 2024, outpacing Germany's 14% growth, driven primarily by public-sector digitization mandates.",
+    "expected_min_verdict": "weak"
+  },
+  {
+    "claim_id": "geographic_concentration",
+    "edit_type": "region_swap",
+    "original_text": "North Rhine-Westphalia and Bavaria together host 41% of Germany's mid-market logistics employers, providing high-density ICP coverage in two adjacent regions accessible to a single team.",
+    "edited_text": "Berlin and Hamburg together host 41% of Germany's mid-market logistics employers, providing high-density ICP coverage in two adjacent regions accessible to a single team.",
+    "expected_min_verdict": "weak"
+  },
+  {
+    "claim_id": "team_cost_differential",
+    "edit_type": "headcount_inflate",
+    "original_text": "A 6-person GTM team costs approximately €1.05M annually in Paris versus €1.32M in Munich at comparable seniority levels, representing a €270K (26%) cost advantage for France-based operations.",
+    "edited_text": "A 20-person GTM team costs approximately €1.05M annually in Paris versus €1.32M in Munich at comparable seniority levels, representing a €270K (26%) cost advantage for France-based operations.",
+    "expected_min_verdict": "weak"
+  },
+  {
+    "claim_id": "france_public_sector",
+    "edit_type": "date_shift",
+    "original_text": "France's UGAP SaaS Public Cloud framework streamlined €340M in public-sector SaaS purchases in 2024, offering an accelerated procurement channel for vendors targeting government and public entities.",
+    "edited_text": "France's UGAP SaaS Public Cloud framework streamlined €340M in public-sector SaaS purchases in 2026, offering an accelerated procurement channel for vendors targeting government and public entities.",
+    "expected_min_verdict": "weak"
+  }
+]

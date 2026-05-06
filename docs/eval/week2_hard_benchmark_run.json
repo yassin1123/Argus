@@ -1,0 +1,540 @@
+{
+  "fixture": {
+    "analyst_path": "backend/tests/fixtures/germany_vs_france_hard/analyst_output.json",
+    "evidence_path": "backend/tests/fixtures/germany_vs_france/evidence.json",
+    "planted_path": "backend/tests/fixtures/germany_vs_france_hard/planted_overstatements.json",
+    "n_total_rows_from_build_claim_support": 20,
+    "n_planted": 5,
+    "planted_ids": [
+      "france_growth_rate",
+      "france_public_sector",
+      "geographic_concentration",
+      "market_size_germany",
+      "team_cost_differential"
+    ],
+    "scoring_filter": "assumption rows excluded — only key_claim rows are scored"
+  },
+  "configs": {
+    "llm_only": {
+      "rows": {
+        "market_size_germany": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "overstates",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "france_growth_rate": {
+          "ensemble_verdict": "unsupported",
+          "legacy_class": "unsupported",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "unsupported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "procurement_cycles": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "geographic_concentration": {
+          "ensemble_verdict": "unsupported",
+          "legacy_class": "unsupported",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "unsupported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "data_residency_requirements": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "france_public_sector": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": true,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "team_cost_differential": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": true,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "sequenced_entry_advantage": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "nrr_comparison": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        },
+        "pilot_program_accuracy": {
+          "ensemble_verdict": "supported_high",
+          "legacy_class": "supported",
+          "is_flagged": false,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": null,
+          "nli_confidence": null,
+          "numeric_overlap_score": null,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": null,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "llm only mode"
+        }
+      },
+      "metrics": {
+        "n_total_claims": 10,
+        "n_planted": 5,
+        "n_unplanted": 5,
+        "flagged_planted": [
+          "market_size_germany",
+          "france_growth_rate",
+          "geographic_concentration"
+        ],
+        "flagged_unplanted": [],
+        "recall_on_planted": 0.6,
+        "precision_on_planted": 1.0,
+        "false_flag_rate": 0.0
+      },
+      "wall_seconds": 0.0
+    },
+    "llm_plus_deberta": {
+      "rows": {
+        "market_size_germany": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "overstates",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.9936095476150513,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "LLM overstates (legacy verdict, treated as weak)"
+        },
+        "france_growth_rate": {
+          "ensemble_verdict": "unsupported",
+          "legacy_class": "unsupported",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "unsupported",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.9953396320343018,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "LLM unsupported (sticky)"
+        },
+        "procurement_cycles": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9994475245475769,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "geographic_concentration": {
+          "ensemble_verdict": "unsupported",
+          "legacy_class": "unsupported",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "unsupported",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.606421172618866,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "LLM unsupported (sticky)"
+        },
+        "data_residency_requirements": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9998098015785217,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "france_public_sector": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9872810244560242,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "team_cost_differential": {
+          "ensemble_verdict": "contradicted",
+          "legacy_class": "contradicted",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "supported",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.8230746388435364,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa contradicts (0.82): see chunk"
+        },
+        "sequenced_entry_advantage": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9997337460517883,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "nrr_comparison": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9995967745780945,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "pilot_program_accuracy": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.999692440032959,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        }
+      },
+      "metrics": {
+        "n_total_claims": 10,
+        "n_planted": 5,
+        "n_unplanted": 5,
+        "flagged_planted": [
+          "market_size_germany",
+          "france_growth_rate",
+          "geographic_concentration",
+          "france_public_sector",
+          "team_cost_differential"
+        ],
+        "flagged_unplanted": [
+          "procurement_cycles",
+          "data_residency_requirements",
+          "sequenced_entry_advantage",
+          "nrr_comparison",
+          "pilot_program_accuracy"
+        ],
+        "recall_on_planted": 1.0,
+        "precision_on_planted": 0.5,
+        "false_flag_rate": 1.0
+      },
+      "wall_seconds": 2.58
+    },
+    "full_ensemble": {
+      "rows": {
+        "market_size_germany": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "overstates",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.9936095476150513,
+          "numeric_overlap_score": 0.5,
+          "numeric_overlap_missing": [
+            "€27.6B"
+          ],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "LLM overstates (legacy verdict, treated as weak)"
+        },
+        "france_growth_rate": {
+          "ensemble_verdict": "unsupported",
+          "legacy_class": "unsupported",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "unsupported",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.9953396320343018,
+          "numeric_overlap_score": 0.6666666666666666,
+          "numeric_overlap_missing": [
+            "55%"
+          ],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "LLM unsupported (sticky)"
+        },
+        "procurement_cycles": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9994475245475769,
+          "numeric_overlap_score": 0.6666666666666666,
+          "numeric_overlap_missing": [
+            "50%"
+          ],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral + numeric drift: 50%"
+        },
+        "geographic_concentration": {
+          "ensemble_verdict": "unsupported",
+          "legacy_class": "unsupported",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "unsupported",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.606421172618866,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 0.5,
+          "entity_overlap_missing": [
+            "Berlin",
+            "Hamburg"
+          ],
+          "ensemble_reason": "LLM unsupported (sticky)"
+        },
+        "data_residency_requirements": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9998098015785217,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "france_public_sector": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9872810244560242,
+          "numeric_overlap_score": 0.5,
+          "numeric_overlap_missing": [
+            "2026"
+          ],
+          "entity_overlap_score": 0.0,
+          "entity_overlap_missing": [
+            "France"
+          ],
+          "ensemble_reason": "DeBERTa neutral + numeric drift: 2026"
+        },
+        "team_cost_differential": {
+          "ensemble_verdict": "contradicted",
+          "legacy_class": "contradicted",
+          "is_flagged": true,
+          "is_planted": true,
+          "verifier_verdict": "supported",
+          "nli_label": "contradiction",
+          "nli_confidence": 0.8230746388435364,
+          "numeric_overlap_score": 0.5,
+          "numeric_overlap_missing": [
+            "€270K",
+            "26%"
+          ],
+          "entity_overlap_score": 0.75,
+          "entity_overlap_missing": [
+            "France"
+          ],
+          "ensemble_reason": "DeBERTa contradicts (0.82): €270K"
+        },
+        "sequenced_entry_advantage": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9997337460517883,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        },
+        "nrr_comparison": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.9995967745780945,
+          "numeric_overlap_score": 0.6666666666666666,
+          "numeric_overlap_missing": [
+            "8"
+          ],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral + numeric drift: 8"
+        },
+        "pilot_program_accuracy": {
+          "ensemble_verdict": "weak",
+          "legacy_class": "weak",
+          "is_flagged": true,
+          "is_planted": false,
+          "verifier_verdict": "supported",
+          "nli_label": "neutral",
+          "nli_confidence": 0.999692440032959,
+          "numeric_overlap_score": 1.0,
+          "numeric_overlap_missing": [],
+          "entity_overlap_score": 1.0,
+          "entity_overlap_missing": [],
+          "ensemble_reason": "DeBERTa neutral; LLM may have anchored on gist"
+        }
+      },
+      "metrics": {
+        "n_total_claims": 10,
+        "n_planted": 5,
+        "n_unplanted": 5,
+        "flagged_planted": [
+          "market_size_germany",
+          "france_growth_rate",
+          "geographic_concentration",
+          "france_public_sector",
+          "team_cost_differential"
+        ],
+        "flagged_unplanted": [
+          "procurement_cycles",
+          "data_residency_requirements",
+          "sequenced_entry_advantage",
+          "nrr_comparison",
+          "pilot_program_accuracy"
+        ],
+        "recall_on_planted": 1.0,
+        "precision_on_planted": 0.5,
+        "false_flag_rate": 1.0
+      },
+      "wall_seconds": 2.2
+    }
+  },
+  "wall_seconds": 22.34,
+  "generated_at": "2026-05-06T23:45:58Z",
+  "llm_verifier_seconds": 17.56,
+  "enrichment_seconds_per_config": {
+    "llm_only": 0.0,
+    "llm_plus_deberta": 2.58,
+    "full_ensemble": 2.2
+  }
+}
