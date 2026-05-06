@@ -945,6 +945,21 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         claim_support = build_claim_support(analysis_rev, evidence_objects, ver_dict)
         by_ev = {str(o.id): o for o in evidence_objects if o.id}
         await enrich_claim_rows_with_entailment(claim_support, by_ev)
+        # Day 3: enrich each row with the three-signal ensemble verdict
+        # (LLM judge + DeBERTa NLI via nli_worker + lexical overlap).
+        # Always populates the new columns so flag-OFF runs still capture
+        # the data for Day 4-5 regression analysis. The writer / critic
+        # / contradiction-policy gates only START reading ensemble_verdict
+        # when ARGUS_USE_ENSEMBLE_VERDICT=true.
+        from core.nli.ensemble_enrich import enrich_with_ensemble_signals  # noqa: WPS433
+
+        try:
+            claim_support = await enrich_with_ensemble_signals(claim_support, evidence_objects)
+        except Exception as ensemble_err:  # noqa: BLE001
+            logger.warning(
+                "Ensemble enrichment failed (continuing with legacy verdicts only): %s",
+                ensemble_err,
+            )
         reasoning_graph["evidence_graph_v1"] = build_evidence_graph_v1(
             analysis=analysis_rev,
             verification=ver_dict,

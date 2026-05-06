@@ -1041,14 +1041,30 @@ async def replace_claim_support_rows(
         rid = report_id if report_id else None
         for r in rows:
             eids = [str(x) for x in (r.get("evidence_object_ids") or []) if x]
+            # Day 3 ensemble columns — present when core/nli/ensemble_enrich.py
+            # has run, NULL otherwise so legacy rows / unit-test fixtures still
+            # round-trip cleanly through this writer.
+            nli_label = str(r["nli_label"])[:32] if r.get("nli_label") else None
+            nli_conf = float(r["nli_confidence"]) if r.get("nli_confidence") is not None else None
+            num_score = float(r["numeric_overlap_score"]) if r.get("numeric_overlap_score") is not None else None
+            ent_score = float(r["entity_overlap_score"]) if r.get("entity_overlap_score") is not None else None
+            num_missing = json.dumps(list(r.get("numeric_overlap_missing") or []))
+            ent_missing = json.dumps(list(r.get("entity_overlap_missing") or []))
+            ens_verdict = str(r["ensemble_verdict"])[:32] if r.get("ensemble_verdict") else None
+            ens_reason = str(r["ensemble_reason"])[:1000] if r.get("ensemble_reason") else None
             await conn.execute(
                 """
                 INSERT INTO claim_support_rows (
                     session_id, report_id, claim_id, claim_text, evidence_object_ids,
                     support_type, verifier_verdict, contradiction_flag, staleness_hint,
-                    entailment_score, weak_flag
+                    entailment_score, weak_flag,
+                    nli_label, nli_confidence,
+                    numeric_overlap_score, numeric_overlap_missing,
+                    entity_overlap_score, entity_overlap_missing,
+                    ensemble_verdict, ensemble_reason
                 ) VALUES (
-                    $1::uuid, $2::uuid, $3, $4, $5::uuid[], $6, $7, $8, $9, $10, $11
+                    $1::uuid, $2::uuid, $3, $4, $5::uuid[], $6, $7, $8, $9, $10, $11,
+                    $12, $13, $14, $15::jsonb, $16, $17::jsonb, $18, $19
                 )
                 """,
                 session_id,
@@ -1062,4 +1078,12 @@ async def replace_claim_support_rows(
                 str(r.get("staleness_hint") or "")[:2000],
                 float(r.get("entailment_score") or 0.0),
                 bool(r.get("weak_or_unsupported")),
+                nli_label,
+                nli_conf,
+                num_score,
+                num_missing,
+                ent_score,
+                ent_missing,
+                ens_verdict,
+                ens_reason,
             )

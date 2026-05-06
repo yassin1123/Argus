@@ -46,8 +46,13 @@ def compute_contradiction_severity(
             n += 2
         if row.get("contradiction_flag"):
             n += 1
-        vv = str(row.get("verifier_verdict") or "").lower()
-        if vv in ("unsupported", "overstates"):
+        # Day 3: when the ensemble flag is on, this pulls the aggregated
+        # verdict (mapped back to legacy vocabulary) instead of the raw
+        # LLM verifier_verdict. Severity weighting is unchanged.
+        from core.feature_flags import effective_verdict  # noqa: WPS433
+
+        vv = (effective_verdict(row) or "").lower()
+        if vv in ("unsupported", "overstates", "contradicted"):
             n += 1
     return n
 

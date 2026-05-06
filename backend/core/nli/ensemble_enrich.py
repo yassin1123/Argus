@@ -1,0 +1,174 @@
+"""Wire LLM judge + DeBERTa + lexical overlap into one ensemble verdict per
+claim_support_row, then return rows enriched with the eight new columns from
+``backend/db/migrations/022_ensemble_verdicts.sql``.
+
+This module sits between ``core.claim_support.build_claim_support`` (which
+produces legacy rows from the analyst output + LLM verifier output) and
+``db.queries.replace_claim_support_rows`` (which persists them). The
+enrichment step:
+
+1. Builds the (premise=combined_evidence_quote, hypothesis=claim_text) pair
+   per row.
+2. Computes the lexical-overlap signal locally — pure regex + spaCy, fast.
+3. Dispatches ONE Celery task to the ``nli`` queue (handled by
+   nli_worker) carrying all pairs in a single batch — model load is
+   amortised once per session, not once per claim.
+4. Runs the aggregator (Day 3 truth table) per row to produce
+   ``ensemble_verdict`` + ``ensemble_reason``.
+
+If the DeBERTa worker is unreachable / times out we substitute a sentinel
+``NLIResult(label="unknown", confidence=0.0)`` and the aggregator's
+"unknown DeBERTa label" branch handles it as if neutral. The pipeline does
+NOT abort — feature-flag-OFF readers (writer/critic/policy) keep using the
+legacy verifier_verdict column anyway.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+from typing import Any
+
+from core.nli.aggregator import aggregate
+from core.nli.deberta_client import NLIResult
+from core.nli.lexical_overlap import score_overlap
+from models.evidence import EvidenceObject
+
+logger = logging.getLogger(__name__)
+
+# Time budget for the whole batched DeBERTa call. The Day 1 perf check
+# scored 60 pairs in ~9s; 90s leaves comfortable headroom for cold-start
+# on the first call of a session.
+_DEBERTA_TIMEOUT_SECONDS: float = 90.0
+
+# Truncate the chunk passed to lexical / DeBERTa so a giant evidence quote
+# doesn't bloat the cross-encoder's window. nli_verifier already truncates
+# to 384 tokens internally — this is just to keep the Celery payload small.
+_CHUNK_MAX_CHARS: int = 4000
+
+
+def _combined_chunk(
+    eids: list[str],
+    evidence_by_id: dict[str, EvidenceObject],
+) -> str:
+    """Concatenate the cited evidence quotes into one premise string.
+
+    Empty when the row cites no evidence (e.g. an analyst assumption row).
+    The aggregator handles that case via its "unknown LLM verdict" branch
+    when verifier_verdict is also absent.
+    """
+    pieces: list[str] = []
+    for e in eids:
+        obj = evidence_by_id.get(e)
+        if obj is None:
+            continue
+        q = (obj.quote or "").strip()
+        if q:
+            pieces.append(q)
+    text = " ".join(pieces)
+    return text[:_CHUNK_MAX_CHARS]
+
+
+def _unknown_deberta() -> dict[str, Any]:
+    return {"label": "unknown", "confidence": 0.0, "softmax": [0.0, 0.0, 0.0]}
+
+
+async def _dispatch_deberta_batch(pairs: list[list[str]]) -> list[dict[str, Any]]:
+    """Submit the batched ``nli.score_pairs`` task and wait for its result.
+
+    Imported lazily so this module's import cost stays small (and so unit
+    tests can monkeypatch the dispatch without dragging Celery in).
+    """
+    if not pairs:
+        return []
+    from tasks.pipeline import celery_app  # noqa: WPS433
+
+    try:
+        async_result = celery_app.send_task(
+            "nli.score_pairs",
+            args=[pairs],
+            queue="nli",
+        )
+        # ``.get()`` is sync; off-load to a thread so the orchestrator's
+        # event loop isn't blocked while DeBERTa scores the batch.
+        results = await asyncio.to_thread(async_result.get, timeout=_DEBERTA_TIMEOUT_SECONDS)
+        if not isinstance(results, list) or len(results) != len(pairs):
+            logger.warning(
+                "DeBERTa batch returned unexpected shape (%d pairs in, %s out)",
+                len(pairs),
+                type(results).__name__,
+            )
+            return [_unknown_deberta() for _ in pairs]
+        return results  # type: ignore[no-any-return]
+    except Exception as e:  # noqa: BLE001 — degrade, don't abort
+        logger.warning("DeBERTa batch dispatch failed: %s", e)
+        return [_unknown_deberta() for _ in pairs]
+
+
+async def enrich_with_ensemble_signals(
+    rows: list[dict[str, Any]],
+    evidence_objects: list[EvidenceObject],
+) -> list[dict[str, Any]]:
+    """Augment each claim_support row with the 8 new ensemble columns.
+
+    Returns NEW row dicts; does not mutate input. The augmented dicts are
+    a superset of what ``build_claim_support`` produced, so the downstream
+    persistence layer (``replace_claim_support_rows``) accepts them
+    without further changes.
+
+    Order of operations:
+        rows from build_claim_support
+          -> compute lexical signal per row (sync, fast)
+          -> dispatch ONE batched DeBERTa task to nli_worker
+          -> run aggregator per row
+    """
+    if not rows:
+        return []
+
+    evidence_by_id: dict[str, EvidenceObject] = {
+        str(o.id): o for o in evidence_objects if o.id
+    }
+
+    # Phase 1: lexical overlap is local — compute per row up-front so the
+    # batched DeBERTa call sees identical (premise, hypothesis) pairs.
+    enriched: list[dict[str, Any]] = []
+    pairs: list[list[str]] = []
+    lexicals: list = []  # list[LexicalSignal], avoiding a second import.
+    for row in rows:
+        eids = [str(x) for x in (row.get("evidence_object_ids") or []) if x]
+        chunk_text = _combined_chunk(eids, evidence_by_id)
+        claim_text = str(row.get("claim_text", ""))
+        lex = score_overlap(claim_text, chunk_text)
+        lexicals.append(lex)
+        pairs.append([chunk_text, claim_text])  # premise, hypothesis
+        # Don't write ensemble columns yet — DeBERTa hasn't returned.
+        enriched.append({**row})
+
+    # Phase 2: batched DeBERTa.
+    deberta_results = await _dispatch_deberta_batch(pairs)
+
+    # Phase 3: aggregate + attach all eight columns.
+    for i, row in enumerate(enriched):
+        d = deberta_results[i] if i < len(deberta_results) else _unknown_deberta()
+        sm = d.get("softmax") or [0.0, 0.0, 0.0]
+        if not isinstance(sm, (list, tuple)) or len(sm) != 3:
+            sm = [0.0, 0.0, 0.0]
+        nli_obj = NLIResult(
+            label=str(d.get("label") or "unknown"),  # type: ignore[arg-type]
+            confidence=float(d.get("confidence") or 0.0),
+            softmax=(float(sm[0]), float(sm[1]), float(sm[2])),
+        )
+        lex = lexicals[i]
+        llm_verdict = row.get("verifier_verdict") or ""
+        ensemble_verdict, ensemble_reason = aggregate(llm_verdict, nli_obj, lex)
+
+        row["nli_label"] = nli_obj.label
+        row["nli_confidence"] = nli_obj.confidence
+        row["numeric_overlap_score"] = lex.numeric_overlap_score
+        row["numeric_overlap_missing"] = list(lex.numeric_missing)
+        row["entity_overlap_score"] = lex.entity_overlap_score
+        row["entity_overlap_missing"] = list(lex.entity_missing)
+        row["ensemble_verdict"] = ensemble_verdict
+        row["ensemble_reason"] = ensemble_reason
+
+    return enriched

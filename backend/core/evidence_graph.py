@@ -181,10 +181,14 @@ def build_ui_evidence_graph(
     referenced_evidence_ids: set[str] = set()
     sources_seen: dict[str, dict[str, Any]] = {}
 
+    # Day 3: when ARGUS_USE_ENSEMBLE_VERDICT is on this returns the ensemble
+    # verdict (mapped to legacy vocabulary); otherwise the raw LLM verdict.
+    from core.feature_flags import effective_verdict as _effective_verdict
+
     for c in claims:
         cid = c["id"]
         cs_row = cs_by_claim.get(cid) or {}
-        verdict = _norm_verdict(cs_row.get("verifier_verdict"))
+        verdict = _norm_verdict(_effective_verdict(cs_row))
         support_type = _str(cs_row.get("support_type")) or "inference"
         weak = bool(cs_row.get("weak_or_unsupported")) or verdict in ("weak", "unsupported")
         nodes.append(
@@ -246,13 +250,13 @@ def build_ui_evidence_graph(
     nodes.extend(sources_seen.values())
 
     supported = sum(
-        1 for c in claims if _norm_verdict(cs_by_claim.get(c["id"], {}).get("verifier_verdict")) == "supported"
+        1 for c in claims if _norm_verdict(_effective_verdict(cs_by_claim.get(c["id"], {}))) == "supported"
     )
     weak = sum(
-        1 for c in claims if _norm_verdict(cs_by_claim.get(c["id"], {}).get("verifier_verdict")) == "weak"
+        1 for c in claims if _norm_verdict(_effective_verdict(cs_by_claim.get(c["id"], {}))) == "weak"
     )
     unsupported = sum(
-        1 for c in claims if _norm_verdict(cs_by_claim.get(c["id"], {}).get("verifier_verdict")) == "unsupported"
+        1 for c in claims if _norm_verdict(_effective_verdict(cs_by_claim.get(c["id"], {}))) == "unsupported"
     )
 
     return {
