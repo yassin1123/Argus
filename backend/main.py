@@ -15,11 +15,24 @@ from api import admin, artifacts, chat, engagements, evaluations, exports, input
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
+from core.model_router import resolve as _resolve_task_model
+from core.provider_family import assert_cross_family
 from db.connection import close_db, init_db
 
 from core.logging_config import configure_json_logging
 
 configure_json_logging()
+
+# Cross-family verification wedge: the analyst (synthesis) and verifier (judge)
+# must resolve to different provider families (see backend/core/provider_family.py).
+# We assert at module load — after model_router._load_yaml() is triggered by
+# resolve() — so a misconfigured models.yaml or a same-family ARGUS_MODEL_*
+# override crashes the container on boot rather than silently degrading
+# verification quality. The DEMO_MODE bypass and unit-test environments don't
+# spin up FastAPI through main.py, so this hook never blocks tests.
+_analyst_cfg = _resolve_task_model("analyst")
+_verifier_cfg = _resolve_task_model("verifier")
+assert_cross_family(_analyst_cfg.model, _verifier_cfg.model)
 
 
 @asynccontextmanager

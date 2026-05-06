@@ -44,9 +44,15 @@ tasks:
     max_tokens: 4096
     timeout_seconds: 90
 
+  # Day 3 cross-family wedge: analyst and writer must NOT fall back to a
+  # provider family already in the verifier chain (openai primary + google
+  # fallback). Falling back to openai/gpt-4o would let the openai verifier
+  # judge openai analyst output — same-family verification, the failure
+  # mode the wedge exists to prevent. Intra-family fallback to claude-haiku-4-5
+  # is weaker on capability but preserves the cross-family contract.
   analyst:
     model: anthropic/claude-sonnet-4-5
-    fallback_model: openai/gpt-4o
+    fallback_model: anthropic/claude-haiku-4-5
     temperature: 0.25
     max_tokens: 8192
     timeout_seconds: 180
@@ -69,7 +75,7 @@ tasks:
 
   writer:
     model: anthropic/claude-sonnet-4-5
-    fallback_model: openai/gpt-4o
+    fallback_model: anthropic/claude-haiku-4-5
     temperature: 0.35
     max_tokens: 8192
     timeout_seconds: 180
