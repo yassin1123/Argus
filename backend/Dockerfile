@@ -18,6 +18,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # via the `cross-encoder/nli-deberta-v3-base` model id.
 RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('cross-encoder/nli-deberta-v3-base')"
 
+# Pre-download the spaCy English small model (~50MB) for the lexical-overlap
+# entity extractor (Week 2 / Day 2). Lives in the main worker; nli_worker
+# inherits it because both services share this image, but only the main
+# worker imports core.nli.entity_extractor.
+RUN python -m spacy download en_core_web_sm
+
 COPY . .
 
 EXPOSE 8000
