@@ -27,6 +27,26 @@ litellm.suppress_debug_info = True
 litellm.drop_params = False
 
 
+def _normalise_model_for_litellm(model: str) -> str:
+    """Translate router prefixes that the project YAML uses but litellm 1.40.20 doesn't.
+
+    The Phase 1 / Week 1 models.yaml uses ``google/<model>`` for Gemini routing
+    (matching the existing ``_provider_for()`` tag). litellm 1.40.20's router
+    only recognises ``gemini/`` (AI Studio) and ``vertex_ai/`` (Vertex), so a
+    raw ``google/...`` model string raises ``BadRequestError: LLM Provider NOT
+    provided``. We rewrite the prefix here at the call site so the YAML stays
+    canonical and the cost-tracking tag (provider="google") is unaffected.
+    """
+    if model and model.lower().startswith("google/"):
+        return "gemini/" + model.split("/", 1)[1]
+    return model
+
+
+def _is_anthropic(model: str) -> bool:
+    m = (model or "").lower()
+    return m.startswith("claude") or m.startswith("anthropic/")
+
+
 async def chat_complete(
     *,
     model: str,
@@ -38,8 +58,10 @@ async def chat_complete(
     timeout_seconds: float,
 ) -> Any:
     """Single chat completion via LiteLLM. Returns the raw response object."""
+    routed_model = _normalise_model_for_litellm(model)
+
     kwargs: dict[str, Any] = {
-        "model": model,
+        "model": routed_model,
         "temperature": temperature,
         "max_tokens": max_tokens,
         "messages": [
@@ -47,7 +69,15 @@ async def chat_complete(
             {"role": "user", "content": user},
         ],
     }
-    if response_format is not None:
+    # litellm 1.40.20 rejects ``response_format={"type":"json_object"}`` on
+    # Anthropic with ``UnsupportedParamsError``; newer litellm versions
+    # translate it via tool-use, but we're pinned for the duration of this
+    # phase. Every Argus agent system prompt already contains an explicit
+    # "Output ONLY valid JSON: {...}" instruction (see analyst.py, planner.py,
+    # critic.py, verifier.py, writer.py, intake.py), so dropping the kwarg on
+    # Anthropic is safe — Claude follows the instruction and the schema-repair
+    # loop in core/inference/structured.py handles any drift.
+    if response_format is not None and not _is_anthropic(routed_model):
         kwargs["response_format"] = response_format
 
     return await asyncio.wait_for(acompletion(**kwargs), timeout=timeout_seconds)

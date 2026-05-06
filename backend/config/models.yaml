@@ -1,8 +1,5 @@
-# Task → model routing. Override with env: ARGUS_MODEL_<TASK_UPPER>=gpt-4o-mini
-# Example: ARGUS_MODEL_PLANNER=gpt-4o
-
 default:
-  model: gpt-4o
+  model: openai/gpt-4o
   temperature: 0.3
   max_tokens: 4096
   timeout_seconds: 120
@@ -10,67 +7,81 @@ default:
   structured_required: false
 
 tasks:
+  intake:
+    model: openai/gpt-4o-mini
+    fallback_model: anthropic/claude-haiku-4-5
+    temperature: 0.2
+    max_tokens: 2048
+    timeout_seconds: 45
+    structured_required: true
+
   conversation:
-    model: gpt-4o-mini
+    model: anthropic/claude-haiku-4-5
+    fallback_model: openai/gpt-4o-mini
     temperature: 0.2
     max_tokens: 1200
     timeout_seconds: 45
-    fallback_model: gpt-4o
     structured_required: true
-  intake:
-    model: gpt-4o-mini
-    temperature: 0.2
-    max_tokens: 2048
-    timeout_seconds: 45
-    fallback_model: gpt-4o
-    structured_required: true
-  # Optional: ARGUS_MODEL_PLANNER=o3-mini for heavier decomposition (requires API access)
+
   planner:
-    model: gpt-4o
+    model: openai/gpt-4o
+    fallback_model: anthropic/claude-sonnet-4-5
     temperature: 0.3
     max_tokens: 4096
     timeout_seconds: 120
-    fallback_model: gpt-4o-mini
+
   researcher:
-    model: gpt-4o
+    model: openai/gpt-4o
+    fallback_model: anthropic/claude-sonnet-4-5
     temperature: 0.25
     max_tokens: 8192
     timeout_seconds: 180
-    fallback_model: gpt-4o-mini
+
   research_subagent:
-    model: gpt-4o-mini
+    model: openai/gpt-4o-mini
+    fallback_model: anthropic/claude-haiku-4-5
     temperature: 0.2
     max_tokens: 4096
     timeout_seconds: 90
-    fallback_model: gpt-4o-mini
+
   analyst:
-    model: gpt-4o
+    model: anthropic/claude-sonnet-4-5
+    fallback_model: openai/gpt-4o
     temperature: 0.25
     max_tokens: 8192
     timeout_seconds: 180
-    fallback_model: gpt-4o-mini
     structured_required: true
+
   critic:
-    model: gpt-4o
-    temperature: 0.25
+    model: anthropic/claude-sonnet-4-5
+    fallback_model: openai/gpt-4o
+    temperature: 0.5
     max_tokens: 4096
     timeout_seconds: 120
-    fallback_model: gpt-4o-mini
+
   verifier:
-    model: gpt-4o-mini
+    model: openai/gpt-4o
+    fallback_model: google/gemini-2.5-pro
     temperature: 0.05
     max_tokens: 4096
     timeout_seconds: 90
-    fallback_model: gpt-4o
     structured_required: true
+
   writer:
-    model: gpt-4o
+    model: anthropic/claude-sonnet-4-5
+    fallback_model: openai/gpt-4o
     temperature: 0.35
     max_tokens: 8192
     timeout_seconds: 180
-    fallback_model: gpt-4o-mini
     structured_required: true
+
   entailment:
-    model: gpt-4o-mini
+    model: openai/gpt-4o-mini
     temperature: 0.0
     max_tokens: 2048
+
+  long_context:
+    model: google/gemini-2.5-pro
+    temperature: 0.2
+    max_tokens: 8192
+    timeout_seconds: 240

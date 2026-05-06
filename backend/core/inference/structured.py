@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from enum import Enum
 from typing import TypeVar
 
@@ -18,6 +19,37 @@ from core.model_router import resolve
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
+
+_FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
+
+
+def _extract_json_payload(text: str) -> str:
+    """Strip markdown fences / prose preamble so model_validate_json can parse.
+
+    OpenAI in ``response_format={"type":"json_object"}`` mode returns clean
+    JSON, but Anthropic doesn't accept that kwarg in litellm 1.40.20 — so for
+    Phase 1 cross-family routing we drop the kwarg on Anthropic in
+    ``litellm_client.chat_complete`` and rely on the agent system prompts'
+    "Output ONLY valid JSON" instruction. Claude usually obeys but occasionally
+    wraps the JSON in a ```json ... ``` fence or a short prose preamble; this
+    helper normalises both shapes back to a parseable object string.
+    """
+    s = (text or "").strip()
+    if not s:
+        return s
+    # ```json ... ``` or plain ``` ... ``` fences (first match wins).
+    fence = _FENCE_RE.search(s)
+    if fence:
+        return fence.group(1).strip()
+    # Pure JSON: parse as-is.
+    if s.startswith("{") and s.endswith("}"):
+        return s
+    # Mixed prose + JSON: trim to the outermost { ... } span.
+    first = s.find("{")
+    last = s.rfind("}")
+    if first >= 0 and last > first:
+        return s[first : last + 1]
+    return s
 
 
 class FailureKind(str, Enum):
@@ -85,7 +117,7 @@ async def generate_structured(
                 continue
 
             try:
-                obj = model_cls.model_validate_json(text)
+                obj = model_cls.model_validate_json(_extract_json_payload(text))
                 return obj, meta
             except ValidationError as ve:
                 schema_attempts += 1
