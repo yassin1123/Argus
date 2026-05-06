@@ -12,6 +12,12 @@ ENV PYTHONPATH=/app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Pre-download the DeBERTa NLI cross-encoder so cold container starts don't
+# spend ~30s pulling the ~440MB model on every boot. The download is ignored
+# at runtime by services that don't need NLI; only nli_worker activates it
+# via the `cross-encoder/nli-deberta-v3-base` model id.
+RUN python -c "from sentence_transformers import CrossEncoder; CrossEncoder('cross-encoder/nli-deberta-v3-base')"
+
 COPY . .
 
 EXPOSE 8000

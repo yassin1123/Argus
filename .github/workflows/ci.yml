@@ -45,11 +45,14 @@ jobs:
           # Skip tests that require live DB / external network. The rest of the suite
           # runs as fast unit tests against fixtures + pure functions. Multi-provider
           # smoke tests skip themselves cleanly when the matching key is unset, so PRs
-          # from forks (no secrets) still pass.
+          # from forks (no secrets) still pass. The DeBERTa NLI smoke test pulls
+          # ~1GB of torch + sentence-transformers and is run inside the nli_worker
+          # container by an operator, not in the lightweight pytest CI step.
           pytest tests \
             --ignore=tests/test_planner_openai.py \
             --ignore=tests/test_retrieval_hybrid.py \
             --ignore=tests/test_research_dedupe.py \
+            --ignore=tests/test_nli_deberta_smoke.py \
             -q --tb=short
 
   frontend-build:

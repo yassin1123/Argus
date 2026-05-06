@@ -85,3 +85,11 @@ def run_partial_pipeline_task(
     except Exception:
         logger.exception("Partial pipeline task failed for session %s", session_id)
         raise
+
+
+# Register sibling task modules so their @celery_app.task decorators run when
+# celery -A tasks.pipeline:celery_app loads this entry point. tasks.nli's
+# heavy deps (torch, sentence-transformers) are imported INSIDE the task
+# body, so this import is cheap for the main worker — it only pays for
+# them on the nli_worker when score_pairs_task actually executes.
+from tasks import nli as _nli_tasks  # noqa: E402, F401

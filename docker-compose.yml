@@ -130,6 +130,49 @@ services:
       backend:
         condition: service_healthy
 
+  # Week 2 / Day 1 — DeBERTa NLI cross-encoder runs in its own Celery worker so
+  # the model loads exactly once per process (concurrency=1) and the main worker
+  # never blocks on a 440MB model load. Listens only on the `nli` queue so
+  # tasks.pipeline tasks routed to the default queue don't accidentally land
+  # here (and vice versa). Day 3 wires it into the verifier; today it's
+  # smoke-only.
+  nli_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # --max-tasks-per-child=1000000 overrides the global
+    # worker_max_tasks_per_child=1 so the DeBERTa model stays loaded across
+    # tasks (a fresh fork would have to re-init the ~440MB cross-encoder for
+    # every score_pairs call). Celery 5.3.6 rejects 0 (assertion `maxtasks > 0`
+    # in billiard.pool.__init__), and there is no CLI way to express "never
+    # recycle"; 1M effectively means "for the lifetime of the worker process".
+    command: >-
+      celery -A tasks.pipeline:celery_app worker --loglevel=info
+      --concurrency=1 --queues=nli --hostname=nli@%h
+      --max-tasks-per-child=1000000
+    mem_limit: 1500m
+    memswap_limit: 1500m
+    restart: on-failure
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/argus
+      REDIS_URL: redis://redis:6379/0
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+    # Bind-mount the backend source so smoke-test fixture / deberta_client
+    # / nli task edits don't require an image rebuild. The HuggingFace
+    # cache stays inside the image (preloaded by Dockerfile RUN). Restart
+    # the worker after editing core/ or tasks/ to reload Python modules.
+    # tools/ is mounted (read-only) so check_nli_perf.py runs in-process
+    # against the same Python interpreter that owns the loaded model.
+    volumes:
+      - ./backend:/app
+      - ./tools:/repo_tools:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+
 volumes:
   pgdata:
   miniodata:
