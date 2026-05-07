@@ -221,6 +221,238 @@ SECTION_PATTERNS_10Q: list[SectionSpec] = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# 8-K — Current Report
+#
+# 8-K items follow the four-digit "X.YZ" scheme set out in Form 8-K.
+# These are the items most often retrieved against in equity research /
+# due-diligence work; the long tail (1.04 mine safety, 4.01 auditor change,
+# 6.01 ABS reports, etc.) drops into UNKNOWN and is fine for Phase 1.
+# ---------------------------------------------------------------------------
+
+SECTION_PATTERNS_8K: list[SectionSpec] = [
+    SectionSpec(
+        "1.01", "Entry into a Material Definitive Agreement",
+        _ci(r"^\s*item\s+1\.01\.?\s+entry\s+into\s+a\s+material\s+definitive\s+agreement\s*$"),
+        _ak("item 1.01 entry into a material definitive agreement"),
+    ),
+    SectionSpec(
+        "1.02", "Termination of a Material Definitive Agreement",
+        _ci(r"^\s*item\s+1\.02\.?\s+termination\s+of\s+a\s+material\s+definitive\s+agreement\s*$"),
+        _ak("item 1.02 termination of a material definitive agreement"),
+    ),
+    SectionSpec(
+        "2.01", "Completion of Acquisition or Disposition of Assets",
+        _ci(r"^\s*item\s+2\.01\.?\s+completion\s+of\s+acquisition\s+or\s+disposition\s+of\s+assets\s*$"),
+        _ak("item 2.01 completion of acquisition or disposition of assets"),
+    ),
+    SectionSpec(
+        "2.02", "Results of Operations and Financial Condition",
+        _ci(r"^\s*item\s+2\.02\.?\s+results\s+of\s+operations\s+and\s+financial\s+condition\s*$"),
+        _ak("item 2.02 results of operations and financial condition"),
+    ),
+    SectionSpec(
+        "2.03", "Creation of a Direct Financial Obligation",
+        _ci(r"^\s*item\s+2\.03\.?\s+creation\s+of\s+a\s+direct\s+financial\s+obligation"),
+        _ak("item 2.03 creation of a direct financial obligation"),
+    ),
+    SectionSpec(
+        "3.01", "Notice of Delisting or Failure to Satisfy a Listing Rule",
+        _ci(r"^\s*item\s+3\.01\.?\s+notice\s+of\s+delisting"),
+        _ak("item 3.01 notice of delisting"),
+    ),
+    SectionSpec(
+        "3.02", "Unregistered Sales of Equity Securities",
+        _ci(r"^\s*item\s+3\.02\.?\s+unregistered\s+sales\s+of\s+equity\s+securities\s*$"),
+        _ak("item 3.02 unregistered sales of equity securities"),
+    ),
+    SectionSpec(
+        "5.02", "Departure of Directors or Certain Officers",
+        _ci(r"^\s*item\s+5\.02\.?\s+departure\s+of\s+directors"),
+        _ak("item 5.02 departure of directors"),
+    ),
+    SectionSpec(
+        "5.03", "Amendments to Articles of Incorporation or Bylaws",
+        _ci(r"^\s*item\s+5\.03\.?\s+amendments\s+to\s+articles"),
+        _ak("item 5.03 amendments to articles of incorporation or bylaws"),
+    ),
+    SectionSpec(
+        "5.07", "Submission of Matters to a Vote of Security Holders",
+        _ci(r"^\s*item\s+5\.07\.?\s+submission\s+of\s+matters\s+to\s+a\s+vote"),
+        _ak("item 5.07 submission of matters to a vote of security holders"),
+    ),
+    SectionSpec(
+        "7.01", "Regulation FD Disclosure",
+        _ci(r"^\s*item\s+7\.01\.?\s+regulation\s+fd\s+disclosure\s*$"),
+        _ak("item 7.01 regulation fd disclosure"),
+    ),
+    SectionSpec(
+        "8.01", "Other Events",
+        _ci(r"^\s*item\s+8\.01\.?\s+other\s+events\s*$"),
+        _ak("item 8.01 other events"),
+    ),
+    SectionSpec(
+        "9.01", "Financial Statements and Exhibits",
+        _ci(r"^\s*item\s+9\.01\.?\s+financial\s+statements\s+and\s+exhibits\s*$"),
+        _ak("item 9.01 financial statements and exhibits"),
+    ),
+]
+
+
+# ---------------------------------------------------------------------------
+# DEF 14A — Definitive Proxy Statement
+#
+# DEF 14As don't have item numbers like 10-K / 8-K do. We tag by the
+# headings issuers typically use; ``item_id`` is a slug that retrieval
+# can reason about without colliding with 10-K item ids.
+# ---------------------------------------------------------------------------
+
+SECTION_PATTERNS_DEF14A: list[SectionSpec] = [
+    SectionSpec(
+        "notice", "Notice of Annual Meeting",
+        _ci(r"^\s*notice\s+of\s+(?:annual|special)\s+meeting"),
+        _ak("notice of annual meeting", "notice of special meeting"),
+    ),
+    SectionSpec(
+        "proxy_summary", "Proxy Statement Summary",
+        _ci(r"^\s*proxy\s+statement\s+summary\s*$"),
+        _ak("proxy statement summary"),
+    ),
+    SectionSpec(
+        "election", "Election of Directors",
+        _ci(r"^\s*(?:proposal\s+\d+\s*[\.:]?\s*)?election\s+of\s+directors\s*$"),
+        _ak("election of directors", "proposal 1 election of directors"),
+    ),
+    SectionSpec(
+        "governance", "Corporate Governance",
+        _ci(r"^\s*corporate\s+governance(?:\s+matters)?\s*$"),
+        _ak("corporate governance", "corporate governance matters"),
+    ),
+    SectionSpec(
+        "compensation_discussion", "Executive Compensation",
+        _ci(
+            r"^\s*compensation\s+discussion\s+and\s+analysis\s*$",
+            r"^\s*executive\s+compensation\s*$",
+        ),
+        _ak(
+            "compensation discussion and analysis",
+            "executive compensation",
+        ),
+    ),
+    SectionSpec(
+        "audit_committee", "Audit Committee Report",
+        _ci(r"^\s*audit\s+committee\s+report\s*$"),
+        _ak("audit committee report"),
+    ),
+    SectionSpec(
+        "auditor_ratification", "Ratification of Auditor",
+        _ci(r"^\s*(?:proposal\s+\d+\s*[\.:]?\s*)?ratification\s+of\s+(?:the\s+)?(?:appointment\s+of\s+)?(?:independent\s+)?(?:registered\s+public\s+)?accounting\s+firm"),
+        _ak(
+            "ratification of independent registered public accounting firm",
+            "ratification of appointment of independent registered public accounting firm",
+        ),
+    ),
+    SectionSpec(
+        "stockholder_proposals", "Stockholder Proposals",
+        _ci(r"^\s*stockholder\s+proposals?\s*$", r"^\s*shareholder\s+proposals?\s*$"),
+        _ak("stockholder proposals", "shareholder proposals"),
+    ),
+    SectionSpec(
+        "voting_information", "Voting Information",
+        _ci(r"^\s*(?:questions\s+and\s+answers\s+about\s+)?(?:the\s+)?voting(?:\s+information|\s+procedures)?\s*$"),
+        _ak("voting information", "questions and answers about voting"),
+    ),
+]
+
+
+# ---------------------------------------------------------------------------
+# S-1 — Registration Statement (IPO prospectus)
+#
+# S-1s carry the "Prospectus" structure: summary, risk factors, use of
+# proceeds, capitalization, MD&A, business, management, principal
+# stockholders, underwriting, financial statements. No item numbers; we
+# tag by canonical heading.
+# ---------------------------------------------------------------------------
+
+SECTION_PATTERNS_S1: list[SectionSpec] = [
+    SectionSpec(
+        "summary", "Prospectus Summary",
+        _ci(r"^\s*prospectus\s+summary\s*$", r"^\s*summary\s*$"),
+        _ak("prospectus summary"),
+    ),
+    SectionSpec(
+        "risk_factors", "Risk Factors",
+        _ci(r"^\s*risk\s+factors\s*$"),
+        _ak("risk factors"),
+    ),
+    SectionSpec(
+        "use_of_proceeds", "Use of Proceeds",
+        _ci(r"^\s*use\s+of\s+proceeds\s*$"),
+        _ak("use of proceeds"),
+    ),
+    SectionSpec(
+        "capitalization", "Capitalization",
+        _ci(r"^\s*capitalization\s*$"),
+        _ak("capitalization"),
+    ),
+    SectionSpec(
+        "dilution", "Dilution",
+        _ci(r"^\s*dilution\s*$"),
+        _ak("dilution"),
+    ),
+    SectionSpec(
+        "mda", "Management's Discussion and Analysis",
+        _ci(r"^\s*management.{0,4}s?\s+discussion\s+and\s+analysis(?:\s+of\s+financial\s+condition)?"),
+        _ak(
+            "managements discussion and analysis",
+            "management s discussion and analysis",
+        ),
+    ),
+    SectionSpec(
+        "business", "Business",
+        _ci(r"^\s*business\s*$"),
+        _ak("business"),
+    ),
+    SectionSpec(
+        "management", "Management",
+        _ci(r"^\s*management\s*$"),
+        _ak("management"),
+    ),
+    SectionSpec(
+        "executive_compensation", "Executive Compensation",
+        _ci(r"^\s*executive\s+compensation\s*$"),
+        _ak("executive compensation"),
+    ),
+    SectionSpec(
+        "principal_stockholders", "Principal Stockholders",
+        _ci(r"^\s*principal\s+(?:and\s+selling\s+)?stockholders?\s*$"),
+        _ak("principal stockholders", "principal and selling stockholders"),
+    ),
+    SectionSpec(
+        "related_party", "Certain Relationships and Related Party Transactions",
+        _ci(r"^\s*certain\s+relationships\s+and\s+related\s+party\s+transactions\s*$"),
+        _ak("certain relationships and related party transactions"),
+    ),
+    SectionSpec(
+        "underwriting", "Underwriting",
+        _ci(r"^\s*underwriting\s*$", r"^\s*plan\s+of\s+distribution\s*$"),
+        _ak("underwriting", "plan of distribution"),
+    ),
+    SectionSpec(
+        "financial_statements", "Financial Statements",
+        _ci(
+            r"^\s*(?:index\s+to\s+)?(?:consolidated\s+)?financial\s+statements\s*$",
+        ),
+        _ak(
+            "financial statements",
+            "consolidated financial statements",
+            "index to financial statements",
+            "index to consolidated financial statements",
+        ),
+    ),
+]
+
+
 def patterns_for(form: str) -> list[SectionSpec]:
     """Return the section taxonomy for a SEC form.
 
@@ -231,6 +463,12 @@ def patterns_for(form: str) -> list[SectionSpec]:
     f = (form or "").strip().upper()
     if f == "10-Q":
         return SECTION_PATTERNS_10Q
+    if f == "8-K":
+        return SECTION_PATTERNS_8K
+    if f == "DEF 14A":
+        return SECTION_PATTERNS_DEF14A
+    if f == "S-1":
+        return SECTION_PATTERNS_S1
     return SECTION_PATTERNS_10K
 
 

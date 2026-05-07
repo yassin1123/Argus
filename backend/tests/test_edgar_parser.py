@@ -109,3 +109,80 @@ def test_unknown_section_handling_on_malformed_html() -> None:
 def test_empty_html_returns_empty_list() -> None:
     assert parse_filing_sections("", "10-K") == []
     assert parse_filing_sections(None, "10-K") == []  # type: ignore[arg-type]
+
+
+# ---------------------------------------------------------------------------
+# Coverage for 8-K / DEF 14A / S-1 (Week 3 / Day 3 — new form taxonomies).
+#
+# The fixtures are real SEC filings downloaded by the operator and
+# committed gzipped under backend/tests/fixtures/edgar/. The bar is:
+#
+#   - non-empty section list
+#   - UNKNOWN under 30% (cover_page is its own bucket and isn't counted)
+#   - at least N canonical sections recognised — N depends on the form
+#
+# AAPL's 8-Ks are minimal (cover + 1-2 items + exhibit list); we don't
+# require every taxonomy entry to land. Same for the DEF 14A; some
+# issuers skip the audit-committee subsection.
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def aapl_8k_sections():
+    path = Path(__file__).resolve().parent / "fixtures" / "edgar" / "aapl_8k.html.gz"
+    with gzip.open(path, "rt", encoding="utf-8") as f:
+        html = f.read()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return parse_filing_sections(html, "8-K")
+
+
+@pytest.fixture(scope="module")
+def aapl_def14a_sections():
+    path = Path(__file__).resolve().parent / "fixtures" / "edgar" / "aapl_def14a.html.gz"
+    with gzip.open(path, "rt", encoding="utf-8") as f:
+        html = f.read()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return parse_filing_sections(html, "DEF 14A")
+
+
+@pytest.fixture(scope="module")
+def rddt_s1_sections():
+    path = Path(__file__).resolve().parent / "fixtures" / "edgar" / "rddt_s1.html.gz"
+    with gzip.open(path, "rt", encoding="utf-8") as f:
+        html = f.read()
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return parse_filing_sections(html, "S-1")
+
+
+def _unknown_fraction(sections) -> float:
+    total = sum(len(s.raw_text) for s in sections) or 1
+    unk = sum(len(s.raw_text) for s in sections if s.item_id == UNKNOWN_ITEM_ID)
+    return unk / total
+
+
+def test_parse_8k_finds_canonical_items(aapl_8k_sections) -> None:
+    found = {s.item_id for s in aapl_8k_sections if s.item_id != UNKNOWN_ITEM_ID}
+    # AAPL's earnings 8-Ks always carry these two.
+    assert "2.02" in found, f"missing item 2.02; got {found}"
+    assert "9.01" in found, f"missing item 9.01; got {found}"
+    assert _unknown_fraction(aapl_8k_sections) <= 0.30
+
+
+def test_parse_def14a_finds_canonical_sections(aapl_def14a_sections) -> None:
+    found = {s.item_id for s in aapl_def14a_sections if s.item_id != UNKNOWN_ITEM_ID}
+    # Every Apple proxy carries these.
+    expected = {"election", "governance", "compensation_discussion"}
+    assert expected.issubset(found), f"missing canonical DEF 14A sections; got {found}"
+    assert _unknown_fraction(aapl_def14a_sections) <= 0.30
+
+
+def test_parse_s1_finds_canonical_sections(rddt_s1_sections) -> None:
+    found = {s.item_id for s in rddt_s1_sections if s.item_id != UNKNOWN_ITEM_ID}
+    # An IPO S-1 must carry summary, risk factors, MD&A, business,
+    # management, financial statements at minimum.
+    expected = {"summary", "risk_factors", "mda", "business", "management", "financial_statements"}
+    assert expected.issubset(found), f"missing canonical S-1 sections; got {found}"
+    assert _unknown_fraction(rddt_s1_sections) <= 0.30

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any, Sequence
 
 from db.connection import acquire
@@ -13,7 +14,7 @@ def _vector_literal(vec: Sequence[float]) -> str:
 
 async def insert_chunks(
     *,
-    session_id: str,
+    session_id: str | None,
     blob_id: str | None,
     source_file_id: str | None,
     source_type: str,
@@ -24,7 +25,12 @@ async def insert_chunks(
 ) -> list[str]:
     """Insert a batch of chunks. `rows` items must include:
         content, content_hash, embedding (list[float]), position
-    Optional: page, slide, timestamp_str, speaker, section_heading.
+    Optional per-row: page, slide, timestamp_str, speaker, section_heading,
+        metadata (dict — serialised to jsonb).
+
+    ``session_id`` may be ``None`` for firm-global / public sources
+    (e.g. SEC EDGAR ingestion writes session-less chunks). Uploaded files
+    still pass a real session_id, so the legacy path is unchanged.
 
     Returns a list of inserted chunk UUIDs.
     """
@@ -33,16 +39,20 @@ async def insert_chunks(
     out: list[str] = []
     async with acquire() as conn:
         for r in rows:
+            metadata = r.get("metadata") or {}
+            metadata_json = json.dumps(metadata) if not isinstance(metadata, str) else metadata
             row = await conn.fetchrow(
                 """
                 INSERT INTO chunks (
                     session_id, blob_id, source_file_id, content, content_hash,
                     embedding, source_type, position, page, slide, timestamp_str,
-                    speaker, section_heading, source_filename, source_url, trust_level
+                    speaker, section_heading, source_filename, source_url, trust_level,
+                    metadata
                 ) VALUES (
                     $1::uuid, $2::uuid, $3::uuid, $4, $5,
                     $6::vector, $7, $8, $9, $10, $11,
-                    $12, $13, $14, $15, $16
+                    $12, $13, $14, $15, $16,
+                    $17::jsonb
                 )
                 RETURNING id
                 """,
@@ -62,6 +72,7 @@ async def insert_chunks(
                 source_filename[:1024] if source_filename else "",
                 source_url,
                 trust_level,
+                metadata_json,
             )
             out.append(str(row["id"]))
     return out

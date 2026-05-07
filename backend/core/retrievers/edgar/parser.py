@@ -356,13 +356,19 @@ def parse_filing_sections(html: str, form: str) -> list[FilingSection]:
 
     out: list[FilingSection] = []
 
-    # Front-matter UNKNOWN: everything before the first known heading.
+    # Front-matter: content before the first known section heading. SEC
+    # filings always carry a cover-page block (registrant info, form
+    # boilerplate, exhibit list intro) ahead of substantive content;
+    # tagging it as "cover_page" rather than UNKNOWN lets the
+    # UNKNOWN-fraction surface rule actually flag *parser bugs* —
+    # otherwise a normal 8-K (which is mostly cover boilerplate) would
+    # always trip the warning.
     first_pos = section_starts[0][0]
     if first_pos > _MIN_BODY_CHARS:
         out.append(
             FilingSection(
-                item_id=UNKNOWN_ITEM_ID,
-                canonical_name=UNKNOWN_CANONICAL_NAME,
+                item_id="cover_page",
+                canonical_name="Cover Page",
                 raw_text=full_text[:first_pos].strip(),
                 position_start=0,
                 position_end=first_pos,
