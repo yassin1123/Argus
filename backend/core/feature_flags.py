@@ -28,10 +28,19 @@ def _truthy(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
 
 
-# Day 3 — when true, the writer / critic / contradiction-policy gates
-# read claim_support_rows.ensemble_verdict instead of the legacy
-# verifier_verdict. Default false until Day 5's regression decides.
-USE_ENSEMBLE_VERDICT: bool = _truthy("ARGUS_USE_ENSEMBLE_VERDICT")
+# When true, the writer / critic / contradiction-policy gates read
+# claim_support_rows.ensemble_verdict instead of the legacy
+# verifier_verdict.
+#
+# Day 3 introduced this flag with default false. Day 5's regression
+# decision (see docs/eval/week2_nli_ensemble.md) flipped the default
+# to true: the ensemble adds measurable recall on the precision-bug
+# class (date shifts, headcount inflations, etc. that the LLM judge
+# anchors past), and the writer adapts to the resulting "mostly weak"
+# verdict spread by producing more validation-gated, more numerically
+# specific recommendations. The 8 ensemble columns are populated on
+# every run regardless, so a future revert is a one-line default flip.
+USE_ENSEMBLE_VERDICT: bool = _truthy("ARGUS_USE_ENSEMBLE_VERDICT", default="true")
 
 
 # Map ensemble verdicts to the legacy verdict vocabulary the

@@ -120,6 +120,70 @@ async def get_session_endpoint(session_id: str, user: dict = Depends(get_current
     return data
 
 
+@router.get("/{session_id}/ensemble_verdicts")
+async def get_ensemble_verdicts(
+    session_id: str, user: dict = Depends(get_current_user)
+) -> dict:
+    """Phase 1 / Week 2 / Day 5 — debug endpoint for the ensemble verdict
+    surfaces. Returns every claim_support_row for the session including the
+    eight Day 3 ensemble columns (nli_label, nli_confidence, numeric/entity
+    overlap scores + missing lists, ensemble_verdict, ensemble_reason).
+
+    The proper claim-popover UI ships in Week 3; this endpoint is the
+    operator-facing fallback the Day 5 spec calls for so the wedge
+    behaviour is auditable end-to-end before then.
+    """
+    await _require_read(session_id, user)
+    from db.connection import acquire  # late import — avoid hot-path cost
+
+    async with acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT claim_id, claim_text, support_type,
+                   verifier_verdict, contradiction_flag, weak_flag,
+                   entailment_score,
+                   nli_label, nli_confidence,
+                   numeric_overlap_score, numeric_overlap_missing,
+                   entity_overlap_score, entity_overlap_missing,
+                   ensemble_verdict, ensemble_reason,
+                   evidence_object_ids
+            FROM claim_support_rows
+            WHERE session_id = $1::uuid
+            ORDER BY created_at ASC
+            """,
+            session_id,
+        )
+
+    out: list[dict] = []
+    for r in rows:
+        d = dict(r)
+        # uuid arrays / jsonb both come back as Python types — stringify
+        # the uuids and pass jsonb dicts through. asyncpg may return a
+        # bytes-like for jsonb depending on codec setup; coerce defensively.
+        if d.get("evidence_object_ids") is not None:
+            d["evidence_object_ids"] = [str(x) for x in d["evidence_object_ids"]]
+        for key in ("numeric_overlap_missing", "entity_overlap_missing"):
+            v = d.get(key)
+            if isinstance(v, (bytes, bytearray, memoryview)):
+                import json as _json
+
+                d[key] = _json.loads(bytes(v).decode("utf-8"))
+            elif isinstance(v, str):
+                import json as _json
+
+                try:
+                    d[key] = _json.loads(v)
+                except Exception:
+                    d[key] = []
+        out.append(d)
+
+    return {
+        "session_id": session_id,
+        "n_rows": len(out),
+        "rows": out,
+    }
+
+
 @router.delete("/{session_id}")
 async def delete_session_endpoint(session_id: str, user: dict = Depends(get_current_user)) -> dict:
     if not await get_session_row(session_id):

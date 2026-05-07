@@ -184,6 +184,23 @@ export interface ClaimSupportRow {
   weak_or_unsupported?: boolean;
   nli_label?: string;
   nli_confidence?: number;
+  // Phase 1 / Week 2 / Day 3 ensemble columns. Populated whenever
+  // ensemble_enrich.py runs (every pipeline run regardless of the
+  // ARGUS_USE_ENSEMBLE_VERDICT flag); the flag only controls whether
+  // downstream gates *read* them.
+  numeric_overlap_score?: number | null;
+  numeric_overlap_missing?: string[];
+  entity_overlap_score?: number | null;
+  entity_overlap_missing?: string[];
+  ensemble_verdict?:
+    | "supported_high"
+    | "supported_low"
+    | "weak"
+    | "unsupported"
+    | "contradicted"
+    | string
+    | null;
+  ensemble_reason?: string | null;
 }
 
 export interface Report {

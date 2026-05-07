@@ -1,0 +1,103 @@
+{
+  "ensemble_flag_on": true,
+  "n_runs": 3,
+  "runs": [
+    {
+      "run_index": 1,
+      "wall_seconds": 717.52,
+      "cost_usd_total": 0.7492,
+      "fallback_stage_count": 0,
+      "fallback_stages": [],
+      "named_options": 6,
+      "numeric_values": 12,
+      "time_bound_next_steps": 8,
+      "forbidden_phrase_hits": 0,
+      "total_claims": 20,
+      "key_claims_only": 10,
+      "ensemble_verdict_distribution": {
+        "weak": 9,
+        "supported_high": 1
+      },
+      "legacy_class_distribution": {
+        "supported": 1,
+        "weak": 9,
+        "unsupported": 0,
+        "contradicted": 0,
+        "other": 0
+      },
+      "recommendation_preview": "Launch a 6-month Mittelstand pilot in North Rhine-Westphalia and Bavaria, allocating 7-8 of 12 headcount, to validate whether Germany's claimed market size advantage (\u20ac18.4B, 1.6x France) and geographic concentration (41% of logistics emplo",
+      "confidence_level": "Low"
+    },
+    {
+      "run_index": 2,
+      "wall_seconds": 694.61,
+      "cost_usd_total": 0.7284,
+      "fallback_stage_count": 0,
+      "fallback_stages": [],
+      "named_options": 3,
+      "numeric_values": 11,
+      "time_bound_next_steps": 10,
+      "forbidden_phrase_hits": 0,
+      "total_claims": 21,
+      "key_claims_only": 11,
+      "ensemble_verdict_distribution": {
+        "supported_high": 3,
+        "weak": 8
+      },
+      "legacy_class_distribution": {
+        "supported": 3,
+        "weak": 8,
+        "unsupported": 0,
+        "contradicted": 0,
+        "other": 0
+      },
+      "recommendation_preview": "Launch a 6-month Germany pilot in North Rhine-Westphalia targeting 12-15 qualified Mittelstand opportunities, with go/no-go decision at month 6 based on: (1) \u22658 active opportunities with \u20ac50K+ ACV, (2) \u226515% pilot conversion rate, (3) averag",
+      "confidence_level": "Medium"
+    },
+    {
+      "run_index": 3,
+      "wall_seconds": 870.67,
+      "cost_usd_total": 0.8276,
+      "fallback_stage_count": 0,
+      "fallback_stages": [],
+      "named_options": 11,
+      "numeric_values": 30,
+      "time_bound_next_steps": 8,
+      "forbidden_phrase_hits": 0,
+      "total_claims": 20,
+      "key_claims_only": 10,
+      "ensemble_verdict_distribution": {
+        "weak": 10
+      },
+      "legacy_class_distribution": {
+        "supported": 0,
+        "weak": 10,
+        "unsupported": 0,
+        "contradicted": 0,
+        "other": 0
+      },
+      "recommendation_preview": "Within 30 days: Validate four critical assumptions through direct research (Germany market \u2265\u20ac15B, Mittelstand NRR exceeds French mid-market by \u22655 points, \u226530% of your actual ICP concentrates in NRW+Bavaria, 7-month cycles are sustainable in",
+      "confidence_level": "Low"
+    }
+  ],
+  "aggregate": {
+    "n_runs": 3,
+    "named_options_avg": 6.67,
+    "numeric_values_avg": 17.67,
+    "time_bound_steps_avg": 8.67,
+    "forbidden_phrase_hits_avg": 0.0,
+    "total_claims_avg": 20.33,
+    "key_claims_only_avg": 10.33,
+    "cost_usd_total_avg": 0.77,
+    "wall_seconds_avg": 760.93,
+    "fallback_stage_count_avg": 0.0,
+    "legacy_class_distribution_total": {
+      "supported": 4,
+      "weak": 27,
+      "unsupported": 0,
+      "contradicted": 0,
+      "other": 0
+    }
+  },
+  "generated_at": "2026-05-07T00:34:41Z"
+}

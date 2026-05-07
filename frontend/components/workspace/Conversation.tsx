@@ -46,12 +46,26 @@ function ModelBadge({ seed }: { seed: string }) {
 }
 
 /**
- * Decide a confidence level for a claim based on its support row + verifier verdict.
+ * Decide a confidence level for a claim based on its support row.
+ *
+ * Phase 1 / Week 2 / Day 5: prefers `ensemble_verdict` (Day 3 aggregator over
+ * the LLM judge + DeBERTa NLI + lexical overlap signals) when present.
+ * supported_high/_low collapse to "high"; weak collapses to "medium";
+ * contradicted/unsupported collapse to "contested". Falls back to the
+ * legacy `verifier_verdict` shape if the row pre-dates the Day 3
+ * migration so existing engagements render unchanged.
  */
 function confidenceLevelFor(claimId: string | null, claimSupport: ClaimSupportRow[]): "high" | "medium" | "contested" {
   if (!claimId) return "medium";
   const row = claimSupport.find((r) => r.claim_id === claimId);
   if (!row) return "medium";
+  const ensemble = String(row.ensemble_verdict || "").toLowerCase();
+  if (ensemble) {
+    if (ensemble === "contradicted" || ensemble === "unsupported") return "contested";
+    if (ensemble === "weak") return "medium";
+    if (ensemble === "supported_high" || ensemble === "supported_low") return "high";
+    // Unknown ensemble vocabulary — fall through to the legacy path.
+  }
   const v = String(row.verifier_verdict || "").toLowerCase();
   if (v === "unsupported" || v === "overstates" || row.contradiction_flag) return "contested";
   if (row.weak_or_unsupported || v === "weak" || row.support_type === "inference" || row.support_type === "assumption")
