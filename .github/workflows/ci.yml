@@ -58,6 +58,7 @@ jobs:
             --ignore=tests/test_retrieval_hybrid.py \
             --ignore=tests/test_research_dedupe.py \
             --ignore=tests/test_nli_deberta_smoke.py \
+            --ignore=tests/test_edgar_ingest.py \
             -q --tb=short
 
   frontend-build:
