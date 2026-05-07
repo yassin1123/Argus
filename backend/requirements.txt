@@ -9,6 +9,10 @@ pandas==2.1.4
 numpy==1.26.3
 httpx==0.26.0
 beautifulsoup4==4.12.3
+# lxml: fast XML/HTML parser used by the SEC EDGAR client (Week 3 / Day 1)
+# and any future BeautifulSoup-based parsing that wants the lxml backend
+# instead of html.parser. Picked up by bs4 automatically when installed.
+lxml==5.2.1
 weasyprint==60.2
 python-pptx==0.6.23
 python-docx==1.1.2
