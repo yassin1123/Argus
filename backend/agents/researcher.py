@@ -4,7 +4,6 @@ import re
 from core.json_util import parse_llm_json
 from core.llm import llm_call_for_task
 from core.retrieval import retrieve_evidence
-from core.web_search import search_web
 from models.evidence import ResearchPayload, RetrievedChunk
 
 RESEARCHER_SYSTEM = """
@@ -114,15 +113,17 @@ class ResearcherAgent:
             chunks_by_id = {h.chunk_id: h for h in hits}
             allowed_ids = list(chunks_by_id.keys())
             hits_payload = [h.model_dump() for h in hits]
-            web_results = ""
-            if task.get("priority") == "high":
-                web_results = await search_web(q)
+            # Day 4 (Week 3): the legacy "priority == high → search_web"
+            # heuristic was removed. Source routing now happens upstream
+            # via PlannerTask.source_priorities consumed by
+            # ResearchOrchestrator. Tasks reaching this legacy path get
+            # chunk-only retrieval; if the planner wants web, it routes
+            # the task through the orchestrator.
             user_msg = f"""
 Task: {json.dumps(task)}
 ALLOWED_CHUNK_IDS: {json.dumps(allowed_ids)}
 Retrieved chunks (use only these chunk_id values; quotes must be substrings of "text"):
 {json.dumps(hits_payload, indent=2)[:12000]}
-Web search results: {web_results[:6000]}
 Additional context: {context[:1000]}
 """
             response = await llm_call_for_task(

@@ -40,30 +40,48 @@ def _to_websearch_tsquery(q: str) -> str:
 # ----------------------------------------------------------------------------
 
 
-async def _vector_candidates(engagement_id: str, query_vec: list[float], k: int) -> list[dict[str, Any]]:
-    """Top-k chunks by cosine distance, scoped to engagement + firm sources."""
+async def _vector_candidates(
+    engagement_id: str,
+    query_vec: list[float],
+    k: int,
+    *,
+    source_types: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Top-k chunks by cosine distance, scoped to engagement + firm sources.
+
+    When ``source_types`` is given, restrict to chunks whose ``source_type``
+    is in the list (used by Day 4 task-aware retrieval routing).
+    """
     async with acquire() as conn:
         rows = await conn.fetch(
             f"""
             SELECT c.id, c.content, c.source_type, c.position, c.page, c.slide,
                    c.timestamp_str, c.speaker, c.section_heading, c.source_filename,
-                   c.source_url, c.trust_level, c.session_id,
+                   c.source_url, c.trust_level, c.session_id, c.metadata,
                    1 - (c.embedding <=> $2::vector) AS similarity
             FROM chunks c
             LEFT JOIN uploaded_files f ON f.id = c.source_file_id
-            WHERE (c.session_id = $1::uuid OR f.scope = 'firm')
+            WHERE (c.session_id = $1::uuid OR f.scope = 'firm' OR c.session_id IS NULL)
               AND c.embedding IS NOT NULL
+              AND ($4::text[] IS NULL OR c.source_type = ANY($4::text[]))
             ORDER BY c.embedding <=> $2::vector ASC
             LIMIT $3
             """,
             engagement_id,
             _vector_literal(query_vec),
             int(k),
+            list(source_types) if source_types else None,
         )
     return [_chunk_row_dict(r, score=float(r["similarity"])) for r in rows]
 
 
-async def _keyword_candidates(engagement_id: str, query: str, k: int) -> list[dict[str, Any]]:
+async def _keyword_candidates(
+    engagement_id: str,
+    query: str,
+    k: int,
+    *,
+    source_types: list[str] | None = None,
+) -> list[dict[str, Any]]:
     """Top-k chunks by ts_rank against the user's query."""
     tsq = _to_websearch_tsquery(query)
     async with acquire() as conn:
@@ -71,21 +89,23 @@ async def _keyword_candidates(engagement_id: str, query: str, k: int) -> list[di
             """
             SELECT c.id, c.content, c.source_type, c.position, c.page, c.slide,
                    c.timestamp_str, c.speaker, c.section_heading, c.source_filename,
-                   c.source_url, c.trust_level, c.session_id,
+                   c.source_url, c.trust_level, c.session_id, c.metadata,
                    ts_rank_cd(c.content_tsv, websearch_to_tsquery('english', $2)) AS rank,
                    ts_headline('english', c.content,
                                websearch_to_tsquery('english', $2),
                                'StartSel=<<,StopSel=>>,MaxFragments=2,MinWords=8,MaxWords=22') AS snippet
             FROM chunks c
             LEFT JOIN uploaded_files f ON f.id = c.source_file_id
-            WHERE (c.session_id = $1::uuid OR f.scope = 'firm')
+            WHERE (c.session_id = $1::uuid OR f.scope = 'firm' OR c.session_id IS NULL)
               AND c.content_tsv @@ websearch_to_tsquery('english', $2)
+              AND ($4::text[] IS NULL OR c.source_type = ANY($4::text[]))
             ORDER BY rank DESC
             LIMIT $3
             """,
             engagement_id,
             tsq,
             int(k),
+            list(source_types) if source_types else None,
         )
     out = []
     for r in rows:
@@ -96,6 +116,14 @@ async def _keyword_candidates(engagement_id: str, query: str, k: int) -> list[di
 
 
 def _chunk_row_dict(r: Any, *, score: float) -> dict[str, Any]:
+    meta = r["metadata"] if "metadata" in r.keys() else None
+    if isinstance(meta, str):
+        import json as _json
+
+        try:
+            meta = _json.loads(meta)
+        except Exception:
+            meta = {}
     return {
         "id": str(r["id"]),
         "session_id": str(r["session_id"]) if r["session_id"] else None,
@@ -110,6 +138,7 @@ def _chunk_row_dict(r: Any, *, score: float) -> dict[str, Any]:
         "source_filename": r["source_filename"] or "",
         "source_url": r["source_url"],
         "trust_level": r["trust_level"] or "web_general",
+        "metadata": meta or {},
         "score": score,
     }
 
@@ -157,10 +186,16 @@ async def hybrid_search(
     k: int = 20,
     candidate_k: int = 30,
     mode: str = "hybrid",
+    source_types: list[str] | None = None,
 ) -> dict[str, Any]:
     """Run the requested retrieval mode and return ranked chunks.
 
     mode ∈ {"hybrid", "vector", "keyword"}
+
+    ``source_types`` (optional): restrict candidates to chunks whose
+    ``source_type`` is in this list. Used by Day 4 task-aware retrieval
+    routing (e.g. only ``sec_filing`` for tasks the planner says are
+    grounded in SEC content). When None, no filter is applied.
     """
     query = (query or "").strip()
     if not query:
@@ -171,13 +206,17 @@ async def hybrid_search(
 
     # Run keyword always (cheap); run vector unless mode forbids.
     if mode in ("hybrid", "keyword"):
-        keyword_results = await _keyword_candidates(engagement_id, query, candidate_k)
+        keyword_results = await _keyword_candidates(
+            engagement_id, query, candidate_k, source_types=source_types
+        )
 
     if mode in ("hybrid", "vector"):
         try:
             embeds = await embed_texts([query])
             if embeds:
-                vector_results = await _vector_candidates(engagement_id, embeds[0], candidate_k)
+                vector_results = await _vector_candidates(
+                    engagement_id, embeds[0], candidate_k, source_types=source_types
+                )
         except Exception:
             # Embedding failed — keyword-only fallback is still useful.
             vector_results = []

@@ -1,0 +1,111 @@
+{
+  "cases": [
+    {
+      "label": "sec_only",
+      "question": "What does Apple disclose about iPhone segment revenue?",
+      "source_priorities": [
+        "sec_filing"
+      ],
+      "sources_consulted": [
+        "sec_filing"
+      ],
+      "elapsed_ms": 5541.1,
+      "hit_count": 8,
+      "hits_by_source_type": {
+        "sec_filing": 8
+      },
+      "top_hits": [
+        {
+          "source_type": "sec_filing",
+          "source_filename": "10-K · 2025-10-31 · Apple Inc.",
+          "section_heading": "7 · Management's Discussion and Analysis",
+          "score": 0.6235,
+          "snippet": "Segment Operating Performance The following table shows net sales by reportable segment for 2025, 2024 and 2023 (dollars in millions): 2025 Change 2024 Change 2"
+        },
+        {
+          "source_type": "sec_filing",
+          "source_filename": "10-K · 2025-10-31 · Apple Inc.",
+          "section_heading": "8 · Financial Statements and Supplementary Data",
+          "score": 0.5477,
+          "snippet": "Item 8. Financial Statements and Supplementary Data Index to Consolidated Financial Statements Page Consolidated Statements of Operations for the years ended Se"
+        },
+        {
+          "source_type": "sec_filing",
+          "source_filename": "10-K · 2025-10-31 · Apple Inc.",
+          "section_heading": "1 · Business",
+          "score": 0.5404,
+          "snippet": "Item 1. Business Company Background The Company designs, manufactures and markets smartphones, personal computers, tablets, wearables and accessories, and sells"
+        }
+      ]
+    },
+    {
+      "label": "uploaded_first_then_sec",
+      "question": "What does Apple disclose about iPhone segment revenue?",
+      "source_priorities": [
+        "uploaded",
+        "sec_filing"
+      ],
+      "sources_consulted": [
+        "uploaded",
+        "sec_filing"
+      ],
+      "elapsed_ms": 2190.1,
+      "hit_count": 8,
+      "hits_by_source_type": {
+        "sec_filing": 8
+      },
+      "top_hits": [
+        {
+          "source_type": "sec_filing",
+          "source_filename": "10-K · 2025-10-31 · Apple Inc.",
+          "section_heading": "7 · Management's Discussion and Analysis",
+          "score": 0.6235,
+          "snippet": "Segment Operating Performance The following table shows net sales by reportable segment for 2025, 2024 and 2023 (dollars in millions): 2025 Change 2024 Change 2"
+        },
+        {
+          "source_type": "sec_filing",
+          "source_filename": "10-K · 2025-10-31 · Apple Inc.",
+          "section_heading": "8 · Financial Statements and Supplementary Data",
+          "score": 0.5477,
+          "snippet": "Item 8. Financial Statements and Supplementary Data Index to Consolidated Financial Statements Page Consolidated Statements of Operations for the years ended Se"
+        },
+        {
+          "source_type": "sec_filing",
+          "source_filename": "10-K · 2025-10-31 · Apple Inc.",
+          "section_heading": "1 · Business",
+          "score": 0.5404,
+          "snippet": "Item 1. Business Company Background The Company designs, manufactures and markets smartphones, personal computers, tablets, wearables and accessories, and sells"
+        }
+      ]
+    },
+    {
+      "label": "uploaded_only",
+      "question": "What does Apple disclose about iPhone segment revenue?",
+      "source_priorities": [
+        "uploaded"
+      ],
+      "sources_consulted": [
+        "uploaded"
+      ],
+      "elapsed_ms": 243.1,
+      "hit_count": 0,
+      "hits_by_source_type": {},
+      "top_hits": []
+    },
+    {
+      "label": "news_then_web_no_chunks_path",
+      "question": "Recent analyst chatter on Apple",
+      "source_priorities": [
+        "news",
+        "web"
+      ],
+      "sources_consulted": [
+        "news"
+      ],
+      "elapsed_ms": 0.0,
+      "hit_count": 0,
+      "hits_by_source_type": {},
+      "top_hits": []
+    }
+  ]
+}

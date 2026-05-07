@@ -18,12 +18,24 @@ from core.research_utils import (
     research_v2_enabled,
 )
 from core.retrieval import retrieve_evidence
+from core.retrieval_chunks import hybrid_search
 from core.web_fetch import fetch_page_text
 from core.web_search import SERPAPI_KEY, search_web_parallel, search_web_structured
 from db.queries import insert_evidence_objects
 from models.evidence import EvidenceObject, RetrievedChunk
 
 logger = logging.getLogger(__name__)
+
+# Day 4: when a task declares source_priorities, walk the list in order
+# and stop once we have at least this many hits. Below the threshold, spill
+# into the next priority. Five is the planner-spec'd minimum — small enough
+# that a niche source can still satisfy a task on its own, large enough that
+# we don't anchor on one or two weak hits.
+_TASK_AWARE_MIN_RESULTS: int = 5
+# Per-priority candidate cap. Hybrid_search returns top-K fused; we don't
+# want a single source to flood the evidence list past what the synthesiser
+# can actually read.
+_TASK_AWARE_PER_SOURCE_K: int = 8
 
 QUERY_PLANNER_SYSTEM = """
 You expand a research task into 2–4 distinct web search queries.
@@ -87,6 +99,107 @@ def _triage_score(query: str, item: dict[str, Any]) -> float:
     hits = sum(1 for t in q_terms if len(t) > 2 and t in blob)
     pos = float(item.get("position") or 10)
     return hits * 2.0 + len(blob) * 0.01 - pos * 0.05
+
+
+def _chunk_dict_to_evidence(
+    session_id: str,
+    task_id: int,
+    hit: dict[str, Any],
+) -> EvidenceObject:
+    """Convert a hybrid_search row (chunks-table dict) into an EvidenceObject.
+
+    Used by the Day 4 task-aware retrieval path. Differs from
+    :func:`_chunk_to_evidence` because hybrid_search returns the chunks
+    table (with `source_type`, `metadata`) instead of the embeddings
+    table the legacy path reads.
+    """
+    quote = (hit.get("content") or "")[:2000]
+    title = hit.get("source_filename") or "Document"
+    url = hit.get("source_url") or ""
+    source_type = hit.get("source_type") or "document"
+
+    # Build a citeable claim string with whatever breadcrumbs the chunk has.
+    bits: list[str] = []
+    if hit.get("section_heading"):
+        bits.append(str(hit["section_heading"]))
+    elif hit.get("page") is not None:
+        bits.append(f"page {hit['page']}")
+    metadata = hit.get("metadata") or {}
+    if source_type == "sec_filing" and isinstance(metadata, dict):
+        # SEC chunks carry the rich breadcrumb dict from Day 3 ingestion.
+        form = metadata.get("form")
+        filing_date = metadata.get("filing_date")
+        if form and filing_date:
+            bits.append(f"{form} {filing_date}")
+
+    score = float(hit.get("score") or hit.get("fused_score") or 0.0)
+    # Map an EvidenceObject.source_type to one of the values downstream
+    # consumers already understand: "document" for any chunk, "web" for
+    # web search hits. SEC filings stay as "document".
+    eo_source_type = "document"
+    return EvidenceObject(
+        session_id=session_id,
+        task_id=task_id,
+        claim=f"Retrieved passage relevant to research task ({', '.join(bits) or 'chunk'})",
+        quote=quote,
+        source_title=title,
+        source_url=url,
+        source_date=None,
+        source_type=eo_source_type,
+        source_score=score,
+        confidence="high" if score >= 0.35 else "medium",
+        is_inference=False,
+    )
+
+
+async def _retrieve_by_priorities(
+    session_id: str,
+    question: str,
+    priorities: list[str],
+    *,
+    min_results: int = _TASK_AWARE_MIN_RESULTS,
+    per_source_k: int = _TASK_AWARE_PER_SOURCE_K,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Run hybrid_search once per non-web priority, in order, until we have
+    at least ``min_results`` hits or we exhaust the list.
+
+    Returns ``(hits, sources_consulted)``. ``sources_consulted`` is the
+    ordered list of source kinds we actually queried (useful for the
+    smoke trace). "web" is handled by the orchestrator separately, so
+    it's filtered out here.
+    """
+    hits: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
+    consulted: list[str] = []
+    for pri in priorities:
+        if pri == "web":
+            continue
+        # "news" doesn't have its own ingestion source_type yet (planned
+        # for a later day). Skip rather than 500 — the orchestrator will
+        # spill into the next priority or, if "web" was listed, hit the
+        # web path. This keeps the planner's "news" hint useful today
+        # without requiring the news ingestor.
+        if pri == "news":
+            consulted.append(pri)
+            continue
+        consulted.append(pri)
+        result = await hybrid_search(
+            engagement_id=session_id,
+            query=question,
+            k=per_source_k,
+            candidate_k=max(per_source_k * 2, 12),
+            mode="hybrid",
+            source_types=[pri],
+        )
+        for row in result.get("results") or []:
+            cid = row.get("id")
+            if not cid or cid in seen_ids:
+                continue
+            seen_ids.add(cid)
+            hits.append(row)
+        if len(hits) >= min_results:
+            break
+    return hits, consulted
 
 
 def _chunk_to_evidence(session_id: str, task_id: int, hit: RetrievedChunk) -> EvidenceObject:
@@ -413,18 +526,65 @@ class ResearchOrchestrator:
 
             task_objs: list[EvidenceObject] = []
 
-            hits = await retrieve_evidence(session_id, q, top_k=8)
-            retrieval_snapshots.append(
-                {
-                    "task_id": tid,
-                    "question": q,
-                    "hits": [h.model_dump(mode="json") for h in hits],
-                }
-            )
-            for h in hits:
-                task_objs.append(_chunk_to_evidence(session_id, tid, h))
+            # Day 4: task-aware retrieval routing.
+            # When the planner emitted source_priorities, walk that list
+            # in order over the chunks table (which has source_type) and
+            # only call web search if "web" is among the priorities. When
+            # no priorities are given, preserve the legacy path (vector-
+            # only over `embeddings` + always-web-when-key-set) so older
+            # plans / direct callers still behave the same.
+            raw_priorities = task.get("source_priorities")
+            priorities: list[str] = []
+            if isinstance(raw_priorities, list):
+                priorities = [
+                    str(p).strip().lower()
+                    for p in raw_priorities
+                    if isinstance(p, str) and p.strip()
+                ]
 
-            if SERPAPI_KEY:
+            if priorities:
+                priority_hits, consulted = await _retrieve_by_priorities(
+                    session_id, q, priorities
+                )
+                retrieval_snapshots.append(
+                    {
+                        "task_id": tid,
+                        "question": q,
+                        "source_priorities": priorities,
+                        "sources_consulted": consulted,
+                        "hits": [
+                            {
+                                "id": h.get("id"),
+                                "source_type": h.get("source_type"),
+                                "source_filename": h.get("source_filename"),
+                                "source_url": h.get("source_url"),
+                                "score": h.get("score") or h.get("fused_score"),
+                                "section_heading": h.get("section_heading"),
+                            }
+                            for h in priority_hits
+                        ],
+                    }
+                )
+                for h in priority_hits:
+                    task_objs.append(_chunk_dict_to_evidence(session_id, tid, h))
+                use_web = "web" in priorities
+            else:
+                hits = await retrieve_evidence(session_id, q, top_k=8)
+                retrieval_snapshots.append(
+                    {
+                        "task_id": tid,
+                        "question": q,
+                        "source_priorities": None,
+                        "hits": [h.model_dump(mode="json") for h in hits],
+                    }
+                )
+                for h in hits:
+                    task_objs.append(_chunk_to_evidence(session_id, tid, h))
+                # Legacy heuristic preserved for backward compat:
+                # always run web search when SERPAPI_KEY is configured.
+                use_web = True
+
+            if SERPAPI_KEY and use_web:
                 queries = await _planned_queries(q)
                 web_hits = await search_web_parallel(queries, num_results=4)
                 await _append_web_extractions(
@@ -444,6 +604,7 @@ class ResearchOrchestrator:
             synth = await _synthesize_finding(q, task_objs)
             if (
                 SERPAPI_KEY
+                and use_web
                 and str(synth.get("confidence", "")).lower() == "low"
                 and len([x for x in task_objs if x.source_type == "web"]) == 0
             ):
@@ -452,7 +613,7 @@ class ResearchOrchestrator:
                     session_id, tid, q, fill, fetch_budget, seen_norm_urls, task_objs, limit=5
                 )
                 synth = await _synthesize_finding(q, task_objs)
-            if SERPAPI_KEY and followups_used < max_followups:
+            if SERPAPI_KEY and use_web and followups_used < max_followups:
                 gaps = (synth.get("gaps") or "").strip()
                 web_n = len([x for x in task_objs if x.source_type == "web"])
                 if len(gaps) > 20 or web_n < 1:

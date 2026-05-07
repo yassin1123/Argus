@@ -1,6 +1,13 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from core.inference.structured import generate_structured
+
+# Source kinds the researcher knows how to route to. Keep this list tight —
+# every value must map to a real retrieval path (uploaded/sec_filing → chunks
+# table source_type filter; news/web → web-search providers).
+SourceKind = Literal["uploaded", "sec_filing", "news", "web"]
 
 PLANNER_SYSTEM = """
 You are the Planner agent in the Argus decision system.
@@ -16,13 +23,46 @@ Output ONLY valid JSON in this exact format:
       "question": "Specific sub-question to research",
       "type": "factual|comparative|quantitative|qualitative",
       "priority": "high|medium|low",
-      "why_it_matters": "Why this question is relevant to the decision"
+      "why_it_matters": "Why this question is relevant to the decision",
+      "source_priorities": ["sec_filing", "uploaded"]
     }
   ],
   "decision_criteria": ["Criterion 1", "Criterion 2"],
   "scope": "What is in and out of scope for this analysis"
 }
 Generate 4-8 tasks. Be specific. Do not be vague.
+
+SOURCE PRIORITIES (per task)
+For each task, emit "source_priorities" as an ordered list of source kinds
+the researcher should query. Pick the smallest set that can actually answer
+the task. The researcher reads them in order and spills to the next kind
+when the first returns too few hits.
+
+Source kinds:
+  - "uploaded"   — documents the user uploaded for this engagement
+                   (CIMs, board decks, internal memos). Use whenever the
+                   answer should be grounded in the user's own materials.
+  - "sec_filing" — SEC EDGAR filings (10-K / 10-Q / 8-K / DEF 14A / S-1).
+                   Best for U.S. public-company financials, risk factors,
+                   MD&A, and segment data.
+  - "news"       — recent news, press releases, analyst notes. Use when
+                   freshness or market reaction matters.
+  - "web"        — open web search. Use for breadth, third-party data,
+                   industry stats, or anything the above sources won't
+                   cover.
+
+Examples:
+  - "Apple iPhone segment revenue trend FY2024"      → ["sec_filing", "uploaded"]
+  - "Recent analyst reaction to the Q3 print"        → ["news", "web"]
+  - "Key risks called out in the CIM"                → ["uploaded"]
+  - "TAM for managed-services in EMEA, 2025"         → ["web"]
+
+If a task could be answered by either uploaded materials or SEC filings,
+list "uploaded" first when the user is the deal owner; list "sec_filing"
+first when the question is about the public-company filer.
+
+If you genuinely cannot decide, omit "source_priorities" — the researcher
+will fall back to legacy behaviour.
 
 COMPARATIVE DECISIONS (when the user compares options A vs B):
 - Include at least 2 tasks that explicitly research Option A / path A.
@@ -41,6 +81,9 @@ class PlannerTask(BaseModel):
     type: str = "factual"
     priority: str = "medium"
     why_it_matters: str = ""
+    # When None, the researcher falls back to its legacy retrieval path
+    # (vector-only over uploaded chunks + always-on web if SERPAPI_KEY).
+    source_priorities: list[SourceKind] | None = None
 
     @field_validator("id", mode="before")
     @classmethod
@@ -54,6 +97,26 @@ class PlannerTask(BaseModel):
         if isinstance(v, str) and v.strip().isdigit():
             return int(v.strip())
         return 0
+
+    @field_validator("source_priorities", mode="before")
+    @classmethod
+    def coerce_source_priorities(cls, v: object) -> list[str] | None:
+        # Accept None, [], or list of strings; drop unknown kinds rather
+        # than reject the whole task so a single typo from the model
+        # doesn't blow up the plan.
+        if v is None:
+            return None
+        if not isinstance(v, list):
+            return None
+        valid = {"uploaded", "sec_filing", "news", "web"}
+        out: list[str] = []
+        seen: set[str] = set()
+        for item in v:
+            s = str(item).strip().lower().replace("-", "_").replace(" ", "_")
+            if s in valid and s not in seen:
+                out.append(s)
+                seen.add(s)
+        return out or None
 
 
 class PlannerOutput(BaseModel):
