@@ -7,7 +7,9 @@ Public surface:
 See ``client.py`` for the rate-limiting / User-Agent / caching contract.
 """
 
+from core.retrievers.edgar.chunker import FilingChunk, chunk_filing
 from core.retrievers.edgar.client import EdgarClient
+from core.retrievers.edgar.parser import FilingSection, parse_filing_sections
 from core.retrievers.edgar.types import (
     CompanyInfo,
     EdgarError,
@@ -22,7 +24,11 @@ __all__ = [
     "CompanyInfo",
     "Filing",
     "FilingDocument",
+    "FilingSection",
+    "FilingChunk",
     "EdgarError",
     "TickerNotFoundError",
     "RateLimitedError",
+    "parse_filing_sections",
+    "chunk_filing",
 ]
