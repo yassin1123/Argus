@@ -31,6 +31,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          # Download the en_core_web_sm spaCy model so the lexical-overlap
+          # tests (Week 2 Day 2) can load it. ~50MB; the Dockerfile does
+          # the same step for runtime images, but the CI pytest job runs
+          # against host Python (actions/setup-python), not the image.
+          python -m spacy download en_core_web_sm
 
       - name: Run pytest (DB-free unit tests only)
         working-directory: backend
