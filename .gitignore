@@ -22,3 +22,10 @@ pgdata/
 backend/eval_runs/**/run_*.json
 backend/eval_runs/**/run_*.md
 backend/eval_runs/**/raw/
+
+# Week 3 / Day 5 e2e raw per-ticker captures (memos can hit ~1MB each, reproducible).
+# Only summary.json is committed.
+backend/eval_runs/week3_e2e/AAPL.json
+backend/eval_runs/week3_e2e/MSFT.json
+backend/eval_runs/week3_e2e/TSLA.json
+backend/eval_runs/week3_e2e/*.failed.json
