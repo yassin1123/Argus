@@ -6,8 +6,7 @@
 
 Argus is the consulting platform where every claim in every deliverable links back to its source, every memo runs through cross-model verification, and your firm's own playbooks shape the output. Built for boutique consulting firms — 10 to 100 consultants — who compete on quality and senior expertise, not headcount.
 
-Two firms run paid engagements through Argus today. We're onboarding the next ten in the second half of 2026.
-
+150 Consultants currrently use Argus with more to come.
 ---
 
 ## What Argus does
