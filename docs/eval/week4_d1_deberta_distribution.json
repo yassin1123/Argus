@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-05-08T03:59:32Z",
+  "captured_sessions": [
+    {
+      "session_id": "d2ef8688-6816-4d8d-a72c-af4056628e77",
+      "ticker": "AAPL",
+      "created_at": "2026-05-08T02:52:28.527517+00:00",
+      "claims_total": 20,
+      "claims_real_label": 20
+    },
+    {
+      "session_id": "3be55a64-5bed-4ee6-a728-500bd9d0e61e",
+      "ticker": "MSFT",
+      "created_at": "2026-05-08T03:02:33.494388+00:00",
+      "claims_total": 17,
+      "claims_real_label": 17
+    }
+  ],
+  "summary_by_ticker": {
+    "AAPL": {
+      "entailment": {
+        "count": 2,
+        "mean_confidence": 0.9671,
+        "median_confidence": 0.9671
+      },
+      "neutral": {
+        "count": 18,
+        "mean_confidence": 0.9395,
+        "median_confidence": 0.999
+      }
+    },
+    "MSFT": {
+      "contradiction": {
+        "count": 1,
+        "mean_confidence": 0.9301,
+        "median_confidence": 0.9301
+      },
+      "neutral": {
+        "count": 16,
+        "mean_confidence": 0.987,
+        "median_confidence": 0.9979
+      }
+    }
+  },
+  "summary_aggregate": {
+    "contradiction": {
+      "count": 1,
+      "mean_confidence": 0.9301,
+      "median_confidence": 0.9301
+    },
+    "entailment": {
+      "count": 2,
+      "mean_confidence": 0.9671,
+      "median_confidence": 0.9671
+    },
+    "neutral": {
+      "count": 34,
+      "mean_confidence": 0.9619,
+      "median_confidence": 0.9989
+    }
+  },
+  "confidence_histograms_by_label": {
+    "contradiction": {
+      "buckets_0_to_1_step_0.1": [
+        {
+          "range": "[0.0,0.1)",
+          "count": 0
+        },
+        {
+          "range": "[0.1,0.2)",
+          "count": 0
+        },
+        {
+          "range": "[0.2,0.3)",
+          "count": 0
+        },
+        {
+          "range": "[0.3,0.4)",
+          "count": 0
+        },
+        {
+          "range": "[0.4,0.5)",
+          "count": 0
+        },
+        {
+          "range": "[0.5,0.6)",
+          "count": 0
+        },
+        {
+          "range": "[0.6,0.7)",
+          "count": 0
+        },
+        {
+          "range": "[0.7,0.8)",
+          "count": 0
+        },
+        {
+          "range": "[0.8,0.9)",
+          "count": 0
+        },
+        {
+          "range": "[0.9,1.0)",
+          "count": 1
+        }
+      ],
+      "total": 1
+    },
+    "entailment": {
+      "buckets_0_to_1_step_0.1": [
+        {
+          "range": "[0.0,0.1)",
+          "count": 0
+        },
+        {
+          "range": "[0.1,0.2)",
+          "count": 0
+        },
+        {
+          "range": "[0.2,0.3)",
+          "count": 0
+        },
+        {
+          "range": "[0.3,0.4)",
+          "count": 0
+        },
+        {
+          "range": "[0.4,0.5)",
+          "count": 0
+        },
+        {
+          "range": "[0.5,0.6)",
+          "count": 0
+        },
+        {
+          "range": "[0.6,0.7)",
+          "count": 0
+        },
+        {
+          "range": "[0.7,0.8)",
+          "count": 0
+        },
+        {
+          "range": "[0.8,0.9)",
+          "count": 0
+        },
+        {
+          "range": "[0.9,1.0)",
+          "count": 2
+        }
+      ],
+      "total": 2
+    },
+    "neutral": {
+      "buckets_0_to_1_step_0.1": [
+        {
+          "range": "[0.0,0.1)",
+          "count": 0
+        },
+        {
+          "range": "[0.1,0.2)",
+          "count": 0
+        },
+        {
+          "range": "[0.2,0.3)",
+          "count": 0
+        },
+        {
+          "range": "[0.3,0.4)",
+          "count": 0
+        },
+        {
+          "range": "[0.4,0.5)",
+          "count": 0
+        },
+        {
+          "range": "[0.5,0.6)",
+          "count": 0
+        },
+        {
+          "range": "[0.6,0.7)",
+          "count": 2
+        },
+        {
+          "range": "[0.7,0.8)",
+          "count": 1
+        },
+        {
+          "range": "[0.8,0.9)",
+          "count": 0
+        },
+        {
+          "range": "[0.9,1.0)",
+          "count": 31
+        }
+      ],
+      "total": 34
+    }
+  },
+  "tuning_hypothesis": [
+    "entailment median confidence = 0.9671",
+    "neutral median confidence = 0.9989",
+    "contradiction median confidence = 0.9301",
+    "OVERLAP: entailment and neutral confidence ranges overlap \u2014 Day 5 threshold tuning is warranted."
+  ],
+  "notes": [
+    "Pre-fix sessions (AAPL/MSFT before 02:50 UTC) had 100% nli_label='unknown' because nli_worker SIGKILLed on 17\u201322 pair batches.",
+    "Post-fix (sub-batches of 5 dispatched sequentially): 100% real labels. Direct evidence in nli_worker docker logs \u2014 sub-batches succeed in 0.3\u20134.2s.",
+    "TSLA never produced claim_support_rows in either Day 1 attempt \u2014 failed at the writer/analyst stage with Anthropic 400 Bad Request, unrelated to DeBERTa or the OOM fix. Surfaced separately for Day 2 triage."
+  ]
+}

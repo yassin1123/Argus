@@ -36,15 +36,26 @@ from models.evidence import EvidenceObject
 
 logger = logging.getLogger(__name__)
 
-# Time budget for the whole batched DeBERTa call. The Day 1 perf check
-# scored 60 pairs in ~9s; 90s leaves comfortable headroom for cold-start
-# on the first call of a session.
-_DEBERTA_TIMEOUT_SECONDS: float = 90.0
+# Time budget for ONE sub-batch DeBERTa call (model load is amortised by
+# the worker after the first call; a 5-pair scoring step is sub-second
+# once the model is hot, so 60s is plenty even for cold-start on the
+# first sub-batch of a session).
+_DEBERTA_TIMEOUT_SECONDS: float = 60.0
 
 # Truncate the chunk passed to lexical / DeBERTa so a giant evidence quote
 # doesn't bloat the cross-encoder's window. nli_verifier already truncates
 # to 384 tokens internally — this is just to keep the Celery payload small.
 _CHUNK_MAX_CHARS: int = 4000
+
+# Week 4 / Day 1: nli_worker SIGKILLs in the WSL Docker memory ceiling on
+# batches of 17–20 pairs (DeBERTa-v3-base holds activations for the whole
+# batch in one PyTorch forward pass). Per-pair truncation IS firing in
+# deberta_client._truncate_to_relevant_window — the OOM is purely from
+# unbounded batch size. Fix: chunk the dispatcher into sub-batches of 5,
+# dispatch sequentially, concatenate. Single model load amortises across
+# sub-batches because nli_worker has --max-tasks-per-child=1000000 (the
+# Celery 5.3.6 sentinel from Week 2 / Day 1).
+_DEBERTA_SUBBATCH_SIZE: int = 5
 
 
 def _combined_chunk(
@@ -73,36 +84,118 @@ def _unknown_deberta() -> dict[str, Any]:
     return {"label": "unknown", "confidence": 0.0, "softmax": [0.0, 0.0, 0.0]}
 
 
-async def _dispatch_deberta_batch(pairs: list[list[str]]) -> list[dict[str, Any]]:
-    """Submit the batched ``nli.score_pairs`` task and wait for its result.
-
-    Imported lazily so this module's import cost stays small (and so unit
-    tests can monkeypatch the dispatch without dragging Celery in).
+def _pair_size_stats(pairs: list[list[str]]) -> dict[str, int]:
+    """Diagnostic stats logged before each dispatch — the data we'd want
+    to see if a future batch unexpectedly OOMs again.
     """
     if not pairs:
+        return {"n": 0, "total_chars": 0, "max_premise_chars": 0, "max_hyp_chars": 0}
+    max_p = 0
+    max_h = 0
+    total = 0
+    for p, h in pairs:
+        lp = len(p or "")
+        lh = len(h or "")
+        total += lp + lh
+        if lp > max_p:
+            max_p = lp
+        if lh > max_h:
+            max_h = lh
+    return {
+        "n": len(pairs),
+        "total_chars": total,
+        "max_premise_chars": max_p,
+        "max_hyp_chars": max_h,
+    }
+
+
+async def _send_one_subbatch(
+    sub_pairs: list[list[str]],
+    *,
+    sub_index: int,
+    n_subs: int,
+) -> list[dict[str, Any]]:
+    """Dispatch ONE sub-batch to nli_worker and wait for the result.
+
+    Catches every exception (broker errors, worker SIGKILL, timeout) and
+    returns a list of ``unknown`` sentinels of the right length so the
+    caller can keep going. Day 1 contract: a single sub-batch failure
+    must not poison the rest.
+    """
+    if not sub_pairs:
         return []
     from tasks.pipeline import celery_app  # noqa: WPS433
 
     try:
         async_result = celery_app.send_task(
             "nli.score_pairs",
-            args=[pairs],
+            args=[sub_pairs],
             queue="nli",
         )
         # ``.get()`` is sync; off-load to a thread so the orchestrator's
-        # event loop isn't blocked while DeBERTa scores the batch.
-        results = await asyncio.to_thread(async_result.get, timeout=_DEBERTA_TIMEOUT_SECONDS)
-        if not isinstance(results, list) or len(results) != len(pairs):
+        # event loop isn't blocked while DeBERTa scores the sub-batch.
+        results = await asyncio.to_thread(
+            async_result.get, timeout=_DEBERTA_TIMEOUT_SECONDS
+        )
+        if not isinstance(results, list) or len(results) != len(sub_pairs):
             logger.warning(
-                "DeBERTa batch returned unexpected shape (%d pairs in, %s out)",
-                len(pairs),
+                "DeBERTa sub-batch %d/%d returned unexpected shape "
+                "(%d pairs in, %s out)",
+                sub_index + 1,
+                n_subs,
+                len(sub_pairs),
                 type(results).__name__,
             )
-            return [_unknown_deberta() for _ in pairs]
+            return [_unknown_deberta() for _ in sub_pairs]
         return results  # type: ignore[no-any-return]
     except Exception as e:  # noqa: BLE001 — degrade, don't abort
-        logger.warning("DeBERTa batch dispatch failed: %s", e)
-        return [_unknown_deberta() for _ in pairs]
+        logger.warning(
+            "DeBERTa sub-batch %d/%d dispatch failed (%d pairs): %s",
+            sub_index + 1,
+            n_subs,
+            len(sub_pairs),
+            e,
+        )
+        return [_unknown_deberta() for _ in sub_pairs]
+
+
+async def _dispatch_deberta_batch(pairs: list[list[str]]) -> list[dict[str, Any]]:
+    """Submit pairs to ``nli.score_pairs`` in sub-batches of
+    :data:`_DEBERTA_SUBBATCH_SIZE`, dispatch sequentially, concatenate.
+
+    Sequential rather than parallel because the worker has concurrency=1
+    by design (DeBERTa is heavy and the model loads once per fork) — two
+    in-flight tasks would just serialise behind each other while doubling
+    Redis traffic. Sub-batch failures degrade per-sub-batch (sentinels
+    only for the failing window) so one OOM doesn't blank the whole
+    enrichment.
+
+    Imported lazily so this module's import cost stays small (and so unit
+    tests can monkeypatch the dispatch without dragging Celery in).
+    """
+    if not pairs:
+        return []
+
+    stats = _pair_size_stats(pairs)
+    n_subs = (len(pairs) + _DEBERTA_SUBBATCH_SIZE - 1) // _DEBERTA_SUBBATCH_SIZE
+    logger.info(
+        "DeBERTa dispatch: %d pairs in %d sub-batch(es) of %d "
+        "(total_chars=%d, max_premise_chars=%d, max_hyp_chars=%d)",
+        stats["n"],
+        n_subs,
+        _DEBERTA_SUBBATCH_SIZE,
+        stats["total_chars"],
+        stats["max_premise_chars"],
+        stats["max_hyp_chars"],
+    )
+
+    out: list[dict[str, Any]] = []
+    for i in range(0, len(pairs), _DEBERTA_SUBBATCH_SIZE):
+        sub = pairs[i : i + _DEBERTA_SUBBATCH_SIZE]
+        sub_index = i // _DEBERTA_SUBBATCH_SIZE
+        sub_results = await _send_one_subbatch(sub, sub_index=sub_index, n_subs=n_subs)
+        out.extend(sub_results)
+    return out
 
 
 async def enrich_with_ensemble_signals(

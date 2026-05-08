@@ -29,3 +29,9 @@ backend/eval_runs/week3_e2e/AAPL.json
 backend/eval_runs/week3_e2e/MSFT.json
 backend/eval_runs/week3_e2e/TSLA.json
 backend/eval_runs/week3_e2e/*.failed.json
+
+# Week 4 / Day 1 e2e — same shape as Week 3, only summary.json committed.
+backend/eval_runs/week4_d1_e2e/AAPL.json
+backend/eval_runs/week4_d1_e2e/MSFT.json
+backend/eval_runs/week4_d1_e2e/TSLA.json
+backend/eval_runs/week4_d1_e2e/*.failed.json

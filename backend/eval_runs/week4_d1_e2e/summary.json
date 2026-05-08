@@ -1,0 +1,79 @@
+{
+  "ensemble_flag_on": true,
+  "n_runs": 2,
+  "runs": [
+    {
+      "ticker": "AAPL",
+      "company_name": "Apple Inc.",
+      "ok": true,
+      "issues": [],
+      "warnings": [],
+      "wall_seconds": 604.61,
+      "cost_usd_total": 0.4913,
+      "total_claims": 20,
+      "grounded_claims": 12,
+      "sec_grounded_claims": 12,
+      "sec_grounded_pct": 1.0,
+      "distinct_accessions_count": 4,
+      "distinct_accessions": [
+        "0000320193-25-000079",
+        "0000320193-26-000006",
+        "0000320193-26-000011",
+        "0000320193-26-000013"
+      ],
+      "ensemble_verdict_distribution": {
+        "weak": 18,
+        "supported_high": 2
+      },
+      "contradicted_count": 0,
+      "recommendation_preview": "Establish a Services revenue target of 30% of total net sales by Q4 fiscal 2027 (up from approximately 22-24% current mix), requiring estimated incremental investment of $8-12 billion in cloud infrastructure, advertising platforms, and content licensing over 8 quarters.",
+      "session_id": "d2ef8688-6816-4d8d-a72c-af4056628e77",
+      "captured_at": "2026-05-08T03:02:33Z"
+    },
+    {
+      "ticker": "MSFT",
+      "company_name": "Microsoft Corp.",
+      "ok": true,
+      "issues": [],
+      "warnings": [
+        "contradicted_count=1 \u2014 surfacing for review (likely DeBERTa OOM false-positives; see Week 4 NLI tuning)"
+      ],
+      "wall_seconds": 677.62,
+      "cost_usd_total": 0.6316,
+      "total_claims": 17,
+      "grounded_claims": 10,
+      "sec_grounded_claims": 10,
+      "sec_grounded_pct": 1.0,
+      "distinct_accessions_count": 5,
+      "distinct_accessions": [
+        "0000950170-25-100235",
+        "0001193125-26-027198",
+        "0001193125-26-027207",
+        "0001193125-26-191457",
+        "0001193125-26-191507"
+      ],
+      "ensemble_verdict_distribution": {
+        "weak": 16,
+        "contradicted": 1
+      },
+      "contradicted_count": 1,
+      "recommendation_preview": "Maintain current Microsoft exposure with quarterly re-evaluation gates. Do not initiate new positions until Q4 FY2026 earnings (July 2026) confirm Azure growth sustains above 32% and Microsoft Cloud gross margin stabilizes above 70%.",
+      "session_id": "3be55a64-5bed-4ee6-a728-500bd9d0e61e",
+      "captured_at": "2026-05-08T03:13:51Z"
+    }
+  ],
+  "aggregate": {
+    "total_claims_avg": 18.5,
+    "sec_grounded_pct_avg": 1.0,
+    "distinct_accessions_avg": 4.5,
+    "cost_usd_total_avg": 0.5615,
+    "wall_seconds_avg": 641.12,
+    "contradicted_count_total": 1,
+    "ensemble_verdict_distribution_total": {
+      "weak": 34,
+      "supported_high": 2,
+      "contradicted": 1
+    }
+  },
+  "generated_at": "2026-05-08T03:59:54Z"
+}
