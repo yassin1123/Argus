@@ -9,9 +9,12 @@ from core.inference.structured import generate_structured
 #   uploaded   → chunks table source_type filter
 #   sec_filing → chunks table source_type filter (US public-company filings)
 #   ch_filing  → chunks table source_type filter (UK Companies House filings)
+#   transcript → chunks table source_type filter (earnings-call transcripts,
+#                manual upload via tools/transcript_upload.py or 8-K
+#                Item 2.02 exhibit walker)
 #   news       → Tavily lazy-fetch + chunks table source_type filter
 #   web        → web-search provider (snippet-only, no chunked verification)
-SourceKind = Literal["uploaded", "sec_filing", "ch_filing", "news", "web"]
+SourceKind = Literal["uploaded", "sec_filing", "ch_filing", "transcript", "news", "web"]
 
 PLANNER_SYSTEM = """
 You are the Planner agent in the Argus decision system.
@@ -55,6 +58,14 @@ Source kinds:
                    etc.). The brief mentioning "UK", "British",
                    "Companies House", a UK FTSE listing, or a UK company
                    number is a strong signal.
+  - "transcript" — earnings-call transcripts (prepared remarks + Q&A).
+                   Use whenever the brief is about a public company
+                   AND the question can be answered by management
+                   commentary, forward guidance, segment colour, or
+                   analyst-question subjects. Pair with "sec_filing"
+                   for public companies — filings give you the numbers
+                   in writing, transcripts give you the narrative
+                   around them.
   - "news"       — recent news, press releases, analyst notes. Use when
                    freshness or market reaction matters.
   - "web"        — open web search. Use for breadth, third-party data,
@@ -68,6 +79,9 @@ Examples:
   - "TAM for managed-services in EMEA, 2025"         → ["web"]
   - "Tesco UK grocery margin trend"                  → ["ch_filing", "news"]
   - "AstraZeneca pipeline disclosures"               → ["ch_filing", "sec_filing"]
+  - "Apple management's view on China demand"        → ["transcript", "sec_filing"]
+  - "What did the CFO say about FY guidance?"        → ["transcript"]
+  - "Apple business model + recent results overview" → ["sec_filing", "transcript"]
 
 If a task could be answered by either uploaded materials or SEC filings,
 list "uploaded" first when the user is the deal owner; list "sec_filing"
@@ -123,7 +137,7 @@ class PlannerTask(BaseModel):
             return None
         if not isinstance(v, list):
             return None
-        valid = {"uploaded", "sec_filing", "ch_filing", "news", "web"}
+        valid = {"uploaded", "sec_filing", "ch_filing", "transcript", "news", "web"}
         out: list[str] = []
         seen: set[str] = set()
         for item in v:

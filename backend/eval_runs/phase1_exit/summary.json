@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-05-08T06:54:54Z",
+  "targets": [
+    {
+      "ticker": "AAPL",
+      "company_name": "Apple Inc.",
+      "country": "US",
+      "is_phase1_exit_target": true,
+      "session_id": "7195d224-81b3-4731-911a-dce109d187f0",
+      "ok": true,
+      "blocking_issues": [],
+      "warnings": [],
+      "wall_seconds": 699.68,
+      "cost_usd_total": 0.5493,
+      "n_claims": 17,
+      "n_grounded": 11,
+      "cross_family_verification_visible": true,
+      "sec_accessions_cited": [
+        "0000320193-25-000079",
+        "0000320193-26-000006",
+        "0000320193-26-000013"
+      ],
+      "transcript_refs_cited": [
+        "AAPL Q4 FY2024"
+      ],
+      "ch_transactions_cited": [],
+      "news_domains_cited": [
+        "cliffsnotes.com",
+        "finance.yahoo.com",
+        "permutable.ai"
+      ],
+      "citations_by_source_type": {
+        "sec_filing": 23,
+        "transcript": 11,
+        "news": 4
+      },
+      "ensemble_verdict_dist": {
+        "weak": 16,
+        "contradicted": 1
+      },
+      "nli_label_dist": {
+        "neutral": 16,
+        "contradiction": 1
+      },
+      "contradicted_count": 1,
+      "n_numbers_in_recommendation": 21,
+      "n_time_bound_phrases": 6,
+      "n_uk_factors_in_recommendation": 0,
+      "recommendation_preview": "Maintain HOLD on Apple Inc. with a 12-month price target of $245 per share (7.5% upside from assumed current price of $228). UPGRADE to BUY if Q1 FY2025 Services revenue exceeds $26B (+15% YoY) AND management guides China revenue growth positive for Q2 FY2025. DOWNGRADE to SELL if Q1 FY2025 Services growth falls below 8% OR China revenue declines exceed 10% YoY for two consecutive quarters."
+    },
+    {
+      "ticker": "TSCO_LON",
+      "company_name": "Tesco PLC",
+      "country": "UK",
+      "is_phase1_exit_target": false,
+      "session_id": "ce65738f-1eb7-4b97-b2f1-838a5ead2e51",
+      "ok": true,
+      "blocking_issues": [],
+      "warnings": [
+        "Tesco has 0 ch_filing citations \u2014 Day 4 surface (CH serves scanned PDFs only); Phase 3 OCR work"
+      ],
+      "wall_seconds": 598.08,
+      "cost_usd_total": 0.3481,
+      "n_claims": 18,
+      "n_grounded": 12,
+      "cross_family_verification_visible": true,
+      "sec_accessions_cited": [],
+      "transcript_refs_cited": [],
+      "ch_transactions_cited": [],
+      "news_domains_cited": [
+        "matrixbcg.com",
+        "pestel-analysis.com",
+        "statista.com",
+        "tescoplc.com"
+      ],
+      "citations_by_source_type": {
+        "news": 12
+      },
+      "ensemble_verdict_dist": {
+        "weak": 18
+      },
+      "nli_label_dist": {
+        "neutral": 18
+      },
+      "contradicted_count": 0,
+      "n_numbers_in_recommendation": 15,
+      "n_time_bound_phrases": 1,
+      "n_uk_factors_in_recommendation": 3,
+      "recommendation_preview": "Tesco PLC's company profile is INCOMPLETE and unsuitable for investment decisions. Based on operational data only (not audited financials), Tesco demonstrates UK market share leadership (28.5% as of February 2026, highest in a decade) and strategic focus on value pricing, colleague investment, and sustainability. However, investors cannot assess financial health, profitability sustainability, debt"
+    }
+  ]
+}

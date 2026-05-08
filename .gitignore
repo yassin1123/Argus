@@ -35,3 +35,10 @@ backend/eval_runs/week4_d1_e2e/AAPL.json
 backend/eval_runs/week4_d1_e2e/MSFT.json
 backend/eval_runs/week4_d1_e2e/TSLA.json
 backend/eval_runs/week4_d1_e2e/*.failed.json
+
+# Phase 1 exit demo — full per-target captures (memos + claims + chunks
+# can be ~1MB each). Reproducible from the runner; only the wrap-up
+# doc + a small numbers-only summary are committed.
+backend/eval_runs/phase1_exit/AAPL.json
+backend/eval_runs/phase1_exit/TSCO_LON.json
+backend/eval_runs/phase1_exit/*.failed.json
