@@ -5,9 +5,13 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from core.inference.structured import generate_structured
 
 # Source kinds the researcher knows how to route to. Keep this list tight —
-# every value must map to a real retrieval path (uploaded/sec_filing → chunks
-# table source_type filter; news/web → web-search providers).
-SourceKind = Literal["uploaded", "sec_filing", "news", "web"]
+# every value must map to a real retrieval path:
+#   uploaded   → chunks table source_type filter
+#   sec_filing → chunks table source_type filter (US public-company filings)
+#   ch_filing  → chunks table source_type filter (UK Companies House filings)
+#   news       → Tavily lazy-fetch + chunks table source_type filter
+#   web        → web-search provider (snippet-only, no chunked verification)
+SourceKind = Literal["uploaded", "sec_filing", "ch_filing", "news", "web"]
 
 PLANNER_SYSTEM = """
 You are the Planner agent in the Argus decision system.
@@ -45,6 +49,12 @@ Source kinds:
   - "sec_filing" — SEC EDGAR filings (10-K / 10-Q / 8-K / DEF 14A / S-1).
                    Best for U.S. public-company financials, risk factors,
                    MD&A, and segment data.
+  - "ch_filing"  — UK Companies House annual accounts. Use whenever the
+                   subject is a UK-registered company (Tesco, Marks &
+                   Spencer, AstraZeneca, BT Group, Unilever, Shell PLC,
+                   etc.). The brief mentioning "UK", "British",
+                   "Companies House", a UK FTSE listing, or a UK company
+                   number is a strong signal.
   - "news"       — recent news, press releases, analyst notes. Use when
                    freshness or market reaction matters.
   - "web"        — open web search. Use for breadth, third-party data,
@@ -56,10 +66,15 @@ Examples:
   - "Recent analyst reaction to the Q3 print"        → ["news", "web"]
   - "Key risks called out in the CIM"                → ["uploaded"]
   - "TAM for managed-services in EMEA, 2025"         → ["web"]
+  - "Tesco UK grocery margin trend"                  → ["ch_filing", "news"]
+  - "AstraZeneca pipeline disclosures"               → ["ch_filing", "sec_filing"]
 
 If a task could be answered by either uploaded materials or SEC filings,
 list "uploaded" first when the user is the deal owner; list "sec_filing"
-first when the question is about the public-company filer.
+first when the question is about the public-company filer. For UK-
+registered companies prefer "ch_filing" over "sec_filing" even when the
+firm has a US listing — Companies House accounts are the statutory
+primary, the SEC filing is downstream.
 
 If you genuinely cannot decide, omit "source_priorities" — the researcher
 will fall back to legacy behaviour.
@@ -108,7 +123,7 @@ class PlannerTask(BaseModel):
             return None
         if not isinstance(v, list):
             return None
-        valid = {"uploaded", "sec_filing", "news", "web"}
+        valid = {"uploaded", "sec_filing", "ch_filing", "news", "web"}
         out: list[str] = []
         seen: set[str] = set()
         for item in v:
