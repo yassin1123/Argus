@@ -28,6 +28,7 @@ RECOMMENDATION QUALITY (this is what makes the report useful, not generic):
 - `core_reasoning` must explain WHY this specific path beats the alternatives, citing the strongest 2-3 claim_ids by reference.
 - `key_reasons` must each start with a specific finding ("Concentrates 41% of...", "Cuts cycle by 2.4 months..."), not generic praise of an option.
 - `assumptions` should name what would have to be true for the recommendation to hold (e.g. "Mittelstand procurement cycles do not lengthen materially in 2025").
+- IMPORTANT: `assumptions` is a list of plain strings. Do NOT wrap each in an object — emit `["string 1", "string 2"]`, not `[{"assumption": "string 1"}, ...]`.
 
 FORBIDDEN:
 - Never argue "lack of evidence for X therefore choose Y" as the sole logic.

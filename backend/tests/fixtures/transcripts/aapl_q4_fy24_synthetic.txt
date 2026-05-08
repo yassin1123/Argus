@@ -1,0 +1,36 @@
+Apple Inc. — Q4 FY2024 Earnings Conference Call
+October 31, 2024
+
+Operator: Good day, and welcome to the Apple Q4 fiscal year 2024 earnings conference call. Today's call is being recorded. At this time, for opening remarks and introductions, I would like to turn the call over to Suhasini Chandramouli, Director of Investor Relations. Please go ahead.
+
+Suhasini Chandramouli - Director of Investor Relations: Thank you. Good afternoon, and thank you for joining us. Speaking first today is Apple's CEO, Tim Cook, and he'll be followed by CFO Luca Maestri. After that, we'll open the call to questions from analysts. With that, I'd like to turn the call over to Tim.
+
+Tim Cook - CEO: Thank you, Suhasini. Good afternoon, everyone, and thanks for joining us. Today Apple is reporting revenue of 94.9 billion dollars for our September quarter, up 6 percent year over year, and an all-time revenue record of 391.0 billion dollars for the full fiscal year. iPhone revenue was 46.2 billion dollars, a September quarter record. Services hit a new all-time high of 24.97 billion dollars, up 12 percent. We are very pleased with the strength we're seeing across the business heading into the holiday season.
+
+Luca Maestri - CFO: Thank you, Tim. Let me walk you through our financial performance in more detail. Products revenue was 70 billion dollars, with iPhone, Mac, and iPad all delivering strong year-over-year growth. Services gross margin was 74 percent, while products gross margin was 36.3 percent. Operating expenses came in at 14.3 billion dollars, near the low end of our guidance. Our installed base of active devices reached an all-time high across all geographic segments and all product categories. Cash plus marketable securities totaled 156.8 billion dollars at the end of the quarter.
+
+Operator: Thank you. We will now begin the question-and-answer portion of today's call. Our first question comes from Erik Woodring with Morgan Stanley. Please go ahead.
+
+Erik Woodring, Morgan Stanley - Analyst: Hi guys, thanks for taking my question. Tim, can you walk through what you're seeing on iPhone demand into the December quarter, particularly with Apple Intelligence rolling out in stages across regions? And Luca, any color on how the staged AI rollout might affect services attach rates?
+
+Tim Cook - CEO: Sure, Erik. Thanks for the question. We are seeing very strong customer response to iPhone 16, which has Apple Intelligence at the core of the experience. The first wave of Apple Intelligence features launched in U.S. English on October 28, with expansion to additional languages and regions planned for December and beyond. We're hearing from customers that the writing tools, notification summaries, and the redesigned Siri are landing well. On demand specifically, we expect total company revenue in the December quarter to grow low to mid single digits year over year.
+
+Luca Maestri - CFO: Just to add on services, Erik — we don't break out attach rates quarter to quarter, but the durable trend is that as the installed base grows and engagement deepens, paid-services adoption follows. We saw that in fiscal 2024 with services up 12.9 percent for the year, and we expect services growth in the December quarter to be similar to the four-quarter average we just reported.
+
+Operator: Thank you. Our next question comes from Wamsi Mohan with Bank of America. Please go ahead.
+
+Wamsi Mohan, Bank of America - Analyst: Yes, thank you. Tim, on Greater China — revenue there was down 4 percent in fiscal 2024 versus a 2 percent decline last year. What's your read on the local competitive dynamic, and what would have to be true for Greater China to return to growth in fiscal 2025?
+
+Tim Cook - CEO: Wamsi, thanks. China remains one of our most competitive markets and has been for some time. In the September quarter specifically, our Greater China revenue was 15.0 billion dollars, down 0.3 percent on a constant-currency basis. We saw record iPhone results in mainland China during the quarter, and on a sell-through basis we grew. The customer response to iPhone 16 in China has been strong. Looking ahead, the introduction of Apple Intelligence in Chinese later in the cycle will be an important moment for that market.
+
+Operator: Thank you. Our next question comes from Krish Sankar with TD Cowen. Please go ahead.
+
+Krish Sankar, TD Cowen - Analyst: Hi, thanks for taking my question. Luca, on capital return — you bought back 25 billion dollars of stock and paid 3.8 billion dollars in dividends in the September quarter. With the new 110 billion dollar buyback authorization announced in May, how should we think about the cadence of repurchases over the next four quarters, particularly given where the cash balance sits relative to your stated net-cash-neutral target?
+
+Luca Maestri - CFO: Thanks, Krish. As we've said before, we remain committed to reaching a net-cash-neutral position over time. We don't telegraph the cadence of repurchases on a quarterly basis, but the 110 billion authorization gives us flexibility, and we plan to continue returning capital to shareholders at a meaningful pace. The pace will be informed by where the share price is, our cash generation, and our investment priorities. Importantly, our buyback strategy has not changed: we view it as the most efficient way to return capital while we continue investing in the business.
+
+Operator: Thank you. That was our final question. I'll turn the call back over to Tim Cook for closing remarks.
+
+Tim Cook - CEO: Thanks, everyone, for joining today. We're heading into the holiday quarter with the strongest product lineup we've ever had, and Apple Intelligence will continue to roll out to more languages and more regions in the coming months. We appreciate your continued support.
+
+Operator: That concludes today's call. We thank you all for your participation. You may now disconnect.

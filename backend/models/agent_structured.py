@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+import json
+from typing import Any, Union
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class AnalystKeyClaim(BaseModel):
@@ -40,7 +43,57 @@ class AnalystStructuredOutput(BaseModel):
     reasoning_slots: list[AnalystReasoningSlot] = Field(default_factory=list)
     trade_offs: list[AnalystTradeOff] = Field(default_factory=list)
     evidence_strength: str = ""
-    assumptions: list[str] = Field(default_factory=list)
+    # Models intermittently emit assumptions as a list of dicts
+    # (``[{"assumption": "..."}]``) instead of plain strings; that used
+    # to trip the structured-output validator and force a retry. The
+    # ``before`` validator coerces dicts to strings so a single typo
+    # doesn't blow up the whole analysis. Schema stays narrow:
+    # list[str | dict[str, Any]] — the dict path is an escape valve, not
+    # the preferred shape (the prompt also tells the model not to wrap).
+    assumptions: list[Union[str, dict[str, Any]]] = Field(default_factory=list)
+
+    @field_validator("assumptions", mode="before")
+    @classmethod
+    def _coerce_assumptions(cls, v: object) -> list[Any]:
+        if v is None:
+            return []
+        if not isinstance(v, list):
+            return [str(v).strip()] if str(v).strip() else []
+        out: list[Any] = []
+        for item in v:
+            if isinstance(item, str):
+                s = item.strip()
+                if s:
+                    out.append(s)
+            elif isinstance(item, dict):
+                # Common shape: {"assumption": "X"} — pull X directly.
+                if len(item) == 1 and "assumption" in item:
+                    s = str(item["assumption"]).strip()
+                    if s:
+                        out.append(s)
+                # Slightly less common: {"assumption": "X", "rationale": "Y"}
+                # Concatenate so neither half is lost.
+                elif "assumption" in item:
+                    a = str(item.get("assumption") or "").strip()
+                    extras = " | ".join(
+                        f"{k}: {v}"
+                        for k, v in item.items()
+                        if k != "assumption" and str(v).strip()
+                    )
+                    if a:
+                        out.append(f"{a} ({extras})" if extras else a)
+                else:
+                    # No 'assumption' key — best effort: serialise so the
+                    # data isn't lost, but the consumer will see noise.
+                    try:
+                        out.append(json.dumps(item, ensure_ascii=False))
+                    except Exception:
+                        out.append(str(item))
+            else:
+                s = str(item).strip()
+                if s:
+                    out.append(s)
+        return out
 
 
 class RevisionInstruction(BaseModel):
