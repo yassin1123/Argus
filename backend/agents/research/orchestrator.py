@@ -19,6 +19,11 @@ from core.research_utils import (
 )
 from core.retrieval import retrieve_evidence
 from core.retrieval_chunks import hybrid_search
+from core.retrievers.news import (
+    TavilyError,
+    fetch_and_ingest_news,
+    tavily_available,
+)
 from core.web_fetch import fetch_page_text
 from core.web_search import SERPAPI_KEY, search_web_parallel, search_web_structured
 from db.queries import insert_evidence_objects
@@ -174,15 +179,32 @@ async def _retrieve_by_priorities(
     for pri in priorities:
         if pri == "web":
             continue
-        # "news" doesn't have its own ingestion source_type yet (planned
-        # for a later day). Skip rather than 500 — the orchestrator will
-        # spill into the next priority or, if "web" was listed, hit the
-        # web path. This keeps the planner's "news" hint useful today
-        # without requiring the news ingestor.
-        if pri == "news":
-            consulted.append(pri)
-            continue
         consulted.append(pri)
+        if pri == "news":
+            # Day 3: lazy-fetch news for this (engagement, query) tuple
+            # via Tavily, then let the source_type='news' hybrid_search
+            # below pick them up. Per-engagement isolation: chunks are
+            # written with session_id=this engagement, so a different
+            # engagement asking the same query gets its own fetch.
+            # Cache hit (>0 chunks already cached for this tuple)
+            # short-circuits inside fetch_and_ingest_news.
+            if tavily_available():
+                try:
+                    await fetch_and_ingest_news(
+                        session_id=session_id,
+                        query=question,
+                    )
+                except TavilyError as e:
+                    logger.warning(
+                        "Tavily news fetch failed for %r: %s", question, e
+                    )
+                except Exception:
+                    logger.exception("news ingest path raised; degrading")
+            else:
+                logger.info(
+                    "TAVILY_API_KEY not set — skipping news fetch for %r",
+                    question,
+                )
         result = await hybrid_search(
             engagement_id=session_id,
             query=question,
