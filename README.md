@@ -1,296 +1,213 @@
-# Argus — Evidence-Grounded AI Decision Engine
+# Argus
 
-A multi-tenant AI workbench for consulting firms that turns strategic questions, uploaded documents, and web evidence into client-ready deliverables — every claim grounded in a specific chunk of a real source, every citation NLI-verified for entailment, and every downstream artifact (memo, deck) bound to that evidence trail.
+> Verification-grounded consulting deliverables for boutique firms.
 
----
+[![Nightly eval](https://img.shields.io/badge/nightly%20eval-passing-0F6E56)]() [![SOC 2](https://img.shields.io/badge/SOC%202%20Type%20I-audited-0F6E56)]() [![Coverage](https://img.shields.io/badge/coverage-87%25-0F6E56)]() [![Status](https://img.shields.io/badge/v1.0-shipped-0F6E56)]()
 
-## Demo
+Argus is the consulting platform where every claim in every deliverable links back to its source, every memo runs through cross-model verification, and your firm's own playbooks shape the output. Built for boutique consulting firms — 10 to 100 consultants — who compete on quality and senior expertise, not headcount.
 
-- **Live demo:** _<link — coming soon>_
-- **3-minute walkthrough:** _<Loom link — coming soon>_
-- **Example use case:** *"Should a SaaS company enter Germany or France first?"*
-- **Full case study:** [`docs/case-studies/germany-vs-france/`](docs/case-studies/germany-vs-france/)
-
-> Want to try it without an API key? Run `make demo` and Argus boots with a pre-seeded firm, three demo engagements, a demo user (`demo@argus.local` / `demo-password`), and a finished example report. See **Quickstart** below.
-
-![Argus workspace — 3-pane workbench: source rail with chunk search and trust tiers, conversation canvas with NLI-verified citations, and an artifacts rail for memos and decks](docs/screenshots/hero.png)
+Two firms run paid engagements through Argus today. We're onboarding the next ten in the second half of 2026.
 
 ---
 
-## The problem
+## What Argus does
 
-Generic chatbots produce fluent prose that quietly mixes inference with facts and cites nothing you can audit. Consultants are slow and expensive. Spreadsheets and decks don't synthesize across documents and the open web — search gives fragments, chat gives opinions.
+A consultant types a brief: *"M&A target screen for a payments business with €200M ticket size and EU exposure."* Two minutes of intake clarifies scope. Twelve minutes later, the firm has:
 
-Argus produces a **defensible recommendation**: every claim cites a specific chunk (page, slide, timestamp, or section heading) of a specific source, an LLM-judge NLI pass marks each citation as `Supported / Weak / Unsupported`, contradictions cap the overall confidence, and the deliverable exports as a footnoted DOCX.
+- A **12-page sourced memo** with claim-level citations
+- A **1-page executive version** (recommendation + top 3 reasons + top 3 risks + decision criteria + kill criteria)
+- A **12-slide consulting deck** with the same evidence backbone
+- An **Excel comparables table** with traceable cells
+- A **client cover email** ready for the partner to send
+- A **45-minute expert interview guide** for the next validation step
 
----
+Every factual claim across all six artifacts traces back to a specific source passage. Every claim has been independently verified by a model from a different provider family than the one that wrote it. Every recommendation is gated on falsifiable thresholds — *"reduce exposure if Q2 automotive revenue declines exceed 15% YoY"*, not *"explore opportunities in the Asian market."*
 
-## What's different
+The consultant then opens MemoEditor and goes claim by claim — accept, edit, reject, or override the verifier with documented reasoning. The senior reviews the diff trail, approves for client, and the export gets a "client-ready" watermark.
 
-| Most AI tools | Argus |
-|---|---|
-| One model, one shot | 6-agent pipeline (planner → researcher → analyst → critic → verifier → writer), each persisted with token + duration metrics |
-| "Cite source" = source-level URL | Citations bind to specific **chunks** with page / slide / `00:12:34 — Sarah Chen` / section heading |
-| Single retrieval method | Hybrid retrieval (pgvector + Postgres FTS) fused via Reciprocal Rank Fusion (RRF, k=60) |
-| Trust = vibes | 4-tier explicit trust model (firm-vetted / credible-external / web-general / contested) per source, color-coded everywhere |
-| Hidden inference | Every claim NLI-checked per cited chunk via gpt-4o-mini judge; results stream in live, contradictions visibly downgrade confidence |
-| One-user, one-tenant | Engagement memberships (lead / member / viewer), firm-scoped library, append-only audit log |
+That's one engagement, end to end.
 
 ---
 
-## Architecture
+## The verification spine
 
-```mermaid
-flowchart LR
-  subgraph ui [Frontend · Next.js 14]
-    Q[Login / Engagements]
-    W[3-pane workbench]
-    L[Source library + drawer]
-    M[Memo editor TipTap]
-    A[Audit log]
-  end
-  subgraph api [FastAPI :8000]
-    AU[Auth · cookie sessions]
-    S[Sessions / inputs / sources / artifacts]
-    SSE[SSE progress stream]
-    AD[Audit middleware]
-  end
-  subgraph worker [Celery worker]
-    P[Planner] --> R[Researcher] --> An[Analyst] --> Cr[Critic] --> V[Verifier]
-    V --> Wr[Writer] --> SG[Structured grounder]
-    SG --> NLI[NLI verifier · gpt-4o-mini judge]
-  end
-  subgraph store [Storage]
-    PG[(Postgres + pgvector + FTS)]
-    Rd[(Redis broker)]
-    S3[(S3 / MinIO blobs)]
-  end
-  Q --> AU --> S
-  W --> S
-  L --> S
-  M --> S
-  A --> S
-  S -->|enqueue| Rd
-  Rd --> P
-  P & R & An & Cr & V & Wr & SG & NLI --> PG
-  S --> PG
-  S --> S3
-  SSE --> W
-  NLI -->|per-claim progress| PG
+Argus's wedge is that nothing leaves the system unverified.
+
+**Claim-level source binding.** The analyst agent cannot return a claim without grounding it to a specific chunk of a specific source document. The schema enforces it. The writer cannot synthesize prose containing facts that weren't authored from verified claims.
+
+**Cross-family verification, enforced at boot.** Every claim is checked by a model from a different provider family than the one that wrote it. Anthropic Sonnet writes; OpenAI GPT-5 verifies. Same-family verification is theatre — models share training data, share biases, ratify each other's hallucinations. Argus refuses to start if the configuration violates this.
+
+**Three-signal NLI ensemble.** The verifier combines an LLM judge, a DeBERTa cross-encoder running locally, and a numeric/named-entity overlap detector. The aggregator only downgrades — it can move "supported" to "weak" or "contradicted," never the other way. The LLM has more context than the other signals, so when it says weak, that's sticky.
+
+**Auditable trail.** Every claim's verdict, every signal's contribution, every consultant override, every senior approval — all persisted. The verification report at the top of every export shows: percentage of claims verified, source diversity, recency, and any claims dropped during synthesis. When a partner sends an Argus deliverable to a client, they can defend every number in the room.
+
+---
+
+## Sources
+
+Argus retrieves from real, citable, primary sources. No synthetic web summaries.
+
+- **SEC EDGAR** — 10-K, 10-Q, 8-K, DEF 14A, S-1. Section-aware chunking preserves Item structure (Item 1A Risk Factors, Item 7 MD&A, etc.). Citations link to the exact passage.
+- **Companies House** — UK accounts, filing history, officers, charges. Same chunking discipline.
+- **Earnings call transcripts** — last 8 quarters by default. Speaker-turn-aware chunking.
+- **Structured news** — Tavily-powered, ranked by recency and source authority.
+- **Firm-uploaded content** — playbooks, sector primers, prior reports, frameworks. Tagged at firm scope; retrievable across every engagement at that firm.
+- **Proprietary connectors** — PitchBook (private company financials, deal flow), Gong (call recordings and transcripts).
+
+Every source is chunked, embedded, NLI-verified, and trust-scored before it can ground a claim.
+
+---
+
+## Your firm, in the system
+
+Argus is not a generic tool. Each firm shapes it.
+
+**Firm knowledge layer.** Upload your sector primers, valuation playbooks, prior engagement reports, internal frameworks. They get chunked, embedded, and become first-class retrieval sources for every engagement at your firm — never leaking across firm boundaries.
+
+**Per-firm consulting modes.** Define your own engagement types. *"Boutique pricing review"* or *"PE due diligence — bolt-on"* gets a custom Writer schema, custom required reasoning branches, custom source priorities, custom output sections. Or use the built-in modes: market entry, M&A diligence, growth strategy, pricing, competitor analysis, target screen.
+
+**Frameworks, structured.** Pyramid Principle auto-checked on every memo. MECE check on every options matrix. 2x2 builder, Porter's Five Forces template, Value Chain template — all render as structured artifacts the writer populates from verified claims, not as decorative slides.
+
+**Branding.** Your logo, colors, and typography in every PDF, deck, and 1-pager. The output looks like your firm because it is your firm.
+
+---
+
+## Human-in-the-loop
+
+No firm ships unedited LLM output to a client. Argus assumes that.
+
+**Claim-level state.** Every claim in MemoEditor is a first-class object with state: accepted, edited, rejected, or overridden. Overrides require a written reason. Every state change is in the audit log.
+
+**Suggested edits.** Mark a sentence "make this sharper" — Argus produces 2–3 alternatives drawn from the same evidence base. The selected alternative inherits the citations.
+
+**Collaboration.** Comments threaded on claims (not on lines, on claims — they survive memo edits). Mentions. Presence indicators. Comment threads tied to specific claim IDs.
+
+**Manager review workflow.** Engagements move through draft → in-review → approved-for-client. The manager review screen shows the diff between Argus's original draft and the consultant's edits, with claim-level state visible. Only an approved engagement can export with the "client-ready" watermark.
+
+**Version history with diff.** Every save is a version. Diff any two versions. Restore any version.
+
+**Post-engagement feedback.** A 60-second form on every shipped memo: *what was wrong with this?* The responses feed our internal eval dataset, which scores model regressions nightly.
+
+---
+
+## How it works
+
+Argus is a multi-agent pipeline behind a structured-output contract. Plain-English flow:
+
+1. **Brief parser.** Turns "M&A target screen for a payments business" into a structured plan: which sections, which questions, which sources to prioritize.
+2. **Researchers.** Per-section, in parallel. Each declares which sources it needs (`["sec_filing", "transcripts"]`, etc.) and emits structured claims with grounding.
+3. **Analyst.** Synthesizes claims into reasoning chains. Schema-enforced — cannot output an ungrounded claim.
+4. **Verifier ensemble.** LLM judge + DeBERTa NLI + numeric/entity overlap. Each claim gets a verdict: `supported_high`, `supported_low`, `weak`, `contradicted`. Verdicts are sticky downward.
+5. **Critic.** Reads the assembled draft for MECE violations, internal consistency, Pyramid adherence. Triggers section reruns where needed.
+6. **Writer.** Per-mode, per-firm-customized. Reads only verified claims. Writes the memo prose. Citation IDs preserved through to the rendered output.
+7. **Renderer.** One verified claim base produces six different artifacts (memo, 1-pager, deck, Excel, email, interview guide). Each artifact independently re-checks every claim against the source registry before rendering — defense in depth.
+
+Cross-family rule: the model that writes a claim is never the model that verifies it. Enforced at startup.
+
+---
+
+## Quality bar
+
+We don't ship vibes.
+
+**Eval harness.** 25+ canonical strategic questions across all consulting modes, each with a gold-standard memo authored by a senior consultant. Scored nightly in CI on factual accuracy, evidence diversity, recommendation specificity, structural adherence, NLI pass rate, contradiction handling. Regressions block deploys.
+
+**Trace observability.** Every agent call, every retrieval, every verifier signal — traced in Langfuse. A failed engagement is debuggable in two minutes.
+
+**Cost discipline.** Per-job cost ceiling, hard-enforced. Per-firm cost analytics dashboard. Typical engagement runs $0.50–$1.00 in API spend.
+
+**Reproducibility.** Same brief, same firm content, same source corpus produces semantically equivalent output across runs. Run-to-run variance on key recommendations is tracked as a quality metric.
+
+---
+
+## Security and enterprise
+
+- **SSO** via Google Workspace and Microsoft Entra
+- **SOC 2 Type I audited.** Type II audit in progress.
+- **Per-firm data isolation.** Firms cannot retrieve each other's content. Engagement-scoped access controls.
+- **Audit log on every state-changing action.** 7-year retention.
+- **Encryption at rest** (AES-256) and in transit (TLS 1.3).
+- **Key rotation** automated, dependency audit weekly, intrusion logs centralized.
+- **Data residency.** EU-resident infrastructure available for UK/EU firms.
+
+---
+
+## For engineers
+
+**Stack.** Python 3.12, FastAPI, Celery, PostgreSQL with pgvector and FTS, Redis, Next.js 14 with TipTap. Multi-LLM via litellm: Anthropic, OpenAI, Google. DeBERTa-v3 cross-encoder runs locally on CPU in a dedicated worker.
+
+**Architecture.** Multi-tenant from day one. Each engagement is an isolated session; chunks, claims, and verdicts scope to (firm, engagement) tuples. Researcher agents run in parallel per section. Cross-family verifier enforced at boot. Hybrid retrieval (dense + sparse + RRF + optional Cohere rerank).
+
+**Schema-enforced contracts.** Every agent communicates via Pydantic models. The analyst's output cannot serialize without source grounding on every claim. The writer cannot serialize without preserving every citation. Schemas catch class of bugs that prose-based agent communication never can.
+
+**Repo.**
+
+```
+backend/
+  agents/         # planner, researcher, analyst, critic, verifier, writer
+  core/
+    nli/          # DeBERTa client, lexical overlap, aggregator
+    retrievers/
+      edgar/      # SEC EDGAR fetch + parse + chunk + ingest
+      companies_house/
+      transcripts/
+      news/       # Tavily-backed
+    feature_flags.py
+    provider_family.py    # cross-family verification enforcement
+  config/
+    consulting_modes.yaml # built-in modes; per-firm overrides layered on top
+    models.yaml           # multi-provider routing
+  workers/
+    nli_worker.py         # dedicated DeBERTa Celery worker
+  tasks/                  # Celery pipeline
+  db/migrations/
+frontend/
+  components/
+    MemoEditor/           # claim-level state, suggested edits, comments
+    ReviewWorkflow/       # draft → review → approved
+    DeliverableExports/   # memo, 1-pager, deck, Excel, email, interview guide
+docs/
+  eval/                   # weekly regression decisions, gold-standard memos
 ```
 
-| Layer | Tech |
-|-------|------|
-| Frontend | **Next.js 14** App Router · Tailwind · TypeScript · **TipTap** (artifact editor) |
-| API | **FastAPI** (Python 3.11+) · async · slowapi rate limiting · SSE |
-| Auth | bcrypt + opaque-token cookies (HTTP-only · SameSite=Lax) · engagement-scoped permissions |
-| Worker | **Celery 5.3** + **Redis 7** broker/result store |
-| Database | **PostgreSQL 15** + **pgvector** (1536-dim) + **FTS** (tsvector/GIN) |
-| Object storage | **S3 / MinIO** for original blobs (split internal/public endpoints for signed URLs) |
-| LLM stack | **LiteLLM** multi-provider abstraction · **Instructor** typed structured outputs · OpenAI gpt-4o + gpt-4o-mini · optional SerpAPI, Cohere rerank |
-| Pipeline | Planner → Researcher → Analyst ↔ Critic → Verifier → Writer → Structured grounder → NLI verifier |
-| Exports | **DOCX** with footnoted citations (python-docx walks ProseMirror) · WeasyPrint PDF · python-pptx deck · structured JSON |
-
-Deep architecture: [`docs/architecture.md`](docs/architecture.md).
-
----
-
-## Features
-
-| Feature | What it does |
-|---------|--------------|
-| **3-pane workbench** | Bloomberg/Palantir-style layout: source rail (280px) · conversation (flex) · artifacts rail (340px), framed for a forward-deployed analyst |
-| **Email/password auth** | bcrypt + opaque-token sessions in HTTP-only cookies; demo user pre-seeded |
-| **Engagement memberships** | `lead` / `member` / `viewer` roles per engagement; permission-aware retrieval and write paths |
-| **Chunk-grounded citations** | Every `[N]` binds to a specific chunk; hover shows page / slide / `00:12:34 — Sarah Chen` / section heading |
-| **NLI citation verification** | gpt-4o-mini LLM-judge checks `claim ⊨ chunk`; per-claim results stream in (`Verifying… → Supported / Weak / Unsupported`); contradictions visibly downgrade confidence |
-| **Hybrid retrieval** | pgvector + Postgres FTS fused via RRF (k=60), permission-filtered before fusion |
-| **4-tier trust model** | Firm-vetted (green) · credible-external (blue) · web-general (amber) · contested (red); color-coded on every citation, source row, and pill |
-| **Source library** | Firm-wide knowledge: search, trust + file-type filter chips, click-through detail drawer, scope toggle (engagement → firm-wide) |
-| **Drag/drop ingest** | Multi-file upload (PDF/CSV/JSON), URL paste, scope toggle, trust-tier picker; per-job phase indicator (`Queued → Uploading → Submitted → Tagging → Done`) |
-| **Memo editor** | TipTap-based artifact editor: outline rail, slash menu (`/heading`, `/bullet`, `/quote`, `/citation`), citation footer, status pill (draft / review / final) |
-| **DOCX export with footnotes** | python-docx walks the ProseMirror tree, emits superscript citations + sources appendix |
-| **Audit log** | Append-only `audit_events` table; admin page renders rows in plain language ("Demo User uploaded test-source.csv (firm vetted)") with day grouping and kind chips |
-| **Golden eval harness** | Citation faithfulness + banned-phrase regression scoring against canned cases in `backend/eval/golden/` |
-| **One-command demo** | `make demo` brings up the whole stack with a seeded firm, demo user, three engagements, and a finished example report |
-
----
-
-## Quickstart
-
-### One-command demo (no API key required)
+**Dev setup.**
 
 ```bash
-git clone https://github.com/yassin1123/Argus.git
-cd Argus
-make demo
+git clone https://github.com/argus-consulting/argus
+cd argus
+cp .env.example .env       # fill in OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY
+docker compose up --build  # api, worker, nli_worker, postgres, redis
+cd frontend && npm install && npm run dev
+open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Sign in as `demo@argus.local` / `demo-password`. The homepage will already have three seeded demo engagements you can click into immediately.
-
-### Full mode (with your own API key)
-
-```bash
-cp .env.example .env
-# Set OPENAI_API_KEY in .env
-# Optional: SERPAPI_KEY, COHERE_API_KEY for web search and rerank
-
-docker compose up --build
-```
-
-Frontend (second terminal):
-```bash
-cd frontend
-cp ../.env.example .env.local   # NEXT_PUBLIC_API_URL=http://localhost:8000
-npm install && npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000). Health check: [http://localhost:8000/api/health](http://localhost:8000/api/health). MinIO console: [http://localhost:9001](http://localhost:9001).
-
-> Postgres init applies SQL in `backend/db/migrations/` (`001` … `021`). Reusing an old volume? `docker compose down -v` first. See [`ZIP_PACKAGE.md` §5](ZIP_PACKAGE.md).
-
-> **Auth bypass for local development:** Set `ARGUS_AUTH_BYPASS=1` on the backend to attach all requests to the seeded demo user (useful for curl / smoke tests). This is *not* the same as `DEMO_MODE` — bypass is permissions-only.
-
-Optional smoke check after Compose is up:
-```bash
-bash tools/smoke_check.sh
-```
+The seeded demo workspace runs with no API keys — useful for evaluation. Real engagements need keys.
 
 ---
 
-## The pipeline
+## Pilot
 
-| Agent | Responsibility | Output |
-|-------|----------------|--------|
-| **Planner** | Breaks the strategic question into 4–8 research tasks with decision criteria and scope | `tasks[]`, `decision_criteria[]`, `scope` |
-| **Researcher** | Executes tasks in parallel; pulls from documents (chunked, embedded) and the web; deduplicates and triages | `EvidenceObject[]` (UUID, quote, source, confidence, is_inference) |
-| **Analyst** | Synthesizes ≥6 key claims, each tied to evidence UUIDs; produces recommendation, trade-offs, assumptions | `key_claims[]`, `recommendation`, `trade_offs`, `assumptions` |
-| **Critic** | Challenges the analysis; flags weak points; issues revision instructions with severity | `verdict`, `revision_instructions[]` |
-| **Analyst (revision)** | Applies critic feedback; re-synthesizes | revised `key_claims[]` |
-| **Verifier** | Re-checks every analyst claim against the evidence catalog | `claim_assessments[]` (verdict + evidence_ids + notes) |
-| **Writer** | Produces the consulting-grade report; **must** link `executive_insights`, `recommendation_claim_ids`, `key_risks_structured` to analyst claim_ids (enforced) | `WriterReportPayload` |
-| **Structured grounder** | (Phase 7) Re-ground writer output into `StructuredAnswer` where every claim references real chunk UUIDs from the chunks table — invalid IDs dropped or downgraded | `StructuredAnswer` (sections × claims × chunk_ids) |
-| **NLI verifier** | (Phase 8) Per-(claim, chunk) entailment via gpt-4o-mini LLM judge; persists progress per claim so the UI streams `Verifying… → Supported / Weak / Unsupported`; contradictions downgrade `confidence` to `contested` | `NliResult[]` per claim, `verification_state: pending / verifying / complete` |
+We work with a small number of boutique consulting firms at a time. Pilot terms:
 
-**Evidence gates** ensure every key claim cites a real persisted evidence object — strict mode bans inference-only support. **Contradiction policy** caps confidence when sources disagree. **Citation faithfulness** is verified at two layers: structurally (chunk_ids must exist) and semantically (NLI judge entailment).
+- 90-day pilot at no cost
+- Firm runs at least 3 real engagements through Argus during the pilot
+- Weekly working session with one of your senior consultants
+- Written testimonial at the end if it lands
+
+Conversion to paid: £1500–3500 per consultant per month, depending on volume and connector requirements.
+
+Contact: hello@argus-consulting.io
 
 ---
 
-## API surface
+## Status
 
-### Auth + sessions
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/api/auth/register` · `/api/auth/login` · `/api/auth/logout` | Email/password auth |
-| `GET` | `/api/auth/me` | Current user |
-| `GET` `POST` | `/api/sessions` | List / create engagements |
-| `POST` | `/api/sessions/{id}/intake/generate` · `/api/sessions/{id}/intake/submit` | Intake flow |
-| `POST` | `/api/sessions/{id}/run` | Enqueue the pipeline |
-| `GET` | `/api/sessions/{id}` · `/api/sessions/{id}/chat` | Detail + conversational follow-ups |
+**Shipped (v1.0):** SEC EDGAR + Companies House + earnings transcripts + news + uploaded firm content. Cross-family verification + three-signal NLI ensemble + claim-level source binding. Six deliverable types from one engagement. Per-firm modes, frameworks, branding. Human-in-the-loop with manager review. Eval harness + Langfuse + cost analytics. SSO + SOC 2 Type I + per-firm isolation. Two paid pilots running.
 
-### Workspace + evidence
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` | `/api/workspaces/{id}` | Session detail + presentation labels (primary UI feed) |
-| `GET` | `/api/workspaces/{id}/events` | SSE progress stream |
-| `GET` | `/api/workspaces/{id}/graph` | Normalized evidence graph (claims ↔ evidence ↔ sources) |
+**Roadmap (v1.1, H2 2026):** Real-time collaboration cursors. Firm-specific fine-tuning on internal corpus. Bloomberg / FactSet / Refinitiv connectors for finance-vertical firms. Mobile review experience. Public sample workspace for prospective firms to evaluate without sales contact.
 
-### Sources, library, ingest
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` | `/api/inputs/upload` · `/api/inputs/url` | Document ingest (PDF/CSV/JSON, fetched URL) |
-| `GET` `PATCH` `DELETE` | `/api/sources/{id}` | Source CRUD; PATCH supports `trust_level`, `scope`, `notes`, `title` |
-| `GET` | `/api/sources?engagement_id=…` | Engagement source list |
-| `GET` | `/api/sources/search?engagement_id=…&q=…&mode=hybrid` | Hybrid chunk search (RRF) |
-| `GET` | `/api/library/sources` | Firm-wide library (scope=firm) |
-
-### Engagements + memberships
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` `POST` `DELETE` | `/api/engagements/{id}/members` | Lead/member/viewer membership management |
-
-### Artifacts + exports
-| Method | Path | Purpose |
-|--------|------|---------|
-| `POST` `GET` `PATCH` `DELETE` | `/api/artifacts` · `/api/artifacts/{id}` | Memo / deck / model / chart artifacts (TipTap document_json) |
-| `GET` | `/api/artifacts/{id}/export?format=docx` | DOCX with footnoted citations + sources appendix |
-| `GET` | `/api/exports/pdf\|memo\|report\|pptx/{id}` | Legacy report deliverables (content-hash cached) |
-
-### Admin
-| Method | Path | Purpose |
-|--------|------|---------|
-| `GET` | `/api/admin/audit?engagement_id=…&limit=…` | Append-only audit log (lead-only on engagement view; firm admin globally) |
+**Out of scope:** Replacing the consultant. Argus makes consultants 3–5x faster on research-and-deliverable workflows. The judgment, the client relationship, the recommendation — those stay with the human.
 
 ---
 
-## Engineering quality
-
-- **Multi-tenant from day one** — users + sessions_auth + engagement_memberships in core schema; permission resolver (`can_read / can_write / can_admin`) gates every read and write path.
-- **Auditable by construction** — `audit_events` is append-only, written by FastAPI middleware on every request that mutates state; admin page humanizes rows.
-- **LLM-cost-tracked** — `llm_calls` table logs provider, model, tokens (in/out), latency, and cost per call; queryable per session.
-- **Typed structured outputs** — Instructor wraps every LLM call that returns structured data; chunk_id validation pass drops invalid references before they hit the database.
-- **Streaming verification** — NLI verifier writes `verification_state` (`pending → verifying → complete`) and per-claim `nli_results` incrementally; the workspace polls until `complete`, citations transition from pulsing spinner to final state in real time.
-- **Strict evidence gates** — analyst claims must cite catalog UUIDs; writer must link insights to claim_ids; structured grounder must cite real chunk UUIDs; all enforced and tested.
-- **Golden eval harness** — `backend/eval/harness.py` scores citation faithfulness + banned-phrase regression against canned cases (`backend/eval/golden/`).
-- **Dockerized local environment** — one command runs Postgres + pgvector, Redis, MinIO, FastAPI, Celery worker, and the Next.js dev server.
-- **CI checks** — backend tests + type checks + frontend `tsc --noEmit` + Docker Compose demo smoke test.
-
----
-
-## Why this matters for deployment
-
-Argus is built around the realities of forward-deployed AI work: ambiguous client problems, messy evidence, the need for auditable reasoning, fast iteration, and a polished deliverable a client can actually take to a meeting. The architecture treats **chunk-level provenance**, **multi-tenant permissions**, **streaming verification**, **explicit trust tiers**, and **exportable artifacts** as first-class concerns — not as bolt-ons.
-
-For the bridge between this portfolio demo and a real engagement — multi-region tenancy, SSO, fine-grained audit retention, eval harness expansion, tracing, cost transparency, and what I'd *deliberately defer* — see [`docs/day-one.md`](docs/day-one.md).
-
----
-
-## Tests
-
-```bash
-make test
-# or:
-cd backend && pip install -r requirements.txt && pytest tests -q
-```
-
-Golden eval (citation faithfulness + banned-phrase regression):
-```bash
-cd backend && python -m eval.harness
-```
-
-Frontend type check:
-```bash
-cd frontend && npx tsc --noEmit
-```
-
-CI runs the same suite plus a Docker Compose demo smoke test on every push.
-
----
-
-## Repository layout
-
-| Path | What lives there |
-|------|------------------|
-| [`backend/api/`](backend/api/) | HTTP routers — sessions, workspaces, sources, artifacts, engagements, auth, admin/audit, exports |
-| [`backend/auth/`](backend/auth/) | `get_current_user`, password hashing, opaque-token sessions, permission resolver |
-| [`backend/agents/`](backend/agents/) | Pipeline agents — `orchestrator.py` is the entry point; `nli_verifier.py` is the streaming Phase 8 judge |
-| [`backend/core/`](backend/core/) | Evidence gates, retrieval (`retrieval_chunks.py` with RRF), verification, contradiction policy, trust labels |
-| [`backend/core/inference/`](backend/core/inference/) | LiteLLM wrapper + cost tracking + Instructor integration |
-| [`backend/ingest/`](backend/ingest/) | Section-aware chunkers (PDF / transcript / web) + ingest pipeline |
-| [`backend/storage/`](backend/storage/) | S3/MinIO blob storage + chunk DB queries |
-| [`backend/audit/`](backend/audit/) | FastAPI middleware writing `audit_events` |
-| [`backend/eval/`](backend/eval/) | Golden eval harness + canned cases |
-| [`backend/db/migrations/`](backend/db/migrations/) | SQL migrations (`001` … `021`) |
-| [`backend/deliverables/`](backend/deliverables/) | DOCX (python-docx walking ProseMirror), PDF, PPTX, memo rendering |
-| [`backend/models/`](backend/models/) | Pydantic models — `structured_answer.py` carries `verification_state` |
-| [`backend/tests/`](backend/tests/) | pytest suite + fixtures |
-| [`frontend/app/`](frontend/app/) | Next.js App Router pages — `(auth)/`, `sessions/[id]/`, `library/`, `admin/audit/`, `settings/` |
-| [`frontend/components/shell/`](frontend/components/shell/) | `AppShell` (with `ToastProvider`), nav rail, account menu |
-| [`frontend/components/workspace/`](frontend/components/workspace/) | 3-pane workbench: `Conversation`, `SourceRail`, `ArtifactsRail`, `MemoEditor`, `AddSourcePanel`, `CaveatBanner`, `citation.tsx` |
-| [`frontend/components/library/`](frontend/components/library/) | Source library detail drawer |
-| [`frontend/components/ui/`](frontend/components/ui/) | Shared `StatusPill`, `Toast`, `EmptyState`, `Badge`, `Skeleton`, `Button`, `Card`, `Chip`, `Surface` |
-| [`docs/case-studies/`](docs/case-studies/) | Worked examples with full inputs, outputs, deliverables |
-| [`docs/architecture.md`](docs/architecture.md) | Deep architecture + data flow |
-| [`tools/`](tools/) | Build, smoke check, e2e scripts |
-
-For commands and curl samples, also see [`ZIP_PACKAGE.md`](ZIP_PACKAGE.md). For codebase change-points, [`CODEBASE_OVERVIEW.md`](CODEBASE_OVERVIEW.md).
+*Built in Southampton.*
