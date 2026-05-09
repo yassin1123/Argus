@@ -42,3 +42,8 @@ backend/eval_runs/week4_d1_e2e/*.failed.json
 backend/eval_runs/phase1_exit/AAPL.json
 backend/eval_runs/phase1_exit/TSCO_LON.json
 backend/eval_runs/phase1_exit/*.failed.json
+
+# Week 5 / Day 5 firm-library e2e — same shape, only summary.json committed.
+backend/eval_runs/week5_e2e/A_with_library.json
+backend/eval_runs/week5_e2e/B_with_library.json
+backend/eval_runs/week5_e2e/A_no_library.json

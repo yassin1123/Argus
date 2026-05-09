@@ -1,0 +1,106 @@
+{
+  "generated_at": "2026-05-09T03:02:43Z",
+  "headline_assertion_pass": true,
+  "headline_assertion_text": "Both with-library engagements produce >= 1 firm_library citation.",
+  "n_runs": 3,
+  "runs": [
+    {
+      "run_name": "A_with_library",
+      "firm_slug": "argus-demo-boutique",
+      "session_id": "71160fcc-0ddc-47d6-9ee7-552a67743847",
+      "brief": "Generate a target screen for a UK retail-sector acquisition target with \u20ac100\u2013500M revenue. Focus on omnichannel readiness and operational efficiency.",
+      "wall_seconds": 665.32,
+      "cost_usd_total": 0.538,
+      "total_claims": 20,
+      "grounded_claims": 12,
+      "library_grounded_claims": 12,
+      "firm_library_citation_count": 17,
+      "firm_library_items_cited": 2,
+      "firm_library_top_items": [
+        [
+          "Retail Sector Primer (UK + US)",
+          16
+        ],
+        [
+          "M&A Target Screen Playbook (Boutique Edition)",
+          1
+        ]
+      ],
+      "firm_library_categories_cited": {
+        "sector_primer": 16,
+        "playbook": 1
+      },
+      "diversity_counts": {
+        "firm_library": 32
+      },
+      "rec_numeric_tokens": 7,
+      "rec_time_bound_phrases": 2,
+      "recommendation_preview": "Accept UK retail targets in the \u20ac100\u2013500M revenue range if they meet ALL of: (a) cost-to-serve per channel demonstrably below sector median with documented channel P&L decomposition, (b) private-label program contributing measurable gross margin advantage with 3-year trend data, (c) 12-month customer cohort retention above sector median for last 3 cohorts with cohort-level data, (d) positioned as scaled omnichannel operator OR specialist single-channel player with named diffe",
+      "error": null
+    },
+    {
+      "run_name": "B_with_library",
+      "firm_slug": "argus-demo-boutique",
+      "session_id": "848df84e-b49e-4ed2-b367-815d80c05802",
+      "brief": "Develop a 3-year growth strategy for a regional UK retailer entering the US market. Cover entry mode options, market attractiveness, and risk profile.",
+      "wall_seconds": 587.45,
+      "cost_usd_total": 0.5246,
+      "total_claims": 21,
+      "grounded_claims": 13,
+      "library_grounded_claims": 13,
+      "firm_library_citation_count": 23,
+      "firm_library_items_cited": 4,
+      "firm_library_top_items": [
+        [
+          "Retail Sector Primer (UK + US)",
+          17
+        ],
+        [
+          "M&A Target Screen Playbook (Boutique Edition)",
+          3
+        ],
+        [
+          "Valuation Methodology (Firm House View)",
+          2
+        ],
+        [
+          "Growth Strategy Framework (Boutique Methodology)",
+          1
+        ]
+      ],
+      "firm_library_categories_cited": {
+        "sector_primer": 17,
+        "playbook": 3,
+        "framework": 1,
+        "methodology": 2
+      },
+      "diversity_counts": {
+        "firm_library": 24
+      },
+      "rec_numeric_tokens": 17,
+      "rec_time_bound_phrases": 2,
+      "recommendation_preview": "Enter the US market via acquisition of a regional grocer in the Mid-Atlantic corridor (Pennsylvania-Maryland-Virginia MSAs) or Upper Midwest (Wisconsin-Minnesota-Iowa cluster), targeting a \u00a3100m\u2013\u00a3200m revenue asset with demonstrated omnichannel capability (\u226515% digital sales penetration, <\u00a38 cost-to-serve for online orders), followed by a 12-month integration phase with defined gates: achieve target's baseline omnichannel KPIs within 6 months, implement private label program ",
+      "error": null
+    },
+    {
+      "run_name": "A_no_library",
+      "firm_slug": "argus-baseline",
+      "session_id": "e3a923e0-bc62-4a90-9ebd-210f47e6d2e9",
+      "brief": "Generate a target screen for a UK retail-sector acquisition target with \u20ac100\u2013500M revenue. Focus on omnichannel readiness and operational efficiency.",
+      "wall_seconds": 312.25,
+      "cost_usd_total": 0.2276,
+      "total_claims": 0,
+      "grounded_claims": 0,
+      "library_grounded_claims": 0,
+      "firm_library_citation_count": 0,
+      "firm_library_items_cited": 0,
+      "firm_library_top_items": [],
+      "firm_library_categories_cited": {},
+      "diversity_counts": {},
+      "rec_numeric_tokens": 0,
+      "rec_time_bound_phrases": 0,
+      "recommendation_preview": "",
+      "error": null
+    }
+  ]
+}
