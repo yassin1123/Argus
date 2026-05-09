@@ -37,6 +37,18 @@ function FirmLibraryIcon() {
     </svg>
   );
 }
+function ModesIcon() {
+  // Sliders glyph — speaks to "tunable mode parameters" without overlapping
+  // GearIcon (settings) or FirmLibraryIcon (curated content).
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0" />
+      <circle cx="16" cy="6" r="2" />
+      <circle cx="8" cy="12" r="2" />
+      <circle cx="18" cy="18" r="2" />
+    </svg>
+  );
+}
 function VaultIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
@@ -71,6 +83,8 @@ const NAV: NavItem[] = [
   { href: "/library", label: "Sources", match: (p) => p === "/library" || p.startsWith("/library/"), icon: <LibraryIcon /> },
   // /firm/library = new firm-curated content (Phase 2 / Week 5 / Day 2 ).
   { href: "/firm/library", label: "Firm Library", match: (p) => p.startsWith("/firm/library"), icon: <FirmLibraryIcon /> },
+  // /firm/modes = layered consulting-mode admin (Phase 2 / Week 6 / Day 3).
+  { href: "/firm/modes", label: "Consulting modes", match: (p) => p.startsWith("/firm/modes"), icon: <ModesIcon /> },
   { href: "/vault", label: "Knowledge Vault", match: (p) => p.startsWith("/vault"), icon: <VaultIcon /> },
   { href: "/notifications", label: "Notifications", match: (p) => p.startsWith("/notifications"), icon: <BellIcon /> },
   { href: "/settings", label: "Settings", match: (p) => p.startsWith("/settings"), icon: <GearIcon /> },
