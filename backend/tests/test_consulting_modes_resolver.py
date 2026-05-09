@@ -264,3 +264,45 @@ def test_load_mode_legacy_matches_builtin_yaml():
         assert m.min_evidence_objects == int(row.get("min_evidence_objects") or 0)
         # And the layer_provenance is purely built-in.
         assert all(v == "built_in" for v in m.layer_provenance.values())
+
+
+# ---------------------------------------------------------------------------
+# W7/D2 — m_and_a_diligence built-in mode
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_resolver_loads_m_and_a_mode(monkeypatch):
+    """resolve_mode for the new built-in returns the full mode shape:
+    6 required branches, 6 reasoning slots, 4 source priorities,
+    trust-tier rules for uploaded/sec_filing/transcript/news, and the
+    metadata block flattened to top level."""
+    # Use the production YAML (no env override).
+    resolver_mod._yaml_reset()
+    _patch_loaders(monkeypatch)  # no firm/engagement override
+
+    m = await resolve_mode("m_and_a_diligence", firm_id=FIRM_A)
+
+    assert m.name == "m_and_a_diligence"
+    assert m.display_name == "M&A diligence"
+    assert len(m.required_branches) == 6
+    assert "synergy_quantification" in m.required_branches
+    assert "valuation_triangulation" in m.required_branches
+    assert len(m.reasoning_slots) == 6
+    assert "deal_breakers" in m.reasoning_slots
+    assert m.source_priorities_default == ["uploaded", "sec_filing", "transcript", "news"]
+    assert m.trust_tier_rules.get("uploaded") == "firm_vetted"
+    assert m.trust_tier_rules.get("news") == "web_general"
+    assert m.metadata.get("schema_version") == "1.0"
+    assert m.metadata.get("writer_payload_class") == "MAndADiligenceReportPayload"
+    # All provenance is built_in (no firm/engagement override applied).
+    assert all(v == "built_in" for v in m.layer_provenance.values())
+
+
+def test_m_and_a_mode_in_load_mode_legacy():
+    """Legacy synchronous shim returns the new built-in too."""
+    resolver_mod._yaml_reset()
+    m = load_mode_legacy("m_and_a_diligence")
+    assert m.name == "m_and_a_diligence"
+    assert "synergy_quantification" in m.required_branches
+    assert "deal_breakers" in m.reasoning_slots

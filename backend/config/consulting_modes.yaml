@@ -26,3 +26,43 @@ growth_strategy:
     - market
     - capabilities
   min_evidence_objects: 2
+
+# Phase 2 / Week 7 / Day 2 — first built-in mode shipping with the
+# richer schema fields (display_name, description, reasoning_slots,
+# source_priorities_default, trust_tier_rules, metadata).
+# Pairs with MAndADiligenceReportPayload in agents/writer/schemas/_m_and_a.py
+# (registered for this slug in agents/writer/schemas/_registry.py).
+m_and_a_diligence:
+  display_name: "M&A diligence"
+  description: |
+    Diligence assessment of an acquisition target. Quantifies deal economics
+    (synergies, valuation range, risks), defines integration plan, and
+    recommends deal structure. Anchored to a CIM or equivalent target data.
+  required_branches:
+    - financial_due_diligence       # P&L quality, working capital, debt
+    - commercial_due_diligence      # market position, customer concentration, contract base
+    - operational_due_diligence     # capex, IT, key dependencies, scalability
+    - synergy_quantification        # revenue + cost + dis-synergies, with basis
+    - valuation_triangulation       # DCF + comparable transactions + trading comps
+    - integration_risk_assessment   # complexity, deal-breakers, post-close priorities
+  reasoning_slots:
+    - target_strategic_fit
+    - deal_economics
+    - value_creation_thesis
+    - integration_complexity
+    - deal_breakers
+    - post_close_priorities
+  source_priorities_default:
+    - uploaded        # CIM, financial model, management presentations
+    - sec_filing      # 10-K, 10-Q, 8-K for context on listed comparables and target if listed
+    - transcript      # earnings calls of comparable companies
+    - news            # M&A market context, recent transactions, sector conditions
+  trust_tier_rules:
+    uploaded: firm_vetted        # CIM is treated as authoritative; consultant has reviewed
+    sec_filing: firm_vetted
+    transcript: firm_vetted
+    news: web_general
+  min_evidence_objects: 4
+  metadata:
+    schema_version: "1.0"
+    writer_payload_class: "MAndADiligenceReportPayload"

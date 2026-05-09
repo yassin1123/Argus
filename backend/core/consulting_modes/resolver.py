@@ -83,7 +83,33 @@ def _yaml_reset() -> None:
 def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingMode:
     """Project a YAML mode row into a fully-populated ResolvedConsultingMode
     with provenance set to "built_in" for every field.
+
+    YAML ``metadata:`` blocks are flattened into the dataclass's
+    ``metadata`` dict directly. Any other unknown top-level YAML key
+    falls into ``metadata`` too (forward-compat).
     """
+    known_fields = (
+        "label",
+        "display_name",
+        "description",
+        "required_branches",
+        "reasoning_slots",
+        "source_priorities_default",
+        "trust_tier_rules",
+        "writer_overlay",
+        "planner_overlay",
+        "min_evidence_objects",
+        "metadata",
+    )
+    metadata: dict[str, Any] = {}
+    raw_md = row.get("metadata")
+    if isinstance(raw_md, dict):
+        metadata.update(raw_md)
+    # Forward-compat: any unknown top-level key gets folded in too.
+    for k, v in row.items():
+        if k not in known_fields:
+            metadata[k] = v
+
     return ResolvedConsultingMode(
         name=name,
         display_name=str(row.get("label") or row.get("display_name") or name),
@@ -95,23 +121,7 @@ def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingM
         writer_overlay=str(row.get("writer_overlay") or ""),
         planner_overlay=str(row.get("planner_overlay") or ""),
         min_evidence_objects=int(row.get("min_evidence_objects") or 0),
-        metadata={
-            k: v
-            for k, v in row.items()
-            if k
-            not in (
-                "label",
-                "display_name",
-                "description",
-                "required_branches",
-                "reasoning_slots",
-                "source_priorities_default",
-                "trust_tier_rules",
-                "writer_overlay",
-                "planner_overlay",
-                "min_evidence_objects",
-            )
-        },
+        metadata=metadata,
         layer_provenance={
             "display_name": "built_in",
             "description": "built_in",
