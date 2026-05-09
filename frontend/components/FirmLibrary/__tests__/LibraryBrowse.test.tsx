@@ -19,10 +19,7 @@ function makeContent(
   overrides: Partial<FirmContent> & { id: string; title: string; category: FirmContentCategory },
 ): FirmContent {
   return {
-    id: overrides.id,
     firm_id: FIRM_ID,
-    title: overrides.title,
-    category: overrides.category,
     description: null,
     intended_modes: [],
     sector_tags: [],

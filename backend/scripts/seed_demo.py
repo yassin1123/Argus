@@ -77,14 +77,18 @@ async def _clear_existing(conn: asyncpg.Connection) -> None:
 
 
 async def _insert_session_row(conn: asyncpg.Connection, session: dict[str, Any]) -> None:
+    # Migration 024 made sessions.firm_id NOT NULL. Demo rows belong to
+    # the default firm (deterministic UUID seeded by 024).
     await conn.execute(
         """
         INSERT INTO sessions (
             id, title, query, status, report_mode, pipeline_state,
-            metadata, gap_report, intake_questions, intake_answers, updated_at
+            metadata, gap_report, intake_questions, intake_answers,
+            firm_id, updated_at
         ) VALUES (
             $1::uuid, $2, $3, $4, $5, $6,
-            $7::jsonb, $8::jsonb, $9::jsonb, $10::jsonb, NOW()
+            $7::jsonb, $8::jsonb, $9::jsonb, $10::jsonb,
+            '00000000-0000-0000-0000-000000000001'::uuid, NOW()
         )
         """,
         session["id"],
