@@ -80,6 +80,48 @@ OVERRIDE_CONFIG: dict[str, object] = {
 }
 
 
+CIM_FIXTURE = "albright_marsh_pricing_pack.md"
+CIM_TITLE = "Albright & Marsh Pricing Diagnostic Pack"
+CIM_CATEGORY = "prior_report"
+
+
+async def _ensure_cim_ingested(firm_id: str) -> None:
+    """Ingest the Albright & Marsh pricing pack into the firm library
+    if it isn't already there. The CIM gives the verifier concrete
+    segment-level revenue / margin / elasticity data to ratify, which
+    a pure-methodology library can't provide for a hypothetical brief.
+
+    Idempotent on (firm_id, sha256(file_bytes)) — the firm library
+    service short-circuits with the existing row.
+    """
+    from core.firm_library.service import ingest_firm_content
+    from pathlib import Path as _Path
+
+    fixture = _Path(__file__).resolve().parent.parent / "backend" / "tests" / "fixtures" / "firm_library" / CIM_FIXTURE
+    if not fixture.exists():
+        raise FileNotFoundError(f"missing fixture: {fixture}")
+    body = fixture.read_bytes()
+    result = await ingest_firm_content(
+        firm_id=firm_id,
+        title=CIM_TITLE,
+        category=CIM_CATEGORY,
+        file_bytes=body,
+        source_filename=CIM_FIXTURE,
+        uploaded_by=None,
+        description=(
+            "Synthetic UK retailer pricing-diagnostic pack — segment-"
+            "level financials, competitor pricing audit, willingness-"
+            "to-pay study, cost structure walk, implementation "
+            "constraints. Used by the Week 6 e2e to give the verifier "
+            "concrete numbers for the boutique_pricing_review demo."
+        ),
+        intended_modes=["boutique_pricing_review", "growth_strategy", "due_diligence"],
+        sector_tags=["consumer_retail"],
+    )
+    marker = "CACHE" if result.cached else "INGEST"
+    print(f"  CIM [{marker}]: {result.firm_content_id}  chunks={result.chunks_written}")
+
+
 async def _ensure_override() -> dict:
     from core.consulting_modes.service import (
         create_firm_mode,
@@ -137,7 +179,8 @@ async def main_async() -> None:
 
     await init_db()
     try:
-        await _ensure_override()
+        result = await _ensure_override()
+        await _ensure_cim_ingested(result["firm_id"])
     finally:
         await close_db()
 

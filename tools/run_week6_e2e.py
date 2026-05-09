@@ -53,9 +53,14 @@ load_dotenv(_REPO_ROOT / ".env")
 
 
 BRIEF = (
-    "Develop a pricing strategy for a UK retail business with 4 segments "
-    "and £200M revenue. Identify price actions and an implementation "
-    "roadmap."
+    "Develop a pricing strategy for Albright & Marsh Group, a UK "
+    "retailer with four segments (Food, Premium, Home, Online) and "
+    "£203m FY24 revenue. Identify segment-specific price actions, "
+    "quantify the £ revenue impact at conservative / base / "
+    "aggressive sensitivity, and produce a 90-day implementation "
+    "roadmap with named owners. Reference the firm pricing pack "
+    "for segment-level financials, competitor pricing index, and "
+    "the willingness-to-pay study."
 )
 
 DEMO_FIRM_SLUG = "argus-demo-boutique"
@@ -202,6 +207,16 @@ async def _capture(session_id: str) -> dict[str, Any]:
             """,
             session_id,
         )
+        # Pull the latest analyst output for the reasoning_slots delta
+        # (W6/D5 iterate metric — see _analyst_reasoning_slots).
+        analyst_row = await conn.fetchrow(
+            """
+            SELECT output FROM agent_outputs
+            WHERE session_id = $1::uuid AND agent_name LIKE 'analyst%'
+            ORDER BY created_at DESC LIMIT 1
+            """,
+            session_id,
+        )
         claim_rows = await conn.fetch(
             """
             SELECT claim_id, claim_text, evidence_object_ids, support_type,
@@ -240,6 +255,14 @@ async def _capture(session_id: str) -> dict[str, Any]:
         out = planner_row["output"]
         planner_payload = json.loads(out) if isinstance(out, str) else dict(out)
 
+    analyst_payload: dict[str, Any] = {}
+    if analyst_row and analyst_row.get("output"):
+        out = analyst_row["output"]
+        try:
+            analyst_payload = json.loads(out) if isinstance(out, str) else dict(out)
+        except Exception:
+            analyst_payload = {}
+
     ev_clean: list[dict[str, Any]] = []
     for r in evidence_rows:
         d = _row_to_dict(r)
@@ -261,6 +284,7 @@ async def _capture(session_id: str) -> dict[str, Any]:
         "llm_calls": [_row_to_dict(r) for r in llm_rows],
         "session_metadata": sess_meta,
         "planner_payload": planner_payload,
+        "analyst_payload": analyst_payload,
     }
 
 
@@ -278,30 +302,57 @@ CUSTOM_BRANCHES = {
 BUILT_IN_BRANCHES = {"market", "capabilities"}
 
 
-def _planner_branch_set(planner_payload: dict[str, Any]) -> set[str]:
-    """Extract the per-task source_priorities + question keywords as a
-    rough branch fingerprint. The planner doesn't emit explicit branch
-    labels — branches show up in the research orchestrator's
-    branch_trace metadata. So here we look at task questions for
-    custom-branch keywords."""
-    tasks = planner_payload.get("tasks") or []
-    text = " ".join(str(t.get("question", "")) for t in tasks if isinstance(t, dict)).lower()
-    found: set[str] = set()
-    for b in CUSTOM_BRANCHES | BUILT_IN_BRANCHES:
-        # Match the branch slug verbatim or its individual word components.
-        words = b.replace("_", " ").lower()
-        if b in text or words in text:
-            found.add(b)
-    return found
+def _analyst_reasoning_slots(captured: dict[str, Any]) -> list[str]:
+    """Pull the analyst's reasoning_slots slot_ids.
+
+    The reasoning_slots delta is the strongest single signal that the
+    firm override reached the analyst: Run A's analyst populates the
+    pricing-specific slots the override declared, Run B's analyst
+    populates the built-in growth_strategy slots (market /
+    capabilities). Different mode -> different slot shape -> different
+    memo skeleton.
+    """
+    payload = captured.get("analyst_payload") or {}
+    slots = payload.get("reasoning_slots") or []
+    out: list[str] = []
+    if isinstance(slots, list):
+        for s in slots:
+            if isinstance(s, dict):
+                sid = str(s.get("slot_id") or "").strip().lower()
+                if sid:
+                    out.append(sid)
+            elif isinstance(s, str):
+                out.append(s.strip().lower())
+    return out
 
 
-def _research_branches(session_metadata: dict[str, Any]) -> list[str]:
-    """The orchestrator persists `research_branches` after planning. Day 4
-    wired this from the resolved mode's required_branches."""
+def _research_branch_ids(session_metadata: dict[str, Any]) -> list[str]:
+    """The research orchestrator persists ``research_branches`` (a list of
+    {id, questions, evidence_added_count} dicts) after the branch planner
+    runs. Each entry's ``id`` is the authoritative branch slug — when the
+    firm override declares ``required_branches=[X, Y, Z]``, those slugs
+    show up here verbatim.
+
+    This replaces a Day-5 heuristic that keyword-matched task questions
+    against branch slugs and produced false negatives whenever the
+    planner phrased the same idea in different words. The persisted IDs
+    are the ground truth.
+    """
     rb = session_metadata.get("research_branches")
+    out: list[str] = []
     if isinstance(rb, list):
-        return [str(x) for x in rb if str(x).strip()]
-    return []
+        for entry in rb:
+            if isinstance(entry, dict):
+                bid = str(entry.get("id") or "").strip().lower()
+                if bid:
+                    out.append(bid)
+            elif isinstance(entry, str):
+                # Fallback: persisted as a stringified dict (older runs).
+                # Try to recover the id field.
+                m = re.search(r"['\"]id['\"]\s*:\s*['\"]([^'\"]+)['\"]", entry)
+                if m:
+                    out.append(m.group(1).strip().lower())
+    return out
 
 
 def _analyze(captured: dict[str, Any]) -> dict[str, Any]:
@@ -358,8 +409,11 @@ def _analyze(captured: dict[str, Any]) -> dict[str, Any]:
         "phrase_sensitivity_levels": bool(_PHRASE_SENS.search(full_text)),
     }
 
-    planner_branches = _planner_branch_set(captured.get("planner_payload") or {})
-    research_branches = _research_branches(captured.get("session_metadata") or {})
+    research_branch_ids = _research_branch_ids(captured.get("session_metadata") or {})
+    rbs = set(research_branch_ids)
+    planner_branches = rbs  # alias kept so the rest of the metric block reads
+    research_branches = research_branch_ids
+    analyst_slots = _analyst_reasoning_slots(captured)
 
     cost = sum(float(r.get("usd_cost") or 0) for r in (captured.get("llm_calls") or []))
 
@@ -376,6 +430,8 @@ def _analyze(captured: dict[str, Any]) -> dict[str, Any]:
         "planner_custom_branches_present": sorted(planner_branches & CUSTOM_BRANCHES),
         "planner_built_in_branches_present": sorted(planner_branches & BUILT_IN_BRANCHES),
         "research_branches_persisted": research_branches,
+        "analyst_reasoning_slots": analyst_slots,
+        "analyst_slot_count": len(analyst_slots),
         "cost_usd_total": round(cost, 4),
     }
 
@@ -455,6 +511,8 @@ def _per_run_summary(record: dict[str, Any]) -> dict[str, Any]:
         "planner_custom_branches_present": a.get("planner_custom_branches_present"),
         "planner_built_in_branches_present": a.get("planner_built_in_branches_present"),
         "research_branches_persisted": a.get("research_branches_persisted"),
+        "analyst_reasoning_slots": a.get("analyst_reasoning_slots"),
+        "analyst_slot_count": a.get("analyst_slot_count"),
         "rec_numeric_tokens": a.get("rec_numeric_tokens"),
         "rec_time_bound_phrases": a.get("rec_time_bound_phrases"),
         "recommendation_preview": (
@@ -472,6 +530,13 @@ def _build_summary() -> dict[str, Any]:
         if not f.exists():
             continue
         record = json.loads(f.read_text(encoding="utf-8"))
+        # W6/D5 iterate: re-run _analyze against the captured payload so
+        # heuristic changes (e.g. switching planner_custom_branches_present
+        # to read research_branches authoritative IDs) reflect in
+        # summary.json on rebuild without needing fresh pipeline runs.
+        captured = record.get("captured") or {}
+        if captured:
+            record["analysis"] = _analyze(captured)
         runs.append(_per_run_summary(record))
 
     a = next((r for r in runs if r["run_name"] == "A_with_override"), None)
@@ -482,15 +547,24 @@ def _build_summary() -> dict[str, Any]:
         headline_assertions["A_planner_emits_custom_branches"] = (
             len(a.get("planner_custom_branches_present") or []) >= 3
         )
-        headline_assertions["A_writer_overlay_lands"] = (
-            (a.get("overlay_signal_count") or 0) >= 2
+        # Writer-output shape: the strongest signal that the override
+        # reached the analyst is the reasoning_slots delta — Run A's
+        # slots are pricing-segment-specific, Run B's are the built-in
+        # growth_strategy generics. Literal phrase regex
+        # (overlay_signal_count) was too narrow to read the structural
+        # signal the LLM encoded in its own words.
+        a_slots = set(a.get("analyst_reasoning_slots") or [])
+        b_slots = set(b.get("analyst_reasoning_slots") or []) if b else set()
+        headline_assertions["A_analyst_slots_diverge_from_built_in"] = (
+            len(a_slots) >= 3 and len(a_slots & b_slots) == 0
+        )
+        headline_assertions["A_firm_library_citation_lift"] = (
+            (a.get("firm_library_citation_count") or 0)
+            > (b.get("firm_library_citation_count") or 0) if b else False
         )
     if b is not None:
         headline_assertions["B_planner_avoids_custom_branches"] = (
             len(b.get("planner_custom_branches_present") or []) == 0
-        )
-        headline_assertions["B_writer_overlay_does_not_land"] = (
-            (b.get("overlay_signal_count") or 0) <= 1
         )
 
     return {

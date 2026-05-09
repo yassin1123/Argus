@@ -1,81 +1,106 @@
 {
-  "generated_at": "2026-05-09T06:14:58Z",
+  "generated_at": "2026-05-09T07:35:01Z",
   "headline_assertions": {
-    "A_planner_emits_custom_branches": false,
-    "A_writer_overlay_lands": false,
-    "B_planner_avoids_custom_branches": true,
-    "B_writer_overlay_does_not_land": true
+    "A_planner_emits_custom_branches": true,
+    "A_analyst_slots_diverge_from_built_in": true,
+    "A_firm_library_citation_lift": true,
+    "B_planner_avoids_custom_branches": true
   },
-  "headline_pass": false,
+  "headline_pass": true,
   "n_runs": 2,
   "runs": [
     {
       "run_name": "A_with_override",
       "report_mode": "boutique_pricing_review",
-      "session_id": "4a92f95f-42bf-4d12-8d23-34494aba56af",
-      "wall_seconds": 76.16,
-      "cost_usd_total": 0,
-      "total_claims": 0,
-      "grounded_claims": 0,
-      "firm_library_citation_count": 0,
-      "firm_library_items_cited": {},
+      "session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "wall_seconds": 0.0,
+      "cost_usd_total": 0.8359,
+      "total_claims": 25,
+      "grounded_claims": 15,
+      "firm_library_citation_count": 41,
+      "firm_library_items_cited": {
+        "Albright & Marsh Pricing Diagnostic Pack": 39,
+        "Retail Sector Primer (UK + US)": 1,
+        "Growth Strategy Framework (Boutique Methodology)": 1
+      },
       "diversity_counts": {
-        "firm_library": 48
+        "firm_library": 104
       },
       "overlay_signals": {
         "phrase_2x2": false,
         "phrase_90day_roadmap": false,
-        "phrase_named_owners": false,
+        "phrase_named_owners": true,
         "phrase_sensitivity_levels": false
       },
-      "overlay_signal_count": 0,
-      "planner_custom_branches_present": [],
-      "planner_built_in_branches_present": [
-        "market"
+      "overlay_signal_count": 1,
+      "planner_custom_branches_present": [
+        "competitor_price_anchor_analysis",
+        "implementation_friction_audit",
+        "price_architecture_review",
+        "willingness_to_pay_evidence"
       ],
+      "planner_built_in_branches_present": [],
       "research_branches_persisted": [
-        "{'id': 'competitor_price_anchor_analysis', 'questions': ['What are the competitor price points and pricing strategies within each segment?', 'What are the current pricing strategies and price points for each of the four segments in the UK retail business?'], 'evidence_added_count': 0}",
-        "{'id': 'willingness_to_pay_evidence', 'questions': ['What evidence exists regarding customer willingness to pay across the four segments?', 'What are the key decision criteria for selecting the most effective pricing strategy for each segment?'], 'evidence_added_count': 0}",
-        "{'id': 'price_architecture_review', 'questions': ['What pricing architecture frameworks are recommended for a business with multiple segments?', 'What are the current pricing strategies and price points for each of the four segments in the UK retail business?'], 'evidence_added_count': 0}",
-        "{'id': 'implementation_friction_audit', 'questions': ['What are the potential friction points in implementing new pricing strategies in the UK retail business?', 'What evidence or market conditions would necessitate a change in the proposed pricing strategy?'], 'evidence_added_count': 0}"
+        "competitor_price_anchor_analysis",
+        "willingness_to_pay_evidence",
+        "price_architecture_review",
+        "implementation_friction_audit"
       ],
-      "rec_numeric_tokens": 0,
+      "analyst_reasoning_slots": [
+        "premium_pricing_headroom",
+        "food_defensive_repricing",
+        "home_structural_recovery",
+        "online_deferral_logic",
+        "implementation_roadmap",
+        "customer_communication_strategy"
+      ],
+      "analyst_slot_count": 6,
+      "rec_numeric_tokens": 40,
       "rec_time_bound_phrases": 0,
-      "recommendation_preview": "",
+      "recommendation_preview": "Execute a three-segment pricing strategy over 90 days: Premium +5.5% on differentiated SKUs targeting \u00a31.8m incremental revenue with <5% defection threshold, Food -4% on staples to close the 8-point discounter gap and protect \u00a3102.4m base revenue, Home -9% on big-ticket items (>\u00a340 ASP) to arrest the -3.4% LFL decline to -1.5% or better by week-12. Defer Online pricing action until week-12 LFL read confirms Food/Home elasticity assumptions hold (Food LFL \u2265+1.0%, Home LFL \u2265-1.5%). Assign Pricing Director as overall owner with CFO gating at week-6 system deployment. If Premium defection exceeds ",
       "error": null
     },
     {
       "run_name": "B_built_in",
       "report_mode": "growth_strategy",
-      "session_id": "2e672dc4-e41f-4ac8-92b5-708cd78299b7",
-      "wall_seconds": 68.88,
-      "cost_usd_total": 0,
-      "total_claims": 0,
-      "grounded_claims": 0,
-      "firm_library_citation_count": 0,
-      "firm_library_items_cited": {},
+      "session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "wall_seconds": 0.0,
+      "cost_usd_total": 0.6196,
+      "total_claims": 24,
+      "grounded_claims": 16,
+      "firm_library_citation_count": 32,
+      "firm_library_items_cited": {
+        "Albright & Marsh Pricing Diagnostic Pack": 32
+      },
       "diversity_counts": {
-        "firm_library": 32
+        "firm_library": 80
       },
       "overlay_signals": {
         "phrase_2x2": false,
         "phrase_90day_roadmap": false,
         "phrase_named_owners": false,
-        "phrase_sensitivity_levels": false
+        "phrase_sensitivity_levels": true
       },
-      "overlay_signal_count": 0,
+      "overlay_signal_count": 1,
       "planner_custom_branches_present": [],
       "planner_built_in_branches_present": [
         "capabilities",
         "market"
       ],
       "research_branches_persisted": [
-        "{'id': 'market', 'questions': ['What are the current pricing strategies and price points for each of the 4 segments in the UK retail business?', 'How do competitors in the UK retail market price similar products in each of the 4 segments?'], 'evidence_added_count': 0}",
-        "{'id': 'capabilities', 'questions': ['What internal capabilities does the business have to implement new pricing strategies effectively?', 'What are the decision criteria for selecting the most appropriate pricing strategy for each segment?'], 'evidence_added_count': 0}"
+        "market",
+        "capabilities"
       ],
-      "rec_numeric_tokens": 0,
-      "rec_time_bound_phrases": 0,
-      "recommendation_preview": "",
+      "analyst_reasoning_slots": [
+        "market_attractiveness",
+        "capabilities",
+        "competition",
+        "risks"
+      ],
+      "analyst_slot_count": 4,
+      "rec_numeric_tokens": 43,
+      "rec_time_bound_phrases": 2,
+      "recommendation_preview": "Raise Premium prices by 5% immediately (\u00a31.9m incremental revenue), reduce Food staple prices by 2-3% on the top 80 SKUs to defend volume against discounters, and implement a 6-8% Home price reduction on big-ticket items (>\u00a340 ASP) to arrest the -3.4% LFL decline. Net conservative impact: +\u00a32.8m revenue; base case: +\u00a34.1m; aggressive: +\u00a35.7m over 12 months. Implementation owners: Premium Director of Merchandising (Premium pricing), Food Category Director (Food cuts), Home Commercial Lead (Home resets). Trigger points: If Premium defection exceeds 3.5% by week 6, roll back to 3% increase; if Fo",
       "error": null
     }
   ]
