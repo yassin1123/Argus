@@ -740,17 +740,30 @@ class ResearchOrchestrator:
                     qs = [f"{str(plan.get('objective', ''))[:180]} — {bid.replace('_', ' ')}"]
                 added = 0
                 for bq in qs:
-                    bhits = await retrieve_evidence(session_id, bq, top_k=6)
+                    # W6/D5 fix: route branch retrieval through hybrid_search
+                    # (chunks table) instead of retrieve_evidence (legacy
+                    # embeddings table). The legacy path didn't see firm-
+                    # library chunks, so a firm declaring custom required
+                    # branches got 0 evidence_added_count per branch and
+                    # the gate killed the pipeline before the writer ran.
+                    bres = await hybrid_search(
+                        engagement_id=session_id,
+                        query=bq,
+                        k=6,
+                        candidate_k=12,
+                        mode="hybrid",
+                    )
+                    brows = bres.get("results") or []
                     retrieval_snapshots.append(
                         {
                             "task_id": tid,
                             "branch_id": bid,
                             "question": bq,
-                            "hits": [h.model_dump(mode="json") for h in bhits],
+                            "hits": brows,
                         }
                     )
-                    for h in bhits:
-                        eo = _chunk_to_evidence(session_id, tid, h)
+                    for h in brows:
+                        eo = _chunk_dict_to_evidence(session_id, tid, h)
                         eo.claim = f"[branch:{bid}] {eo.claim}"
                         all_pending.append(eo)
                         added += 1
