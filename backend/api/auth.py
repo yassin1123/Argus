@@ -105,5 +105,7 @@ async def me(user: dict = Depends(get_current_user)) -> dict[str, Any]:
             "email": user["email"],
             "full_name": user["full_name"],
             "role": user["role"],
+            "default_firm_id": user.get("default_firm_id"),
+            "default_firm_role": user.get("default_firm_role"),
         }
     }

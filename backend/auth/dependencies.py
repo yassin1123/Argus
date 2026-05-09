@@ -24,7 +24,14 @@ async def _demo_user() -> dict[str, Any]:
     from db.connection import acquire
     async with acquire() as conn:
         row = await conn.fetchrow(
-            "SELECT id, email, full_name, role FROM users WHERE email = 'demo@argus.local'"
+            """
+            SELECT u.id, u.email, u.full_name, u.role, u.default_firm_id,
+                   m.role AS firm_role
+            FROM users u
+            LEFT JOIN firm_memberships m
+                   ON m.user_id = u.id AND m.firm_id = u.default_firm_id
+            WHERE u.email = 'demo@argus.local'
+            """
         )
     if not row:
         # No demo user provisioned yet — refuse rather than fabricate identity.
@@ -34,6 +41,8 @@ async def _demo_user() -> dict[str, Any]:
         "email": row["email"],
         "full_name": row["full_name"] or "",
         "role": row["role"] or "member",
+        "default_firm_id": str(row["default_firm_id"]) if row["default_firm_id"] else None,
+        "default_firm_role": row["firm_role"] if row["firm_role"] else None,
     }
 
 

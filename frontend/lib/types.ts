@@ -134,6 +134,14 @@ export interface EvidenceObjectRow {
   confidence?: string;
   is_inference?: boolean;
   created_at?: string | null;
+  /**
+   * Source-type-specific breadcrumb data (Phase 2 / Week 5 / Day 4).
+   * For source_type='firm_library' this carries:
+   *   firm_content_id, firm_library_title, category, intended_modes,
+   *   sector_tags, section.
+   * Other source types may populate it as enrichments arrive.
+   */
+  metadata?: Record<string, unknown>;
 }
 
 export interface ExecutiveInsightItem {

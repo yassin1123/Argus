@@ -40,7 +40,14 @@ async function jsonOrThrow<T>(res: Response, fallback = "Request failed"): Promi
 
 // ---- Auth ----------------------------------------------------------------
 
-export type AuthUser = { user_id: string; email: string; full_name: string; role: string };
+export type AuthUser = {
+  user_id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  default_firm_id: string | null;
+  default_firm_role: "admin" | "member" | null;
+};
 
 export async function register(email: string, password: string, full_name = ""): Promise<{ user: AuthUser }> {
   const res = await apiFetch(`/api/auth/register`, {

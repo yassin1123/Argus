@@ -7,6 +7,14 @@ from typing import Any, Sequence
 
 from db.connection import acquire
 
+# Phase 2 / Week 5 / Day 1: deterministic UUID for the "Argus Default Firm".
+# Mirrors the value used in migration 024_firm_multitenancy.sql. Callers
+# that don't pass a firm_id explicitly (existing SEC / transcripts / news /
+# CH ingest paths from Phase 1) land here, which matches what those rows'
+# firm_id was backfilled to. New callers (firm-library service) MUST pass
+# their own firm_id.
+DEFAULT_FIRM_ID = "00000000-0000-0000-0000-000000000001"
+
 
 def _vector_literal(vec: Sequence[float]) -> str:
     return "[" + ",".join(f"{float(x):.7f}" for x in vec) + "]"
@@ -22,6 +30,8 @@ async def insert_chunks(
     source_url: str | None,
     trust_level: str,
     rows: list[dict[str, Any]],
+    firm_id: str | None = None,
+    firm_content_id: str | None = None,
 ) -> list[str]:
     """Insert a batch of chunks. `rows` items must include:
         content, content_hash, embedding (list[float]), position
@@ -36,6 +46,7 @@ async def insert_chunks(
     """
     if not rows:
         return []
+    fid = firm_id or DEFAULT_FIRM_ID
     out: list[str] = []
     async with acquire() as conn:
         for r in rows:
@@ -47,12 +58,12 @@ async def insert_chunks(
                     session_id, blob_id, source_file_id, content, content_hash,
                     embedding, source_type, position, page, slide, timestamp_str,
                     speaker, section_heading, source_filename, source_url, trust_level,
-                    metadata
+                    metadata, firm_id, firm_content_id
                 ) VALUES (
                     $1::uuid, $2::uuid, $3::uuid, $4, $5,
                     $6::vector, $7, $8, $9, $10, $11,
                     $12, $13, $14, $15, $16,
-                    $17::jsonb
+                    $17::jsonb, $18::uuid, $19::uuid
                 )
                 RETURNING id
                 """,
@@ -73,6 +84,8 @@ async def insert_chunks(
                 source_url,
                 trust_level,
                 metadata_json,
+                fid,
+                firm_content_id,
             )
             out.append(str(row["id"]))
     return out

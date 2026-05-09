@@ -40,18 +40,47 @@ def _to_websearch_tsquery(q: str) -> str:
 # ----------------------------------------------------------------------------
 
 
+async def _resolve_engagement_firm_id(engagement_id: str) -> str | None:
+    """Look up the firm_id for an engagement.
+
+    Migration 024 made sessions.firm_id NOT NULL with a default-firm
+    backfill, so any real engagement resolves to a firm. Returns None
+    only when engagement_id doesn't refer to a real session — caller
+    treats that as 'no chunks visible' rather than 'all chunks visible'
+    (fail-closed tenancy).
+    """
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT firm_id FROM sessions WHERE id = $1::uuid",
+            engagement_id,
+        )
+    return str(row["firm_id"]) if row and row["firm_id"] else None
+
+
 async def _vector_candidates(
     engagement_id: str,
     query_vec: list[float],
     k: int,
     *,
     source_types: list[str] | None = None,
+    firm_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Top-k chunks by cosine distance, scoped to engagement + firm sources.
 
+    Phase 2 multi-tenancy: ALWAYS firm-scoped. Two tiers of visibility
+    within the firm:
+      - chunks attached to this engagement (c.session_id = engagement_id)
+      - firm-global chunks (c.session_id IS NULL OR uploaded_files.scope='firm')
+    Both are gated by c.firm_id = the engagement's firm — that's the
+    cross-firm isolation guarantee.
+
     When ``source_types`` is given, restrict to chunks whose ``source_type``
-    is in the list (used by Day 4 task-aware retrieval routing).
+    is in the list (Day 4 of Week 3 task-aware retrieval routing).
     """
+    if firm_id is None:
+        firm_id = await _resolve_engagement_firm_id(engagement_id)
+        if firm_id is None:
+            return []
     async with acquire() as conn:
         rows = await conn.fetch(
             f"""
@@ -61,7 +90,9 @@ async def _vector_candidates(
                    1 - (c.embedding <=> $2::vector) AS similarity
             FROM chunks c
             LEFT JOIN uploaded_files f ON f.id = c.source_file_id
-            WHERE (c.session_id = $1::uuid OR f.scope = 'firm' OR c.session_id IS NULL)
+            WHERE c.firm_id = $5::uuid
+              AND (c.session_id = $1::uuid OR f.scope = 'firm' OR c.session_id IS NULL)
+              AND (c.metadata->>'retired_at') IS NULL
               AND c.embedding IS NOT NULL
               AND ($4::text[] IS NULL OR c.source_type = ANY($4::text[]))
             ORDER BY c.embedding <=> $2::vector ASC
@@ -71,6 +102,7 @@ async def _vector_candidates(
             _vector_literal(query_vec),
             int(k),
             list(source_types) if source_types else None,
+            firm_id,
         )
     return [_chunk_row_dict(r, score=float(r["similarity"])) for r in rows]
 
@@ -81,8 +113,16 @@ async def _keyword_candidates(
     k: int,
     *,
     source_types: list[str] | None = None,
+    firm_id: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Top-k chunks by ts_rank against the user's query."""
+    """Top-k chunks by ts_rank against the user's query.
+
+    Same firm-scoping rules as :func:`_vector_candidates`.
+    """
+    if firm_id is None:
+        firm_id = await _resolve_engagement_firm_id(engagement_id)
+        if firm_id is None:
+            return []
     tsq = _to_websearch_tsquery(query)
     async with acquire() as conn:
         rows = await conn.fetch(
@@ -96,7 +136,9 @@ async def _keyword_candidates(
                                'StartSel=<<,StopSel=>>,MaxFragments=2,MinWords=8,MaxWords=22') AS snippet
             FROM chunks c
             LEFT JOIN uploaded_files f ON f.id = c.source_file_id
-            WHERE (c.session_id = $1::uuid OR f.scope = 'firm' OR c.session_id IS NULL)
+            WHERE c.firm_id = $5::uuid
+              AND (c.session_id = $1::uuid OR f.scope = 'firm' OR c.session_id IS NULL)
+              AND (c.metadata->>'retired_at') IS NULL
               AND c.content_tsv @@ websearch_to_tsquery('english', $2)
               AND ($4::text[] IS NULL OR c.source_type = ANY($4::text[]))
             ORDER BY rank DESC
@@ -106,6 +148,7 @@ async def _keyword_candidates(
             tsq,
             int(k),
             list(source_types) if source_types else None,
+            firm_id,
         )
     out = []
     for r in rows:
@@ -201,13 +244,23 @@ async def hybrid_search(
     if not query:
         return {"mode": mode, "results": [], "vector_count": 0, "keyword_count": 0}
 
+    # Resolve firm_id once and thread it into both candidate paths so we
+    # don't double up on the lookup. Phase 2 multi-tenancy: when the
+    # engagement doesn't resolve to a firm (caller passed a bogus ID),
+    # we fail-closed and return zero candidates rather than fall back to
+    # a global view. Cross-firm isolation is the contract.
+    firm_id = await _resolve_engagement_firm_id(engagement_id)
+    if firm_id is None:
+        return {"mode": mode, "results": [], "vector_count": 0, "keyword_count": 0}
+
     vector_results: list[dict[str, Any]] = []
     keyword_results: list[dict[str, Any]] = []
 
     # Run keyword always (cheap); run vector unless mode forbids.
     if mode in ("hybrid", "keyword"):
         keyword_results = await _keyword_candidates(
-            engagement_id, query, candidate_k, source_types=source_types
+            engagement_id, query, candidate_k,
+            source_types=source_types, firm_id=firm_id,
         )
 
     if mode in ("hybrid", "vector"):
@@ -215,7 +268,8 @@ async def hybrid_search(
             embeds = await embed_texts([query])
             if embeds:
                 vector_results = await _vector_candidates(
-                    engagement_id, embeds[0], candidate_k, source_types=source_types
+                    engagement_id, embeds[0], candidate_k,
+                    source_types=source_types, firm_id=firm_id,
                 )
         except Exception:
             # Embedding failed — keyword-only fallback is still useful.

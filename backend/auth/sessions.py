@@ -46,7 +46,14 @@ async def create_session(user_id: str, *, ip: str | None = None, user_agent: str
 
 
 async def lookup_session(token: str) -> dict[str, Any] | None:
-    """Resolve a token to {user_id, email, full_name, role} or None."""
+    """Resolve a token to user dict or None.
+
+    Day 3 adds ``default_firm_role`` so the frontend can render
+    admin-only UI affordances without a follow-up call. The role is
+    looked up against ``firm_memberships`` for the user's
+    ``default_firm_id``; users without a membership row get ``None``
+    (the frontend treats that as "no admin powers").
+    """
     if not token:
         return None
     token_hash = _hash_token(token)
@@ -54,9 +61,12 @@ async def lookup_session(token: str) -> dict[str, Any] | None:
         row = await conn.fetchrow(
             """
             SELECT s.user_id, s.expires_at, s.revoked_at,
-                   u.email, u.full_name, u.role
+                   u.email, u.full_name, u.role, u.default_firm_id,
+                   m.role AS firm_role
             FROM sessions_auth s
             JOIN users u ON u.id = s.user_id
+            LEFT JOIN firm_memberships m
+                   ON m.user_id = u.id AND m.firm_id = u.default_firm_id
             WHERE s.token_hash = $1
             """,
             token_hash,
@@ -72,6 +82,8 @@ async def lookup_session(token: str) -> dict[str, Any] | None:
         "email": row["email"],
         "full_name": row["full_name"] or "",
         "role": row["role"] or "member",
+        "default_firm_id": str(row["default_firm_id"]) if row["default_firm_id"] else None,
+        "default_firm_role": row["firm_role"] if row["firm_role"] else None,
     }
 
 

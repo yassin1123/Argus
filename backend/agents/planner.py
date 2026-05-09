@@ -47,8 +47,14 @@ when the first returns too few hits.
 
 Source kinds:
   - "uploaded"   — documents the user uploaded for this engagement
-                   (CIMs, board decks, internal memos). Use whenever the
-                   answer should be grounded in the user's own materials.
+                   (CIMs, board decks, internal memos) AND firm-library
+                   content (playbooks, sector primers, prior reports,
+                   frameworks the firm has curated and tagged for reuse).
+                   Prefer ["uploaded"] first when the brief matches a
+                   sector or methodology covered by the firm's library —
+                   the orchestrator routes to firm content automatically
+                   under this single source kind, so the planner doesn't
+                   need a separate firm_library literal.
   - "sec_filing" — SEC EDGAR filings (10-K / 10-Q / 8-K / DEF 14A / S-1).
                    Best for U.S. public-company financials, risk factors,
                    MD&A, and segment data.
