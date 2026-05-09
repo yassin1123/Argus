@@ -13,10 +13,33 @@ export function inferTrustTier(ev?: EvidenceObjectRow | null): TrustTier {
   if (ev.is_inference) return "contested";
   const type = (ev.source_type || "").toLowerCase();
   const conf = (ev.confidence || "").toLowerCase();
-  if (type === "document" || type === "knowledge") return "firm";
+  // Phase 2 / Week 5 / Day 4: firm_library is firm-trust by definition
+  // (statutorily curated by the firm's admins). Everything else keeps
+  // its existing tier-resolution.
+  if (type === "firm_library" || type === "document" || type === "knowledge") return "firm";
   if (conf === "high") return "credible";
   if (conf === "low") return "contested";
   return "web";
+}
+
+
+/**
+ * Render-side breadcrumb for a firm-library evidence row.
+ * Returns null when the evidence isn't from the firm library, so callers
+ * can use it as a conditional renderer:
+ *
+ *   {renderFirmLibraryBreadcrumb(ev) ?? null}
+ */
+export function firmLibraryBreadcrumb(
+  ev: EvidenceObjectRow,
+): { title: string; category: string; section: string } | null {
+  if ((ev.source_type || "").toLowerCase() !== "firm_library") return null;
+  const meta = (ev.metadata || {}) as Record<string, unknown>;
+  return {
+    title: String(meta.firm_library_title ?? ev.source_title ?? ""),
+    category: String(meta.category ?? ""),
+    section: String(meta.section ?? ""),
+  };
 }
 
 const TIER_LABEL: Record<TrustTier, string> = {
@@ -165,10 +188,12 @@ function CitationPopover({
   onSelect?: (ev: EvidenceObjectRow) => void;
 }) {
   const location = formatChunkLocation(ev);
+  const firmLib = firmLibraryBreadcrumb(ev);
 
   return (
     <span
       role="dialog"
+      data-source-type={ev.source_type || ""}
       className="absolute left-0 top-full z-40 mt-1 block w-[360px] rounded-argus-sm border border-argus-border-moderate bg-surface p-3 shadow-popover"
       onMouseEnter={(e) => e.stopPropagation()}
     >
@@ -178,20 +203,41 @@ function CitationPopover({
           className="argus-confidence"
           data-level={tier === "firm" ? "high" : tier === "contested" ? "contested" : "medium"}
         >
-          {TIER_LABEL[tier]}
+          {firmLib ? "📚 Firm Library" : TIER_LABEL[tier]}
         </span>
         <span className="text-[10px] text-argus-tertiary tabular-nums">
           {ev.source_date ? ev.source_date.slice(0, 10) : ""}
         </span>
       </span>
 
-      {/* Source title */}
-      <span className="block font-serif text-[13px] font-semibold leading-snug text-argus-primary">
-        {ev.source_title || "Untitled source"}
-      </span>
+      {/* Source title — firm-library renders the breadcrumb form
+          "📚 Firm Library — {title} ({category})" so the citation
+          identity is unambiguous in the popover and in PDF/DOCX
+          footnote exports that read this same data. */}
+      {firmLib ? (
+        <span className="block font-serif text-[13px] font-semibold leading-snug text-argus-primary">
+          {firmLib.title || "Untitled firm content"}
+          {firmLib.category ? (
+            <span className="ml-1 font-mono text-[10px] uppercase tracking-wide text-argus-tertiary">
+              ({firmLib.category.replaceAll("_", " ")})
+            </span>
+          ) : null}
+        </span>
+      ) : (
+        <span className="block font-serif text-[13px] font-semibold leading-snug text-argus-primary">
+          {ev.source_title || "Untitled source"}
+        </span>
+      )}
 
-      {/* Phase 4 location row — page / slide / timestamp / section, in mono */}
-      {location ? (
+      {/* Phase 4 location row — page / slide / timestamp / section, in mono.
+          Firm-library citations render their section explicitly so the
+          breadcrumb ("Firm Library — Playbook · Section: Sourcing") is
+          fully reconstructable from the popover. */}
+      {firmLib?.section ? (
+        <span className="mt-1 block font-mono text-[10px] uppercase tracking-wide text-argus-tertiary">
+          Section: {firmLib.section}
+        </span>
+      ) : location ? (
         <span className="mt-1 block font-mono text-[10px] uppercase tracking-wide text-argus-tertiary">
           {location}
         </span>

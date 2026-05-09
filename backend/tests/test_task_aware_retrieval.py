@@ -237,7 +237,11 @@ async def test_orchestrator_spills_into_next_priority_below_threshold(
 
     async def _hybrid(*, engagement_id, query, k, candidate_k, mode, source_types):
         hybrid_calls.append(source_types)
-        if source_types == ["uploaded"]:
+        # Phase 2 / Week 5 / Day 4: the orchestrator expands "uploaded"
+        # to ["uploaded", "firm_library"] under the hood so firm-curated
+        # content surfaces under the same planner priority. Tests pin
+        # the expansion contract by accepting the wider list as-is.
+        if source_types == ["uploaded", "firm_library"]:
             return {"results": _make_chunks("uploaded", n_under)}
         if source_types == ["sec_filing"]:
             return {"results": _make_chunks("sec_filing", 4, base=100)}
@@ -273,7 +277,11 @@ async def test_orchestrator_spills_into_next_priority_below_threshold(
     )
 
     # We saw both priorities consulted, in the right order.
-    assert hybrid_calls == [["uploaded"], ["sec_filing"]]
+    # The "uploaded" priority expands to ["uploaded", "firm_library"]
+    # in the SQL filter (Phase 2 / Week 5 / Day 4) so firm-curated
+    # content surfaces under the same planner priority without the
+    # planner needing a new literal value.
+    assert hybrid_calls == [["uploaded", "firm_library"], ["sec_filing"]]
     snap = result["_retrieval_hits"][0]
     assert snap["sources_consulted"] == ["uploaded", "sec_filing"]
     types_seen = {h["source_type"] for h in snap["hits"]}

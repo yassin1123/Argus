@@ -107,7 +107,15 @@ class ResearchPayload(BaseModel):
 
 
 class EvidenceObject(BaseModel):
-    """Single citeable evidence row aligned with `evidence_objects` (V2)."""
+    """Single citeable evidence row aligned with `evidence_objects` (V2).
+
+    ``metadata`` (Phase 2 / Week 5 / Day 4) carries source-type-specific
+    breadcrumb data the citation popover renders inline. For
+    firm-library chunks today: ``firm_content_id``, ``firm_library_title``,
+    ``category``, ``intended_modes``, ``section``. Other source types
+    can populate it as enrichments arrive — the field is intentionally
+    free-form jsonb so the schema doesn't churn per source.
+    """
 
     id: str | None = None
     session_id: str
@@ -122,12 +130,23 @@ class EvidenceObject(BaseModel):
     confidence: str = "medium"
     is_inference: bool = False
     created_at: datetime | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
     model_config = {"extra": "ignore"}
 
     @classmethod
     def from_db_row(cls, row: Any) -> "EvidenceObject":
         tid = row.get("task_id")
+        meta = row.get("metadata") if "metadata" in row.keys() else None
+        if isinstance(meta, str):
+            import json as _json
+
+            try:
+                meta = _json.loads(meta)
+            except Exception:
+                meta = {}
+        if not isinstance(meta, dict):
+            meta = {}
         return cls(
             id=str(row["id"]),
             session_id=str(row["session_id"]),
@@ -142,6 +161,7 @@ class EvidenceObject(BaseModel):
             confidence=row.get("confidence") or "medium",
             is_inference=bool(row.get("is_inference")),
             created_at=row["created_at"] if row.get("created_at") else None,
+            metadata=meta,
         )
 
     def for_llm_catalog(self) -> dict[str, Any]:

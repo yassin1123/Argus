@@ -865,21 +865,29 @@ def _report_dict(row: Any) -> dict[str, Any]:
 
 
 async def insert_evidence_objects(objs: list[EvidenceObject]) -> list[EvidenceObject]:
-    """Insert rows; returns same objects with id and created_at set."""
+    """Insert rows; returns same objects with id, metadata, created_at set.
+
+    ``metadata`` (Day 4) is serialised to jsonb so the citation popover
+    can render source-type-specific breadcrumbs (e.g. firm-library
+    title + category) without the schema needing to grow per source.
+    """
     if not objs:
         return []
     out: list[EvidenceObject] = []
     async with acquire() as conn:
         for o in objs:
+            md = json.dumps(o.metadata or {})
             row = await conn.fetchrow(
                 """
                 INSERT INTO evidence_objects (
                     session_id, task_id, claim, quote, source_title, source_url,
-                    source_date, source_type, source_score, confidence, is_inference
+                    source_date, source_type, source_score, confidence, is_inference,
+                    metadata
                 )
-                VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                VALUES ($1::uuid, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)
                 RETURNING id, session_id, task_id, claim, quote, source_title, source_url,
-                          source_date, source_type, source_score, confidence, is_inference, created_at
+                          source_date, source_type, source_score, confidence, is_inference,
+                          metadata, created_at
                 """,
                 o.session_id,
                 o.task_id,
@@ -892,6 +900,7 @@ async def insert_evidence_objects(objs: list[EvidenceObject]) -> list[EvidenceOb
                 o.source_score,
                 o.confidence,
                 o.is_inference,
+                md,
             )
             out.append(EvidenceObject.from_db_row(row))
     return out
@@ -902,7 +911,8 @@ async def list_evidence_objects(session_id: str) -> list[EvidenceObject]:
         rows = await conn.fetch(
             """
             SELECT id, session_id, task_id, claim, quote, source_title, source_url,
-                   source_date, source_type, source_score, confidence, is_inference, created_at
+                   source_date, source_type, source_score, confidence, is_inference,
+                   metadata, created_at
             FROM evidence_objects WHERE session_id = $1::uuid ORDER BY created_at ASC
             """,
             session_id,

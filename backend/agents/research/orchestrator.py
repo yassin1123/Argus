@@ -113,15 +113,37 @@ def _chunk_dict_to_evidence(
 ) -> EvidenceObject:
     """Convert a hybrid_search row (chunks-table dict) into an EvidenceObject.
 
-    Used by the Day 4 task-aware retrieval path. Differs from
-    :func:`_chunk_to_evidence` because hybrid_search returns the chunks
-    table (with `source_type`, `metadata`) instead of the embeddings
-    table the legacy path reads.
+    Day 4 (Phase 2 / Week 5) extension: when the chunk's source_type is
+    ``'firm_library'``, the resulting EvidenceObject keeps that
+    source_type (instead of being flattened to ``'document'``) and its
+    ``metadata`` dict carries the firm-content breadcrumb data the
+    citation popover renders inline (title, category, intended_modes,
+    section). Other source types (sec_filing, transcript, news,
+    ch_filing) still flatten to ``'document'``/``'web'`` because their
+    citation breadcrumbs already fit in the existing fields
+    (``source_title`` + ``source_url`` + section_heading).
     """
     quote = (hit.get("content") or "")[:2000]
-    title = hit.get("source_filename") or "Document"
+    chunk_meta = hit.get("metadata") or {}
+    if isinstance(chunk_meta, str):
+        try:
+            chunk_meta = json.loads(chunk_meta)
+        except Exception:
+            chunk_meta = {}
+    if not isinstance(chunk_meta, dict):
+        chunk_meta = {}
+
+    chunk_source_type = (hit.get("source_type") or "document").lower()
     url = hit.get("source_url") or ""
-    source_type = hit.get("source_type") or "document"
+
+    # Title default: the chunk's source_filename (e.g. "10-K · 2025-09-27 …").
+    # firm_library overrides this with the firm_content.title (the
+    # human-friendly name set during upload, not the original filename).
+    title = hit.get("source_filename") or "Document"
+    if chunk_source_type == "firm_library":
+        firm_title = chunk_meta.get("title")
+        if firm_title:
+            title = str(firm_title)
 
     # Build a citeable claim string with whatever breadcrumbs the chunk has.
     bits: list[str] = []
@@ -129,19 +151,32 @@ def _chunk_dict_to_evidence(
         bits.append(str(hit["section_heading"]))
     elif hit.get("page") is not None:
         bits.append(f"page {hit['page']}")
-    metadata = hit.get("metadata") or {}
-    if source_type == "sec_filing" and isinstance(metadata, dict):
-        # SEC chunks carry the rich breadcrumb dict from Day 3 ingestion.
-        form = metadata.get("form")
-        filing_date = metadata.get("filing_date")
+    if chunk_source_type == "sec_filing":
+        form = chunk_meta.get("form")
+        filing_date = chunk_meta.get("filing_date")
         if form and filing_date:
             bits.append(f"{form} {filing_date}")
 
     score = float(hit.get("score") or hit.get("fused_score") or 0.0)
-    # Map an EvidenceObject.source_type to one of the values downstream
-    # consumers already understand: "document" for any chunk, "web" for
-    # web search hits. SEC filings stay as "document".
-    eo_source_type = "document"
+    eo_source_type: str
+    eo_metadata: dict[str, Any]
+    if chunk_source_type == "firm_library":
+        eo_source_type = "firm_library"
+        eo_metadata = {
+            "firm_content_id": chunk_meta.get("firm_content_id"),
+            "firm_library_title": chunk_meta.get("title") or "",
+            "category": chunk_meta.get("category") or "",
+            "intended_modes": list(chunk_meta.get("intended_modes") or []),
+            "sector_tags": list(chunk_meta.get("sector_tags") or []),
+            "section": hit.get("section_heading") or "",
+        }
+    else:
+        # Existing behaviour: flatten to "document" so the legacy
+        # citation rendering keeps working unchanged for SEC / news /
+        # transcript / CH chunks.
+        eo_source_type = "document"
+        eo_metadata = {}
+
     return EvidenceObject(
         session_id=session_id,
         task_id=task_id,
@@ -154,6 +189,7 @@ def _chunk_dict_to_evidence(
         source_score=score,
         confidence="high" if score >= 0.35 else "medium",
         is_inference=False,
+        metadata=eo_metadata,
     )
 
 
@@ -205,13 +241,22 @@ async def _retrieve_by_priorities(
                     "TAVILY_API_KEY not set — skipping news fetch for %r",
                     question,
                 )
+        # Phase 2 / Week 5 / Day 4: "uploaded" expands to BOTH legacy
+        # engagement uploads (chunks.source_type='uploaded') AND firm-
+        # library content (chunks.source_type='firm_library'). The
+        # planner's source_priorities literal stays as "uploaded" — the
+        # routing happens here so the planner stays simple. Trust level
+        # + RRF handle ranking; no pre-bias toward firm content.
+        sql_source_types = (
+            ["uploaded", "firm_library"] if pri == "uploaded" else [pri]
+        )
         result = await hybrid_search(
             engagement_id=session_id,
             query=question,
             k=per_source_k,
             candidate_k=max(per_source_k * 2, 12),
             mode="hybrid",
-            source_types=[pri],
+            source_types=sql_source_types,
         )
         for row in result.get("results") or []:
             cid = row.get("id")
