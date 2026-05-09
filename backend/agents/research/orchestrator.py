@@ -4,7 +4,10 @@ import json
 import logging
 import os
 import re
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401
 from urllib.parse import urlparse
 
 from core.json_util import parse_llm_json
@@ -568,6 +571,7 @@ class ResearchOrchestrator:
         context: str,
         *,
         report_mode: str = "general",
+        resolved_mode: "ResolvedConsultingMode | None" = None,
     ) -> dict[str, Any]:
         """
         Persist EvidenceObject rows and return research dict compatible with analyst (findings + evidence_ids).
@@ -609,10 +613,30 @@ class ResearchOrchestrator:
                     if isinstance(p, str) and p.strip()
                 ]
 
+            # W6/D4: when the planner didn't emit per-task priorities,
+            # fall back to the resolved mode's source_priorities_default.
+            # Precedence is: per-task explicit > mode-default > legacy
+            # vector-only path (kept below).
+            if not priorities and resolved_mode is not None:
+                spd = list(resolved_mode.source_priorities_default or [])
+                if spd:
+                    priorities = [str(p).strip().lower() for p in spd if str(p).strip()]
+
             if priorities:
                 priority_hits, consulted = await _retrieve_by_priorities(
                     session_id, q, priorities
                 )
+                # W6/D4: layer the resolved mode's trust_tier_rules on top
+                # of retrieval — drops chunks whose trust_level falls
+                # below the firm-mandated minimum for that source_type.
+                # Identity-pass when the mode declares no rules (the
+                # common case for built-ins).
+                if resolved_mode is not None and resolved_mode.trust_tier_rules:
+                    from core.consulting_modes import apply_trust_rules
+
+                    priority_hits = apply_trust_rules(
+                        priority_hits, resolved_mode.trust_tier_rules
+                    )
                 retrieval_snapshots.append(
                     {
                         "task_id": tid,
@@ -696,9 +720,14 @@ class ResearchOrchestrator:
             all_pending.extend(task_objs)
 
         branch_trace: list[dict[str, Any]] = []
-        from core.consulting_modes import get_mode_config
+        # W6/D4: prefer the firm-resolved required_branches; fall back to
+        # flat YAML for callers that haven't migrated.
+        if resolved_mode is not None:
+            req_branches = list(resolved_mode.required_branches)
+        else:
+            from core.consulting_modes import get_mode_config
 
-        req_branches = list(get_mode_config(report_mode).get("required_branches") or [])
+            req_branches = list(get_mode_config(report_mode).get("required_branches") or [])
         if req_branches or report_mode != "general":
             branch_defs = await _plan_research_branches(plan, req_branches)
             tid_base = 9000

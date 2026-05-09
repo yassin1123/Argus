@@ -120,6 +120,7 @@ class WriterAgent:
         repair_hint: str | None = None,
         session_id: str | None = None,
         trace_id: str | None = None,
+        resolved_mode: "ResolvedConsultingMode | None" = None,
     ) -> WriterReportPayload:
         prior = ""
         if prior_analysis is not None:
@@ -129,8 +130,22 @@ First analyst draft (superseded by revision): {json.dumps(prior_analysis, indent
         ver = json.dumps(verification or {}, indent=2)[:6000]
         rg = json.dumps(reasoning_graph or {}, indent=2)[:6000]
         cs = json.dumps(claim_support or [], indent=2)[:6000]
+
+        # Mode header surfaces display_name + description so the LLM
+        # knows what kind of memo to write under (and the cover/header
+        # references the firm-overridden label when one exists).
+        mode_header = ""
+        if resolved_mode is not None:
+            mh_parts: list[str] = [
+                f"Consulting mode: {resolved_mode.display_name} "
+                f"(slug: {resolved_mode.name})"
+            ]
+            if (resolved_mode.description or "").strip():
+                mh_parts.append(f"Mode description: {resolved_mode.description.strip()}")
+            mode_header = "\n".join(mh_parts) + "\n\n"
+
         user_msg = f"""
-Original query: {query}
+{mode_header}Original query: {query}
 Structured reasoning graph (canonical structure — align narrative to this): {rg}
 Claim–support table (evidence vs assumption vs inference; use for honesty): {cs}
 Revised analysis (use this as the primary analytical position): {json.dumps(analysis, indent=2)}
@@ -144,13 +159,28 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
 """
         if repair_hint:
             user_msg += f"\n\nREPAIR REQUIRED:\n{repair_hint}\n"
+
+        system_prompt = WRITER_SYSTEM
+        if resolved_mode is not None and (resolved_mode.writer_overlay or "").strip():
+            system_prompt = (
+                WRITER_SYSTEM
+                + "\n\nFIRM WRITER OVERLAY:\n"
+                + resolved_mode.writer_overlay.strip()
+            )
+
         out, _meta = await generate_structured(
             WriterReportPayload,
             task_kind="writer",
-            system=WRITER_SYSTEM,
+            system=system_prompt,
             user=user_msg,
             temperature=0.3,
             session_id=session_id,
             trace_id=trace_id,
         )
         return out
+
+
+from typing import TYPE_CHECKING  # noqa: E402
+
+if TYPE_CHECKING:
+    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401

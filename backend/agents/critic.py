@@ -1,7 +1,11 @@
 import json
+from typing import TYPE_CHECKING
 
 from core.inference.structured import generate_structured
 from models.agent_structured import CriticStructuredOutput
+
+if TYPE_CHECKING:
+    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401
 
 CRITIC_SYSTEM = """
 You are the Critic agent in the Argus decision system.
@@ -48,12 +52,32 @@ class CriticAgent:
         *,
         session_id: str | None = None,
         trace_id: str | None = None,
+        resolved_mode: "ResolvedConsultingMode | None" = None,
     ) -> dict:
+        # Mode-driven coverage block: when a resolved mode is provided
+        # the critic gets the firm-overridden required_branches and
+        # reasoning_slots directly in the user message, so its branch-
+        # coverage and slot-population checks reflect the FIRM's policy
+        # (W6/D4) rather than the flat YAML.
+        coverage_block = ""
+        if resolved_mode is not None:
+            rb = resolved_mode.required_branches
+            rs = resolved_mode.reasoning_slots
+            if rb or rs:
+                coverage_block = (
+                    "\nCONSULTING-MODE COVERAGE EXPECTATIONS:\n"
+                    f"  required_branches: {', '.join(rb) if rb else '(none)'}\n"
+                    f"  reasoning_slots:   {', '.join(rs) if rs else '(none)'}\n"
+                    "Flag in weak_points or revision_instructions any required\n"
+                    "branch with no evidence, and any reasoning slot the analyst\n"
+                    "did not populate. Use the slot_id from the analysis output.\n"
+                )
+
         user_msg = f"""
 Original query: {query}
 Analyst output: {json.dumps(analysis, indent=2)}
 Research used: {json.dumps(research, indent=2)[:3000]}
-"""
+{coverage_block}"""
         out, _meta = await generate_structured(
             CriticStructuredOutput,
             task_kind="critic",

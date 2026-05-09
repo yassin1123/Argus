@@ -105,24 +105,33 @@ async def _audit_unauthorized(
         logger.debug("audit unauthorized skipped: %s", e)
 
 
-async def require_firm_member(firm_id: str, user: dict) -> None:
+async def require_firm_member(
+    firm_id: str, user: dict, *, resource_kind: str = "firm_library"
+) -> None:
     """Raise 404 if the user is not a member of ``firm_id``.
 
     404 (not 403) on cross-firm reads so non-members can't enumerate
     firm UUIDs by probing for 403 vs 404. The denied attempt is still
     audited for monitoring.
+
+    ``resource_kind`` is the prefix for the domain-level audit action
+    (e.g. ``"firm_library"`` -> ``firm_library.list_unauthorized_attempt``).
+    Defaults to ``firm_library`` so Week 5 callers stay unchanged;
+    Week 6 firm-modes endpoints pass ``"firm_modes"``.
     """
     if await is_firm_member(firm_id, user):
         return
     await _audit_unauthorized(
         user=user,
         firm_id=firm_id,
-        action="firm_library.list_unauthorized_attempt",
+        action=f"{resource_kind}.list_unauthorized_attempt",
     )
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Firm not found")
 
 
-async def require_firm_admin(firm_id: str, user: dict) -> None:
+async def require_firm_admin(
+    firm_id: str, user: dict, *, resource_kind: str = "firm_library"
+) -> None:
     """Raise 403 if the user is not an admin of ``firm_id``.
 
     Members trying to perform admin-only actions get 403 (we already
@@ -135,7 +144,7 @@ async def require_firm_admin(firm_id: str, user: dict) -> None:
     await _audit_unauthorized(
         user=user,
         firm_id=firm_id,
-        action="firm_library.admin_unauthorized_attempt",
+        action=f"{resource_kind}.admin_unauthorized_attempt",
     )
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
