@@ -1,7 +1,24 @@
+"""Writer agent. Phase 2 / Week 7 / Day 1: pulled out of the
+single-file ``agents/writer.py`` so the schema registry can live
+alongside it (``agents/writer/schemas/``).
+
+The runtime behaviour of ``WriterAgent.run`` is unchanged from the
+W6 implementation. Schema selection happens via the registry lookup;
+``GeneralReportPayload`` is the default and matches what every
+existing built-in mode produces today.
+"""
+
+from __future__ import annotations
+
 import json
+from typing import TYPE_CHECKING
 
 from core.inference.structured import generate_structured
-from models.report import WriterReportPayload
+
+from .schemas import GeneralReportPayload, WriterReportBase, get_writer_schema
+
+if TYPE_CHECKING:
+    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401
 
 WRITER_SYSTEM = """
 You are the Writer agent in the Argus decision system (Argus signature deliverable).
@@ -121,7 +138,7 @@ class WriterAgent:
         session_id: str | None = None,
         trace_id: str | None = None,
         resolved_mode: "ResolvedConsultingMode | None" = None,
-    ) -> WriterReportPayload:
+    ) -> WriterReportBase:
         prior = ""
         if prior_analysis is not None:
             prior = f"""
@@ -168,8 +185,17 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
                 + resolved_mode.writer_overlay.strip()
             )
 
+        # W7/D1: registry-driven schema selection. Built-in modes still
+        # validate against GeneralReportPayload; m_and_a_diligence (and
+        # whatever Phase 3 adds) gets its bespoke class. Day 2 will
+        # build the per-mode prompt — today the prompt stays generic
+        # and the writer just routes to the right validator.
+        schema_cls: type[WriterReportBase] = GeneralReportPayload
+        if resolved_mode is not None:
+            schema_cls = get_writer_schema(resolved_mode.name)
+
         out, _meta = await generate_structured(
-            WriterReportPayload,
+            schema_cls,
             task_kind="writer",
             system=system_prompt,
             user=user_msg,
@@ -178,9 +204,3 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
             trace_id=trace_id,
         )
         return out
-
-
-from typing import TYPE_CHECKING  # noqa: E402
-
-if TYPE_CHECKING:
-    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401
