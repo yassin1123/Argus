@@ -1,37 +1,43 @@
-"""Firm library API (Phase 2 / Week 5 / Day 1).
+"""Firm library API.
 
 Endpoints (all under ``/api/firms/{firm_id}/library``):
 
-  POST   /                       upload + metadata
-  GET    /                       list (with category/sector/mode filters)
-  GET    /{content_id}           one record + first-3-chunk preview
-  POST   /{content_id}           metadata edit (title/description/modes/sectors)
-  POST   /{content_id}/retire    soft-delete
+  POST   /                       upload + metadata           (admin)
+  GET    /                       list (with filters)         (member)
+  GET    /{content_id}           one record + chunk preview  (member)
+  POST   /{content_id}           metadata edit               (admin)
+  POST   /{content_id}/retire    soft-delete                 (admin)
 
-Day 1 contract: every endpoint checks firm membership; 403 on mismatch.
-Role-gated actions (admin-only retire, etc.) come Day 3.
+Day 3 wires real role gates: any member can read; only admins can
+mutate. Cross-firm reads return 404 (not 403) so non-members can't
+enumerate firms by probing. Failed attempts are audited at the domain
+level (action='firm_library.list_unauthorized_attempt' /
+'firm_library.admin_unauthorized_attempt') in addition to the HTTP-
+level audit middleware row.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Path, Query, UploadFile
 from pydantic import BaseModel, Field
 
 from auth.dependencies import get_current_user
-from auth.firm_permissions import is_firm_member
+from auth.firm_permissions import (
+    require_firm_admin,
+    require_firm_member,
+)
 from core.firm_library import (
-    SUPPORTED_EXTENSIONS,
     UnsupportedFileTypeError,
     ingest_firm_content,
     retire_firm_content,
 )
 from core.firm_library.service import list_chunks_for_content
+from db.connection import acquire
 from storage.firm_content_queries import (
-    CATEGORIES,
     get_firm_content,
     list_firm_content,
     update_firm_content,
@@ -58,18 +64,59 @@ class FirmContentEditBody(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Membership guard
+# Domain-rich audit helpers
 # ---------------------------------------------------------------------------
 
 
-async def _assert_firm_member(firm_id: str, user: dict) -> None:
-    if not await is_firm_member(firm_id, user):
-        # 404 rather than 403 so non-members can't enumerate firms.
-        raise HTTPException(status_code=404, detail="Firm not found")
+async def _audit_event(
+    *,
+    user: dict,
+    action: str,
+    firm_id: str,
+    content_id: str | None,
+    payload: dict[str, Any],
+) -> None:
+    """Best-effort domain-level audit row. Never raises."""
+    try:
+        async with acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO audit_events (
+                    actor_user_id, actor_email, action, resource_type,
+                    resource_id, payload
+                ) VALUES (
+                    $1::uuid, $2, $3, 'firm_content', $4, $5::jsonb
+                )
+                """,
+                user.get("user_id"),
+                user.get("email"),
+                action,
+                content_id,
+                json.dumps({"firm_id": firm_id, **payload}),
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.debug("audit_event %s skipped: %s", action, e)
+
+
+def _diff_metadata(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
+    """Return only the fields that changed between two firm_content rows.
+
+    Used for the firm_library.metadata_edit audit payload. Compares the
+    four mutable fields (title, description, intended_modes,
+    sector_tags); everything else is immutable per spec.
+    """
+    keys = ("title", "description", "intended_modes", "sector_tags")
+    out: dict[str, Any] = {}
+    for k in keys:
+        b = before.get(k)
+        a = after.get(k)
+        if b != a:
+            out[k] = {"before": b, "after": a}
+    return out
 
 
 # ---------------------------------------------------------------------------
-# POST / — upload
+# POST / — upload (admin only)
 # ---------------------------------------------------------------------------
 
 
@@ -90,7 +137,11 @@ async def upload_firm_content(
     file: UploadFile = File(..., description="PDF / DOCX / MD / TXT"),
     user: dict = Depends(get_current_user),
 ) -> dict:
-    await _assert_firm_member(firm_id, user)
+    # Two-tier check: prove membership (404 if not), then prove admin
+    # (403 if not). Each check audits its own denial, so the trail is
+    # specific to the failure mode.
+    await require_firm_member(firm_id, user)
+    await require_firm_admin(firm_id, user)
 
     if not file.filename:
         raise HTTPException(status_code=400, detail="file is required")
@@ -119,6 +170,19 @@ async def upload_firm_content(
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     fc = await get_firm_content(firm_id, result.firm_content_id)
+    await _audit_event(
+        user=user,
+        action="firm_library.upload",
+        firm_id=firm_id,
+        content_id=result.firm_content_id,
+        payload={
+            "title": title,
+            "category": category,
+            "chunks_written": result.chunks_written,
+            "cached": result.cached,
+            "source_filename": file.filename,
+        },
+    )
     return {
         "firm_content": fc,
         "ingest": {
@@ -129,7 +193,7 @@ async def upload_firm_content(
 
 
 # ---------------------------------------------------------------------------
-# GET / — list
+# GET / — list (member)
 # ---------------------------------------------------------------------------
 
 
@@ -142,7 +206,7 @@ async def list_endpoint(
     include_retired: bool = Query(default=False),
     user: dict = Depends(get_current_user),
 ) -> dict:
-    await _assert_firm_member(firm_id, user)
+    await require_firm_member(firm_id, user)
     rows = await list_firm_content(
         firm_id,
         category=category,
@@ -154,7 +218,7 @@ async def list_endpoint(
 
 
 # ---------------------------------------------------------------------------
-# GET /{content_id} — one + chunk preview
+# GET /{content_id} — one + chunk preview (member)
 # ---------------------------------------------------------------------------
 
 
@@ -164,7 +228,7 @@ async def get_one(
     content_id: str = Path(...),
     user: dict = Depends(get_current_user),
 ) -> dict:
-    await _assert_firm_member(firm_id, user)
+    await require_firm_member(firm_id, user)
     fc = await get_firm_content(firm_id, content_id)
     if not fc:
         raise HTTPException(status_code=404, detail="Firm content not found")
@@ -173,7 +237,7 @@ async def get_one(
 
 
 # ---------------------------------------------------------------------------
-# POST /{content_id} — metadata edit (POST not PATCH per spec)
+# POST /{content_id} — metadata edit (admin)
 # ---------------------------------------------------------------------------
 
 
@@ -184,9 +248,10 @@ async def edit_metadata(
     content_id: str = Path(...),
     user: dict = Depends(get_current_user),
 ) -> dict:
-    await _assert_firm_member(firm_id, user)
-    fc = await get_firm_content(firm_id, content_id)
-    if not fc:
+    await require_firm_member(firm_id, user)
+    await require_firm_admin(firm_id, user)
+    before = await get_firm_content(firm_id, content_id)
+    if not before:
         raise HTTPException(status_code=404, detail="Firm content not found")
     updated = await update_firm_content(
         firm_id,
@@ -196,11 +261,20 @@ async def edit_metadata(
         intended_modes=body.intended_modes,
         sector_tags=body.sector_tags,
     )
+    diff = _diff_metadata(before or {}, updated or {})
+    if diff:
+        await _audit_event(
+            user=user,
+            action="firm_library.metadata_edit",
+            firm_id=firm_id,
+            content_id=content_id,
+            payload={"diff": diff},
+        )
     return {"firm_content": updated}
 
 
 # ---------------------------------------------------------------------------
-# POST /{content_id}/retire — soft-delete
+# POST /{content_id}/retire — soft-delete (admin)
 # ---------------------------------------------------------------------------
 
 
@@ -210,7 +284,8 @@ async def retire_endpoint(
     content_id: str = Path(...),
     user: dict = Depends(get_current_user),
 ) -> dict:
-    await _assert_firm_member(firm_id, user)
+    await require_firm_member(firm_id, user)
+    await require_firm_admin(firm_id, user)
     fc = await retire_firm_content(
         firm_id=firm_id,
         content_id=content_id,

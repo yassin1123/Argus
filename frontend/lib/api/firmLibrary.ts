@@ -49,10 +49,17 @@ export interface UploadFirmContentInput {
   file: File;
 }
 
+async function jsonOrThrow<T>(res: Response, fallback: string): Promise<T> {
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as { detail?: string };
+    throw new Error(err.detail || `${fallback} (${res.status})`);
+  }
+  return (await res.json()) as T;
+}
+
 /**
- * Multipart POST to /api/firms/{firm_id}/library matching the Day 1
- * backend signature (Form fields + File). Throws Error with the
- * server's `detail` message on non-2xx.
+ * Multipart POST to /api/firms/{firm_id}/library. Throws Error with the
+ * server's `detail` message on non-2xx (e.g. 403 admin required).
  */
 export async function uploadFirmContent(
   firmId: string,
@@ -75,9 +82,95 @@ export async function uploadFirmContent(
     credentials: FETCH_CREDS,
     body: fd,
   });
-  if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as { detail?: string };
-    throw new Error(err.detail || `Upload failed (${res.status})`);
-  }
-  return (await res.json()) as UploadFirmContentResult;
+  return jsonOrThrow<UploadFirmContentResult>(res, "Upload failed");
+}
+
+// ---------------------------------------------------------------------------
+// Day 3 — list / get-one / edit / retire
+// ---------------------------------------------------------------------------
+
+
+export interface ChunkPreview {
+  id: string;
+  content: string;
+  position: number;
+  page: number | null;
+  section_heading: string | null;
+  source_filename: string | null;
+}
+
+export interface ListFirmContentParams {
+  category?: FirmContentCategory;
+  sector?: string;
+  mode?: string;
+  includeRetired?: boolean;
+}
+
+export async function listFirmContent(
+  firmId: string,
+  params: ListFirmContentParams = {},
+): Promise<FirmContent[]> {
+  const qs = new URLSearchParams();
+  if (params.category) qs.set("category", params.category);
+  if (params.sector) qs.set("sector", params.sector);
+  if (params.mode) qs.set("mode", params.mode);
+  if (params.includeRetired) qs.set("include_retired", "true");
+  const qsPart = qs.toString();
+  const url = `${BASE_URL}/api/firms/${firmId}/library${qsPart ? `?${qsPart}` : ""}`;
+  const res = await fetch(url, { credentials: FETCH_CREDS, cache: "no-store" });
+  const body = await jsonOrThrow<{ firm_content: FirmContent[] }>(res, "List failed");
+  return body.firm_content;
+}
+
+export async function getFirmContent(
+  firmId: string,
+  contentId: string,
+): Promise<{ firm_content: FirmContent; chunk_preview: ChunkPreview[] }> {
+  const res = await fetch(
+    `${BASE_URL}/api/firms/${firmId}/library/${contentId}`,
+    { credentials: FETCH_CREDS, cache: "no-store" },
+  );
+  return jsonOrThrow(res, "Fetch failed");
+}
+
+export interface EditFirmContentInput {
+  title?: string;
+  description?: string;
+  intendedModes?: string[];
+  sectorTags?: string[];
+}
+
+export async function editFirmContent(
+  firmId: string,
+  contentId: string,
+  input: EditFirmContentInput,
+): Promise<FirmContent> {
+  const body = {
+    title: input.title,
+    description: input.description,
+    intended_modes: input.intendedModes,
+    sector_tags: input.sectorTags,
+  };
+  const res = await fetch(
+    `${BASE_URL}/api/firms/${firmId}/library/${contentId}`,
+    {
+      method: "POST",
+      credentials: FETCH_CREDS,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  const r = await jsonOrThrow<{ firm_content: FirmContent }>(res, "Edit failed");
+  return r.firm_content;
+}
+
+export async function retireFirmContent(
+  firmId: string,
+  contentId: string,
+): Promise<{ firm_content: FirmContent; already_retired: boolean }> {
+  const res = await fetch(
+    `${BASE_URL}/api/firms/${firmId}/library/${contentId}/retire`,
+    { method: "POST", credentials: FETCH_CREDS },
+  );
+  return jsonOrThrow(res, "Retire failed");
 }

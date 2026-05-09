@@ -46,6 +46,7 @@ export type AuthUser = {
   full_name: string;
   role: string;
   default_firm_id: string | null;
+  default_firm_role: "admin" | "member" | null;
 };
 
 export async function register(email: string, password: string, full_name = ""): Promise<{ user: AuthUser }> {
