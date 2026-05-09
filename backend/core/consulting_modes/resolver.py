@@ -454,3 +454,171 @@ def load_mode_legacy(name: str) -> ResolvedConsultingMode:
 def _cache_clear() -> None:
     """Test hook — clear the resolution cache."""
     _CACHE.clear()
+
+
+def invalidate_firm_mode(name: str, firm_id: str | UUID) -> int:
+    """Drop every cache entry for (name, firm_id, *engagement_id*).
+
+    Called from the service layer on create / update / retire / restore
+    so the next resolve_mode() call re-reads the DB. Returns the number
+    of entries dropped (handy for tests).
+    """
+    fid = str(firm_id)
+    keys_to_drop = [k for k in _CACHE if k[0] == name and k[1] == fid]
+    for k in keys_to_drop:
+        del _CACHE[k]
+    return len(keys_to_drop)
+
+
+# ---------------------------------------------------------------------------
+# Config-payload validation (used by the service layer on create/update)
+# ---------------------------------------------------------------------------
+
+
+# Canonical trust-tier values from backend/api/sources.py / source_queries.py.
+# Centralised here so future trust-tier additions only need updating in one
+# place if the validator references it.
+ALLOWED_TRUST_TIERS = ("firm_vetted", "credible_external", "web_general", "contested")
+ALLOWED_SOURCE_TYPES = (
+    "uploaded",
+    "sec_filing",
+    "transcript",
+    "news",
+    "ch_filing",
+    "web",
+    "firm_library",  # surfaced in citations as a first-class type since W5/D4
+)
+
+ALLOWED_CONFIG_KEYS = frozenset(
+    {
+        "display_name",
+        "description",
+        "required_branches",
+        "reasoning_slots",
+        "source_priorities_default",
+        "trust_tier_rules",
+        "writer_overlay",
+        "planner_overlay",
+        "min_evidence_objects",
+        "metadata",
+    }
+)
+
+LIST_FIELD_MAX_ITEMS = 20
+
+
+def _validate_overlay_payload(config: dict[str, Any]) -> None:
+    """Validate a firm_modes / engagement override config dict.
+
+    Raises :class:`ModeConfigError` with a clear, field-level message on
+    any violation:
+
+      * unknown top-level keys
+      * required_branches / reasoning_slots / source_priorities_default
+        not lists, or > 20 items, or non-string items
+      * source_priorities_default contains a literal not in the allowed set
+      * trust_tier_rules: keys not in source-type set, values not in
+        trust-tier set
+      * overlay strings > 2000 chars (also enforced again at merge time —
+        belt-and-braces)
+      * min_evidence_objects not coercible to int
+
+    The validator is strict on purpose. Per Day 1 hard rule we don't
+    silently fall back on a bad firm override.
+    """
+    if not isinstance(config, dict):
+        raise ModeConfigError(
+            f"config must be an object, got {type(config).__name__}"
+        )
+
+    extra = set(config.keys()) - ALLOWED_CONFIG_KEYS
+    if extra:
+        raise ModeConfigError(
+            "config contains unknown keys: "
+            + ", ".join(sorted(extra))
+            + f" (allowed: {', '.join(sorted(ALLOWED_CONFIG_KEYS))})"
+        )
+
+    for key in ("display_name", "description"):
+        if key in config and not isinstance(config[key], str):
+            raise ModeConfigError(
+                f"{key} must be a string, got {type(config[key]).__name__}"
+            )
+
+    for key in ("required_branches", "reasoning_slots", "source_priorities_default"):
+        if key not in config:
+            continue
+        v = config[key]
+        if not isinstance(v, list):
+            raise ModeConfigError(
+                f"{key} must be a list, got {type(v).__name__}"
+            )
+        if len(v) > LIST_FIELD_MAX_ITEMS:
+            raise ModeConfigError(
+                f"{key} has {len(v)} items, max {LIST_FIELD_MAX_ITEMS}"
+            )
+        for item in v:
+            if not isinstance(item, str):
+                raise ModeConfigError(
+                    f"{key} items must be strings, got {type(item).__name__}"
+                )
+        if key == "source_priorities_default":
+            bad = [x for x in v if x not in ALLOWED_SOURCE_TYPES]
+            if bad:
+                raise ModeConfigError(
+                    f"source_priorities_default contains unknown source types: "
+                    f"{', '.join(bad)} (allowed: {', '.join(ALLOWED_SOURCE_TYPES)})"
+                )
+
+    if "trust_tier_rules" in config:
+        rules = config["trust_tier_rules"]
+        if not isinstance(rules, dict):
+            raise ModeConfigError(
+                f"trust_tier_rules must be an object, got {type(rules).__name__}"
+            )
+        for k, v in rules.items():
+            if k not in ALLOWED_SOURCE_TYPES:
+                raise ModeConfigError(
+                    f"trust_tier_rules key {k!r} is not a known source type "
+                    f"(allowed: {', '.join(ALLOWED_SOURCE_TYPES)})"
+                )
+            if not isinstance(v, str) or v not in ALLOWED_TRUST_TIERS:
+                raise ModeConfigError(
+                    f"trust_tier_rules[{k!r}] = {v!r} is not a valid trust tier "
+                    f"(allowed: {', '.join(ALLOWED_TRUST_TIERS)})"
+                )
+
+    for key in ("writer_overlay", "planner_overlay"):
+        if key in config:
+            v = config[key]
+            if not isinstance(v, str):
+                raise ModeConfigError(
+                    f"{key} must be a string, got {type(v).__name__}"
+                )
+            if len(v) > OVERLAY_MAX_CHARS:
+                raise ModeConfigError(
+                    f"{key} is {len(v)} chars, exceeds {OVERLAY_MAX_CHARS}-char per-layer cap"
+                )
+
+    if "min_evidence_objects" in config:
+        try:
+            int(config["min_evidence_objects"])
+        except (TypeError, ValueError) as e:
+            raise ModeConfigError(
+                f"min_evidence_objects must be an int, "
+                f"got {config['min_evidence_objects']!r}"
+            ) from e
+
+    if "metadata" in config and not isinstance(config["metadata"], dict):
+        raise ModeConfigError(
+            f"metadata must be an object, got {type(config['metadata']).__name__}"
+        )
+
+
+def is_known_built_in(name: str) -> bool:
+    """Whether ``name`` matches a key in the built-in YAML."""
+    return isinstance(_load_yaml().get(name), dict)
+
+
+def list_built_in_names() -> list[str]:
+    return sorted(k for k, v in _load_yaml().items() if isinstance(v, dict))
