@@ -390,7 +390,7 @@ async def get_session_row(session_id: str) -> dict[str, Any] | None:
             """
             SELECT id, title, query, status, created_at, updated_at, metadata, gap_report,
                    pipeline_state, report_mode, intake_questions, intake_answers,
-                   created_by_user_id
+                   created_by_user_id, firm_id
             FROM sessions WHERE id = $1::uuid
             """,
             session_id,
@@ -746,6 +746,7 @@ def _session_dict(row: Any) -> dict[str, Any]:
     if isinstance(ia, str):
         ia = json.loads(ia)
     created_by = row.get("created_by_user_id") if "created_by_user_id" in row else None
+    firm_id_val = row.get("firm_id") if "firm_id" in row else None
     return {
         "id": str(row["id"]),
         "title": row["title"],
@@ -762,6 +763,7 @@ def _session_dict(row: Any) -> dict[str, Any]:
         "intake_answers": list(ia) if isinstance(ia, list) else [],
         "recommendation_preview": _preview_or_none(row.get("recommendation_preview")),
         "created_by_user_id": str(created_by) if created_by else None,
+        "firm_id": str(firm_id_val) if firm_id_val else None,
     }
 
 

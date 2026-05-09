@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-05-09T06:14:58Z",
+  "headline_assertions": {
+    "A_planner_emits_custom_branches": false,
+    "A_writer_overlay_lands": false,
+    "B_planner_avoids_custom_branches": true,
+    "B_writer_overlay_does_not_land": true
+  },
+  "headline_pass": false,
+  "n_runs": 2,
+  "runs": [
+    {
+      "run_name": "A_with_override",
+      "report_mode": "boutique_pricing_review",
+      "session_id": "4a92f95f-42bf-4d12-8d23-34494aba56af",
+      "wall_seconds": 76.16,
+      "cost_usd_total": 0,
+      "total_claims": 0,
+      "grounded_claims": 0,
+      "firm_library_citation_count": 0,
+      "firm_library_items_cited": {},
+      "diversity_counts": {
+        "firm_library": 48
+      },
+      "overlay_signals": {
+        "phrase_2x2": false,
+        "phrase_90day_roadmap": false,
+        "phrase_named_owners": false,
+        "phrase_sensitivity_levels": false
+      },
+      "overlay_signal_count": 0,
+      "planner_custom_branches_present": [],
+      "planner_built_in_branches_present": [
+        "market"
+      ],
+      "research_branches_persisted": [
+        "{'id': 'competitor_price_anchor_analysis', 'questions': ['What are the competitor price points and pricing strategies within each segment?', 'What are the current pricing strategies and price points for each of the four segments in the UK retail business?'], 'evidence_added_count': 0}",
+        "{'id': 'willingness_to_pay_evidence', 'questions': ['What evidence exists regarding customer willingness to pay across the four segments?', 'What are the key decision criteria for selecting the most effective pricing strategy for each segment?'], 'evidence_added_count': 0}",
+        "{'id': 'price_architecture_review', 'questions': ['What pricing architecture frameworks are recommended for a business with multiple segments?', 'What are the current pricing strategies and price points for each of the four segments in the UK retail business?'], 'evidence_added_count': 0}",
+        "{'id': 'implementation_friction_audit', 'questions': ['What are the potential friction points in implementing new pricing strategies in the UK retail business?', 'What evidence or market conditions would necessitate a change in the proposed pricing strategy?'], 'evidence_added_count': 0}"
+      ],
+      "rec_numeric_tokens": 0,
+      "rec_time_bound_phrases": 0,
+      "recommendation_preview": "",
+      "error": null
+    },
+    {
+      "run_name": "B_built_in",
+      "report_mode": "growth_strategy",
+      "session_id": "2e672dc4-e41f-4ac8-92b5-708cd78299b7",
+      "wall_seconds": 68.88,
+      "cost_usd_total": 0,
+      "total_claims": 0,
+      "grounded_claims": 0,
+      "firm_library_citation_count": 0,
+      "firm_library_items_cited": {},
+      "diversity_counts": {
+        "firm_library": 32
+      },
+      "overlay_signals": {
+        "phrase_2x2": false,
+        "phrase_90day_roadmap": false,
+        "phrase_named_owners": false,
+        "phrase_sensitivity_levels": false
+      },
+      "overlay_signal_count": 0,
+      "planner_custom_branches_present": [],
+      "planner_built_in_branches_present": [
+        "capabilities",
+        "market"
+      ],
+      "research_branches_persisted": [
+        "{'id': 'market', 'questions': ['What are the current pricing strategies and price points for each of the 4 segments in the UK retail business?', 'How do competitors in the UK retail market price similar products in each of the 4 segments?'], 'evidence_added_count': 0}",
+        "{'id': 'capabilities', 'questions': ['What internal capabilities does the business have to implement new pricing strategies effectively?', 'What are the decision criteria for selecting the most appropriate pricing strategy for each segment?'], 'evidence_added_count': 0}"
+      ],
+      "rec_numeric_tokens": 0,
+      "rec_time_bound_phrases": 0,
+      "recommendation_preview": "",
+      "error": null
+    }
+  ]
+}

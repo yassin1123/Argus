@@ -47,3 +47,7 @@ backend/eval_runs/phase1_exit/*.failed.json
 backend/eval_runs/week5_e2e/A_with_library.json
 backend/eval_runs/week5_e2e/B_with_library.json
 backend/eval_runs/week5_e2e/A_no_library.json
+
+# Week 6 / Day 5 layered-modes e2e — same shape, only summary.json committed.
+backend/eval_runs/week6_e2e/A_with_override.json
+backend/eval_runs/week6_e2e/B_built_in.json
