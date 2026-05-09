@@ -27,6 +27,16 @@ function LibraryIcon() {
     </svg>
   );
 }
+function FirmLibraryIcon() {
+  // Open book with a tag tucked in — distinguishes "firm-curated" from the
+  // legacy promoted-sources library glyph.
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <path d="M3 5a2 2 0 0 1 2-2h6v18H5a2 2 0 0 1-2-2zM21 5a2 2 0 0 0-2-2h-6v18h6a2 2 0 0 0 2-2z" />
+      <path d="M11 7h2M11 11h2" />
+    </svg>
+  );
+}
 function VaultIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
@@ -55,7 +65,12 @@ function GearIcon() {
 
 const NAV: NavItem[] = [
   { href: "/", label: "Engagements", match: (p) => p === "/" || p.startsWith("/sessions"), icon: <HomeIcon /> },
-  { href: "/library", label: "Source Library", match: (p) => p.startsWith("/library"), icon: <LibraryIcon /> },
+  // /library = legacy promoted-sources list (sources promoted to firm scope
+  // from individual engagement uploads). Renamed to "Sources" so the new
+  // /firm/library upload route can claim the "Firm Library" label.
+  { href: "/library", label: "Sources", match: (p) => p === "/library" || p.startsWith("/library/"), icon: <LibraryIcon /> },
+  // /firm/library = new firm-curated content (Phase 2 / Week 5 / Day 2 ).
+  { href: "/firm/library", label: "Firm Library", match: (p) => p.startsWith("/firm/library"), icon: <FirmLibraryIcon /> },
   { href: "/vault", label: "Knowledge Vault", match: (p) => p.startsWith("/vault"), icon: <VaultIcon /> },
   { href: "/notifications", label: "Notifications", match: (p) => p.startsWith("/notifications"), icon: <BellIcon /> },
   { href: "/settings", label: "Settings", match: (p) => p.startsWith("/settings"), icon: <GearIcon /> },

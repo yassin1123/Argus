@@ -46,7 +46,7 @@ async def create_session(user_id: str, *, ip: str | None = None, user_agent: str
 
 
 async def lookup_session(token: str) -> dict[str, Any] | None:
-    """Resolve a token to {user_id, email, full_name, role} or None."""
+    """Resolve a token to {user_id, email, full_name, role, default_firm_id} or None."""
     if not token:
         return None
     token_hash = _hash_token(token)
@@ -54,7 +54,7 @@ async def lookup_session(token: str) -> dict[str, Any] | None:
         row = await conn.fetchrow(
             """
             SELECT s.user_id, s.expires_at, s.revoked_at,
-                   u.email, u.full_name, u.role
+                   u.email, u.full_name, u.role, u.default_firm_id
             FROM sessions_auth s
             JOIN users u ON u.id = s.user_id
             WHERE s.token_hash = $1
@@ -72,6 +72,7 @@ async def lookup_session(token: str) -> dict[str, Any] | None:
         "email": row["email"],
         "full_name": row["full_name"] or "",
         "role": row["role"] or "member",
+        "default_firm_id": str(row["default_firm_id"]) if row["default_firm_id"] else None,
     }
 
 
