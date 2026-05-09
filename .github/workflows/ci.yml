@@ -63,6 +63,7 @@ jobs:
             --ignore=tests/test_firm_library_permissions.py \
             --ignore=tests/test_firm_library_retrieval.py \
             --ignore=tests/test_firm_modes_api.py \
+            --ignore=tests/test_get_session_row_firm_id.py \
             -q --tb=short
 
   frontend-build:

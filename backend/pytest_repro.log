@@ -1,0 +1,49 @@
+.....................................s.................................. [ 28%]
+..............................s.......................E
+=================================== ERRORS ====================================
+___________ ERROR at setup of test_get_session_row_includes_firm_id ___________
+tests\test_get_session_row_firm_id.py:27: in _db_pool
+    await init_db()
+db\connection.py:21: in init_db
+    _pool = await asyncpg.create_pool(
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py:439: in _async__init__
+    await self._initialize()
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py:466: in _initialize
+    await first_ch.connect()
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py:153: in connect
+    self._con = await self._pool._get_new_connection()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\pool.py:538: in _get_new_connection
+    con = await self._connect(
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connection.py:2443: in connect
+    return await connect_utils._connect(
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py:1218: in _connect
+    conn = await _connect_addr(
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py:1054: in _connect_addr
+    return await __connect_addr(params, True, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\asyncpg\connect_utils.py:1102: in __connect_addr
+    await connected
+E   asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "noop"
+============================== warnings summary ===============================
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\spacy\cli\_util.py:23
+  C:\Users\yassi\AppData\Local\Programs\Python\Python312\Lib\site-packages\spacy\cli\_util.py:23: DeprecationWarning: Importing 'parser.split_arg_string' is deprecated, it will only be available in 'shell_completion' in Click 9.0.
+    from click.parser import split_arg_string
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\_internal\_config.py:295
+  C:\Users\yassi\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\_internal\_config.py:295: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.10/migration/
+    warnings.warn(DEPRECATION_MESSAGE, DeprecationWarning)
+
+..\..\..\..\AppData\Local\Programs\Python\Python312\Lib\site-packages\litellm\utils.py:98
+  C:\Users\yassi\AppData\Local\Programs\Python\Python312\Lib\site-packages\litellm\utils.py:98: DeprecationWarning: open_text is deprecated. Use files() instead. Refer to https://importlib-resources.readthedocs.io/en/latest/using.html#migrating-from-legacy for migration advice.
+    with resources.open_text("litellm.llms.tokenizers", "anthropic_tokenizer.json") as f:
+
+tests/test_edgar_parser.py::test_unknown_section_handling_on_malformed_html
+  C:\Users\yassi\AppData\Local\Programs\Python\Python312\Lib\site-packages\bs4\builder\_lxml.py:124: DeprecationWarning: The 'strip_cdata' option of HTMLParser() has never done anything and will eventually be removed.
+    parser = parser(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/test_get_session_row_firm_id.py::test_get_session_row_includes_firm_id
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+124 passed, 2 skipped, 4 warnings, 1 error in 19.40s
