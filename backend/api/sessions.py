@@ -1,6 +1,10 @@
+import json
+import logging
 import uuid
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from pydantic import BaseModel, Field
 
 from auth.dependencies import get_current_user
 from auth.permissions import (
@@ -10,9 +14,13 @@ from auth.permissions import (
     can_write,
     get_engagement_role,
 )
+from core.consulting_modes import invalidate_engagement
+from core.consulting_modes.resolver import _validate_overlay_payload
+from core.consulting_modes.types import ModeConfigError
 from core.limits import limiter
 from core.text_normaliser import normalise_query
 from agents.intake import IntakeAgent
+from db.connection import acquire
 from db.queries import (
     clear_pipeline_artifacts,
     create_session,
@@ -26,6 +34,8 @@ from db.queries import (
 )
 from models.session import CreateSessionRequest, IntakeSubmitRequest
 from tasks.pipeline import run_pipeline_task
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -193,6 +203,97 @@ async def delete_session_endpoint(session_id: str, user: dict = Depends(get_curr
     if not ok:
         raise HTTPException(status_code=404, detail="Session not found")
     return {"deleted": True}
+
+
+class EngagementModeOverrideBody(BaseModel):
+    """Body for POST /api/sessions/{session_id}/mode_override.
+
+    Power-user endpoint (no UI). Validated against the same overlay
+    schema firm_modes uses; on save the resolver cache is invalidated
+    so the next pipeline run picks up the override.
+    """
+
+    config: dict[str, Any] = Field(default_factory=dict)
+
+
+@router.post("/{session_id}/mode_override")
+async def set_engagement_mode_override(
+    session_id: str,
+    body: EngagementModeOverrideBody,
+    user: dict = Depends(get_current_user),
+) -> dict:
+    """Set an engagement-level override on top of (built-in <- firm).
+
+    The session's existing ``report_mode`` is the mode_name this
+    override applies to. Subsequent pipeline runs of this engagement
+    see the merged result; other engagements at the same firm are
+    unaffected.
+
+    Power-user endpoint (no Phase 2 UI). The W6/D2 firm-modes UI is
+    the place to push firm-wide changes.
+    """
+    row = await get_session_row(session_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Session not found")
+    await _require_write(session_id, user)
+    try:
+        _validate_overlay_payload(body.config)
+    except ModeConfigError as e:
+        raise HTTPException(
+            status_code=400,
+            detail={"error": "invalid_mode_config", "message": str(e)},
+        ) from e
+
+    mode_name = str(row.get("report_mode") or "general")
+    firm_id = str(row.get("firm_id"))
+    async with acquire() as conn:
+        await conn.execute(
+            """
+            INSERT INTO engagement_mode_overrides (
+                session_id, firm_id, mode_name, config, created_by
+            ) VALUES ($1::uuid, $2::uuid, $3, $4::jsonb, $5::uuid)
+            ON CONFLICT (session_id) DO UPDATE
+                SET mode_name = EXCLUDED.mode_name,
+                    config = EXCLUDED.config,
+                    created_by = EXCLUDED.created_by
+            """,
+            session_id,
+            firm_id,
+            mode_name,
+            json.dumps(body.config),
+            user.get("user_id"),
+        )
+        try:
+            await conn.execute(
+                """
+                INSERT INTO audit_events (
+                    actor_user_id, actor_email, action, resource_type,
+                    resource_id, payload
+                ) VALUES (
+                    $1::uuid, $2, 'engagement_mode_override.set',
+                    'session', $3, $4::jsonb
+                )
+                """,
+                user.get("user_id"),
+                user.get("email"),
+                session_id,
+                json.dumps(
+                    {
+                        "firm_id": firm_id,
+                        "mode_name": mode_name,
+                        "config_keys": sorted(body.config.keys()),
+                    }
+                ),
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.debug("engagement_mode_override audit skipped: %s", e)
+
+    invalidate_engagement(session_id)
+    return {
+        "session_id": session_id,
+        "mode_name": mode_name,
+        "config": body.config,
+    }
 
 
 @router.post("/{session_id}/run")

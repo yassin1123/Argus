@@ -23,6 +23,10 @@ from core._consulting_modes_legacy import (  # noqa: F401 — re-export
 from .resolver import (  # noqa: F401 — re-export
     CACHE_TTL_SECONDS,
     OVERLAY_MAX_CHARS,
+    apply_trust_rules,
+    check_resolved_mode_satisfied,
+    invalidate_engagement,
+    invalidate_firm_mode,
     load_mode_legacy,
     resolve_mode,
 )

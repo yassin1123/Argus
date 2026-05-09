@@ -19,7 +19,13 @@ from core.contradiction_policy import (
     compute_contradiction_severity,
     merge_contradiction_into_caveats,
 )
-from core.consulting_modes import branch_ids_from_evidence_claims, check_mode_satisfied
+from core.consulting_modes import (
+    ResolvedConsultingMode,
+    branch_ids_from_evidence_claims,
+    check_mode_satisfied,
+    check_resolved_mode_satisfied,
+    resolve_mode,
+)
 from core.entailment import enrich_claim_rows_with_entailment
 from core.evidence_graph import build_evidence_graph_v1
 from core.eval_rubric import score_pipeline_artifacts
@@ -201,9 +207,35 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
     context = await get_uploaded_context_text(session_id)
     sess = await get_session_row(session_id)
     report_mode = str(sess.get("report_mode") or "general") if sess else "general"
+    firm_id = str(sess.get("firm_id")) if sess and sess.get("firm_id") else None
     research_contradictions_list: list[str] = []
     research_followup_queries = 0
     verifier_sanitize_stats: dict[str, Any] = {}
+
+    # W6/D4: resolve the consulting mode once at the top of the pipeline
+    # so every agent sees the same merged view (built-in <- firm <-
+    # engagement). Cached resolution makes the cost negligible.
+    resolved_mode: ResolvedConsultingMode | None = None
+    try:
+        resolved_mode = await resolve_mode(
+            report_mode,
+            firm_id=firm_id,
+            engagement_id=session_id,
+        )
+    except Exception as e:  # noqa: BLE001
+        # If the mode name doesn't exist in YAML and the firm has no
+        # override defining it, log and fall through to the legacy YAML
+        # path — the existing `check_mode_satisfied(name, ...)` then
+        # gracefully handles the unknown name (returns no required
+        # branches). This preserves backward compat for sessions
+        # created before the resolver landed.
+        logging.getLogger(__name__).debug(
+            "resolve_mode failed for %s (%s) — falling back to YAML: %s",
+            report_mode,
+            firm_id,
+            e,
+        )
+
     try:
         await update_session_status(session_id, "processing")
         await _pipeline_trace(session_id, "pipeline_start", "status=processing")
@@ -224,6 +256,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 context=context,
                 report_mode=report_mode,
                 intake_block=intake_block,
+                resolved_mode=resolved_mode,
             ),
         )
         await update_pipeline_state(session_id, "plan_ready")
@@ -236,7 +269,11 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             "researcher",
             json.dumps(plan, ensure_ascii=False)[:8000],
             research_orch.run(
-                session_id=session_id, plan=plan, context=context, report_mode=report_mode
+                session_id=session_id,
+                plan=plan,
+                context=context,
+                report_mode=report_mode,
+                resolved_mode=resolved_mode,
             ),
         )
         if isinstance(research, dict):
@@ -271,11 +308,20 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             f"evidence_objects={len(evidence_objects)}",
         )
         branch_ids = branch_ids_from_evidence_claims(evidence_objects)
-        ok_mode, mode_gaps = check_mode_satisfied(
-            report_mode,
-            branch_ids_present=branch_ids,
-            evidence_count=len(evidence_objects),
-        )
+        # W6/D4: prefer the firm-resolved mode; fall back to flat YAML
+        # only when resolution failed (rare — see top-of-pipeline).
+        if resolved_mode is not None:
+            ok_mode, mode_gaps = check_resolved_mode_satisfied(
+                resolved_mode,
+                branch_ids_present=branch_ids,
+                evidence_count=len(evidence_objects),
+            )
+        else:
+            ok_mode, mode_gaps = check_mode_satisfied(
+                report_mode,
+                branch_ids_present=branch_ids,
+                evidence_count=len(evidence_objects),
+            )
         if not ok_mode:
             await update_session_gap_report(
                 session_id,
@@ -339,6 +385,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 research=research,
                 session_id=session_id,
                 trace_id=session_id,
+                resolved_mode=resolved_mode,
             ),
         )
         await update_pipeline_state(session_id, "critique_done")
@@ -555,6 +602,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 research=research,
                 session_id=session_id,
                 trace_id=session_id,
+                resolved_mode=resolved_mode,
             ),
         )
         await update_pipeline_state(session_id, "critic_post_done")
@@ -979,6 +1027,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             claim_support=claim_support,
             session_id=session_id,
             trace_id=session_id,
+            resolved_mode=resolved_mode,
         )
         ok_wl, wl_errors = validate_writer_claim_linkage(report, analysis_rev)
         if not ok_wl:
@@ -994,6 +1043,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 repair_hint="Fix claim linkage errors:\n" + "\n".join(wl_errors),
                 session_id=session_id,
                 trace_id=session_id,
+                resolved_mode=resolved_mode,
             )
             ok_wl, wl_errors = validate_writer_claim_linkage(report, analysis_rev)
         if not ok_wl:

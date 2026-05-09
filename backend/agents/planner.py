@@ -180,11 +180,47 @@ class PlannerAgent:
         *,
         report_mode: str | None = None,
         intake_block: str = "",
+        resolved_mode: "ResolvedConsultingMode | None" = None,
     ) -> dict:
-        hint = ""
-        if report_mode and report_mode != "general":
-            from core.consulting_modes import get_mode_config
+        """Run the planner. When ``resolved_mode`` is provided (Week 6/D4
+        and later), the planner uses it for required-branches hints,
+        appends ``planner_overlay`` to the system prompt, and surfaces
+        the mode's ``source_priorities_default`` so per-task priorities
+        without an explicit value fall through to a sensible firm-aware
+        default. ``report_mode`` is still accepted for backward compat —
+        callers that pass it without a resolved mode get the legacy
+        flat-YAML behaviour."""
+        from core.consulting_modes import (
+            ResolvedConsultingMode,
+            get_mode_config,
+        )
 
+        hint = ""
+        priorities_hint = ""
+        system_prompt = PLANNER_SYSTEM
+
+        if resolved_mode is not None:
+            rb = resolved_mode.required_branches
+            if rb:
+                hint = (
+                    f"\nConsulting mode '{resolved_mode.name}': ensure tasks "
+                    "collectively cover these research dimensions: "
+                    f"{', '.join(rb)}.\n"
+                )
+            spd = resolved_mode.source_priorities_default
+            if spd:
+                priorities_hint = (
+                    f"\nMode default source priorities (use as the fallback when "
+                    f"a task doesn't have a stronger reason to deviate): "
+                    f"{', '.join(spd)}.\n"
+                )
+            if (resolved_mode.planner_overlay or "").strip():
+                system_prompt = (
+                    PLANNER_SYSTEM
+                    + "\n\nFIRM PLANNER OVERLAY:\n"
+                    + resolved_mode.planner_overlay.strip()
+                )
+        elif report_mode and report_mode != "general":
             cfg = get_mode_config(report_mode)
             rb = cfg.get("required_branches") or []
             if rb:
@@ -192,15 +228,19 @@ class PlannerAgent:
                     f"\nConsulting mode '{report_mode}': ensure tasks collectively cover these "
                     f"research dimensions: {', '.join(rb)}.\n"
                 )
+
         prefix = ""
         ib = (intake_block or "").strip()
         if ib:
             prefix = f"User context (from intake):\n{ib[:4000]}\n\n"
-        user_message = f"{prefix}Query: {query}\n\nContext available:\n{context[:3000]}{hint}"
+        user_message = (
+            f"{prefix}Query: {query}\n\nContext available:\n{context[:3000]}"
+            f"{hint}{priorities_hint}"
+        )
         out, _meta = await generate_structured(
             PlannerOutput,
             task_kind="planner",
-            system=PLANNER_SYSTEM,
+            system=system_prompt,
             user=user_message,
         )
         data = out.model_dump()
@@ -208,3 +248,11 @@ class PlannerAgent:
             if not t.get("id"):
                 t["id"] = i + 1
         return data
+
+
+# Late import for type hint (keeps planner module importable in test
+# environments that mock out resolver dependencies).
+from typing import TYPE_CHECKING  # noqa: E402
+
+if TYPE_CHECKING:
+    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401

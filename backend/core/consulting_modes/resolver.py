@@ -470,6 +470,85 @@ def invalidate_firm_mode(name: str, firm_id: str | UUID) -> int:
     return len(keys_to_drop)
 
 
+def invalidate_engagement(engagement_id: str | UUID) -> int:
+    """Drop every cache entry that references this engagement.
+
+    Called when the engagement-level override config is written/cleared.
+    """
+    eid = str(engagement_id)
+    keys_to_drop = [k for k in _CACHE if k[2] == eid]
+    for k in keys_to_drop:
+        del _CACHE[k]
+    return len(keys_to_drop)
+
+
+def check_resolved_mode_satisfied(
+    resolved: ResolvedConsultingMode,
+    *,
+    branch_ids_present: set[str],
+    evidence_count: int,
+) -> tuple[bool, list[str]]:
+    """Same gap check as the legacy ``check_mode_satisfied(name, ...)`` but
+    against an already-resolved mode. The orchestrator uses this so the
+    firm's overridden ``required_branches`` and ``min_evidence_objects``
+    drive the gate, not the flat YAML.
+    """
+    gaps: list[str] = []
+    for b in resolved.required_branches:
+        if b not in branch_ids_present:
+            gaps.append(f"Missing research branch coverage: {b}")
+    if evidence_count < resolved.min_evidence_objects:
+        gaps.append(
+            f"Mode '{resolved.name}' requires at least "
+            f"{resolved.min_evidence_objects} evidence objects; "
+            f"found {evidence_count}."
+        )
+    return len(gaps) == 0, gaps
+
+
+# ---------------------------------------------------------------------------
+# Trust-tier filtering — layered on top of retrieval results
+# ---------------------------------------------------------------------------
+
+
+_TRUST_RANK = {
+    "contested": 0,
+    "web_general": 1,
+    "credible_external": 2,
+    "firm_vetted": 3,
+}
+
+
+def chunk_passes_trust_rules(
+    chunk: dict[str, Any], rules: dict[str, str]
+) -> bool:
+    """True if a chunk's ``trust_level`` meets the per-source-type minimum
+    declared by ``rules`` (the resolved mode's ``trust_tier_rules``).
+
+    Rules without an entry for the chunk's source_type are not enforced —
+    the global policy applies. A chunk with no trust_level is treated as
+    web_general.
+    """
+    if not rules:
+        return True
+    src = (chunk.get("source_type") or "").lower()
+    required = rules.get(src)
+    if not required:
+        return True
+    have = (chunk.get("trust_level") or "web_general").lower()
+    return _TRUST_RANK.get(have, 1) >= _TRUST_RANK.get(required, 0)
+
+
+def apply_trust_rules(
+    chunks: list[dict[str, Any]], rules: dict[str, str]
+) -> list[dict[str, Any]]:
+    """Drop chunks that fail :func:`chunk_passes_trust_rules`. Identity
+    pass when ``rules`` is empty (the common case)."""
+    if not rules:
+        return chunks
+    return [c for c in chunks if chunk_passes_trust_rules(c, rules)]
+
+
 # ---------------------------------------------------------------------------
 # Config-payload validation (used by the service layer on create/update)
 # ---------------------------------------------------------------------------
