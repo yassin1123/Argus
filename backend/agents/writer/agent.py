@@ -6,6 +6,14 @@ W7/D2: per-mode prompts moved into ``agents/writer/prompts/`` and
 selected via :func:`get_writer_prompt`. The pre-W7 ``WRITER_SYSTEM``
 constant is preserved as a re-export of ``GENERAL_WRITER_PROMPT`` for
 backward compat — every callsite that imported it still works.
+
+W7/D3: schema validation failures surface with the schema class name
+and the offending field path so a generic "Schema validation failed
+after N repairs" becomes "MAndADiligenceReportPayload validation
+failed at synergy_estimate.cost_synergies.0.basis_citations". The
+underlying retry path inside ``generate_structured`` is unchanged —
+we just unwrap its chained ``ValidationError`` and re-raise with a
+mode-aware message.
 """
 
 from __future__ import annotations
@@ -13,10 +21,42 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError
+
+from core.inference.exceptions import InferenceSchemaError
 from core.inference.structured import generate_structured
 
 from .prompts import GENERAL_WRITER_PROMPT, get_writer_prompt
 from .schemas import GeneralReportPayload, WriterReportBase, get_writer_schema
+
+
+class WriterSchemaValidationError(InferenceSchemaError):
+    """Raised by :class:`WriterAgent` when ``generate_structured`` exhausts
+    its repair retries on a schema mismatch. Carries the schema class
+    name and the first offending field path so callers / logs see a
+    specific diagnostic rather than the generic upstream message.
+    """
+
+    def __init__(self, schema_name: str, field_path: str, original: BaseException):
+        super().__init__(
+            f"{schema_name} validation failed at {field_path}"
+        )
+        self.schema_name = schema_name
+        self.field_path = field_path
+        self.__cause__ = original
+
+
+def _format_field_path(loc: tuple) -> str:
+    """Pretty-print a Pydantic ValidationError location tuple as
+    ``a.b.0.c``-style dotted path for log messages.
+    """
+    parts: list[str] = []
+    for x in loc:
+        if isinstance(x, int):
+            parts.append(str(x))
+        else:
+            parts.append(str(x))
+    return ".".join(parts) if parts else "(root)"
 
 # Backward-compat: pre-W7/D2 imports of ``WRITER_SYSTEM`` keep working,
 # unchanged in behaviour for the general / market_entry / due_diligence
@@ -108,13 +148,38 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
         if resolved_mode is not None:
             schema_cls = get_writer_schema(resolved_mode.name)
 
-        out, _meta = await generate_structured(
-            schema_cls,
-            task_kind="writer",
-            system=system_prompt,
-            user=user_msg,
-            temperature=0.3,
-            session_id=session_id,
-            trace_id=trace_id,
-        )
+        try:
+            out, _meta = await generate_structured(
+                schema_cls,
+                task_kind="writer",
+                system=system_prompt,
+                user=user_msg,
+                temperature=0.3,
+                session_id=session_id,
+                trace_id=trace_id,
+            )
+        except InferenceSchemaError as ise:
+            # generate_structured exhausted its repair retries.
+            # Surface the offending field path so logs / Sentry / the
+            # downstream operator see something specific instead of
+            # the generic "Schema validation failed after N repairs".
+            cause = ise.__cause__
+            if isinstance(cause, ValidationError):
+                first = next(iter(cause.errors()), None)
+                field_path = (
+                    _format_field_path(first["loc"]) if first else "(unknown)"
+                )
+                raise WriterSchemaValidationError(
+                    schema_name=schema_cls.__name__,
+                    field_path=field_path,
+                    original=cause,
+                ) from ise
+            # Some other exhaustion path (empty response retries, etc.) —
+            # still attach the schema name so the operator knows what
+            # mode this engagement was running.
+            raise WriterSchemaValidationError(
+                schema_name=schema_cls.__name__,
+                field_path="(no validation error attached)",
+                original=ise,
+            ) from ise
         return out
