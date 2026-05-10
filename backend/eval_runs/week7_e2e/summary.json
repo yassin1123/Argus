@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-05-10T01:06:25Z",
+  "headline_assertions": {
+    "A_mode_is_m_and_a_diligence": true,
+    "A_has_m_and_a_top_level_fields": false,
+    "A_has_valuation_range": false,
+    "A_has_synergy_estimate": false,
+    "A_has_integration_plan": false,
+    "B_mode_is_growth_strategy": true,
+    "B_has_no_m_and_a_top_level_fields": true,
+    "structural_field_divergence_count": 0,
+    "A_unique_top_level_fields": [],
+    "headline_pass": false
+  },
+  "headline_pass": false,
+  "n_runs": 2,
+  "runs": [
+    {
+      "run_name": "A_m_and_a",
+      "report_mode": "m_and_a_diligence",
+      "session_id": "3f348eda-92c8-40c1-91d8-a6db7649e1ba",
+      "wall_seconds": 0.0,
+      "cost_usd_total": 1.1308,
+      "evidence_total": 128,
+      "diversity_counts": {
+        "firm_library": 128
+      },
+      "firm_library_titles_cited": {
+        "Retail Sector Primer (UK + US)": 12,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 66,
+        "Albright & Marsh Pricing Diagnostic Pack": 4,
+        "M&A Target Screen Playbook (Boutique Edition)": 29,
+        "Valuation Methodology (Firm House View)": 17
+      },
+      "m_and_a_fields_present": [],
+      "m_and_a_fields_absent": [
+        "deal_structure_implications",
+        "financial_profile",
+        "integration_plan",
+        "risks_and_mitigations",
+        "synergy_estimate",
+        "target_overview",
+        "valuation_range"
+      ],
+      "vocab_hits": {
+        "synergy": 0,
+        "synergies": 0,
+        "valuation range": 0,
+        "walk-away": 0,
+        "walk away": 0,
+        "dis-synergy": 0,
+        "dis-synergies": 0,
+        "dissynergy": 0,
+        "day 1": 0,
+        "day one": 0,
+        "100 days": 0,
+        "100-day": 0,
+        "first 100 days": 0,
+        "earn-out": 0,
+        "earnout": 0,
+        "EV/EBITDA": 0
+      },
+      "vocab_total": 0,
+      "report_recommendation": "",
+      "report_summary_preview": "",
+      "valuation_base_excerpt": null,
+      "first_walk_away_trigger": null,
+      "error": null
+    },
+    {
+      "run_name": "B_growth_strategy",
+      "report_mode": "growth_strategy",
+      "session_id": "65d3e370-8fe2-4525-8ed1-ee8b0fc912d1",
+      "wall_seconds": 868.97,
+      "cost_usd_total": 0.8346,
+      "evidence_total": 72,
+      "diversity_counts": {
+        "firm_library": 72
+      },
+      "firm_library_titles_cited": {
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 54,
+        "Retail Sector Primer (UK + US)": 7,
+        "Albright & Marsh Pricing Diagnostic Pack": 2,
+        "M&A Target Screen Playbook (Boutique Edition)": 2,
+        "Valuation Methodology (Firm House View)": 7
+      },
+      "m_and_a_fields_present": [],
+      "m_and_a_fields_absent": [
+        "deal_structure_implications",
+        "financial_profile",
+        "integration_plan",
+        "risks_and_mitigations",
+        "synergy_estimate",
+        "target_overview",
+        "valuation_range"
+      ],
+      "vocab_hits": {
+        "synergy": 0,
+        "synergies": 0,
+        "valuation range": 1,
+        "walk-away": 5,
+        "walk away": 8,
+        "dis-synergy": 0,
+        "dis-synergies": 0,
+        "dissynergy": 0,
+        "day 1": 0,
+        "day one": 0,
+        "100 days": 0,
+        "100-day": 0,
+        "first 100 days": 0,
+        "earn-out": 0,
+        "earnout": 0,
+        "EV/EBITDA": 0
+      },
+      "vocab_total": 14,
+      "report_recommendation": "Pursue acquisition at \u00a3195-210m EV (7.6-8.2x FY24 Adj EBITDA) via senior debt-financed structure, contingent on securing a 2-year Halo Bank contract extension at \u22648% pricing concession OR achieving binding ROI divestment commitment at \u22650.7x revenue before close. Walk away if Halo extension probability falls below 60% or requires >10% pricing concession.",
+      "report_summary_preview": "Acquire TargetCo at \u00a3195-210m (7.6-8.2x EBITDA), a 5-7% discount to the 8.1x sector median, reflecting unquantified Halo Bank renewal risk (10% revenue, 14% EBITDA), stale ROI divestment bids, and Mechanical Services pipeline contraction implying 26% revenue decline. The platform's core strength\u2014Facilities Maintenance generating \u00a393.6m (52% of revenue) with 91% recurring revenue and 4.7-year contract duration\u2014supports 1.8-2.1x DSCR at 3.5-4.0x leverage. Walk away if Halo exte",
+      "valuation_base_excerpt": null,
+      "first_walk_away_trigger": null,
+      "error": null
+    }
+  ]
+}
