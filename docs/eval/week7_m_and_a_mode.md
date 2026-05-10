@@ -1,6 +1,6 @@
 # Week 7 — M&A diligence mode end-to-end
 
-**Status:** iterate
+**Status:** iterate (cap blocker resolved; prompt↔schema drift is the new blocker)
 
 ## Component check
 
@@ -9,15 +9,17 @@
 | Writer schema registry | ✅ | Day 1; 7 unit tests; backward-compat alias preserved |
 | M&A diligence Pydantic schema | ✅ | Day 1; 7 nested types; strict validation |
 | M&A mode in `consulting_modes.yaml` | ✅ | Day 2; resolver returns 6 branches + 6 reasoning slots + 4 source priorities + trust rules |
-| M&A writer prompt | ✅ | Day 2; ~2.5KB; demands basis citations, dis-synergies, methodology per valuation point |
+| M&A writer prompt | ⚠️ | Day 2 ships, but does not enumerate the 8 base WriterReportBase fields nor pin number-as-string formatting — see "What's still open" below |
 | Writer dispatcher (per-mode schema + prompt) | ✅ | Day 3; 4 dispatcher tests; `WriterSchemaValidationError` surfaces schema name + field path |
 | Critic M&A-specific checks | ✅ | Day 3; 5 critic tests |
 | Memo rendering for M&A shape | ✅ | Day 3; ValuationRangeTable + SynergyBreakdown + IntegrationTimeline + SchemaDriven fallback |
 | Synthetic CIM | ✅ | Day 4; 13KB, 4 segments, 8 Q&As, 3 comparables |
 | M&A integration test scaffold | ✅ | Day 4; gated `ARGUS_RUN_REAL_LLM_INTEGRATION=1` |
-| **Run A produces a valid M&A payload end-to-end** | ❌ | Day 5 + iterate; root cause now hard-evidenced |
-| **Layered `model_overrides` plumbing** | ✅ | Iterate addition; in resolver + writer; YAML override usable when the underlying model supports it |
-| **Raw failed-attempt text capture** | ✅ | Iterate addition; persisted on `session.metadata.writer_schema_failure` for forensic inspection |
+| Layered `model_overrides` plumbing (`max_tokens` and `model`) | ✅ | Iterate; in resolver + writer; YAML override usable |
+| Raw failed-attempt text capture | ✅ | Iterate; persisted on `session.metadata.writer_schema_failure` |
+| `apply_mode_checks` wired post-writer (advisory, non-blocking) | ✅ | Iterate; orchestrator persists `mode_check_failures` on `session.metadata` |
+| Minimal valid M&A payload fixture + 3 downstream tests (critic + renderer) | ✅ | Iterate; `tests/test_m_and_a_downstream.py` — 3/3 green |
+| **Run A produces a valid M&A payload end-to-end** | ❌ | Iterate run still fails — failure mode shifted from truncation to prompt drift |
 
 ## End-to-end demo
 
@@ -29,194 +31,214 @@
 Both runs in **Argus Demo Boutique** with the synthetic
 **TargetCo Holdings — Project Lighthouse CIM** ingested.
 
-### Structural divergence — top-level fields
+### Latest iterate run (2026-05-10)
 
-| Field | Run A (M&A, last attempt) | Run B (Growth Strategy) |
-|---|---|---|
-| Mode dispatcher selected | `MAndADiligenceReportPayload` ✅ | `GeneralReportPayload` ✅ |
-| Pipeline outcome | **`failed` at writer** (3 attempts, all 8192-token cap) | `complete` (writer succeeded after 1 retry) |
-| `target_overview` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
-| `synergy_estimate` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
-| `valuation_range` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
-| `integration_plan` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
-| `deal_structure_implications` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
-| **Top-level field divergence count** | — | **0** (target was ≥5) |
-
-The dispatcher correctly routed each engagement to its schema —
-that part of the wedge fired. The runtime failure is downstream:
-Run A's writer can't fit the M&A schema's required JSON within
-Sonnet 4.5's hard 8192-token output cap.
-
-### Run-level metrics
-
-| Metric | Run A (M&A, latest attempt) | Run B (Growth Strategy) |
+| Metric | Run A (M&A, OpenAI writer) | Run B (Growth Strategy) |
 |---|---|---|
 | Mode | `m_and_a_diligence` | `growth_strategy` |
-| Pipeline state | `failed` (writer cap) | `deliverable_ready` |
-| Writer ran successfully | ❌ no | ✅ yes (after 1 retry) |
-| firm_library citations | 104 chunks | 72 chunks |
-| Cost | $1.11 (single attempt) | $0.83 |
-| Wall (s) | ~1148 (failed at writer) | ~870 |
+| Pipeline state | `failed` (writer schema-validate exhaustion) | `deliverable_ready` |
+| Writer ran successfully | ❌ no — schema mismatch | ✅ yes |
+| Writer model used | `openai/gpt-4o` (per-mode override) | default Sonnet |
+| firm_library citations | 128 chunks | 72 chunks |
+| Cost | $0.97 (single attempt + 2 repairs) | $0.83 |
+| Wall (s) | ~1006 | ~869 |
+| `headline_pass` | **false** | n/a |
 
-### What did fire correctly
+The dispatcher correctly routed each engagement to its schema —
+that part of the wedge fired. Run B remains a clean control.
 
-Three independent signals confirm the W7 architecture is sound:
-
-1. **Mode dispatch reaches the writer.** Run A's writer was invoked
-   with `MAndADiligenceReportPayload`; Run B's with
-   `GeneralReportPayload`. The W7/D3 `WriterSchemaValidationError`
-   surfaced for Run A with the schema class name and the `(root)`
-   field path on every retry. (Confirmed in pipeline trace + new raw
-   text capture on `session.metadata.writer_schema_failure`.)
-
-2. **Schema strictness rejects bad output.** Every Run A attempt
-   produced JSON that started parsing fine but ran out of content —
-   Pydantic refused; orchestrator raised `WriterSchemaValidationError`
-   on retry exhaustion.
-
-3. **CIM consumed end-to-end.** Run A retrieved 104 firm_library
-   chunks (CIM-anchored); Run B retrieved 72.
-
-## The full diagnostic chain (iterate work)
+## What changed during iterate
 
 The Day 5 wrap-up's first cut blamed token budget. The user's review
-correctly pushed back: `failed at (root)` means Pydantic couldn't
-even start parsing — that's consistent with truncation **but also**
-with markdown wrappers or freeform prose. Three things were needed to
-distinguish:
+correctly pushed back: `failed at (root)` could mean truncation, but
+also markdown wrappers or freeform prose. Six things landed during
+iterate to stop guessing:
 
-### Step 1 — capture the raw failed text
+1. **Capture the raw failed text.** `InferenceSchemaError` and
+   `WriterSchemaValidationError` now carry `raw_text`; the
+   orchestrator's failure handler persists
+   `session.metadata.writer_schema_failure.raw_text_excerpt` (4KB
+   cap) on every writer schema-exhaustion event. Permanent forensic
+   trail. ([backend/core/inference/exceptions.py](backend/core/inference/exceptions.py),
+   [backend/core/inference/structured.py](backend/core/inference/structured.py),
+   [backend/agents/writer/agent.py](backend/agents/writer/agent.py),
+   [backend/agents/orchestrator.py](backend/agents/orchestrator.py))
 
-Added `raw_text` to `InferenceSchemaError` and to
-`WriterSchemaValidationError`; the orchestrator's failure handler
-now persists `session.metadata.writer_schema_failure.raw_text_excerpt`
-(4KB cap) on any writer schema-exhaustion event. After this, every
-failed attempt leaves a forensic trail that survives the
-process. ([backend/core/inference/exceptions.py],
-[backend/core/inference/structured.py],
-[backend/agents/writer/agent.py],
-[backend/agents/orchestrator.py])
+2. **Open-only-fence stripping.** First captured raw text revealed
+   Claude wrapping in `` ```json … `` and the closing fence was
+   often missing because the response truncated. `_extract_json_payload`
+   now strips an open-only fence prefix when no closing fence
+   exists, and the M&A prompt explicitly forbids fences.
+   ([backend/core/inference/structured.py](backend/core/inference/structured.py),
+   [backend/agents/writer/prompts/_m_and_a.py](backend/agents/writer/prompts/_m_and_a.py))
 
-### Step 2 — first re-run revealed markdown fences
+3. **Layered `model_overrides` plumbing.** New
+   `model_overrides: dict[task_kind, dict[str, Any]]` on
+   `ResolvedConsultingMode`, deep-merged like `trust_tier_rules`
+   through firm + engagement layers. `WriterAgent.run` reads
+   both `max_tokens` and `model` overrides; `model_override`
+   threads through `generate_structured` → `chat_complete`.
+   Resolver validates `max_tokens ∈ [256, 64000]` and that
+   `model` matches `provider/model`.
+   ([backend/core/consulting_modes/types.py](backend/core/consulting_modes/types.py),
+   [backend/core/consulting_modes/resolver.py](backend/core/consulting_modes/resolver.py),
+   [backend/agents/writer/agent.py](backend/agents/writer/agent.py))
 
-The captured raw text on the next failed Run A started with
-`` ```json ``. The LLM was wrapping its output in markdown code
-fences. The existing `_FENCE_RE` regex required a *closed* fence
-(both opening and closing `` ``` ``) — when the LLM ran out of token
-budget mid-output, the closing fence was missing and the regex
-fell through to a malformed substring extraction.
+4. **Anthropic extended-output beta header — tried, reverted.**
+   Wired `_extra_headers_for("anthropic/...")` to inject
+   `extended-output-128k-2025-02-19` on every Anthropic call.
+   Result: HTTP 400 at the FIRST Anthropic call (analyst, no LLM
+   tokens consumed) — the beta name is rejected on Sonnet 4.5 today.
+   Reverted; helper now returns `{}` for every provider. Pinned
+   in `tests/test_litellm_client.py` so an accidental
+   re-introduction shows up in CI.
+   ([backend/core/inference/litellm_client.py](backend/core/inference/litellm_client.py),
+   [backend/tests/test_litellm_client.py](backend/tests/test_litellm_client.py))
 
-Fix landed:
-- `_extract_json_payload` now also strips an *open-only* fence
-  prefix when the closing fence is absent, then trims to the
-  outermost balanced object.
-  ([backend/core/inference/structured.py])
-- M&A prompt explicitly forbids markdown wrappers ("Start your
-  response with `{` and end with `}`. NO markdown code fences.").
-  ([backend/agents/writer/prompts/_m_and_a.py])
+5. **Pivot rule: writer model swap to OpenAI for M&A.** Per the
+   iterate-spec pivot rule, swapped to `openai/gpt-4o` via
+   `model_overrides.writer.model` on the M&A mode (no `max_tokens`
+   override; gpt-4o's per-response ceiling fits the schema).
+   ([backend/config/consulting_modes.yaml](backend/config/consulting_modes.yaml))
 
-### Step 3 — `max_tokens` override hit Anthropic 400
+6. **`apply_mode_checks` wired post-writer.** Advisory,
+   non-blocking checks fire after the writer succeeds;
+   `mode_check_failures` is merged into session metadata so
+   reviewers see them even when the pipeline keeps moving.
+   ([backend/agents/orchestrator.py](backend/agents/orchestrator.py))
 
-The user's review proposed bumping the writer's `max_tokens` to
-16384 for the M&A mode specifically through the layered modes
-system. Built that:
-- New `model_overrides: dict[str, dict]` field on
-  `ResolvedConsultingMode`, deep-merged like `trust_tier_rules`
-  through firm + engagement layers.
-  ([backend/core/consulting_modes/types.py],
-  [backend/core/consulting_modes/resolver.py])
-- `WriterAgent.run` reads `resolved_mode.model_overrides.writer.max_tokens`
-  and threads it into `generate_structured`.
-  ([backend/agents/writer/agent.py])
-- Set `model_overrides.writer.max_tokens: 16384` on
-  `m_and_a_diligence` in YAML.
-  ([backend/config/consulting_modes.yaml])
+7. **Minimal valid M&A payload fixture + 3 downstream tests.**
+   Fully populated `MAndADiligenceReportPayload` with realistic
+   TargetCo-shaped data; tests confirm critic + renderer paths
+   are healthy independent of the LLM. Lets the LLM-side and
+   schema-side problems be debugged separately.
+   ([backend/tests/fixtures/m_and_a/__init__.py](backend/tests/fixtures/m_and_a/__init__.py),
+   [backend/tests/test_m_and_a_downstream.py](backend/tests/test_m_and_a_downstream.py))
 
-Result: Anthropic returned **HTTP 400** for the writer call.
-Sonnet 4.5's hard per-response cap is 8192 tokens by default;
-going above requires the `extended-output-128k-2025-02-19` beta
-header in the API request, which the current litellm client config
-doesn't set. Override reverted (kept commented out for later).
+## What the latest run proved
 
-### Step 4 — fence fix didn't help because the writer keeps hitting the 8192 cap
+The pivot worked at the level it was supposed to: gpt-4o produced a
+complete JSON payload with all seven M&A sections present. No
+truncation, no markdown wrappers. The 8192-token cap is no longer
+the proximate cause of failure.
 
-After dropping the override and re-running with the fence-strip fix
-+ no-wrap prompt instruction, Run A failed AGAIN at `(root)`.
-`llm_calls.completion_tokens` for all three writer attempts:
-**8192, 8192, 8192** — every attempt maxed the model's per-response
-budget exactly. The M&A schema is too long to fit a fully populated
-payload in 8192 tokens regardless of fence handling.
+The new failure mode is **prompt↔schema drift** — Pydantic emitted
+**39 validation errors** falling into four categories:
 
-(The captured raw text from this run still shows `` ```json `` —
-the prompt instruction "no markdown fences" wasn't strong enough to
-dissuade Claude. So the fence-strip code fix is the right bet on
-that axis, not a prompt-only fix.)
+1. **Base WriterReportBase fields missing entirely.** The schema
+   inherits `recommendation`, `confidence_level`, `summary`,
+   `key_reasons`, `risks`, `counterarguments`, `next_steps`,
+   `sources` from `WriterReportBase` (every mode produces these).
+   The M&A prompt mentions only `recommendation` and never tells
+   the LLM to emit the other seven base fields *alongside* the
+   M&A-specific sections. gpt-4o emitted only the M&A-specific
+   sections.
 
-## What works
-- Resolver / schema / prompt / dispatcher / critic-checks /
-  renderer — 39 unit tests across D1–D3 cover each layer
-  independently
+2. **Type drift: numbers vs strings.** Schema expects strings
+   for percent-shaped fields (`growth_rate: "8%"`,
+   `gross_margin: "35%"`). gpt-4o emitted bare floats (`8.0`,
+   `35.0`). Pydantic refused to coerce.
+
+3. **Shape drift: dict vs array.** Schema expects
+   `synergy_estimate.{revenue,cost,dis}_synergies`,
+   `risks_and_mitigations`, and `integration_plan.*.dependencies`
+   as arrays of items. gpt-4o emitted single dicts / strings
+   instead of arrays.
+
+4. **Missing required nested fields.** ~12 nested required
+   fields not emitted: `target_overview.{ownership_history,
+   key_customers_concentration, business_model}`,
+   `financial_profile.margin_profile.fcf_margin`,
+   `valuation_range.{low,base,high}.gbp_m`,
+   `valuation_range.multiples_implied`,
+   `synergy_estimate.{net_present_value,realization_timeline}`,
+   `integration_plan.{integration_complexity_rating,
+   complexity_rationale}`, etc.
+
+This is exactly the failure mode the iterate-spec was designed to
+surface honestly — the user's pre-iterate review explicitly said
+"failures are findings, not retry triggers." Logged here, not
+papered over.
+
+## What works (everything below the LLM)
+
+- Resolver / schema / prompt-dispatcher / critic-checks /
+  renderer / fixture — 76 unit tests across the writer + mode +
+  resolver paths green (1 skipped — the LLM-integration scaffold).
 - Mode dispatcher routes the right schema + prompt to the writer
-  for each engagement
-- Schema strictness correctly rejects truncated/fence-wrapped
-  output and `WriterSchemaValidationError` raises with the schema
-  name and field path
-- New layered `model_overrides` plumbing (iterate addition) is
-  ready for any future config knob the M&A mode needs
-- Raw failed-text capture is now a permanent forensic feature; any
-  future writer-schema failure leaves a 4KB excerpt on
-  `session.metadata.writer_schema_failure`
+  for each engagement; the M&A run took the M&A schema path
+  end-to-end.
+- Schema strictness correctly rejects shape-mismatched output;
+  `WriterSchemaValidationError` carries schema name + first-error
+  field path + 4KB raw-text excerpt.
+- `model_overrides` plumbing for both `max_tokens` and `model`
+  is in place and validates inputs.
+- `apply_mode_checks` is wired and non-blocking — mode-specific
+  invariants get logged on `session.metadata` even when the
+  writer succeeds.
+- Run B (Growth Strategy) is a clean control — the dispatcher and
+  writer paths produce the right shape for non-M&A modes
+  unchanged.
 
 ## What's still open (the iterate signal)
 
-**One concrete fix between us and shipping Week 7**: enable extended
-output for the writer task. Implementation options ranked:
+**One concrete fix between us and shipping Week 7**: realign the
+M&A writer prompt with the M&A schema. Specifically:
 
-1. **Wire `extended-output-128k-2025-02-19` beta header on Anthropic
-   writer calls** in `core/inference/litellm_client.py`. Smallest
-   change. After this, set `model_overrides.writer.max_tokens` to
-   ~32k on the M&A mode and re-run. Estimated: 1-2 hours including
-   re-test.
+1. **Enumerate the eight base WriterReportBase fields** the
+   prompt has to emit alongside the M&A-specific sections —
+   `recommendation`, `confidence_level`, `summary`, `key_reasons`,
+   `risks`, `counterarguments`, `next_steps`, `sources`. Today
+   the prompt names `recommendation` only; the rest are
+   inherited from the base schema and the LLM doesn't know they're
+   required.
 
-2. **Switch the writer model for `m_and_a_diligence`** to one whose
-   default per-response cap fits the schema (e.g. some OpenAI
-   models). Avoids the beta-header dependency but couples the
-   wedge to a model swap. Same `model_overrides` mechanism, just
-   `model: ...` instead of `max_tokens: ...`.
+2. **Pin number-as-string formatting** for percent / multiplier
+   fields (`growth_rate`, `*_margin`, etc.) with a worked example
+   in the prompt body. The schema reads `str` because consultants
+   prefer `"8%"` and `"4.5x"` over bare floats; the prompt has to
+   tell the LLM that.
 
-3. **Two-pass writer**: first pass produces base sections,
-   second pass extends with the M&A-specific sections. Doubles
-   cost per engagement but bounds per-call output and gives
-   per-section retry granularity. Bigger refactor.
+3. **Pin array shape** for synergies, risks, and integration-plan
+   dependencies. The schema reads `list[Synergy]`, the prompt
+   has to explicitly say "arrays of objects, even when there's
+   only one item."
+
+4. **Enumerate the ~12 nested required fields** the latest run
+   missed (or restructure them as optional-with-warning if the
+   schema is over-specified relative to a real diligence memo).
+
+After that one prompt rewrite, re-run the same e2e — the pivot
+infrastructure already on this branch should let it land
+without further code changes. Estimated: <2 hours of prompt
+work + one e2e re-fire.
 
 Other deferred items (smaller):
 - M&A renderer not yet mounted in the workspace UI flow (D3
   ships components + tests; route/panel decision is Phase 4
   polish).
-- `apply_mode_checks` not wired into the post-writer orchestrator
-  path yet.
 
 ## Decision
 
-- [ ] **Ship Week 7.** M&A mode produces a structurally distinct memo.
-- [x] **Iterate.** One specific blocking issue:
-  - Writer model output budget is 8192 tokens; M&A schema needs
-    more. Wire Anthropic extended-output beta header
-    (`core/inference/litellm_client.py`) and re-set the
-    `model_overrides.writer.max_tokens` override on the M&A mode.
-  - With that fix the same Run A demo should produce a valid
-    `MAndADiligenceReportPayload` with the seven structural
-    fields populated, and the headline assertion
-    `structural_field_divergence_count >= 5` should pass on the
-    next run.
+- [ ] **Ship Week 7.** Run A still fails schema validation, so
+  the headline assertion `headline_pass: true` does not hold.
+  Per the iterate-spec rule "Don't ship if Step 5 produces
+  anything other than headline_pass: true", we don't ship yet.
+- [x] **Iterate (continued).** New, smaller, well-localised
+  blocker: M&A writer prompt rewrite to match the schema (4
+  bullet points above). The 8192-token cap problem is solved;
+  the model swap works; the schema, dispatcher, critic checks,
+  renderer, and fixture are all green. The remaining gap is
+  prompt-level alignment — the cheapest possible
+  iterate-to-ship path from here.
 
-The Week 7 wedge architecture is structurally complete (39 unit
+The Week 7 wedge architecture is structurally complete (76 unit
 tests + dispatcher correctness on a real run + raw-text capture
-proves it). The remaining gap is **one config issue**: the writer
-model's per-response output budget is too small for the schema we
-designed, and going above the default needs a beta header that
-isn't wired today. The iterate is small but load-bearing — exactly
-matching the user's pre-iterate review call.
++ model-override plumbing + post-writer mode checks all proven).
+The prompt is the last thing standing between us and a clean
+end-to-end M&A run. The iterate continues to be small and
+load-bearing — exactly matching the user's pre-iterate review
+call.
 
 Run records:
 - `backend/eval_runs/week7_e2e/A_m_and_a.json` (gitignored — last

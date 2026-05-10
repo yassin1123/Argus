@@ -159,16 +159,21 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
             schema_cls = get_writer_schema(resolved_mode.name)
 
         # W7/D5 iterate: per-mode model-config overrides flow through
-        # the layered modes system. Today only ``max_tokens`` is
-        # plumbed into ``generate_structured``; other params (temp,
-        # top_p) can be added as kwargs land. The override is bounded
-        # at resolver-validation time to [256, 64000].
+        # the layered modes system. ``max_tokens`` and ``model`` are
+        # both plumbed into ``generate_structured`` (the latter as
+        # ``model_override``, which the structured-output layer
+        # forwards to the LLM client). Other params (temp, top_p)
+        # can be added as kwargs land. ``max_tokens`` is bounded at
+        # resolver-validation time to [256, 64000].
         gen_kwargs: dict[str, object] = {}
         if resolved_mode is not None:
             writer_overrides = (resolved_mode.model_overrides or {}).get("writer") or {}
             mt = writer_overrides.get("max_tokens")
             if isinstance(mt, int) and mt > 0:
                 gen_kwargs["max_tokens"] = mt
+            mo = writer_overrides.get("model")
+            if isinstance(mo, str) and mo.strip():
+                gen_kwargs["model_override"] = mo.strip()
 
         try:
             out, _meta = await generate_structured(

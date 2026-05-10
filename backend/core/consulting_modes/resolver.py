@@ -741,9 +741,9 @@ def _validate_overlay_payload(config: dict[str, Any]) -> None:
         )
 
     # model_overrides: dict[task_kind, dict[param_name, value]]. Today
-    # we only inspect ``max_tokens`` deeply; other params pass through
-    # so per-task tuning (temperature, top_p, etc.) is configurable
-    # without schema churn.
+    # we inspect ``max_tokens`` (bounded) and ``model`` (string) deeply;
+    # other params pass through so per-task tuning (temperature, top_p,
+    # etc.) is configurable without schema churn.
     if "model_overrides" in config:
         mo = config["model_overrides"]
         if not isinstance(mo, dict):
@@ -770,6 +770,20 @@ def _validate_overlay_payload(config: dict[str, Any]) -> None:
                     raise ModeConfigError(
                         f"model_overrides[{tk!r}].max_tokens={iv} out of range "
                         "[256, 64000]"
+                    )
+            mdl = params.get("model")
+            if mdl is not None:
+                if not isinstance(mdl, str) or not mdl.strip():
+                    raise ModeConfigError(
+                        f"model_overrides[{tk!r}].model must be a non-blank "
+                        f"string, got {mdl!r}"
+                    )
+                # Provider-prefix sanity: keep the canonical form so
+                # downstream cost-tracking / model-router lookups work.
+                if "/" not in mdl:
+                    raise ModeConfigError(
+                        f"model_overrides[{tk!r}].model {mdl!r} should use "
+                        f"the provider/model form (e.g. 'openai/gpt-4o')"
                     )
 
 

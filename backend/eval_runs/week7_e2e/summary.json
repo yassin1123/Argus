@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-10T03:36:16Z",
+  "generated_at": "2026-05-10T04:51:31Z",
   "headline_assertions": {
     "A_mode_is_m_and_a_diligence": true,
     "A_has_m_and_a_top_level_fields": false,
@@ -18,19 +18,19 @@
     {
       "run_name": "A_m_and_a",
       "report_mode": "m_and_a_diligence",
-      "session_id": "e5387df8-a13f-41c9-9a80-99c55257056f",
-      "wall_seconds": 1148.15,
-      "cost_usd_total": 1.1102,
-      "evidence_total": 104,
+      "session_id": "ef023d6a-8e48-4b14-91da-d670444c8c33",
+      "wall_seconds": 1005.88,
+      "cost_usd_total": 0.9734,
+      "evidence_total": 128,
       "diversity_counts": {
-        "firm_library": 104
+        "firm_library": 128
       },
       "firm_library_titles_cited": {
-        "Retail Sector Primer (UK + US)": 13,
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 67,
+        "Retail Sector Primer (UK + US)": 10,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 71,
         "Albright & Marsh Pricing Diagnostic Pack": 4,
-        "M&A Target Screen Playbook (Boutique Edition)": 10,
-        "Valuation Methodology (Firm House View)": 10
+        "M&A Target Screen Playbook (Boutique Edition)": 25,
+        "Valuation Methodology (Firm House View)": 18
       },
       "m_and_a_fields_present": [],
       "m_and_a_fields_absent": [
@@ -65,7 +65,7 @@
       "report_summary_preview": "",
       "valuation_base_excerpt": null,
       "first_walk_away_trigger": null,
-      "error": "WriterSchemaValidationError: MAndADiligenceReportPayload validation failed at (root)\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 134, in generate_structured\n    obj = model_cls.model_validate_json(_extract_json_payload(text))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pydantic\\main.py\", line 656, in model_validate_json\n    return cls.__pydantic_validator__.validate_json(json_data, strict=strict, context=context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npydantic_core._pydantic_core.ValidationError: 1 validation error for MAndADiligenceReportPayload\n  Invalid JSON: EOF while parsing a list at line 201 column 7 [type=json_invalid, input_value='{\\n  \"target_overview\": ...81\"\\n        ]\\n      }', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/json_invalid\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\writer\\agent.py\", line 174, in run\n    out, _meta = await generate_structured(\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 150, in generate_structured\n    raise InferenceSchemaError(\ncore.inference.exceptions.InferenceSchemaError: Schema validation failed after 2 repairs\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\tools\\run_week7_e2e.py\", line 361, in _execute_run\n    await run_pipeline(session_id, BRIEF)\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\orchestrator.py\", line 1019, in run_pipeline\n    report = await writer.run(\n             ^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\writer\\agent.py\", line 198, in run\n    raise WriterSchemaValidationError(\nagents.writer.agent.WriterSchemaValidationError: MAndADiligenceReportPayload validation failed at (root)\n"
+      "error": "WriterSchemaValidationError: MAndADiligenceReportPayload validation failed at recommendation\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 134, in generate_structured\n    obj = model_cls.model_validate_json(_extract_json_payload(text))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pydantic\\main.py\", line 656, in model_validate_json\n    return cls.__pydantic_validator__.validate_json(json_data, strict=strict, context=context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npydantic_core._pydantic_core.ValidationError: 39 validation errors for MAndADiligenceReportPayload\nrecommendation\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nconfidence_level\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nsummary\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nkey_reasons\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nrisks\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ncounterarguments\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nnext_steps\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\nsources\n  Field required [type=missing, input_value={'target_overview': {'nam...le advantages, walk.']}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ntarget_overview.business_model\n  Field required [type=missing, input_value={'name': 'TargetCo Holdin...9, 'growth_rate': 4.0}]}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ntarget_overview.segments.0.revenue_pct\n  Field required [type=missing, input_value={'name': 'Facilities Main... 52, 'growth_rate': 8.0}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.10/v/missing\ntarget_overview.segments.0.growth_rate\n  Input should be a valid string [type=string_type, input_value=8.0, input_type=float]\n    For further information visit https://errors.pydantic.dev/2.10/v/strin"
     },
     {
       "run_name": "B_growth_strategy",

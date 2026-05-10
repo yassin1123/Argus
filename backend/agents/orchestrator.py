@@ -1101,6 +1101,38 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             raw_writer,
         )
 
+        # W7/iterate: post-writer mode-specific advisory checks. The
+        # schema validator already gated structural correctness; these
+        # are content-discipline checks (monotonic valuation, distinct
+        # methodologies across low/base/high, dis-synergies non-empty,
+        # walk-aways with quantitative thresholds) that the schema
+        # can't catch. Issues are advisory — persisted to session
+        # metadata for visibility, never block the memo.
+        try:
+            from agents.critic_checks import apply_mode_checks
+
+            mode_check_issues = apply_mode_checks(report_mode, report)
+            if mode_check_issues:
+                await merge_session_metadata(
+                    session_id,
+                    {
+                        "mode_check_failures": [
+                            {"level": i.level, "field": i.field, "message": i.message}
+                            for i in mode_check_issues
+                        ],
+                    },
+                )
+                logger.info(
+                    "post-writer mode checks for %s flagged %d issue(s) on %s",
+                    report_mode,
+                    len(mode_check_issues),
+                    session_id,
+                )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "post-writer mode checks raised for %s — non-blocking", session_id
+            )
+
         evidence_bundle = build_evidence_bundle(research, evidence_objects)
         unsupported_n = _count_unsupported(ver_dict)
         report_id = await save_report(

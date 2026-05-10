@@ -66,17 +66,19 @@ m_and_a_diligence:
   metadata:
     schema_version: "1.0"
     writer_payload_class: "MAndADiligenceReportPayload"
-  # W7/D5 iterate: the override-able model_overrides field is wired
-  # through the layered modes system but unused at present. The
-  # captured failure mode under load was Claude wrapping its JSON in
-  # ```json ... ``` fences — fixed in core.inference.structured
-  # _extract_json_payload + an explicit "no markdown fences"
-  # instruction in agents/writer/prompts/_m_and_a.py. Keeping the
-  # default writer max_tokens (8192). If a future M&A payload runs
-  # out of headroom we can override here without touching code.
-  # An override above 8192 needs the Anthropic
-  # `extended-output-128k-2025-02-19` beta header, which we don't
-  # set today.
-  # model_overrides:
-  #   writer:
-  #     max_tokens: 8192
+  # W7/iterate (pivot): Sonnet 4.5's 8192-token default per-response
+  # cap was the proximate cause of writer truncation on the seven-
+  # section M&A schema. The beta header path (extended-output-128k-
+  # 2025-02-19) was attempted but rejected by the Anthropic API at
+  # runtime (HTTP 400 on every call, beta name appears to have drifted
+  # in the Sonnet 4.5 cycle). Per the iterate-spec pivot rule, we
+  # swap the writer model to OpenAI for this mode — gpt-4o has a
+  # 16k-token completion ceiling per response (no beta required) and
+  # handles the 7-section schema cleanly. Other agents (analyst,
+  # critic, verifier) keep their default routing. ``max_tokens`` is
+  # intentionally NOT overridden; the layered-modes resolver allows
+  # arbitrary writer kwargs but the spec says drop the cap override
+  # and let the structured layer pick the model default.
+  model_overrides:
+    writer:
+      model: openai/gpt-4o
