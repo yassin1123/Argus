@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Sequence
@@ -6,6 +7,8 @@ from typing import Any, Sequence
 from db.connection import acquire
 from models.evidence import EvidenceObject
 from models.report import ReportRow, WriterReportPayload
+
+logger = logging.getLogger(__name__)
 
 
 def _vector_literal(vec: Sequence[float]) -> str:
@@ -276,6 +279,35 @@ async def merge_session_metadata(session_id: str, patch: dict[str, Any]) -> None
             session_id,
             json.dumps(patch),
         )
+
+
+async def persist_pyramid_result(session_id: str, result: dict[str, Any]) -> None:
+    """W8/D1: store the pyramid checker result on the session row.
+
+    Full result lands as JSONB on ``metadata.pyramid_check_result``;
+    the finding count is mirrored to ``sessions.pyramid_findings_count``
+    (column added in migration 029) so dashboards can filter without
+    JSONB-unpacking. Best-effort — never raises; pyramid findings are
+    advisory and a DB hiccup here must not abort the pipeline.
+    """
+    try:
+        findings = result.get("findings") if isinstance(result, dict) else None
+        count = len(findings) if isinstance(findings, list) else 0
+        async with acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE sessions SET
+                    metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
+                    pyramid_findings_count = $3,
+                    updated_at = NOW()
+                WHERE id = $1::uuid
+                """,
+                session_id,
+                json.dumps({"pyramid_check_result": result}),
+                count,
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.debug("persist_pyramid_result skipped for %s: %s", session_id, e)
 
 
 async def append_pipeline_trace_events(session_id: str, events: list[dict[str, Any]]) -> None:

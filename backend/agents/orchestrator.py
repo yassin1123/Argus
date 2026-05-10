@@ -40,6 +40,7 @@ from db.queries import (
     insert_pipeline_event,
     list_evidence_objects,
     merge_session_metadata,
+    persist_pyramid_result,
     replace_claim_support_rows,
     save_agent_output,
     save_claim_evidence_links,
@@ -1140,6 +1141,29 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         except Exception:  # noqa: BLE001
             logger.exception(
                 "post-writer mode checks raised for %s â€” non-blocking", session_id
+            )
+
+        # W8/D1: Pyramid Principle auto-checker. Runs against every
+        # writer payload regardless of mode (uses base fields only).
+        # Advisory — does NOT block deliverable_ready. Cost ~$0.001
+        # for the LLM judge call; structural pre-check is free.
+        try:
+            from core.frameworks.pyramid import run_pyramid_check
+
+            pyramid_result = await run_pyramid_check(report, session_id=session_id)
+            await persist_pyramid_result(session_id, pyramid_result.model_dump(mode="json"))
+            if pyramid_result.findings:
+                logger.info(
+                    "pyramid check for %s surfaced %d finding(s) (errors=%d, warnings=%d, info=%d)",
+                    session_id,
+                    len(pyramid_result.findings),
+                    pyramid_result.error_count,
+                    pyramid_result.warning_count,
+                    pyramid_result.info_count,
+                )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "pyramid check raised for %s — non-blocking", session_id
             )
 
         evidence_bundle = build_evidence_bundle(research, evidence_objects)
