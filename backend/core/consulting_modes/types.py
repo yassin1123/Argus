@@ -47,6 +47,14 @@ class ResolvedConsultingMode:
     # promoted to first-class fields yet (e.g. report shape weights).
     metadata: dict[str, object] = field(default_factory=dict)
 
+    # W7/D5 iterate: per-mode LLM-config overrides keyed by task_kind.
+    # Shape: {"writer": {"max_tokens": 16384}, "analyst": {...}, ...}.
+    # Empty for built-ins that don't need them. Overlay-able by firm /
+    # engagement layers via the same merge semantics as
+    # ``trust_tier_rules`` (deep-merge: layer keys take precedence
+    # within each task_kind, base keys not overridden stay).
+    model_overrides: dict[str, dict[str, object]] = field(default_factory=dict)
+
 
 class ModeNotFoundError(LookupError):
     """Raised when `resolve_mode(name)` is asked for a name with neither a

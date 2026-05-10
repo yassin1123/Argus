@@ -1,11 +1,35 @@
 import json
 import uuid
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from core.inference.structured import generate_structured
 from core.reasoning_skeleton import skeleton_hint_for_prompt
 from models.agent_structured import AnalystStructuredOutput
 from models.evidence import EvidenceObject
+
+if TYPE_CHECKING:
+    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401
+
+
+def _gen_kwargs_for_task(
+    resolved_mode: "ResolvedConsultingMode | None",
+    task_kind: str,
+) -> dict[str, object]:
+    """Read ``model_overrides[task_kind]`` off ``resolved_mode`` (W7
+    iterate-4 plumbing). Mirrors the writer's reader; same shape so a
+    later refactor can hoist this onto ``ResolvedConsultingMode``
+    itself without changing call-site code."""
+    if resolved_mode is None:
+        return {}
+    overrides = (resolved_mode.model_overrides or {}).get(task_kind) or {}
+    out: dict[str, object] = {}
+    mt = overrides.get("max_tokens")
+    if isinstance(mt, int) and mt > 0:
+        out["max_tokens"] = mt
+    mo = overrides.get("model")
+    if isinstance(mo, str) and mo.strip():
+        out["model_override"] = mo.strip()
+    return out
 
 ANALYST_SYSTEM = """
 You are the Analyst agent in the Argus decision system.
@@ -174,6 +198,7 @@ class AnalystAgent:
         report_mode: str | None = None,
         session_id: str | None = None,
         trace_id: str | None = None,
+        resolved_mode: "ResolvedConsultingMode | None" = None,
     ) -> dict:
         allowed = {str(o.id) for o in (evidence_objects or []) if o.id}
         skel = skeleton_hint_for_prompt((report_mode or "general").strip().lower())
@@ -182,7 +207,7 @@ class AnalystAgent:
 Original query: {query}
 Research plan: {json.dumps(plan, indent=2)[:6000]}
 Research findings: {json.dumps(research, indent=2)[:12000]}
-Web evidence (use freely; cite by matching UUIDs in the catalog that correspond to these sources): 
+Web evidence (use freely; cite by matching UUIDs in the catalog that correspond to these sources):
 {web_app}
 Evidence object catalog (cite ids from here): {_catalog_json(evidence_objects)}
 {skel}
@@ -194,6 +219,7 @@ Evidence object catalog (cite ids from here): {_catalog_json(evidence_objects)}
             user=user_msg,
             session_id=session_id,
             trace_id=trace_id,
+            **_gen_kwargs_for_task(resolved_mode, "analyst"),
         )
         data = out.model_dump()
         _sanitize_evidence_ids(data, allowed)
@@ -215,6 +241,7 @@ Evidence object catalog (cite ids from here): {_catalog_json(evidence_objects)}
         report_mode: str | None = None,
         session_id: str | None = None,
         trace_id: str | None = None,
+        resolved_mode: "ResolvedConsultingMode | None" = None,
     ) -> dict:
         allowed = {str(o.id) for o in (evidence_objects or []) if o.id}
         gate_block = ""
@@ -244,6 +271,7 @@ Produce the revised analyst JSON only.
             user=user_msg,
             session_id=session_id,
             trace_id=trace_id,
+            **_gen_kwargs_for_task(resolved_mode, "analyst"),
         )
         data = out.model_dump()
         _sanitize_evidence_ids(data, allowed)

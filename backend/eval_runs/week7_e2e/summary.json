@@ -1,0 +1,124 @@
+{
+  "generated_at": "2026-05-10T06:28:20Z",
+  "headline_assertions": {
+    "A_mode_is_m_and_a_diligence": true,
+    "A_has_m_and_a_top_level_fields": false,
+    "A_has_valuation_range": false,
+    "A_has_synergy_estimate": false,
+    "A_has_integration_plan": false,
+    "B_mode_is_growth_strategy": true,
+    "B_has_no_m_and_a_top_level_fields": true,
+    "structural_field_divergence_count": 0,
+    "A_unique_top_level_fields": [],
+    "headline_pass": false
+  },
+  "headline_pass": false,
+  "n_runs": 2,
+  "runs": [
+    {
+      "run_name": "A_m_and_a",
+      "report_mode": "m_and_a_diligence",
+      "session_id": "67e41040-f7b6-4002-96ab-5d32f32e3c6b",
+      "wall_seconds": 815.64,
+      "cost_usd_total": 0.6456,
+      "evidence_total": 128,
+      "diversity_counts": {
+        "firm_library": 128
+      },
+      "firm_library_titles_cited": {
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 87,
+        "Retail Sector Primer (UK + US)": 7,
+        "Albright & Marsh Pricing Diagnostic Pack": 5,
+        "M&A Target Screen Playbook (Boutique Edition)": 14,
+        "Valuation Methodology (Firm House View)": 12,
+        "Growth Strategy Framework (Boutique Methodology)": 3
+      },
+      "m_and_a_fields_present": [],
+      "m_and_a_fields_absent": [
+        "deal_structure_implications",
+        "financial_profile",
+        "integration_plan",
+        "risks_and_mitigations",
+        "synergy_estimate",
+        "target_overview",
+        "valuation_range"
+      ],
+      "vocab_hits": {
+        "synergy": 0,
+        "synergies": 0,
+        "valuation range": 0,
+        "walk-away": 0,
+        "walk away": 0,
+        "dis-synergy": 0,
+        "dis-synergies": 0,
+        "dissynergy": 0,
+        "day 1": 0,
+        "day one": 0,
+        "100 days": 0,
+        "100-day": 0,
+        "first 100 days": 0,
+        "earn-out": 0,
+        "earnout": 0,
+        "EV/EBITDA": 0
+      },
+      "vocab_total": 0,
+      "report_recommendation": "",
+      "report_summary_preview": "",
+      "valuation_base_excerpt": null,
+      "first_walk_away_trigger": null,
+      "error": "InferenceSchemaError: Schema validation failed after 2 repairs\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 134, in generate_structured\n    obj = model_cls.model_validate_json(_extract_json_payload(text))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pydantic\\main.py\", line 656, in model_validate_json\n    return cls.__pydantic_validator__.validate_json(json_data, strict=strict, context=context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npydantic_core._pydantic_core.ValidationError: 1 validation error for CriticStructuredOutput\n  Invalid JSON: EOF while parsing a list at line 38 column 5 [type=json_invalid, input_value='{\\n  \"overall_assessment...n validation.\\'\"\\n    }', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/json_invalid\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\tools\\run_week7_e2e.py\", line 361, in _execute_run\n    await run_pipeline(session_id, BRIEF)\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\orchestrator.py\", line 595, in run_pipeline\n    critique_post = await _timed_agent(\n                    ^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\orchestrator.py\", line 196, in _timed_agent\n    out = await coro\n          ^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\critic.py\", line 81, in run\n    out, _meta = await generate_structured(\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 150, in generate_structured\n    raise InferenceSchemaError(\ncore.inference.exceptions.InferenceSchemaError: Schema validation failed after 2 repairs\n"
+    },
+    {
+      "run_name": "B_growth_strategy",
+      "report_mode": "growth_strategy",
+      "session_id": "65d3e370-8fe2-4525-8ed1-ee8b0fc912d1",
+      "wall_seconds": 868.97,
+      "cost_usd_total": 0.8346,
+      "evidence_total": 72,
+      "diversity_counts": {
+        "firm_library": 72
+      },
+      "firm_library_titles_cited": {
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 54,
+        "Retail Sector Primer (UK + US)": 7,
+        "Albright & Marsh Pricing Diagnostic Pack": 2,
+        "M&A Target Screen Playbook (Boutique Edition)": 2,
+        "Valuation Methodology (Firm House View)": 7
+      },
+      "m_and_a_fields_present": [],
+      "m_and_a_fields_absent": [
+        "deal_structure_implications",
+        "financial_profile",
+        "integration_plan",
+        "risks_and_mitigations",
+        "synergy_estimate",
+        "target_overview",
+        "valuation_range"
+      ],
+      "vocab_hits": {
+        "synergy": 0,
+        "synergies": 0,
+        "valuation range": 1,
+        "walk-away": 5,
+        "walk away": 8,
+        "dis-synergy": 0,
+        "dis-synergies": 0,
+        "dissynergy": 0,
+        "day 1": 0,
+        "day one": 0,
+        "100 days": 0,
+        "100-day": 0,
+        "first 100 days": 0,
+        "earn-out": 0,
+        "earnout": 0,
+        "EV/EBITDA": 0
+      },
+      "vocab_total": 14,
+      "report_recommendation": "Pursue acquisition at \u00a3195-210m EV (7.6-8.2x FY24 Adj EBITDA) via senior debt-financed structure, contingent on securing a 2-year Halo Bank contract extension at \u22648% pricing concession OR achieving binding ROI divestment commitment at \u22650.7x revenue before close. Walk away if Halo extension probability falls below 60% or requires >10% pricing concession.",
+      "report_summary_preview": "Acquire TargetCo at \u00a3195-210m (7.6-8.2x EBITDA), a 5-7% discount to the 8.1x sector median, reflecting unquantified Halo Bank renewal risk (10% revenue, 14% EBITDA), stale ROI divestment bids, and Mechanical Services pipeline contraction implying 26% revenue decline. The platform's core strength\u2014Facilities Maintenance generating \u00a393.6m (52% of revenue) with 91% recurring revenue and 4.7-year contract duration\u2014supports 1.8-2.1x DSCR at 3.5-4.0x leverage. Walk away if Halo exte",
+      "valuation_base_excerpt": null,
+      "first_walk_away_trigger": null,
+      "error": null
+    }
+  ]
+}

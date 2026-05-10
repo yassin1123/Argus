@@ -82,13 +82,15 @@ def _patch_generate_structured(monkeypatch: pytest.MonkeyPatch, return_value: An
             return model_cls.model_construct(**return_value), {}
 
     # Patch in every agent module that has its own import of
-    # generate_structured (planner, writer, critic).
+    # generate_structured (planner, writer.agent, critic). W7/D1
+    # promoted writer.py to a package; the import lives in
+    # agents.writer.agent now, not the package __init__.
     import agents.planner as planner_mod
-    import agents.writer as writer_mod
+    import agents.writer.agent as writer_agent_mod
     import agents.critic as critic_mod
 
     monkeypatch.setattr(planner_mod, "generate_structured", _stub)
-    monkeypatch.setattr(writer_mod, "generate_structured", _stub)
+    monkeypatch.setattr(writer_agent_mod, "generate_structured", _stub)
     monkeypatch.setattr(critic_mod, "generate_structured", _stub)
     return captured
 

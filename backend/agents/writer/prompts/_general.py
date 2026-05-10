@@ -1,9 +1,12 @@
-import json
+"""General-mode writer system prompt.
 
-from core.inference.structured import generate_structured
-from models.report import WriterReportPayload
+This is the pre-W7 ``WRITER_SYSTEM`` constant moved out of ``agent.py``
+so each per-mode prompt can live in its own module under
+``prompts/``. Identical text — no behaviour change for general /
+market_entry / due_diligence / growth_strategy modes.
+"""
 
-WRITER_SYSTEM = """
+GENERAL_WRITER_PROMPT = """
 You are the Writer agent in the Argus decision system (Argus signature deliverable).
 You receive the revised analysis, critique (including critic_post_revision if present), research summary,
 and structured verification from the Verifier.
@@ -103,84 +106,3 @@ FORBIDDEN in any field — these phrases mark a generic LLM answer, not a real p
 
 If the analysis lacks the specifics to meet these rules, populate the field with the best available specifics and flag the gap in caveats. Don't pad with generic prose.
 """
-
-
-class WriterAgent:
-    async def run(
-        self,
-        query: str,
-        analysis: dict,
-        critique: dict,
-        research: dict,
-        prior_analysis: dict | None = None,
-        verification: dict | None = None,
-        *,
-        reasoning_graph: dict | None = None,
-        claim_support: list[dict] | None = None,
-        repair_hint: str | None = None,
-        session_id: str | None = None,
-        trace_id: str | None = None,
-        resolved_mode: "ResolvedConsultingMode | None" = None,
-    ) -> WriterReportPayload:
-        prior = ""
-        if prior_analysis is not None:
-            prior = f"""
-First analyst draft (superseded by revision): {json.dumps(prior_analysis, indent=2)[:4000]}
-"""
-        ver = json.dumps(verification or {}, indent=2)[:6000]
-        rg = json.dumps(reasoning_graph or {}, indent=2)[:6000]
-        cs = json.dumps(claim_support or [], indent=2)[:6000]
-
-        # Mode header surfaces display_name + description so the LLM
-        # knows what kind of memo to write under (and the cover/header
-        # references the firm-overridden label when one exists).
-        mode_header = ""
-        if resolved_mode is not None:
-            mh_parts: list[str] = [
-                f"Consulting mode: {resolved_mode.display_name} "
-                f"(slug: {resolved_mode.name})"
-            ]
-            if (resolved_mode.description or "").strip():
-                mh_parts.append(f"Mode description: {resolved_mode.description.strip()}")
-            mode_header = "\n".join(mh_parts) + "\n\n"
-
-        user_msg = f"""
-{mode_header}Original query: {query}
-Structured reasoning graph (canonical structure — align narrative to this): {rg}
-Claim–support table (evidence vs assumption vs inference; use for honesty): {cs}
-Revised analysis (use this as the primary analytical position): {json.dumps(analysis, indent=2)}
-Critique: {json.dumps(critique, indent=2)}
-Verifier output: {ver}
-Research summary: {json.dumps(research, indent=2)[:2500]}
-{prior}
-In key_reasons and counterarguments, reflect verification verdicts (supported / weak / unsupported / overstates).
-Split tone using claim_support support_type where helpful (direct_quote vs paraphrase vs inference vs assumption).
-Respect nli_label / entailment fields in claim_support when present (contradicts / insufficient → flag honestly).
-"""
-        if repair_hint:
-            user_msg += f"\n\nREPAIR REQUIRED:\n{repair_hint}\n"
-
-        system_prompt = WRITER_SYSTEM
-        if resolved_mode is not None and (resolved_mode.writer_overlay or "").strip():
-            system_prompt = (
-                WRITER_SYSTEM
-                + "\n\nFIRM WRITER OVERLAY:\n"
-                + resolved_mode.writer_overlay.strip()
-            )
-
-        out, _meta = await generate_structured(
-            WriterReportPayload,
-            task_kind="writer",
-            system=system_prompt,
-            user=user_msg,
-            temperature=0.3,
-            session_id=session_id,
-            trace_id=trace_id,
-        )
-        return out
-
-
-from typing import TYPE_CHECKING  # noqa: E402
-
-if TYPE_CHECKING:
-    from core.consulting_modes import ResolvedConsultingMode  # noqa: F401

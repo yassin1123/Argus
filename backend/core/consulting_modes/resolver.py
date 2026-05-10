@@ -83,7 +83,42 @@ def _yaml_reset() -> None:
 def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingMode:
     """Project a YAML mode row into a fully-populated ResolvedConsultingMode
     with provenance set to "built_in" for every field.
+
+    YAML ``metadata:`` blocks are flattened into the dataclass's
+    ``metadata`` dict directly. Any other unknown top-level YAML key
+    falls into ``metadata`` too (forward-compat).
     """
+    known_fields = (
+        "label",
+        "display_name",
+        "description",
+        "required_branches",
+        "reasoning_slots",
+        "source_priorities_default",
+        "trust_tier_rules",
+        "writer_overlay",
+        "planner_overlay",
+        "min_evidence_objects",
+        "metadata",
+        "model_overrides",
+    )
+    metadata: dict[str, Any] = {}
+    raw_md = row.get("metadata")
+    if isinstance(raw_md, dict):
+        metadata.update(raw_md)
+    # Forward-compat: any unknown top-level key gets folded in too.
+    for k, v in row.items():
+        if k not in known_fields:
+            metadata[k] = v
+
+    # model_overrides: dict of task_kind -> {param: value}
+    raw_mo = row.get("model_overrides") or {}
+    model_overrides: dict[str, dict[str, Any]] = {}
+    if isinstance(raw_mo, dict):
+        for tk, params in raw_mo.items():
+            if isinstance(params, dict):
+                model_overrides[str(tk)] = dict(params)
+
     return ResolvedConsultingMode(
         name=name,
         display_name=str(row.get("label") or row.get("display_name") or name),
@@ -95,23 +130,8 @@ def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingM
         writer_overlay=str(row.get("writer_overlay") or ""),
         planner_overlay=str(row.get("planner_overlay") or ""),
         min_evidence_objects=int(row.get("min_evidence_objects") or 0),
-        metadata={
-            k: v
-            for k, v in row.items()
-            if k
-            not in (
-                "label",
-                "display_name",
-                "description",
-                "required_branches",
-                "reasoning_slots",
-                "source_priorities_default",
-                "trust_tier_rules",
-                "writer_overlay",
-                "planner_overlay",
-                "min_evidence_objects",
-            )
-        },
+        metadata=metadata,
+        model_overrides=model_overrides,
         layer_provenance={
             "display_name": "built_in",
             "description": "built_in",
@@ -121,6 +141,7 @@ def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingM
             "trust_tier_rules": "built_in",
             "writer_overlay": "built_in",
             "planner_overlay": "built_in",
+            "model_overrides": "built_in",
         },
     )
 
@@ -253,6 +274,9 @@ def _apply_layer(
     new_planner_overlay = base.planner_overlay
     new_min_evidence = base.min_evidence_objects
     new_metadata = dict(base.metadata)
+    new_model_overrides = {
+        tk: dict(params) for tk, params in (base.model_overrides or {}).items()
+    }
 
     for key in _SCALAR_REPLACE_FIELDS:
         if key in layer_cfg:
@@ -328,6 +352,25 @@ def _apply_layer(
             )
         new_metadata.update(layer_md)
 
+    # model_overrides: deep-merge by task_kind. Layer keys take
+    # precedence within each task_kind; base keys not overridden stay.
+    if "model_overrides" in layer_cfg:
+        layer_mo = layer_cfg["model_overrides"]
+        if not isinstance(layer_mo, dict):
+            raise ModeConfigError(
+                f"{layer_name}.model_overrides must be an object, got {type(layer_mo).__name__}"
+            )
+        for tk, params in layer_mo.items():
+            if not isinstance(params, dict):
+                raise ModeConfigError(
+                    f"{layer_name}.model_overrides[{tk!r}] must be an object, "
+                    f"got {type(params).__name__}"
+                )
+            base_params = new_model_overrides.get(str(tk), {})
+            base_params.update(params)
+            new_model_overrides[str(tk)] = base_params
+        new_provenance["model_overrides"] = layer_name
+
     return ResolvedConsultingMode(
         name=base.name,
         display_name=new_display_name,
@@ -341,6 +384,7 @@ def _apply_layer(
         layer_provenance=new_provenance,
         min_evidence_objects=new_min_evidence,
         metadata=new_metadata,
+        model_overrides=new_model_overrides,
     )
 
 
@@ -414,6 +458,7 @@ async def resolve_mode(
             planner_overlay="",
             min_evidence_objects=0,
             metadata={},
+            model_overrides={},
             layer_provenance={
                 "display_name": "firm",
                 "description": "firm",
@@ -423,6 +468,7 @@ async def resolve_mode(
                 "trust_tier_rules": "firm",
                 "writer_overlay": "firm",
                 "planner_overlay": "firm",
+                "model_overrides": "firm",
             },
         )
         merged = _apply_layer(synthetic_base, firm_cfg, "firm")
@@ -580,6 +626,7 @@ ALLOWED_CONFIG_KEYS = frozenset(
         "planner_overlay",
         "min_evidence_objects",
         "metadata",
+        "model_overrides",
     }
 )
 
@@ -692,6 +739,52 @@ def _validate_overlay_payload(config: dict[str, Any]) -> None:
         raise ModeConfigError(
             f"metadata must be an object, got {type(config['metadata']).__name__}"
         )
+
+    # model_overrides: dict[task_kind, dict[param_name, value]]. Today
+    # we inspect ``max_tokens`` (bounded) and ``model`` (string) deeply;
+    # other params pass through so per-task tuning (temperature, top_p,
+    # etc.) is configurable without schema churn.
+    if "model_overrides" in config:
+        mo = config["model_overrides"]
+        if not isinstance(mo, dict):
+            raise ModeConfigError(
+                f"model_overrides must be an object, got {type(mo).__name__}"
+            )
+        for tk, params in mo.items():
+            if not isinstance(params, dict):
+                raise ModeConfigError(
+                    f"model_overrides[{tk!r}] must be an object, "
+                    f"got {type(params).__name__}"
+                )
+            mt = params.get("max_tokens")
+            if mt is not None:
+                try:
+                    iv = int(mt)
+                except (TypeError, ValueError) as e:
+                    raise ModeConfigError(
+                        f"model_overrides[{tk!r}].max_tokens must be an int, "
+                        f"got {mt!r}"
+                    ) from e
+                # Sanity bounds — protect against runaway prompts.
+                if iv < 256 or iv > 64000:
+                    raise ModeConfigError(
+                        f"model_overrides[{tk!r}].max_tokens={iv} out of range "
+                        "[256, 64000]"
+                    )
+            mdl = params.get("model")
+            if mdl is not None:
+                if not isinstance(mdl, str) or not mdl.strip():
+                    raise ModeConfigError(
+                        f"model_overrides[{tk!r}].model must be a non-blank "
+                        f"string, got {mdl!r}"
+                    )
+                # Provider-prefix sanity: keep the canonical form so
+                # downstream cost-tracking / model-router lookups work.
+                if "/" not in mdl:
+                    raise ModeConfigError(
+                        f"model_overrides[{tk!r}].model {mdl!r} should use "
+                        f"the provider/model form (e.g. 'openai/gpt-4o')"
+                    )
 
 
 def is_known_built_in(name: str) -> bool:

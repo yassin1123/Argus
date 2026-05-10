@@ -225,12 +225,12 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
     except Exception as e:  # noqa: BLE001
         # If the mode name doesn't exist in YAML and the firm has no
         # override defining it, log and fall through to the legacy YAML
-        # path — the existing `check_mode_satisfied(name, ...)` then
+        # path â€” the existing `check_mode_satisfied(name, ...)` then
         # gracefully handles the unknown name (returns no required
         # branches). This preserves backward compat for sessions
         # created before the resolver landed.
         logging.getLogger(__name__).debug(
-            "resolve_mode failed for %s (%s) — falling back to YAML: %s",
+            "resolve_mode failed for %s (%s) â€” falling back to YAML: %s",
             report_mode,
             firm_id,
             e,
@@ -309,7 +309,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         )
         branch_ids = branch_ids_from_evidence_claims(evidence_objects)
         # W6/D4: prefer the firm-resolved mode; fall back to flat YAML
-        # only when resolution failed (rare — see top-of-pipeline).
+        # only when resolution failed (rare â€” see top-of-pipeline).
         if resolved_mode is not None:
             ok_mode, mode_gaps = check_resolved_mode_satisfied(
                 resolved_mode,
@@ -370,6 +370,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 report_mode=report_mode,
                 session_id=session_id,
                 trace_id=session_id,
+                resolved_mode=resolved_mode,
             ),
         )
         await update_pipeline_state(session_id, "analysis_v1_done")
@@ -404,6 +405,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 report_mode=report_mode,
                 session_id=session_id,
                 trace_id=session_id,
+                resolved_mode=resolved_mode,
             ),
         )
         await update_pipeline_state(session_id, "analysis_v2_done")
@@ -434,6 +436,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                     report_mode=report_mode,
                     session_id=session_id,
                     trace_id=session_id,
+                    resolved_mode=resolved_mode,
                 ),
             )
             ok_gates, gate_errors = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -442,7 +445,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             gate_passed_final = False
             await update_pipeline_state(session_id, "evidence_insufficient")
             gap_report = {
-                "title": "Evidence gate failure — claims not tied to catalog",
+                "title": "Evidence gate failure â€” claims not tied to catalog",
                 "missing_evidence": gate_errors,
                 "suggested_searches": [
                     "Add primary documents to the session",
@@ -499,6 +502,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                     report_mode=report_mode,
                     session_id=session_id,
                     trace_id=session_id,
+                    resolved_mode=resolved_mode,
                 ),
             )
             ok_gates, gate_errors = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -519,6 +523,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                         report_mode=report_mode,
                         session_id=session_id,
                         trace_id=session_id,
+                        resolved_mode=resolved_mode,
                     ),
                 )
                 ok_gates, gate_errors = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -622,6 +627,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                     report_mode=report_mode,
                     session_id=session_id,
                     trace_id=session_id,
+                    resolved_mode=resolved_mode,
                 ),
             )
             ok_gates, gate_errors = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -642,6 +648,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                         report_mode=report_mode,
                         session_id=session_id,
                         trace_id=session_id,
+                        resolved_mode=resolved_mode,
                     ),
                 )
                 ok_gates, gate_errors = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -696,6 +703,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                     report_mode=report_mode,
                     session_id=session_id,
                     trace_id=session_id,
+                    resolved_mode=resolved_mode,
                 ),
             )
             ok_gates, gate_errors = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -770,7 +778,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         force_rev = int(os.getenv("ARGUS_CONTRADICTION_FORCE_REVISION_MIN", "3"))
         if len(research_contradictions_list) >= force_rev:
             tension_fb = [
-                f"Research flagged cross-source tension — address in analysis: {t}"
+                f"Research flagged cross-source tension â€” address in analysis: {t}"
                 for t in research_contradictions_list[:6]
             ]
             crit_ref = critique_post if isinstance(critique_post, dict) else critique
@@ -790,6 +798,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                     report_mode=report_mode,
                     session_id=session_id,
                     trace_id=session_id,
+                    resolved_mode=resolved_mode,
                 ),
             )
             ok_gates_t, gate_errors_t = validate_analyst_evidence_gates(analysis_rev, evidence_objects)
@@ -1101,6 +1110,38 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             raw_writer,
         )
 
+        # W7/iterate: post-writer mode-specific advisory checks. The
+        # schema validator already gated structural correctness; these
+        # are content-discipline checks (monotonic valuation, distinct
+        # methodologies across low/base/high, dis-synergies non-empty,
+        # walk-aways with quantitative thresholds) that the schema
+        # can't catch. Issues are advisory â€” persisted to session
+        # metadata for visibility, never block the memo.
+        try:
+            from agents.critic_checks import apply_mode_checks
+
+            mode_check_issues = apply_mode_checks(report_mode, report)
+            if mode_check_issues:
+                await merge_session_metadata(
+                    session_id,
+                    {
+                        "mode_check_failures": [
+                            {"level": i.level, "field": i.field, "message": i.message}
+                            for i in mode_check_issues
+                        ],
+                    },
+                )
+                logger.info(
+                    "post-writer mode checks for %s flagged %d issue(s) on %s",
+                    report_mode,
+                    len(mode_check_issues),
+                    session_id,
+                )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "post-writer mode checks raised for %s â€” non-blocking", session_id
+            )
+
         evidence_bundle = build_evidence_bundle(research, evidence_objects)
         unsupported_n = _count_unsupported(ver_dict)
         report_id = await save_report(
@@ -1119,7 +1160,7 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             await save_claim_evidence_links(report_id, _claim_links_from_verification(report_id, ver_dict))
             await replace_claim_support_rows(session_id, report_id, claim_support)
             # Phase 7: structured grounder runs as a post-write step.
-            # Phase 8 + Batch 1: NLI verifier streams per-claim — we save the
+            # Phase 8 + Batch 1: NLI verifier streams per-claim â€” we save the
             # answer EARLY (state="pending") so the frontend renders citations
             # as `verifying...`, then patch in NLI results as each claim resolves.
             try:
@@ -1207,6 +1248,29 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             await _pipeline_trace(session_id, "failed", str(e)[:400])
         except Exception:
             logger.exception("Could not append pipeline trace for %s", session_id)
+        # W7/D5 iterate: when the writer's structured-output exhaustion
+        # is the root cause, persist the raw failed LLM body on session
+        # metadata. The operator can read it back without re-running
+        # the engagement. Truncated to 4KB to avoid blowing up the
+        # session row.
+        try:
+            from agents.writer.agent import WriterSchemaValidationError as _WSVE
+
+            if isinstance(e, _WSVE) and getattr(e, "raw_text", None):
+                await merge_session_metadata(
+                    session_id,
+                    {
+                        "writer_schema_failure": {
+                            "schema_name": e.schema_name,
+                            "field_path": e.field_path,
+                            "raw_text_excerpt": (e.raw_text or "")[:4096],
+                        },
+                    },
+                )
+        except Exception:
+            logger.exception(
+                "Could not persist writer schema failure metadata for %s", session_id
+            )
         await update_session_status(session_id, "failed")
         try:
             await update_pipeline_state(session_id, "failed")

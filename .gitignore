@@ -51,3 +51,14 @@ backend/eval_runs/week5_e2e/A_no_library.json
 # Week 6 / Day 5 layered-modes e2e — same shape, only summary.json committed.
 backend/eval_runs/week6_e2e/A_with_override.json
 backend/eval_runs/week6_e2e/B_built_in.json
+
+# Week 7 / Day 4-5 — heavy per-run captures + integration logs.
+backend/eval_runs/week7_d4_integration/failed_session.json
+w7d4_integration.log
+w7d5_e2e.log
+w7d5_run_b.log
+w7d5_iterate*.log
+w7d5_iterate_run.log
+w7_iterate*.log
+backend/eval_runs/week7_e2e/A_m_and_a.json
+backend/eval_runs/week7_e2e/B_growth_strategy.json

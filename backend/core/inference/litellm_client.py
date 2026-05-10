@@ -47,6 +47,17 @@ def _is_anthropic(model: str) -> bool:
     return m.startswith("claude") or m.startswith("anthropic/")
 
 
+# W7/iterate: per-provider extra headers helper. Today returns empty
+# for every provider — the Anthropic extended-output beta was tried
+# and rejected (HTTP 400 on every call, suggests beta name drifted in
+# the Sonnet 4.5 cycle). The pivot path uses the model_overrides
+# system to swap the writer model to OpenAI rather than depend on a
+# beta header. Helper kept as the integration point for future
+# per-provider header needs (cache control, prompt caching, etc.).
+def _extra_headers_for(model: str) -> dict[str, str]:  # noqa: ARG001
+    return {}
+
+
 async def chat_complete(
     *,
     model: str,
@@ -79,6 +90,14 @@ async def chat_complete(
     # loop in core/inference/structured.py handles any drift.
     if response_format is not None and not _is_anthropic(routed_model):
         kwargs["response_format"] = response_format
+
+    # W7/iterate: per-provider extra headers. Anthropic gets the
+    # extended-output beta tag so max_tokens > 8192 is permitted on
+    # Sonnet 4.5; OpenAI / Gemini get nothing (avoids accidental
+    # cross-provider header leakage).
+    extra_headers = _extra_headers_for(routed_model)
+    if extra_headers:
+        kwargs["extra_headers"] = extra_headers
 
     return await asyncio.wait_for(acompletion(**kwargs), timeout=timeout_seconds)
 

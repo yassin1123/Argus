@@ -78,6 +78,20 @@ Original query: {query}
 Analyst output: {json.dumps(analysis, indent=2)}
 Research used: {json.dumps(research, indent=2)[:3000]}
 {coverage_block}"""
+        # W7 iterate-4: ``model_overrides[critic]`` lets the M&A mode
+        # (and any future mode) route the critic to a model whose
+        # per-response cap fits long structured payloads. Same plumbing
+        # as writer + analyst.
+        gen_kwargs: dict[str, object] = {}
+        if resolved_mode is not None:
+            critic_overrides = (resolved_mode.model_overrides or {}).get("critic") or {}
+            mt = critic_overrides.get("max_tokens")
+            if isinstance(mt, int) and mt > 0:
+                gen_kwargs["max_tokens"] = mt
+            mo = critic_overrides.get("model")
+            if isinstance(mo, str) and mo.strip():
+                gen_kwargs["model_override"] = mo.strip()
+
         out, _meta = await generate_structured(
             CriticStructuredOutput,
             task_kind="critic",
@@ -86,6 +100,7 @@ Research used: {json.dumps(research, indent=2)[:3000]}
             temperature=0.5,
             session_id=session_id,
             trace_id=trace_id,
+            **gen_kwargs,
         )
         data = out.model_dump()
         if isinstance(data, dict) and data.get("verdict") == "revise":
