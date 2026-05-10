@@ -66,3 +66,17 @@ m_and_a_diligence:
   metadata:
     schema_version: "1.0"
     writer_payload_class: "MAndADiligenceReportPayload"
+  # W7/D5 iterate: the override-able model_overrides field is wired
+  # through the layered modes system but unused at present. The
+  # captured failure mode under load was Claude wrapping its JSON in
+  # ```json ... ``` fences — fixed in core.inference.structured
+  # _extract_json_payload + an explicit "no markdown fences"
+  # instruction in agents/writer/prompts/_m_and_a.py. Keeping the
+  # default writer max_tokens (8192). If a future M&A payload runs
+  # out of headroom we can override here without touching code.
+  # An override above 8192 needs the Anthropic
+  # `extended-output-128k-2025-02-19` beta header, which we don't
+  # set today.
+  # model_overrides:
+  #   writer:
+  #     max_tokens: 8192

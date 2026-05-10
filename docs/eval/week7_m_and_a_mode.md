@@ -7,15 +7,17 @@
 | Component | Status | Evidence |
 |---|---|---|
 | Writer schema registry | ✅ | Day 1; 7 unit tests; backward-compat alias preserved |
-| M&A diligence Pydantic schema | ✅ | Day 1; 7 nested types; strict validation (basis_citations, methodology, multiples_implied) |
+| M&A diligence Pydantic schema | ✅ | Day 1; 7 nested types; strict validation |
 | M&A mode in `consulting_modes.yaml` | ✅ | Day 2; resolver returns 6 branches + 6 reasoning slots + 4 source priorities + trust rules |
-| M&A writer prompt | ✅ | Day 2; 2243 chars; demands basis citations, dis-synergies, methodology per valuation point, falsifiable walk-aways |
+| M&A writer prompt | ✅ | Day 2; ~2.5KB; demands basis citations, dis-synergies, methodology per valuation point |
 | Writer dispatcher (per-mode schema + prompt) | ✅ | Day 3; 4 dispatcher tests; `WriterSchemaValidationError` surfaces schema name + field path |
-| Critic M&A-specific checks | ✅ | Day 3; 5 critic tests; monotonic valuation, dis-synergies non-empty, walk-away triggers must be falsifiable |
-| Memo rendering for M&A shape | ✅ | Day 3; ValuationRangeTable + SynergyBreakdown + IntegrationTimeline + SchemaDrivenSection fallback; 10 tests |
-| Synthetic CIM | ✅ | Day 4; 13KB, 4 segments, 8 Q&As, 3 comparable transactions, realistic warts |
-| M&A integration test | ✅ | Day 4; 13+ structural assertions; gated `ARGUS_RUN_REAL_LLM_INTEGRATION=1`; cost ceiling $3 |
-| **Structural divergence between M&A and growth-strategy memos on same brief** | ❌ | Day 5; Run A's writer couldn't fit the full M&A JSON in max_tokens (truncated mid-output both attempts). See "What didn't fire" |
+| Critic M&A-specific checks | ✅ | Day 3; 5 critic tests |
+| Memo rendering for M&A shape | ✅ | Day 3; ValuationRangeTable + SynergyBreakdown + IntegrationTimeline + SchemaDriven fallback |
+| Synthetic CIM | ✅ | Day 4; 13KB, 4 segments, 8 Q&As, 3 comparables |
+| M&A integration test scaffold | ✅ | Day 4; gated `ARGUS_RUN_REAL_LLM_INTEGRATION=1` |
+| **Run A produces a valid M&A payload end-to-end** | ❌ | Day 5 + iterate; root cause now hard-evidenced |
+| **Layered `model_overrides` plumbing** | ✅ | Iterate addition; in resolver + writer; YAML override usable when the underlying model supports it |
+| **Raw failed-attempt text capture** | ✅ | Iterate addition; persisted on `session.metadata.writer_schema_failure` for forensic inspection |
 
 ## End-to-end demo
 
@@ -24,156 +26,203 @@
 > services group with £180m FY24 revenue. Quantify the deal opportunity,
 > identify key risks, recommend deal structure and a valuation range.
 
-Both runs ran in **Argus Demo Boutique** with the synthetic
-**TargetCo Holdings — Project Lighthouse CIM** ingested into the firm
-library.
+Both runs in **Argus Demo Boutique** with the synthetic
+**TargetCo Holdings — Project Lighthouse CIM** ingested.
 
 ### Structural divergence — top-level fields
 
-| Field | Run A (M&A) | Run B (Growth Strategy) |
+| Field | Run A (M&A, last attempt) | Run B (Growth Strategy) |
 |---|---|---|
 | Mode dispatcher selected | `MAndADiligenceReportPayload` ✅ | `GeneralReportPayload` ✅ |
-| Pipeline outcome | **`failed` at writer** (schema validation exhausted) | `complete` (writer succeeded after 1 retry) |
-| `target_overview` | ❌ writer didn't produce | ❌ not in schema (correct) |
-| `financial_profile` | ❌ writer didn't produce | ❌ not in schema (correct) |
-| `synergy_estimate` | ❌ writer didn't produce | ❌ not in schema (correct) |
-| `valuation_range` | ❌ writer didn't produce | ❌ not in schema (correct) |
-| `integration_plan` | ❌ writer didn't produce | ❌ not in schema (correct) |
-| `deal_structure_implications` | ❌ writer didn't produce | ❌ not in schema (correct) |
-| `risks_and_mitigations` | ❌ writer didn't produce | partial — flat `risks` field on general payload |
+| Pipeline outcome | **`failed` at writer** (3 attempts, all 8192-token cap) | `complete` (writer succeeded after 1 retry) |
+| `target_overview` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
+| `synergy_estimate` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
+| `valuation_range` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
+| `integration_plan` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
+| `deal_structure_implications` | ❌ writer cut off mid-output | ❌ not in schema (correct) |
 | **Top-level field divergence count** | — | **0** (target was ≥5) |
 
 The dispatcher correctly routed each engagement to its schema —
 that part of the wedge fired. The runtime failure is downstream:
-Run A's writer LLM emitted JSON longer than its `max_tokens`
-budget on both attempts.
+Run A's writer can't fit the M&A schema's required JSON within
+Sonnet 4.5's hard 8192-token output cap.
 
 ### Run-level metrics
 
-| Metric | Run A (M&A) | Run B (Growth Strategy) |
+| Metric | Run A (M&A, latest attempt) | Run B (Growth Strategy) |
 |---|---|---|
 | Mode | `m_and_a_diligence` | `growth_strategy` |
-| Pipeline state | `failed` (writer) | `deliverable_ready` |
+| Pipeline state | `failed` (writer cap) | `deliverable_ready` |
 | Writer ran successfully | ❌ no | ✅ yes (after 1 retry) |
-| Total claims / grounded | n/a (no report) | full memo produced |
-| firm_library citations | 128 chunks | 72 chunks |
-| M&A-vocabulary hits (informational) | 0 (no memo) | 14 |
-| Cost | $1.13 | $0.83 |
-| Wall (s) | ~1190 (failed at writer) | ~870 |
-
-Run A's $1.13 spend got us through planner → research → analyst×2 →
-critic×2 → verifier → writer×2 (both writer attempts truncated). The
-W7/D3 `WriterSchemaValidationError` correctly surfaced the schema
-class name and `(root)` field path on exhaustion.
+| firm_library citations | 104 chunks | 72 chunks |
+| Cost | $1.11 (single attempt) | $0.83 |
+| Wall (s) | ~1148 (failed at writer) | ~870 |
 
 ### What did fire correctly
 
-The wedge architecture is sound. Three independent signals:
+Three independent signals confirm the W7 architecture is sound:
 
-1. **Mode dispatch reaches the writer.** Run A's `MAndADiligenceReportPayload`
-   was selected (not `GeneralReportPayload`); Run B's `GeneralReportPayload`
-   was selected. Confirmed in the pipeline trace and the
-   `WriterSchemaValidationError` payload that surfaced for Run A.
+1. **Mode dispatch reaches the writer.** Run A's writer was invoked
+   with `MAndADiligenceReportPayload`; Run B's with
+   `GeneralReportPayload`. The W7/D3 `WriterSchemaValidationError`
+   surfaced for Run A with the schema class name and the `(root)`
+   field path on every retry. (Confirmed in pipeline trace + new raw
+   text capture on `session.metadata.writer_schema_failure`.)
 
-2. **Schema strictness rejects bad output.** Run A's writer first
-   produced a markdown document (`# M&A Diligence Memo: …`) — schema
-   refused. Second attempt produced JSON but truncated at line 334
-   mid-object — schema refused. Both retries audited; orchestrator
-   raised on exhaustion. The schema discipline worked exactly as Day 1
-   designed it; the LLM couldn't satisfy the contract.
+2. **Schema strictness rejects bad output.** Every Run A attempt
+   produced JSON that started parsing fine but ran out of content —
+   Pydantic refused; orchestrator raised `WriterSchemaValidationError`
+   on retry exhaustion.
 
-3. **CIM was consumed.** Run A retrieved 128 firm_library chunks (all
-   from `targetco_cim.md` + supporting fixtures); Run B retrieved 72.
-   The retrieval profile is mode-shaped (M&A pulls more, due to its
-   wider source-priority chain `uploaded → sec_filing → transcript →
-   news`).
+3. **CIM consumed end-to-end.** Run A retrieved 104 firm_library
+   chunks (CIM-anchored); Run B retrieved 72.
 
-### What didn't fire
+## The full diagnostic chain (iterate work)
 
-**The M&A writer's structured output is too long for the model's
-`max_tokens` budget on this engagement.**
+The Day 5 wrap-up's first cut blamed token budget. The user's review
+correctly pushed back: `failed at (root)` means Pydantic couldn't
+even start parsing — that's consistent with truncation **but also**
+with markdown wrappers or freeform prose. Three things were needed to
+distinguish:
 
-The M&A schema requires producing seven nested top-level sections —
-`target_overview` (with segments, geographies, ownership), `financial_profile`
-(with two trajectories of points), `synergy_estimate` (three buckets +
-NPV + timeline), `risks_and_mitigations` (list of structured
-assessments), `integration_plan` (Day 1 + 100-day + first-year
-initiatives), `valuation_range` (low/base/high + multiples + comps),
-`deal_structure_implications` — plus all the inherited base fields
-(recommendation, summary, key_reasons, risks, next_steps, sources,
-…).
+### Step 1 — capture the raw failed text
 
-Real LLM responses for this brief consistently exceeded the writer
-task's configured `max_tokens` window, getting cut off mid-array or
-mid-object. Both retry attempts produced the same shape of failure
-because the underlying volume of text is the same.
+Added `raw_text` to `InferenceSchemaError` and to
+`WriterSchemaValidationError`; the orchestrator's failure handler
+now persists `session.metadata.writer_schema_failure.raw_text_excerpt`
+(4KB cap) on any writer schema-exhaustion event. After this, every
+failed attempt leaves a forensic trail that survives the
+process. ([backend/core/inference/exceptions.py],
+[backend/core/inference/structured.py],
+[backend/agents/writer/agent.py],
+[backend/agents/orchestrator.py])
 
-This is **not** a Day 1–3 wedge bug. It's a runtime config issue
-visible only at full-brief scale.
+### Step 2 — first re-run revealed markdown fences
+
+The captured raw text on the next failed Run A started with
+`` ```json ``. The LLM was wrapping its output in markdown code
+fences. The existing `_FENCE_RE` regex required a *closed* fence
+(both opening and closing `` ``` ``) — when the LLM ran out of token
+budget mid-output, the closing fence was missing and the regex
+fell through to a malformed substring extraction.
+
+Fix landed:
+- `_extract_json_payload` now also strips an *open-only* fence
+  prefix when the closing fence is absent, then trims to the
+  outermost balanced object.
+  ([backend/core/inference/structured.py])
+- M&A prompt explicitly forbids markdown wrappers ("Start your
+  response with `{` and end with `}`. NO markdown code fences.").
+  ([backend/agents/writer/prompts/_m_and_a.py])
+
+### Step 3 — `max_tokens` override hit Anthropic 400
+
+The user's review proposed bumping the writer's `max_tokens` to
+16384 for the M&A mode specifically through the layered modes
+system. Built that:
+- New `model_overrides: dict[str, dict]` field on
+  `ResolvedConsultingMode`, deep-merged like `trust_tier_rules`
+  through firm + engagement layers.
+  ([backend/core/consulting_modes/types.py],
+  [backend/core/consulting_modes/resolver.py])
+- `WriterAgent.run` reads `resolved_mode.model_overrides.writer.max_tokens`
+  and threads it into `generate_structured`.
+  ([backend/agents/writer/agent.py])
+- Set `model_overrides.writer.max_tokens: 16384` on
+  `m_and_a_diligence` in YAML.
+  ([backend/config/consulting_modes.yaml])
+
+Result: Anthropic returned **HTTP 400** for the writer call.
+Sonnet 4.5's hard per-response cap is 8192 tokens by default;
+going above requires the `extended-output-128k-2025-02-19` beta
+header in the API request, which the current litellm client config
+doesn't set. Override reverted (kept commented out for later).
+
+### Step 4 — fence fix didn't help because the writer keeps hitting the 8192 cap
+
+After dropping the override and re-running with the fence-strip fix
++ no-wrap prompt instruction, Run A failed AGAIN at `(root)`.
+`llm_calls.completion_tokens` for all three writer attempts:
+**8192, 8192, 8192** — every attempt maxed the model's per-response
+budget exactly. The M&A schema is too long to fit a fully populated
+payload in 8192 tokens regardless of fence handling.
+
+(The captured raw text from this run still shows `` ```json `` —
+the prompt instruction "no markdown fences" wasn't strong enough to
+dissuade Claude. So the fence-strip code fix is the right bet on
+that axis, not a prompt-only fix.)
 
 ## What works
 - Resolver / schema / prompt / dispatcher / critic-checks /
-  renderer — 36+ unit tests across D1–D3 cover each layer
+  renderer — 39 unit tests across D1–D3 cover each layer
   independently
 - Mode dispatcher routes the right schema + prompt to the writer
   for each engagement
-- Schema strictness is correct (truncated/invalid output gets
-  rejected, retries fire, then `WriterSchemaValidationError` raises
-  with the schema name and field path)
-- CIM is retrieved + grounded by the research orchestrator (128
-  chunks for the M&A run, anchored to the CIM)
-- Run B (growth strategy) ran end-to-end and produced a substantive
-  recommendation with M&A-flavoured language (the brief asked for
-  one) — but with NO structured M&A-specific fields, exactly as the
-  schema dispatch dictates
+- Schema strictness correctly rejects truncated/fence-wrapped
+  output and `WriterSchemaValidationError` raises with the schema
+  name and field path
+- New layered `model_overrides` plumbing (iterate addition) is
+  ready for any future config knob the M&A mode needs
+- Raw failed-text capture is now a permanent forensic feature; any
+  future writer-schema failure leaves a 4KB excerpt on
+  `session.metadata.writer_schema_failure`
 
 ## What's still open (the iterate signal)
 
-- **Writer `max_tokens` budget vs M&A schema length.** The single
-  blocking issue. Three sane fixes, in order of preference:
-  - **Raise the writer task's `max_tokens` ceiling** for the M&A
-    mode (cleanest — affects only this mode; doesn't touch the
-    schema or prompt). Should be set high enough that even a
-    verbose output completes; the schema's strictness then enforces
-    discipline.
-  - **Stream the structured output and let the model use the full
-    context window.** Bigger refactor.
-  - **Two-pass writer**: first pass generates the base fields, second
-    pass generates the M&A-specific sections. Doubles cost but each
-    pass fits comfortably.
-- **M&A renderer not yet mounted** in the workspace UI flow
-  (deferred from D3 — D3 ships the components + tests; route /
-  panel decision is Phase 4 polish).
-- **`apply_mode_checks` not wired** into the post-writer
-  orchestrator path. Function is callable; integration point is the
-  same iterate window as the max_tokens fix.
-- **Comparable-transactions retrieval** today comes only from the CIM
-  itself. A real M&A engagement would surface comps from a deal
-  database; that's a Week 8+ data-source question.
+**One concrete fix between us and shipping Week 7**: enable extended
+output for the writer task. Implementation options ranked:
+
+1. **Wire `extended-output-128k-2025-02-19` beta header on Anthropic
+   writer calls** in `core/inference/litellm_client.py`. Smallest
+   change. After this, set `model_overrides.writer.max_tokens` to
+   ~32k on the M&A mode and re-run. Estimated: 1-2 hours including
+   re-test.
+
+2. **Switch the writer model for `m_and_a_diligence`** to one whose
+   default per-response cap fits the schema (e.g. some OpenAI
+   models). Avoids the beta-header dependency but couples the
+   wedge to a model swap. Same `model_overrides` mechanism, just
+   `model: ...` instead of `max_tokens: ...`.
+
+3. **Two-pass writer**: first pass produces base sections,
+   second pass extends with the M&A-specific sections. Doubles
+   cost per engagement but bounds per-call output and gives
+   per-section retry granularity. Bigger refactor.
+
+Other deferred items (smaller):
+- M&A renderer not yet mounted in the workspace UI flow (D3
+  ships components + tests; route/panel decision is Phase 4
+  polish).
+- `apply_mode_checks` not wired into the post-writer orchestrator
+  path yet.
 
 ## Decision
 
 - [ ] **Ship Week 7.** M&A mode produces a structurally distinct memo.
-- [x] **Iterate.** Specific blocking issues:
-  - Raise the writer task's `max_tokens` for the M&A mode (or
-    two-pass it) so the full schema fits in a single response.
-  - Re-run `tools/run_week7_e2e.py` with the fix in place; expect
-    Run A to produce the full M&A payload and the headline assertion
-    `structural_field_divergence_count >= 5` to pass.
-  - Optional: wire `apply_mode_checks` into the orchestrator's
-    post-writer step so the W7/D3 critic_checks fire on real
-    engagements (today they're callable but no orchestrator caller).
+- [x] **Iterate.** One specific blocking issue:
+  - Writer model output budget is 8192 tokens; M&A schema needs
+    more. Wire Anthropic extended-output beta header
+    (`core/inference/litellm_client.py`) and re-set the
+    `model_overrides.writer.max_tokens` override on the M&A mode.
+  - With that fix the same Run A demo should produce a valid
+    `MAndADiligenceReportPayload` with the seven structural
+    fields populated, and the headline assertion
+    `structural_field_divergence_count >= 5` should pass on the
+    next run.
 
-The Week 7 architecture is structurally complete (D1–D3 unit tests
-prove it; D4 apparatus + D5 dispatcher behaviour confirm dispatch
-fires correctly). The remaining gap is a **runtime token-budget
-issue** that prevents the LLM from producing the full M&A schema in
-one shot. Estimated fix: half a day (config + re-run); the same
-demo run after the fix should land cleanly with the schema-level
-divergence we set out to demonstrate.
+The Week 7 wedge architecture is structurally complete (39 unit
+tests + dispatcher correctness on a real run + raw-text capture
+proves it). The remaining gap is **one config issue**: the writer
+model's per-response output budget is too small for the schema we
+designed, and going above the default needs a beta header that
+isn't wired today. The iterate is small but load-bearing — exactly
+matching the user's pre-iterate review call.
 
 Run records:
-- `backend/eval_runs/week7_e2e/A_m_and_a.json` (gitignored — 220KB capture)
-- `backend/eval_runs/week7_e2e/B_growth_strategy.json` (gitignored — 151KB capture)
+- `backend/eval_runs/week7_e2e/A_m_and_a.json` (gitignored — last
+  attempt's capture)
+- `backend/eval_runs/week7_e2e/B_growth_strategy.json` (gitignored)
 - `backend/eval_runs/week7_e2e/summary.json` (committed)
-- W7/D4 integration test capture: `backend/eval_runs/week7_d4_integration/`
+- W7/D4 single-shot integration capture:
+  `backend/eval_runs/week7_d4_integration/`
+- W7/D5 iterate-attempt logs: `w7d5_iterate*.log` (gitignored)

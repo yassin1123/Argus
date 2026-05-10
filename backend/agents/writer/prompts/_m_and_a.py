@@ -17,6 +17,11 @@ diligence (target_overview, financial_profile, synergy_estimate,
 risks_and_mitigations, integration_plan, valuation_range,
 deal_structure_implications). Every field must be filled.
 
+OUTPUT FORMAT: emit the JSON object directly. Start your response
+with `{` and end with `}`. NO markdown code fences (no ```json, no
+```), no prose preamble, no trailing commentary. The downstream
+parser is strict and rejects any wrapper.
+
 STRICT REQUIREMENTS — the schema enforces these and rejects your output otherwise:
 
 - Synergies must have basis citations. Every synergy (revenue, cost,

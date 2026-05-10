@@ -33,13 +33,23 @@ from .schemas import GeneralReportPayload, WriterReportBase, get_writer_schema
 class WriterSchemaValidationError(InferenceSchemaError):
     """Raised by :class:`WriterAgent` when ``generate_structured`` exhausts
     its repair retries on a schema mismatch. Carries the schema class
-    name and the first offending field path so callers / logs see a
-    specific diagnostic rather than the generic upstream message.
+    name, the first offending field path, AND the last raw LLM
+    response body (W7/D5 iterate) so callers can see exactly what the
+    model emitted — truncation? markdown wrapper? freeform prose?
+    The diagnosis matters because each shape needs a different fix.
     """
 
-    def __init__(self, schema_name: str, field_path: str, original: BaseException):
+    def __init__(
+        self,
+        schema_name: str,
+        field_path: str,
+        original: BaseException,
+        *,
+        raw_text: str | None = None,
+    ):
         super().__init__(
-            f"{schema_name} validation failed at {field_path}"
+            f"{schema_name} validation failed at {field_path}",
+            raw_text=raw_text,
         )
         self.schema_name = schema_name
         self.field_path = field_path
@@ -148,6 +158,18 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
         if resolved_mode is not None:
             schema_cls = get_writer_schema(resolved_mode.name)
 
+        # W7/D5 iterate: per-mode model-config overrides flow through
+        # the layered modes system. Today only ``max_tokens`` is
+        # plumbed into ``generate_structured``; other params (temp,
+        # top_p) can be added as kwargs land. The override is bounded
+        # at resolver-validation time to [256, 64000].
+        gen_kwargs: dict[str, object] = {}
+        if resolved_mode is not None:
+            writer_overrides = (resolved_mode.model_overrides or {}).get("writer") or {}
+            mt = writer_overrides.get("max_tokens")
+            if isinstance(mt, int) and mt > 0:
+                gen_kwargs["max_tokens"] = mt
+
         try:
             out, _meta = await generate_structured(
                 schema_cls,
@@ -157,12 +179,16 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
                 temperature=0.3,
                 session_id=session_id,
                 trace_id=trace_id,
+                **gen_kwargs,
             )
         except InferenceSchemaError as ise:
             # generate_structured exhausted its repair retries.
-            # Surface the offending field path so logs / Sentry / the
-            # downstream operator see something specific instead of
-            # the generic "Schema validation failed after N repairs".
+            # Surface the offending field path + the raw LLM response
+            # so logs / Sentry / the downstream operator see something
+            # specific instead of the generic "Schema validation failed
+            # after N repairs". The raw text distinguishes truncation
+            # from markdown wrapping from freeform prose.
+            raw = getattr(ise, "raw_text", None)
             cause = ise.__cause__
             if isinstance(cause, ValidationError):
                 first = next(iter(cause.errors()), None)
@@ -173,13 +199,12 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
                     schema_name=schema_cls.__name__,
                     field_path=field_path,
                     original=cause,
+                    raw_text=raw,
                 ) from ise
-            # Some other exhaustion path (empty response retries, etc.) —
-            # still attach the schema name so the operator knows what
-            # mode this engagement was running.
             raise WriterSchemaValidationError(
                 schema_name=schema_cls.__name__,
                 field_path="(no validation error attached)",
                 original=ise,
+                raw_text=raw,
             ) from ise
         return out

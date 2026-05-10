@@ -57,5 +57,7 @@ backend/eval_runs/week7_d4_integration/failed_session.json
 w7d4_integration.log
 w7d5_e2e.log
 w7d5_run_b.log
+w7d5_iterate*.log
+w7d5_iterate_run.log
 backend/eval_runs/week7_e2e/A_m_and_a.json
 backend/eval_runs/week7_e2e/B_growth_strategy.json

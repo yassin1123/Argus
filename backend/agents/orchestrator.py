@@ -1207,6 +1207,29 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             await _pipeline_trace(session_id, "failed", str(e)[:400])
         except Exception:
             logger.exception("Could not append pipeline trace for %s", session_id)
+        # W7/D5 iterate: when the writer's structured-output exhaustion
+        # is the root cause, persist the raw failed LLM body on session
+        # metadata. The operator can read it back without re-running
+        # the engagement. Truncated to 4KB to avoid blowing up the
+        # session row.
+        try:
+            from agents.writer.agent import WriterSchemaValidationError as _WSVE
+
+            if isinstance(e, _WSVE) and getattr(e, "raw_text", None):
+                await merge_session_metadata(
+                    session_id,
+                    {
+                        "writer_schema_failure": {
+                            "schema_name": e.schema_name,
+                            "field_path": e.field_path,
+                            "raw_text_excerpt": (e.raw_text or "")[:4096],
+                        },
+                    },
+                )
+        except Exception:
+            logger.exception(
+                "Could not persist writer schema failure metadata for %s", session_id
+            )
         await update_session_status(session_id, "failed")
         try:
             await update_pipeline_state(session_id, "failed")

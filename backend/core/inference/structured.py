@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T", bound=BaseModel)
 
 _FENCE_RE = re.compile(r"```(?:json)?\s*([\s\S]*?)```", re.IGNORECASE)
+_FENCE_OPEN_RE = re.compile(r"^```(?:json)?\s*\n?", re.IGNORECASE)
 
 
 def _extract_json_payload(text: str) -> str:
@@ -33,14 +34,27 @@ def _extract_json_payload(text: str) -> str:
     "Output ONLY valid JSON" instruction. Claude usually obeys but occasionally
     wraps the JSON in a ```json ... ``` fence or a short prose preamble; this
     helper normalises both shapes back to a parseable object string.
+
+    W7/D5 iterate: on long structured outputs (e.g. the M&A writer's
+    7-section payload) Claude sometimes opens a ``` fence and never
+    closes it because the response runs out of token budget mid-JSON.
+    The original closed-only regex couldn't recover that case and fell
+    through to a malformed `find("{") .. rfind("}")` span. We now
+    handle the open-fence-no-close path explicitly: strip the leading
+    fence and trim back to the outermost balanced object.
     """
     s = (text or "").strip()
     if not s:
         return s
-    # ```json ... ``` or plain ``` ... ``` fences (first match wins).
+    # Closed fence — preferred path.
     fence = _FENCE_RE.search(s)
     if fence:
         return fence.group(1).strip()
+    # Open fence with no close (truncated response). Strip the opener
+    # and continue with the body.
+    open_only = _FENCE_OPEN_RE.match(s)
+    if open_only:
+        s = s[open_only.end():].strip()
     # Pure JSON: parse as-is.
     if s.startswith("{") and s.endswith("}"):
         return s
@@ -126,8 +140,17 @@ async def generate_structured(
                 notes.append(f"{FailureKind.SCHEMA.value}:{ve.error_count()}")
                 meta["repair_notes"] = notes
                 logger.warning("Structured validation failed (%s/%s): %s", schema_attempts, max_schema_repairs, ve)
+                # W7/D5 iterate: stash the last raw response on meta so
+                # callers (e.g. WriterAgent) can surface it for forensic
+                # inspection. Truncate aggressively — 4KB is enough to
+                # see the failure mode (markdown? truncation? wrapper?)
+                # without bloating logs.
+                meta["last_raw_response"] = (text or "")[:4096]
                 if schema_attempts > max_schema_repairs:
-                    raise InferenceSchemaError(f"Schema validation failed after {max_schema_repairs} repairs") from ve
+                    raise InferenceSchemaError(
+                        f"Schema validation failed after {max_schema_repairs} repairs",
+                        raw_text=(text or "")[:4096],
+                    ) from ve
                 repair = build_schema_repair_message(schema_hint, ve)
         except RateLimitError as e:
             notes = list(meta["repair_notes"])  # type: ignore[arg-type]
