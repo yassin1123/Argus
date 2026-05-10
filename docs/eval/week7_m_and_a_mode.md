@@ -1,6 +1,6 @@
 # Week 7 — M&A diligence mode end-to-end
 
-**Status:** iterate (cap + prompt↔schema drift resolved; upstream flakiness is the new blocker)
+**Status:** iterate (cap + prompt↔schema drift resolved; upstream pivot plumbed but not yet e2e-verified)
 
 ## Component check
 
@@ -223,19 +223,29 @@ when the firm library returns 128 chunks; the same fix surface
 applies (per-task `model_overrides` + provider swap or extended-
 output budget).
 
-Two paths from here, ranked:
+Iterate-4 landed the path-1 fix: analyst + critic now read
+`model_overrides[task]` from the resolved mode (mirrors the writer's
+W7 iterate-2 plumbing), the orchestrator passes `resolved_mode` to
+all 9 analyst.run/.revise call sites and both critic.run sites, and
+the M&A YAML now routes analyst, critic, and writer all to
+`openai/gpt-4o`. ([backend/agents/analyst.py](backend/agents/analyst.py),
+[backend/agents/critic.py](backend/agents/critic.py),
+[backend/agents/orchestrator.py](backend/agents/orchestrator.py),
+[backend/config/consulting_modes.yaml](backend/config/consulting_modes.yaml))
 
-1. **Apply the same `model_overrides.{model,max_tokens}` fix to
-   analyst + critic** for the M&A engagement specifically.
-   Smallest change. The plumbing is already on the branch — just
-   add `analyst:` and `critic:` keys under `model_overrides` in
-   the M&A YAML stanza. Estimated: <30 min code + one e2e.
+The pivot has not been verified end-to-end yet — committed as a
+plumbing-only change after 90/90 unit tests green. Next session: one
+e2e fire under M&A mode should now exercise the full pipeline on
+gpt-4o and reach `deliverable_ready`.
 
-2. **Reduce the analyst/critic input volume.** 128 retrieved
-   chunks is a lot; trimming to 64 (or applying max-marginal-
-   relevance dedup before the agents) would also bring the
-   structured outputs back inside the cap. Trades retrieval
-   recall for output stability. Estimated: 2-4 hours.
+Path 2 (input-volume trimming) remains a fallback if the pivot
+under-performs:
+
+- **Reduce the analyst/critic input volume.** 128 retrieved
+  chunks is a lot; trimming to 64 (or applying max-marginal-
+  relevance dedup before the agents) would also bring the
+  structured outputs back inside the cap. Trades retrieval
+  recall for output stability. Estimated: 2-4 hours.
 
 Other deferred items (smaller):
 - M&A renderer not yet mounted in the workspace UI flow (D3
@@ -249,11 +259,11 @@ Other deferred items (smaller):
   if Step 5 produces anything other than headline_pass: true",
   we don't ship yet.
 - [x] **Iterate (continued).** Writer prompt is now correct
-  (39 → 0 schema errors when reached). The remaining gap is
-  upstream agent flakiness on long structured outputs — same
-  underlying shape as the writer cap problem the pivot already
-  solved, so the same `model_overrides` fix should apply
-  cleanly to analyst + critic.
+  (39 → 0 schema errors when reached). Iterate-4 extends the
+  same `model_overrides` pivot to analyst + critic; plumbing
+  + YAML are committed and unit-tested but the pivot has not
+  yet been verified by an e2e run that reaches the writer.
+  Next session: one e2e fire to confirm.
 
 The Week 7 wedge architecture is structurally complete (76 unit
 tests + dispatcher correctness on a real run + raw-text capture

@@ -66,19 +66,25 @@ m_and_a_diligence:
   metadata:
     schema_version: "1.0"
     writer_payload_class: "MAndADiligenceReportPayload"
-  # W7/iterate (pivot): Sonnet 4.5's 8192-token default per-response
-  # cap was the proximate cause of writer truncation on the seven-
-  # section M&A schema. The beta header path (extended-output-128k-
-  # 2025-02-19) was attempted but rejected by the Anthropic API at
-  # runtime (HTTP 400 on every call, beta name appears to have drifted
-  # in the Sonnet 4.5 cycle). Per the iterate-spec pivot rule, we
-  # swap the writer model to OpenAI for this mode — gpt-4o has a
-  # 16k-token completion ceiling per response (no beta required) and
-  # handles the 7-section schema cleanly. Other agents (analyst,
-  # critic, verifier) keep their default routing. ``max_tokens`` is
-  # intentionally NOT overridden; the layered-modes resolver allows
-  # arbitrary writer kwargs but the spec says drop the cap override
-  # and let the structured layer pick the model default.
+  # W7/iterate (pivot + iterate-4): Sonnet 4.5's 8192-token default
+  # per-response cap was the proximate cause of writer truncation on
+  # the seven-section M&A schema. The beta header path (extended-
+  # output-128k-2025-02-19) was attempted but rejected by the
+  # Anthropic API at runtime. Per the iterate-spec pivot rule, the
+  # writer swapped to gpt-4o.
+  #
+  # Iterate-4 extends the same pivot to analyst + critic — both
+  # produced JSON-truncated structured outputs in iterate-3 e2e runs
+  # under the 128-evidence-chunk load (analyst: Anthropic timeout;
+  # critic: 3× truncated lists). Same root cause as the writer's
+  # original failure (long structured payload + 8192-token ceiling),
+  # same fix shape (model_overrides[task] = gpt-4o). Verifier keeps
+  # default routing — its structured output is shorter and hasn't
+  # shown the same flake pattern.
   model_overrides:
     writer:
+      model: openai/gpt-4o
+    analyst:
+      model: openai/gpt-4o
+    critic:
       model: openai/gpt-4o
