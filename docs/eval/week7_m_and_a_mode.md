@@ -27,7 +27,7 @@
 | Raw failed-attempt text capture | ✅ | Iterate; persisted on `session.metadata.writer_schema_failure` |
 | `apply_mode_checks` wired post-writer (advisory, non-blocking) | ✅ | Iterate; orchestrator persists `mode_check_failures` on `session.metadata` |
 | Minimal valid M&A payload fixture + 3 downstream tests (critic + renderer) | ✅ | Iterate; `tests/test_m_and_a_downstream.py` — 3/3 green |
-| **Run A produces a valid M&A payload end-to-end** | ❌ | Iterate runs progress through the failure stack — writer is now clean; failures sit upstream (analyst / critic JSON-truncation under 128-chunk evidence load). Still no full green pass. |
+| **Run A produces a valid M&A payload end-to-end** | ✅ | **Verified W8/D5 (2026-05-11) Run A — session `9da8a365-...`**: 7/7 M&A sections, 8/8 base fields, 4-item 2x2, Pyramid + MECE passed. Cost $0.22, wall 457s. Iterate trajectory below is preserved as the historical record of how this was reached. |
 
 ## End-to-end demo
 
@@ -39,21 +39,51 @@
 Both runs in **Argus Demo Boutique** with the synthetic
 **TargetCo Holdings — Project Lighthouse CIM** ingested.
 
-### Latest iterate run (2026-05-10)
+### W8/D5 verification run (2026-05-11) — the run that closes Week 7
 
-| Metric | Run A (M&A, OpenAI writer) | Run B (Growth Strategy) |
+Re-ran under the W8 framework wiring. Same brief verbatim. Pipeline
+now reaches the writer cleanly; writer emits a valid
+`MAndADiligenceReportPayload`; post-writer Pyramid + MECE checks
+both fire and pass.
+
+| Metric | Run A (M&A) |
+|---|---|
+| Mode | `m_and_a_diligence` |
+| Pipeline state | `deliverable_ready` |
+| Writer ran successfully | ✅ yes |
+| Writer model used | `openai/gpt-4o` (per-mode override, W7 iterate-2 pivot) |
+| firm_library citations | 128 chunks |
+| Cost | $0.22 |
+| Wall (s) | 457 |
+| M&A top-level sections | 7/7 populated |
+| Base WriterReportBase fields | 8/8 populated |
+| 2x2 framework (W8/D3) | 4 items, all with evidence citations |
+| Pyramid check | passed, 0 errors, 3 advisory findings |
+| MECE check | passed, 0 overlaps across 7 fields |
+| Recommendation | "PROCEED WITH CONDITIONS" |
+| Session | `9da8a365-224e-4c4c-8f65-8ff1d1cef5dc` |
+
+Full Run A detail and Run B (growth_strategy) trajectory:
+[week8_frameworks.md](week8_frameworks.md).
+
+### Earlier iterate run (2026-05-10) — historical
+
+The first W7/D5 iterate run did not produce a clean memo. Trajectory:
+
+| Metric | Run A (M&A) | Run B (Growth Strategy) |
 |---|---|---|
 | Mode | `m_and_a_diligence` | `growth_strategy` |
 | Pipeline state | `failed` (writer schema-validate exhaustion) | `deliverable_ready` |
 | Writer ran successfully | ❌ no — schema mismatch | ✅ yes |
-| Writer model used | `openai/gpt-4o` (per-mode override) | default Sonnet |
-| firm_library citations | 128 chunks | 72 chunks |
-| Cost | $0.97 (single attempt + 2 repairs) | $0.83 |
+| Writer model used | `openai/gpt-4o` | default Sonnet |
+| firm_library citations | 128 | 72 |
+| Cost | $0.97 | $0.83 |
 | Wall (s) | ~1006 | ~869 |
 | `headline_pass` | **false** | n/a |
 
-The dispatcher correctly routed each engagement to its schema —
-that part of the wedge fired. Run B remains a clean control.
+Preserved as the record of how W7 reached ship; supersession is
+documented in the W8/D5 row above and in
+[week8_frameworks.md](week8_frameworks.md).
 
 ## What changed during iterate
 
@@ -217,21 +247,28 @@ The writer's schema-alignment problem is solved: in the runs
 where the writer was reached, output went from 39 → 8 → 0
 schema errors as the prompt tightened.
 
-## What's still open (the iterate signal)
+## What's still open (the iterate signal) — historical, resolved
 
-**Upstream agent flakiness under 128-evidence load.** Two of
-the three e2e re-fires this iterate failed before reaching the
-writer: one at the analyst (Anthropic timeout → fallback returns
-truncated JSON), one at the critic (3× retries all return
+**The upstream-flakiness blocker described below was resolved.**
+Iterate-4's `model_overrides` pivot (analyst + critic both routed to
+`openai/gpt-4o` on the M&A mode) was e2e-verified during W8/D5 Run A
+on 2026-05-11: the pipeline reached the writer cleanly, the writer
+produced a valid `MAndADiligenceReportPayload`, and post-writer
+Pyramid + MECE auto-checks passed. The narrative below is preserved
+as the historical record of the gap; the W8/D5 verification row in
+the component-check table above is the current state.
+
+---
+
+**Upstream agent flakiness under 128-evidence load (historical).**
+Two of the three e2e re-fires during the W7/D5 iterate failed before
+reaching the writer: one at the analyst (Anthropic timeout → fallback
+returns truncated JSON), one at the critic (3× retries all return
 truncated JSON mid-list). The pattern is the same shape as the
 original writer truncation that motivated the iterate's pivot —
-LLM hits the 8192-token cap on a long structured payload. The
-analyst and critic schemas also produce long structured outputs
-when the firm library returns 128 chunks; the same fix surface
-applies (per-task `model_overrides` + provider swap or extended-
-output budget).
+LLM hits the 8192-token cap on a long structured payload.
 
-Iterate-4 landed the path-1 fix: analyst + critic now read
+**Iterate-4 fix that closed it:** analyst + critic now read
 `model_overrides[task]` from the resolved mode (mirrors the writer's
 W7 iterate-2 plumbing), the orchestrator passes `resolved_mode` to
 all 9 analyst.run/.revise call sites and both critic.run sites, and
@@ -241,13 +278,13 @@ the M&A YAML now routes analyst, critic, and writer all to
 [backend/agents/orchestrator.py](backend/agents/orchestrator.py),
 [backend/config/consulting_modes.yaml](backend/config/consulting_modes.yaml))
 
-The pivot has not been verified end-to-end yet — committed as a
-plumbing-only change after 90/90 unit tests green. Next session: one
-e2e fire under M&A mode should now exercise the full pipeline on
-gpt-4o and reach `deliverable_ready`.
+**Verification:** W8/D5 Run A (session `9da8a365-...`,
+[week8_frameworks.md](week8_frameworks.md)) — pipeline reached
+`deliverable_ready`, writer emitted a valid payload, both auto-
+checks passed.
 
-Path 2 (input-volume trimming) remains a fallback if the pivot
-under-performs:
+Path 2 (input-volume trimming) was identified as a fallback but
+not needed:
 
 - **Reduce the analyst/critic input volume.** 128 retrieved
   chunks is a lot; trimming to 64 (or applying max-marginal-
@@ -255,36 +292,46 @@ under-performs:
   structured outputs back inside the cap. Trades retrieval
   recall for output stability. Estimated: 2-4 hours.
 
-Other deferred items (smaller):
+Other deferred items (smaller, Phase-4 polish, NOT W7 ship
+blockers):
 - M&A renderer not yet mounted in the workspace UI flow (D3
   ships components + tests; route/panel decision is Phase 4
   polish).
 
 ## Decision
 
-- [ ] **Ship Week 7.** No e2e run this iterate produced a clean
-  M&A payload end-to-end. Per the iterate-spec rule "Don't ship
-  if Step 5 produces anything other than headline_pass: true",
-  we don't ship yet.
-- [x] **Iterate (continued).** Writer prompt is now correct
-  (39 → 0 schema errors when reached). Iterate-4 extends the
-  same `model_overrides` pivot to analyst + critic; plumbing
-  + YAML are committed and unit-tested but the pivot has not
-  yet been verified by an e2e run that reaches the writer.
-  Next session: one e2e fire to confirm.
+- [x] **Ship Week 7.** Verified end-to-end on 2026-05-11 (W8/D5
+  iterate Run A). M&A engagement produces a valid
+  `MAndADiligenceReportPayload` — 7/7 M&A sections, 8/8 base
+  fields, 4-item 2x2, Pyramid + MECE auto-checks passed. The
+  iterate-1..4 trajectory documented above is the historical
+  record of how this was reached; iterate-4's `model_overrides`
+  pivot (analyst + critic both on gpt-4o) is now e2e-verified.
+- [ ] ~~Iterate (continued).~~ Closed.
 
-The Week 7 wedge architecture is structurally complete (76 unit
-tests + dispatcher correctness on a real run + raw-text capture
-+ model-override plumbing + post-writer mode checks + minimal-
-valid M&A payload fixture + claim-linkage prompt section all
-proven). The work no longer sits at the writer; it sits one
-layer up. Same plumbing, narrower scope.
+Deferred-by-design (not W7 ship blockers — explicitly Phase 4
+polish per the original W7 doc):
+
+- M&A renderer not yet mounted in the workspace UI flow. The
+  W7/D3 components + tests ship; the route/panel decision is
+  Phase 4.
+
+The Week 7 wedge architecture is structurally complete and
+end-to-end verified: 76 unit tests + dispatcher correctness +
+raw-text capture + model-override plumbing + post-writer mode
+checks + minimal-valid M&A payload fixture + claim-linkage
+prompt section + W8/D5 Run A producing a fully valid M&A memo.
 
 Run records:
-- `backend/eval_runs/week7_e2e/A_m_and_a.json` (gitignored — last
-  attempt's capture)
+- `backend/eval_runs/week7_e2e/A_m_and_a.json` (gitignored — W7/D5
+  iterate attempt's capture)
 - `backend/eval_runs/week7_e2e/B_growth_strategy.json` (gitignored)
-- `backend/eval_runs/week7_e2e/summary.json` (committed)
+- `backend/eval_runs/week7_e2e/summary.json` (committed; superseded
+  by W8/D5 Run A for the M&A end-to-end claim)
 - W7/D4 single-shot integration capture:
   `backend/eval_runs/week7_d4_integration/`
 - W7/D5 iterate-attempt logs: `w7d5_iterate*.log` (gitignored)
+- **W8/D5 verification run (the run that closed W7):**
+  `backend/eval_runs/week8_e2e/A_m_and_a.json` (gitignored, session
+  `9da8a365-...`) + `backend/eval_runs/week8_e2e/summary.json`
+  (committed).
