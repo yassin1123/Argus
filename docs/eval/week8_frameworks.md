@@ -1,6 +1,6 @@
 # Week 8 — Frameworks library
 
-**Status:** ship (M&A path verified end-to-end; growth_strategy path gated on Phase 3 library expansion, not on W8 code)
+**Status:** iterate (regression found; `min_length=4` schema constraint over-strict for writer; reverted to `min_length=2`)
 
 ## Component check
 
@@ -137,6 +137,17 @@ never reached because there was no analysis to anchor it on.
 - **W7 carry-forward closed.** Run A produces the M&A memo W7 was missing.
 
 ## What's still open
+
+### Run A regression from W8/D5-iterate-3
+
+Tightening `TwoByTwoMatrix.items` to `min_length=4` in iterate-2
+caused the M&A pipeline to regress from its earlier shipping state
+(last successful: 7/7 fields + 4-item 2x2 + $0.16). Writer was
+reliably producing 2-3 items; `min_length=4` forced retries that
+all failed, aborting at the `evidence_insufficient` gate. Schema
+constraint reverted to `min_length=2`; prompt updated to demand
+4-6 items as a soft target. No re-fire this session; next session
+re-fires Run A first to confirm regression is resolved.
 
 ### Phase 3 escalation — library breadth, not W8 code
 

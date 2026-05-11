@@ -75,8 +75,9 @@ def _valid_two_by_two_kwargs(**overrides):
 def test_two_by_two_valid_payload_parses() -> None:
     m = TwoByTwoMatrix(**_valid_two_by_two_kwargs())
     assert m.title.startswith("Target screen")
-    # W8/D5: schema now enforces min_length=4 (was 2). Four-item fixture
-    # is the new minimum-valid shape.
+    # W8/D5 iterate-4: min_length is back to 2; fixture still uses 4
+    # items (richer demo shape), but the schema-floor check below
+    # confirms the floor is the soft 2, not the over-strict 4.
     assert len(m.items) == 4
 
 
@@ -86,20 +87,21 @@ def test_two_by_two_rejects_empty_items() -> None:
     assert "items" in str(exc.value)
 
 
-def test_two_by_two_rejects_fewer_than_4_items() -> None:
-    """W8/D5: a 2x2 with 1-3 items is unusable. Schema rejects."""
-    three_items = [
+def test_two_by_two_accepts_two_items() -> None:
+    """W8/D5 iterate-4: min_length=2 (reverted from over-strict 4). A
+    2-item 2x2 should validate; the prompt aims for 4-6 as a soft
+    target, but the schema floor is 2."""
+    two_items = [
         {
             "name": f"Tile {i}",
             "quadrant": "top_left",
             "rationale": "Long enough rationale to clear the twenty char minimum.",
             "evidence_citations": [f"c{i}"],
         }
-        for i in range(3)
+        for i in range(2)
     ]
-    with pytest.raises(ValidationError) as exc:
-        TwoByTwoMatrix(**_valid_two_by_two_kwargs(items=three_items))
-    assert "items" in str(exc.value)
+    m = TwoByTwoMatrix(**_valid_two_by_two_kwargs(items=two_items))
+    assert len(m.items) == 2
 
 
 def test_two_by_two_rejects_more_than_12_items() -> None:
