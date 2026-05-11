@@ -20,6 +20,7 @@
  * Renamed to `MemoRenderer/` to avoid the collision.
  */
 
+import FrameworksSection, { type FrameworksData } from "./Frameworks";
 import IntegrationTimeline from "./M_and_A/IntegrationTimeline";
 import SynergyBreakdown from "./M_and_A/SynergyBreakdown";
 import ValuationRangeTable from "./M_and_A/ValuationRangeTable";
@@ -45,6 +46,7 @@ const M_AND_A_RENDERED_KEYS = new Set([
 const SKIP_KEYS = new Set([
   "mode",                        // displayed in header, not body
   "metadata",                    // internal forward-compat bag
+  "frameworks",                  // W8/D3: dispatched to FrameworksSection
 ]);
 
 const ORDERED_BASE_KEYS = [
@@ -135,6 +137,13 @@ export default function MemoRenderer({ payload, modeName }: MemoRendererProps) {
           ) : null}
         </>
       ) : null}
+
+      {/* W8/D3: optional structured frameworks (2x2, Porter's Five
+          Forces, Value Chain). Mode-agnostic — any memo can carry one,
+          two, all three, or none. FrameworksSection is a no-op when
+          payload.frameworks is null or all slots are null, so
+          backward compat is preserved. */}
+      <FrameworksSection data={(payload.frameworks ?? null) as FrameworksData | null} />
     </div>
   );
 }

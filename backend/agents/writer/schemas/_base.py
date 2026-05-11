@@ -29,6 +29,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+# W8/D3: imported here for the optional ``frameworks`` field below.
+# Importing from the package avoids a top-level circular when subclasses
+# of WriterReportBase that don't use frameworks are loaded first.
+from .frameworks import FrameworksPayload
+
 
 class SourceItem(BaseModel):
     title: str
@@ -102,6 +107,19 @@ class WriterReportBase(BaseModel):
         description=(
             "Free-form bag for forward-compatible per-mode hints we "
             "haven't promoted to first-class fields yet."
+        ),
+    )
+
+    # W8/D3: structured frameworks — three first-class slots (2x2,
+    # Porter's Five Forces, Value Chain). All independently optional.
+    # Backward-compat: every legacy payload deserialises with
+    # ``frameworks=None`` and nothing changes downstream. Mode-level
+    # "this framework is required" enforcement is W8/D4, not today.
+    frameworks: FrameworksPayload | None = Field(
+        None,
+        description=(
+            "Optional structured-framework slot. When non-null, the renderer "
+            "dispatches each non-null sub-framework to its bespoke component."
         ),
     )
 
