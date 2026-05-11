@@ -33,11 +33,16 @@ _REQUIRED_INSTRUCTIONS: dict[str, str] = {
         "x_axis_label (str, the dimension, e.g. 'Strategic fit'); x_axis_low_label + "
         "x_axis_high_label (str, the pole names, e.g. 'Low' and 'High'); y_axis_label, "
         "y_axis_low_label, y_axis_high_label (same shape for the vertical axis); items "
-        "(list of 2-12 entries, aim 4-8) where each item is {name, quadrant ∈ "
+        "(list of AT LEAST 4 and AT MOST 8 entries) where each item is {name, quadrant ∈ "
         "{bottom_left, bottom_right, top_left, top_right}, rationale ≥20 chars, "
         "evidence_citations (list of ≥1 claim_id from key_claims)}; interpretation "
         "(str ≥30 chars, the narrative reading of the cluster pattern). For M&A diligence "
-        "default to x_axis_label='Strategic fit', y_axis_label='Deal complexity'."
+        "default to x_axis_label='Strategic fit', y_axis_label='Deal complexity'. "
+        "FEWER THAN 4 ITEMS PRODUCES AN UNUSABLE MATRIX — if you can only identify 2-3 items, "
+        "you have not done enough analysis; mine the analyst's key_claims for additional "
+        "tiles (target sub-options, segments, deal sub-themes, capability gaps) until you "
+        "have 4-8 differentiated items. The schema validator REJECTS payloads with fewer "
+        "than 4 items in this field."
     ),
     "porters_five_forces": (
         "Populate frameworks.porters_five_forces with these EXACT top-level keys: "

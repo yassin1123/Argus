@@ -56,7 +56,11 @@ class TwoByTwoMatrix(BaseModel):
     y_axis_label: str = Field(..., min_length=2, max_length=60)
     y_axis_low_label: str = Field(..., min_length=1, max_length=30, description="Bottom-pole label.")
     y_axis_high_label: str = Field(..., min_length=1, max_length=30, description="Top-pole label.")
-    items: list[TwoByTwoItem] = Field(..., min_length=2, max_length=12)
+    # W8/D5 iterate: bumped min_length 2 -> 4. A 2x2 with fewer than 4
+    # items is performance art, not analysis. Schema-level enforcement
+    # backs up the prompt's "4-8 items, fewer than 4 produces an
+    # unusable matrix" rule so the writer retry loop can recover.
+    items: list[TwoByTwoItem] = Field(..., min_length=4, max_length=12)
     interpretation: str = Field(
         ...,
         min_length=30,

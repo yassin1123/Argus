@@ -91,6 +91,18 @@ def _valid_two_by_two() -> TwoByTwoMatrix:
                 "rationale": "Low fit, high complexity: separate sales motion + legacy ERP.",
                 "evidence_citations": ["c-ms-1"],
             },
+            {
+                "name": "Compliance Services",
+                "quadrant": "top_left",
+                "rationale": "Strong cultural fit but limited revenue scale + integration overhead.",
+                "evidence_citations": ["c-cs-1"],
+            },
+            {
+                "name": "International Expansion",
+                "quadrant": "bottom_right",
+                "rationale": "High strategic upside but complex regulatory + GTM integration work.",
+                "evidence_citations": ["c-ie-1"],
+            },
         ],
         interpretation="Cluster sits bottom-right; Mechanical Services is a divestiture candidate.",
     )

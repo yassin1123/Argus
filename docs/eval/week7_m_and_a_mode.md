@@ -1,6 +1,14 @@
 # Week 7 — M&A diligence mode end-to-end
 
-**Status:** iterate (cap + prompt↔schema drift resolved; upstream pivot plumbed but not yet e2e-verified — re-tested under W8/D5 demo run, same upstream gate blocks; see [week8_frameworks.md](week8_frameworks.md) for the W8/D5 trajectory)
+**Status:** ship
+
+> Verified end-to-end during W8/D5 iterate re-run on 2026-05-11. Run A
+> against the same TargetCo brief produced a valid
+> `MAndADiligenceReportPayload` with **7/7 M&A top-level sections** +
+> **8/8 base fields** + a populated 2x2 framework. Pyramid + MECE
+> auto-checks fired and passed. Cost $0.22, wall 457s. Session
+> `9da8a365-224e-4c4c-8f65-8ff1d1cef5dc`. Closes the W7 carry-forward.
+> Detail: [week8_frameworks.md](week8_frameworks.md) Run A.
 
 ## Component check
 

@@ -53,6 +53,18 @@ def _valid_two_by_two_kwargs(**overrides):
                 "rationale": "Weak strategic fit and difficult system integration.",
                 "evidence_citations": ["c2"],
             },
+            {
+                "name": "Compliance Services",
+                "quadrant": "top_left",
+                "rationale": "Strong cultural alignment but limited cross-sell potential.",
+                "evidence_citations": ["c3"],
+            },
+            {
+                "name": "International Expansion",
+                "quadrant": "bottom_right",
+                "rationale": "High strategic fit but operationally complex post-close.",
+                "evidence_citations": ["c4"],
+            },
         ],
         interpretation="Cluster sits at top-right; Mechanical is the weakest tile and a candidate for divestment.",
     )
@@ -63,12 +75,30 @@ def _valid_two_by_two_kwargs(**overrides):
 def test_two_by_two_valid_payload_parses() -> None:
     m = TwoByTwoMatrix(**_valid_two_by_two_kwargs())
     assert m.title.startswith("Target screen")
-    assert len(m.items) == 2
+    # W8/D5: schema now enforces min_length=4 (was 2). Four-item fixture
+    # is the new minimum-valid shape.
+    assert len(m.items) == 4
 
 
 def test_two_by_two_rejects_empty_items() -> None:
     with pytest.raises(ValidationError) as exc:
         TwoByTwoMatrix(**_valid_two_by_two_kwargs(items=[]))
+    assert "items" in str(exc.value)
+
+
+def test_two_by_two_rejects_fewer_than_4_items() -> None:
+    """W8/D5: a 2x2 with 1-3 items is unusable. Schema rejects."""
+    three_items = [
+        {
+            "name": f"Tile {i}",
+            "quadrant": "top_left",
+            "rationale": "Long enough rationale to clear the twenty char minimum.",
+            "evidence_citations": [f"c{i}"],
+        }
+        for i in range(3)
+    ]
+    with pytest.raises(ValidationError) as exc:
+        TwoByTwoMatrix(**_valid_two_by_two_kwargs(items=three_items))
     assert "items" in str(exc.value)
 
 
