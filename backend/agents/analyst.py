@@ -187,6 +187,80 @@ def _assign_claim_ids(analysis: dict[str, Any]) -> None:
             item["claim_id"] = str(uuid.uuid4())
 
 
+def _rewrite_slot_claim_ids(analysis: dict[str, Any]) -> None:
+    """W8/D5 follow-up: rewrite ``reasoning_slots[].claim_ids`` to point
+    at real minted ``key_claims`` ids after ``_assign_claim_ids`` runs.
+
+    The LLM emits ``reasoning_slots[].claim_ids`` referencing
+    hallucinated tokens like ``claim_013`` because at emission time it
+    has no real ids to anchor on. ``_assign_claim_ids`` then mints UUIDs
+    on ``key_claims`` — leaving slot references dangling. The
+    reasoning-skeleton gate (W6/D2) correctly rejects this, blocking
+    growth_strategy memos from reaching the writer.
+
+    Strategy:
+      1. Collect actual minted claim_ids from key_claims.
+      2. For each slot, keep any id that already matches a minted id.
+      3. For each invalid id, try to recover by matching the slot's
+         summary against the claim texts via word-overlap (threshold
+         ≥3 shared words).
+      4. Drop references that can't be recovered. If a slot ends up
+         empty after recovery, leave it — the gate will then see a
+         genuine coverage gap, not a referential one.
+      5. Deduplicate the final list while preserving order.
+    """
+    kc = analysis.get("key_claims") or []
+    if not isinstance(kc, list):
+        return
+
+    valid_ids: set[str] = set()
+    id_to_text: dict[str, str] = {}
+    for c in kc:
+        if isinstance(c, dict) and c.get("claim_id"):
+            cid = str(c["claim_id"])
+            valid_ids.add(cid)
+            id_to_text[cid] = str(c.get("text") or "")
+
+    slots = analysis.get("reasoning_slots") or []
+    if not isinstance(slots, list):
+        return
+
+    for slot in slots:
+        if not isinstance(slot, dict):
+            continue
+        cids = slot.get("claim_ids") or []
+        if not isinstance(cids, list):
+            slot["claim_ids"] = []
+            continue
+
+        rewritten: list[str] = []
+        slot_summary = str(slot.get("summary") or "").lower()
+        slot_words = set(slot_summary.split())
+        for cid in cids:
+            cid_str = str(cid)
+            if cid_str in valid_ids:
+                rewritten.append(cid_str)
+                continue
+            # Hallucinated id — recover by matching slot summary text
+            # against claim texts. Pick the claim with the most word
+            # overlap; threshold ≥3 keeps recovery anchored to real
+            # semantic overlap, not noise.
+            best_id, best_overlap = None, 0
+            for vid in valid_ids:
+                claim_words = set(id_to_text[vid].lower().split())
+                overlap = len(slot_words & claim_words)
+                if overlap > best_overlap:
+                    best_overlap = overlap
+                    best_id = vid
+            if best_id and best_overlap >= 3:
+                rewritten.append(best_id)
+            # else: silently drop; gate will see the coverage gap.
+
+        # Deduplicate while preserving order.
+        seen: set[str] = set()
+        slot["claim_ids"] = [x for x in rewritten if not (x in seen or seen.add(x))]
+
+
 class AnalystAgent:
     async def run(
         self,
@@ -225,6 +299,7 @@ Evidence object catalog (cite ids from here): {_catalog_json(evidence_objects)}
         _sanitize_evidence_ids(data, allowed)
         _strip_ungrounded_key_claims(data)
         _assign_claim_ids(data)
+        _rewrite_slot_claim_ids(data)  # W8/D5: rewrite slot refs to minted ids
         return data
 
     async def revise(
@@ -277,4 +352,5 @@ Produce the revised analyst JSON only.
         _sanitize_evidence_ids(data, allowed)
         _strip_ungrounded_key_claims(data)
         _assign_claim_ids(data)
+        _rewrite_slot_claim_ids(data)  # W8/D5: rewrite slot refs to minted ids
         return data

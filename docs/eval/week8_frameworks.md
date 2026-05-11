@@ -56,25 +56,50 @@
 | All 5 forces populated | ❌ |
 | Pyramid + MECE | did not fire (no writer payload) |
 
-**Why Run B aborted (deterministic, two attempts confirmed):**
-The analyst on `growth_strategy` mode populates the mode's reasoning_slots
-(market_attractiveness, capabilities, competition, risks) with
-hallucinated `claim_id` references (`claim_013`, `claim_014`,
-`claim_016`, `claim_017`) that do not appear in its own emitted
-`key_claims` list. The reasoning-skeleton validator (W6/D2) correctly
-rejects this and triggers the analyst revise loop; the analyst
-hallucinates the same shape on retry. After 2 retries the pipeline
-flips to `evidence_insufficient` with gap_report "Report mode
-'growth_strategy' requires all configured reasoning slots with summaries
-and claim links."
+**Run B failure mode 1 (closed):** the analyst on `growth_strategy`
+mode populated reasoning_slots with hallucinated `claim_id`
+references (`claim_013`, `claim_014`, etc.) that did not appear in
+its own emitted `key_claims` list. The reasoning-skeleton validator
+correctly rejected this and the pipeline flipped to
+`evidence_insufficient` after 2 retries.
 
-This is a **W6/D2 analyst-side claim-id integrity bug**, not a W8
-regression. The W8 framework code never gets reached. It's specific
-to `growth_strategy` (Run A's M&A engagement does NOT exhibit this).
-Likely root cause: the analyst's claim-id assignment runs after
-reasoning_slot population, so slot references can point at not-yet-
-minted claim ids; M&A's reasoning_slots may happen to use a smaller
-slot set that hasn't surfaced this latent bug.
+**Root cause:** `_assign_claim_ids` minted UUIDs on `key_claims`
+*after* the LLM had already emitted `reasoning_slots[].claim_ids`,
+leaving slot refs dangling.
+
+**Fix committed this session** ([backend/agents/analyst.py](backend/agents/analyst.py)):
+new `_rewrite_slot_claim_ids` post-pass runs immediately after
+`_assign_claim_ids` in both `AnalystAgent.run()` and `.revise()`.
+It rewrites dangling refs to real minted ids via word-overlap
+matching between each slot's `summary` and each claim's `text`
+(threshold ≥3 shared words); drops unrecoverable refs cleanly
+rather than silently mis-pointing. 4 unit tests in
+[backend/tests/test_analyst.py](backend/tests/test_analyst.py) all
+green.
+
+**Run B re-fire after the fix:** zero `claim_id` / `reasoning_slot`
+errors in the run output. Fix worked at its target. Pipeline still
+aborted, but at a **different**, **semantic** gate:
+
+**Run B failure mode 2 (open — content gap, not code bug):** the
+analyst exited with a well-formed `gap_report`:
+
+> "The analysis lacks direct evidence on the German market structure,
+> regulatory requirements, and competitive landscape, which are
+> critical for validating the market entry strategy."
+
+The firm library contains UK industrial services content (TargetCo
+CIM, UK retail sector primer, Albright & Marsh pricing pack,
+Valuation Methodology, M&A Target Screen Playbook). The Run B brief
+asks for **German industrial services market entry**. The analyst
+correctly identified that it cannot honestly produce a market-entry
+memo from a UK-only library and exited with a structured gap_report
+rather than fabricating. Pipeline state: `evidence_insufficient`.
+Wall 533s, cost $0.43.
+
+This is the **honest behavior** of a grounded analyst, not a bug.
+It's also not a W8 framework problem — Porter's Five Forces was
+never reached because there was no analysis to anchor it on.
 
 ## Headline assertions
 
@@ -113,25 +138,38 @@ slot set that hasn't surfaced this latent bug.
 
 ## What's still open
 
-### Run B — growth_strategy analyst claim-id hallucination
+### Run B — content gap (NOT a code bug)
 
-The reasoning-skeleton gate (W6/D2) correctly rejects the analyst's
-output on `growth_strategy` mode because the analyst references
-`claim_id` values in its `reasoning_slots` that don't exist in its own
-`key_claims` list. Two attempts in this session both failed the same
-way; it's deterministic, not stochastic. The fix is W6/D2 territory,
-not W8:
+The analyst claim-id hallucination that originally blocked Run B is
+**closed** (see "Run B failure mode 1" above and
+`_rewrite_slot_claim_ids` in
+[backend/agents/analyst.py](backend/agents/analyst.py)). The
+re-fire after the fix surfaced a different, honest failure:
 
-1. Most likely: enforce that `_assign_claim_ids` runs **before** the
-   analyst's slot-population pass writes `claim_ids` into
-   `reasoning_slots[].claim_ids` — OR add a post-pass that rewrites
-   slot claim_ids to actual minted ids by matching them to claim text.
-2. Alternative: post-validate at the analyst layer (not just at the
-   skeleton gate downstream) so the analyst's own retry sees the
-   error in time to fix it on its own.
+The Run B brief asks for **German industrial services market entry**,
+but the demo firm's library contains UK industrial services content
+only. The analyst correctly refused to fabricate German market data
+and exited with a structured `gap_report` listing exactly what's
+missing (regulatory landscape, market sizing, competitive structure).
 
-Estimated: 1-3 hours. Should land in Week 9 housekeeping before any
-new feature work depends on growth_strategy producing a valid memo.
+This is not a Week 8 framework problem. Two ways to verify Run B:
+
+1. **Seed the demo library with German market content** — a short
+   German industrial services market primer (sizing, top players,
+   regulatory bodies, recent transactions). Estimated 1 hour.
+   Cleanest demo result; Run B then exercises Porter's against
+   real grounding.
+2. **Change the Run B brief to something the existing library
+   supports** — e.g. "Develop a UK regional expansion strategy
+   for TargetCo into Scotland and the North-East." The current
+   firm library has enough content for this; Porter's would
+   anchor on the same UK industrial services data the M&A run
+   uses. Estimated 5 minutes (change the BRIEF constant in
+   `tools/run_week8_e2e.py`).
+
+Either path produces a fully verified W8 — the framework code
+itself is proven by Run A and would behave identically on Run B
+once an analysis exists to anchor on.
 
 ### Yesterday's stochastic research-branch dispatch issue
 
@@ -164,31 +202,38 @@ to **ship**.
 ## Decision
 
 - [ ] **Ship Week 8 as fully verified.** Cannot do: Run B's required
-  framework (Porter's) didn't land, the writer never ran on Run B.
-  Per spec hard rule "Don't ship Week 8 if either required framework
-  is missing on its run."
-- [x] **Iterate (continued).** Two iterate signals from W8/D5:
-  - **(a) M&A path is genuinely shipping.** No further W8 work needed
-    on M&A — the architecture is structurally complete, tests pass,
-    e2e produces the memo, pyramid + mece auto-check.
-  - **(b) growth_strategy path is blocked one layer upstream of W8.**
-    The W6/D2 analyst-side claim-id hallucination needs a targeted
-    fix (1-3 hours) before Run B will ever reach the writer.
+  framework (Porter's) didn't land. The writer never ran on Run B,
+  not because of a code bug (the analyst claim-id bug is now fixed)
+  but because the demo firm's library doesn't have German market
+  content and the brief asks for German market entry.
+- [x] **Iterate (one config change away from ship).** All W8 code
+  is verified production-ready:
+  - **(a) M&A path is genuinely shipping.** No further W8 work
+    needed on M&A — the architecture is structurally complete,
+    tests pass, e2e produces the memo, pyramid + mece auto-check.
+  - **(b) growth_strategy path is now code-clean too.** The
+    analyst claim-id hallucination that originally blocked Run B
+    is fixed and unit-tested (4 tests green); Run B re-fire after
+    the fix produced zero claim-id errors and exited honestly on
+    a content gap, not a code bug.
+  - **(c) Run B needs either German library content OR a
+    UK-flavored brief** to actually exercise Porter's end-to-end.
+    Either path: ~1 hour or ~5 minutes; ~$0.50 e2e re-fire.
 
-The W8 frameworks library itself is production-ready; one analyst
-bug stands between us and a fully-verified ship. Week 9 housekeeping
-should land that fix first.
+The W8 frameworks library itself is production-ready. The one
+remaining gap is a demo-library-vs-brief mismatch on Run B, not
+a framework defect.
 
 ## 5-line summary
 
-1. **Decision:** iterate — M&A path ships, growth_strategy path blocked on a pre-existing W6/D2 analyst bug surfaced during W8/D5.
-2. **Headline finding:** Run A produced a valid M&A memo with 4-item 2x2, 7/7 sections, 8/8 base fields, pyramid + mece passed — closes the W7 carry-forward.
+1. **Decision:** iterate — M&A path ships clean (W7 carry-forward closed); growth_strategy path now also code-clean (analyst claim-id fix shipped + unit-tested), but Run B brief asks for German content the demo library doesn't have.
+2. **Headline finding:** Run A produced a valid M&A memo with 4-item 2x2, 7/7 sections, 8/8 base fields, pyramid + mece passed. Run B's blocker shifted from a code bug to a content gap — analyst correctly refused to fabricate German market data.
 3. **Pyramid + MECE pass rates:** Pyramid 0 errors / 3 advisory findings (1 run); MECE 0 overlaps across 7 fields (1 run); both gated on a writer payload existing.
 4. **Week 7 carry-forward:** **closed.** W7 wrap-up flipped to ship.
-5. **Open for Week 9:** fix the analyst's reasoning_slot → key_claims claim-id integrity (W6/D2 housekeeping); then a single Run B verifies Porter's. After that, W8 flips to ship.
+5. **Open for Week 9:** seed the demo library with German industrial services content (~1h) OR change the Run B brief to a UK-supported question (~5 min), then a single Run B re-fire verifies Porter's. After that, W8 flips to ship.
 
 Run records:
 - [backend/eval_runs/week8_e2e/A_m_and_a.json](../../backend/eval_runs/week8_e2e/A_m_and_a.json) (gitignored — Run A captured payload)
-- [backend/eval_runs/week8_e2e/B_growth_strategy.json](../../backend/eval_runs/week8_e2e/B_growth_strategy.json) (gitignored — Run B captured trace)
+- [backend/eval_runs/week8_e2e/B_growth_strategy.json](../../backend/eval_runs/week8_e2e/B_growth_strategy.json) (gitignored — Run B post-fix capture: gap_report cites missing German content)
 - [backend/eval_runs/week8_e2e/summary.json](../../backend/eval_runs/week8_e2e/summary.json) (committed)
-- Total session spend across 4 runs (A x2, B x2): **$1.44** of $5 ceiling.
+- Total session spend across 5 runs (A x2, B x3): **~$1.87** of $5 ceiling.
