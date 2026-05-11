@@ -28,28 +28,39 @@ from core.consulting_modes import FrameworksModeConfig
 # these blocks communicate intent + axis labels + counts.
 _REQUIRED_INSTRUCTIONS: dict[str, str] = {
     "two_by_two": (
-        "Populate frameworks.two_by_two — a 2x2 matrix. Pick two discriminating axes "
-        "(for M&A diligence: 'Deal complexity' as the y-axis low→high, 'Strategic fit' "
-        "as the x-axis low→high). Place 4-8 items from your analysis (target capabilities, "
-        "sub-options, segments) in the four quadrants (bottom_left, bottom_right, "
-        "top_left, top_right). Every item needs ≥1 evidence_citations from key_claims. "
-        "End with an interpretation paragraph reading the cluster pattern."
+        "Populate frameworks.two_by_two — a 2x2 matrix. Required FLAT fields (do NOT nest "
+        "under an 'axes' object): title (str ≥4 chars, e.g. 'TargetCo capability screen'); "
+        "x_axis_label (str, the dimension, e.g. 'Strategic fit'); x_axis_low_label + "
+        "x_axis_high_label (str, the pole names, e.g. 'Low' and 'High'); y_axis_label, "
+        "y_axis_low_label, y_axis_high_label (same shape for the vertical axis); items "
+        "(list of 2-12 entries, aim 4-8) where each item is {name, quadrant ∈ "
+        "{bottom_left, bottom_right, top_left, top_right}, rationale ≥20 chars, "
+        "evidence_citations (list of ≥1 claim_id from key_claims)}; interpretation "
+        "(str ≥30 chars, the narrative reading of the cluster pattern). For M&A diligence "
+        "default to x_axis_label='Strategic fit', y_axis_label='Deal complexity'."
     ),
     "porters_five_forces": (
-        "Populate frameworks.porters_five_forces — define the market scope clearly "
-        "(market_definition), then assess each of the five forces (rivalry, "
-        "supplier_power, buyer_power, substitute_threat, new_entrant_threat). For each: "
-        "intensity (low|moderate|high), a quantified rationale, 2-6 key_drivers, ≥1 "
-        "evidence_citations from key_claims. Close with overall_attractiveness + "
-        "overall_rationale synthesising which forces dominate."
+        "Populate frameworks.porters_five_forces with these EXACT top-level keys: "
+        "market_definition (str ≥10 chars — scope of 'this market'); rivalry, "
+        "supplier_power, buyer_power, substitute_threat, new_entrant_threat (each is "
+        "a ForceAssessment object — see shape below); overall_attractiveness "
+        "(literal: low|moderate|high); overall_rationale (str ≥30 chars synthesising "
+        "which forces dominate). Do NOT nest the five forces inside a 'forces' object. "
+        "Each ForceAssessment = {intensity ∈ {low, moderate, high}, rationale (str "
+        "≥30 chars, quantified where possible), key_drivers (list of 2-6 short labels), "
+        "evidence_citations (list of ≥1 claim_id from key_claims)}."
     ),
     "value_chain": (
-        "Populate frameworks.value_chain — set business_context (scope), then list ≥4 "
-        "activities across primary (inbound_logistics, operations, outbound_logistics, "
-        "marketing_and_sales, service) and support (firm_infrastructure, hr_management, "
-        "technology_development, procurement). Each activity needs assessment + "
-        "competitive_implication + ≥1 evidence_citations. Close with overall_thesis "
-        "naming the strategic wins and gaps across activities."
+        "Populate frameworks.value_chain with EXACT top-level keys: business_context "
+        "(str ≥20 chars — scope: BU, geography, segment); activities (list of ≥4 "
+        "ValueChainActivity objects); overall_thesis (str ≥30 chars — synthesis). "
+        "Each ValueChainActivity = {name (str), category ∈ {primary, support}, "
+        "canonical_step ∈ {inbound_logistics, operations, outbound_logistics, "
+        "marketing_and_sales, service, firm_infrastructure, hr_management, "
+        "technology_development, procurement} — primary activities use the first five, "
+        "support activities use the last four; assessment (str ≥30 chars), "
+        "competitive_implication (str ≥10 chars), evidence_citations (list of ≥1 "
+        "claim_id from key_claims)}."
     ),
 }
 

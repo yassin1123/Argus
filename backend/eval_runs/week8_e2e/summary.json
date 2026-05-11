@@ -1,0 +1,83 @@
+{
+  "generated_at": "2026-05-11T02:22:37Z",
+  "headline_assertions": {
+    "A_two_by_two_present": false,
+    "A_two_by_two_items_ge_4": false,
+    "A_two_by_two_items_all_have_citations": false,
+    "A_pyramid_present": false,
+    "A_mece_present": false,
+    "headline_pass": false,
+    "week7_carry_forward": {}
+  },
+  "headline_pass": false,
+  "n_runs": 1,
+  "runs": [
+    {
+      "run_name": "A_m_and_a",
+      "report_mode": "m_and_a_diligence",
+      "session_id": "87d59652-fd49-4e01-b2b1-d44ef40cb730",
+      "wall_seconds": 143.67,
+      "cost_usd_total": 0.1185,
+      "evidence_total": 128,
+      "diversity_counts": {
+        "firm_library": 128
+      },
+      "firm_library_titles_cited": {
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 73,
+        "Retail Sector Primer (UK + US)": 15,
+        "Albright & Marsh Pricing Diagnostic Pack": 5,
+        "M&A Target Screen Playbook (Boutique Edition)": 17,
+        "Valuation Methodology (Firm House View)": 16,
+        "Growth Strategy Framework (Boutique Methodology)": 2
+      },
+      "frameworks_status": {
+        "two_by_two": false,
+        "porters_five_forces": false,
+        "value_chain": false
+      },
+      "two_by_two_quality": {
+        "items_count": 0,
+        "items_with_citations": 0,
+        "axes_labeled": false
+      },
+      "porters_quality": {
+        "all_five_populated": false,
+        "forces_with_evidence": 0,
+        "market_definition_set": false,
+        "overall_attractiveness": null
+      },
+      "pyramid": {
+        "present": false,
+        "passed": null,
+        "findings": 0,
+        "model_used": null,
+        "cost_usd": 0.0
+      },
+      "mece": {
+        "present": false,
+        "passed": null,
+        "overlaps": 0,
+        "fields_checked": []
+      },
+      "expected_framework": "two_by_two",
+      "expected_framework_present": false,
+      "m_and_a_fields_present": [],
+      "m_and_a_fields_absent": [
+        "deal_structure_implications",
+        "financial_profile",
+        "integration_plan",
+        "risks_and_mitigations",
+        "synergy_estimate",
+        "target_overview",
+        "valuation_range"
+      ],
+      "report_recommendation": "",
+      "report_summary_preview": "",
+      "week7_carry_forward": {
+        "closes_week7": false,
+        "reason": "no report row at all"
+      },
+      "error": null
+    }
+  ]
+}

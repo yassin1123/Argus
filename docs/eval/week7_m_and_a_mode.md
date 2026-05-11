@@ -1,6 +1,6 @@
 # Week 7 — M&A diligence mode end-to-end
 
-**Status:** iterate (cap + prompt↔schema drift resolved; upstream pivot plumbed but not yet e2e-verified)
+**Status:** iterate (cap + prompt↔schema drift resolved; upstream pivot plumbed but not yet e2e-verified — re-tested under W8/D5 demo run, same upstream gate blocks; see [week8_frameworks.md](week8_frameworks.md) for the W8/D5 trajectory)
 
 ## Component check
 
