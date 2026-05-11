@@ -63,11 +63,18 @@ M_AND_A_BRIEF = (
     "structure and a valuation range."
 )
 
-# Run B — German market-entry brief (per W8/D5 spec verbatim).
+# Run B — W8/D5 iterate-3: re-flavored to a UK-supported question.
+# Original W8/D5 spec brief was German market entry; the demo firm's
+# library has UK industrial services content only (TargetCo CIM,
+# Retail Sector Primer UK+US, Albright & Marsh Pricing Pack, etc.),
+# so the analyst correctly refused to fabricate German market data
+# and Porter's never got produced. Re-flavoring keeps the brief
+# adjacent (still growth_strategy, still uses TargetCo data) while
+# ensuring the firm library can actually support the analysis.
 GROWTH_BRIEF = (
-    "Develop a market-entry strategy for TargetCo into the German "
-    "industrial services market. Cover competitive landscape, "
-    "regulatory environment, go-to-market options."
+    "Develop a UK regional expansion strategy for TargetCo into "
+    "Scotland and the North-East. Cover competitive landscape, "
+    "operational considerations, go-to-market options."
 )
 
 M_AND_A_TOP_LEVEL_FIELDS = (

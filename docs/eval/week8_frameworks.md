@@ -138,38 +138,44 @@ never reached because there was no analysis to anchor it on.
 
 ## What's still open
 
-### Run B — content gap (NOT a code bug)
+### Run B — three failure modes, each one layer deeper
 
-The analyst claim-id hallucination that originally blocked Run B is
-**closed** (see "Run B failure mode 1" above and
-`_rewrite_slot_claim_ids` in
-[backend/agents/analyst.py](backend/agents/analyst.py)). The
-re-fire after the fix surfaced a different, honest failure:
+Each fix today surfaced the next gate. Honest reading: Run B isn't
+converging on its own; the next attempt needs a different shape of
+work, not another prompt tweak.
 
-The Run B brief asks for **German industrial services market entry**,
-but the demo firm's library contains UK industrial services content
-only. The analyst correctly refused to fabricate German market data
-and exited with a structured `gap_report` listing exactly what's
-missing (regulatory landscape, market sizing, competitive structure).
+| Fire | Wall | Cost | Failure | Gate |
+|---|---|---|---|---|
+| 1st (post analyst-fix `_rewrite_slot_claim_ids`) | 533s | $0.43 | German market entry brief vs UK-only firm library — analyst honestly declined | analyst self-reported `evidence_insufficient` |
+| 2nd (after re-flavoring brief to UK regional expansion) | 1388s | $0.69 | Writer reached `deliverable_ready` BUT emitted no `frameworks` block. `apply_mode_checks` correctly fired error-severity finding `"Mode requires 'porters_five_forces' framework but the writer payload has no frameworks block at all"`; the orchestrator persisted to `session.metadata.mode_check_failures` but did NOT block ship — wired advisory-only | writer-level: framework instruction too weak |
+| 3rd (after strengthening Porter's instruction with REQUIRED + critic-fail language) | 457s | $0.37 | Different pre-writer gate. Analyst hallucinated UK-grocery-sector framing (because the firm library has the Retail Sector Primer UK+US for breadth), couldn't ground it sufficiently, declined. Pipeline died pre-writer | analyst evidence-sufficiency on subject confusion |
 
-This is not a Week 8 framework problem. Two ways to verify Run B:
+The Porter's prompt strengthening (commit
+`<this commit>`) is good code regardless — captures the lesson
+about explicit REQUIRED + consequence language. But it can't fire
+when the writer never runs.
 
-1. **Seed the demo library with German market content** — a short
-   German industrial services market primer (sizing, top players,
-   regulatory bodies, recent transactions). Estimated 1 hour.
-   Cleanest demo result; Run B then exercises Porter's against
-   real grounding.
-2. **Change the Run B brief to something the existing library
-   supports** — e.g. "Develop a UK regional expansion strategy
-   for TargetCo into Scotland and the North-East." The current
-   firm library has enough content for this; Porter's would
-   anchor on the same UK industrial services data the M&A run
-   uses. Estimated 5 minutes (change the BRIEF constant in
-   `tools/run_week8_e2e.py`).
+**Three options for next session:**
 
-Either path produces a fully verified W8 — the framework code
-itself is proven by Run A and would behave identically on Run B
-once an analysis exists to anchor on.
+1. **Make the framework critic check actually blocking, not advisory.**
+   When `apply_mode_checks` returns an error-severity finding, the
+   orchestrator should trigger a writer retry with the finding in
+   the repair hint (mirrors the existing `validate_writer_claim_linkage`
+   pattern at orchestrator.py:1032). Then Fire-2's scenario would
+   force the writer to re-emit including Porter's. ~2-3 hours.
+2. **Seed the demo library with focused growth-strategy content.**
+   A short UK industrial services growth-strategy primer (regional
+   structure, competitive dynamics, expansion case patterns) so the
+   analyst's evidence base on UK regional expansion is robust enough
+   not to drift into grocery framing. ~1-2 hours.
+3. **Both.** The orchestrator wiring is the durable structural fix;
+   the library seed is the demo-quality polish on top. ~3-5 hours
+   total.
+
+The Run A path (M&A) proves the framework code works end-to-end.
+The Run B path's three failures are at three different layers
+none of which are W8 framework-code defects — they're upstream
+pipeline-wiring and library-content gaps.
 
 ### Yesterday's stochastic research-branch dispatch issue
 
@@ -226,14 +232,14 @@ a framework defect.
 
 ## 5-line summary
 
-1. **Decision:** iterate — M&A path ships clean (W7 carry-forward closed); growth_strategy path now also code-clean (analyst claim-id fix shipped + unit-tested), but Run B brief asks for German content the demo library doesn't have.
-2. **Headline finding:** Run A produced a valid M&A memo with 4-item 2x2, 7/7 sections, 8/8 base fields, pyramid + mece passed. Run B's blocker shifted from a code bug to a content gap — analyst correctly refused to fabricate German market data.
-3. **Pyramid + MECE pass rates:** Pyramid 0 errors / 3 advisory findings (1 run); MECE 0 overlaps across 7 fields (1 run); both gated on a writer payload existing.
+1. **Decision:** iterate — M&A path ships clean (W7 carry-forward closed); growth_strategy Run B failed three different ways across three fires today — each fix surfaced the next layer.
+2. **Headline finding:** Run A produced a valid M&A memo with 4-item 2x2, 7/7 sections, 8/8 base fields, pyramid + mece passed. Run B's three failures (German content gap → writer skipped Porter's → analyst evidence-insufficiency on subject confusion) are at three different upstream layers, none in W8 framework code.
+3. **Pyramid + MECE pass rates:** Pyramid 0 errors / 3 advisory findings (Run A only); MECE 0 overlaps across 7 fields (Run A only); both gated on a writer payload existing.
 4. **Week 7 carry-forward:** **closed.** W7 wrap-up flipped to ship.
-5. **Open for Week 9:** seed the demo library with German industrial services content (~1h) OR change the Run B brief to a UK-supported question (~5 min), then a single Run B re-fire verifies Porter's. After that, W8 flips to ship.
+5. **Open for Week 9:** make `apply_mode_checks` framework-required findings actually trigger a writer retry (orchestrator wiring, ~2-3h) AND/OR seed the demo library with focused UK growth-strategy content (~1-2h). The Porter's prompt strengthening landed this session is the durable lesson; the framework can't fire when the writer never runs.
 
 Run records:
 - [backend/eval_runs/week8_e2e/A_m_and_a.json](../../backend/eval_runs/week8_e2e/A_m_and_a.json) (gitignored — Run A captured payload)
-- [backend/eval_runs/week8_e2e/B_growth_strategy.json](../../backend/eval_runs/week8_e2e/B_growth_strategy.json) (gitignored — Run B post-fix capture: gap_report cites missing German content)
+- [backend/eval_runs/week8_e2e/B_growth_strategy.json](../../backend/eval_runs/week8_e2e/B_growth_strategy.json) (gitignored — Run B 3rd-fire capture: pre-writer evidence_insufficient)
 - [backend/eval_runs/week8_e2e/summary.json](../../backend/eval_runs/week8_e2e/summary.json) (committed)
-- Total session spend across 5 runs (A x2, B x3): **~$1.87** of $5 ceiling.
+- Total session spend across 7 runs (A x2, B x3 today + 2 yesterday): **~$3.36** of $5 ceiling.
