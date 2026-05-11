@@ -26,7 +26,11 @@ from pydantic import ValidationError
 from core.inference.exceptions import InferenceSchemaError
 from core.inference.structured import generate_structured
 
-from .prompts import GENERAL_WRITER_PROMPT, get_writer_prompt
+from .prompts import (
+    GENERAL_WRITER_PROMPT,
+    build_framework_instructions,
+    get_writer_prompt,
+)
 from .schemas import GeneralReportPayload, WriterReportBase, get_writer_schema
 
 
@@ -150,6 +154,16 @@ Respect nli_label / entailment fields in claim_support when present (contradicts
                 + "\n\nFIRM WRITER OVERLAY:\n"
                 + resolved_mode.writer_overlay.strip()
             )
+
+        # W8/D4: framework instructions. Resolved-mode declares required +
+        # optional frameworks; the writer prompt picks up matching
+        # field-by-field guidance so the LLM knows which sub-payload
+        # to fill at ``frameworks.<slot>``. Empty when the mode makes
+        # no framework claim (most modes today).
+        fw_cfg = getattr(resolved_mode, "frameworks", None) if resolved_mode is not None else None
+        framework_block = build_framework_instructions(fw_cfg)
+        if framework_block:
+            system_prompt = system_prompt + "\n\nFRAMEWORK REQUIREMENTS:\n" + framework_block
 
         # W7/D1: registry-driven schema selection. Built-in modes still
         # validate against GeneralReportPayload; m_and_a_diligence gets

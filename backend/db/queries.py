@@ -1,4 +1,5 @@
 import json
+import logging
 import uuid
 from datetime import datetime, timezone
 from typing import Any, Sequence
@@ -6,6 +7,8 @@ from typing import Any, Sequence
 from db.connection import acquire
 from models.evidence import EvidenceObject
 from models.report import ReportRow, WriterReportPayload
+
+logger = logging.getLogger(__name__)
 
 
 def _vector_literal(vec: Sequence[float]) -> str:
@@ -276,6 +279,90 @@ async def merge_session_metadata(session_id: str, patch: dict[str, Any]) -> None
             session_id,
             json.dumps(patch),
         )
+
+
+async def persist_pyramid_result(session_id: str, result: dict[str, Any]) -> None:
+    """W8/D1: store the pyramid checker result on the session row.
+
+    Full result lands as JSONB on ``metadata.pyramid_check_result``;
+    the finding count is mirrored to ``sessions.pyramid_findings_count``
+    (column added in migration 029) so dashboards can filter without
+    JSONB-unpacking. Best-effort — never raises; pyramid findings are
+    advisory and a DB hiccup here must not abort the pipeline.
+    """
+    try:
+        findings = result.get("findings") if isinstance(result, dict) else None
+        count = len(findings) if isinstance(findings, list) else 0
+        async with acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE sessions SET
+                    metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
+                    pyramid_findings_count = $3,
+                    updated_at = NOW()
+                WHERE id = $1::uuid
+                """,
+                session_id,
+                json.dumps({"pyramid_check_result": result}),
+                count,
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.debug("persist_pyramid_result skipped for %s: %s", session_id, e)
+
+
+async def persist_framework_results(
+    session_id: str,
+    *,
+    pyramid: dict[str, Any] | None = None,
+    mece: dict[str, Any] | None = None,
+) -> None:
+    """W8/D2: write Pyramid + MECE results in a single DB round-trip.
+
+    Both results land as JSONB on ``sessions.metadata`` (keys
+    ``pyramid_check_result`` and ``mece_check_result``); count
+    mirrors land in ``sessions.pyramid_findings_count`` and
+    ``sessions.mece_overlaps_count`` (columns added in migrations
+    029 + 030). Either kwarg may be ``None`` — the corresponding
+    column is left as ``COALESCE(existing, NULL)``.
+
+    Best-effort — never raises; framework findings are advisory and
+    a DB hiccup here must not abort the pipeline.
+    """
+    if pyramid is None and mece is None:
+        return
+    try:
+        patch: dict[str, Any] = {}
+        if pyramid is not None:
+            patch["pyramid_check_result"] = pyramid
+        if mece is not None:
+            patch["mece_check_result"] = mece
+
+        pyramid_count = None
+        if pyramid is not None:
+            pf = pyramid.get("findings") if isinstance(pyramid, dict) else None
+            pyramid_count = len(pf) if isinstance(pf, list) else 0
+        mece_count = None
+        if mece is not None:
+            mo = mece.get("overlaps") if isinstance(mece, dict) else None
+            mece_count = len(mo) if isinstance(mo, list) else 0
+
+        async with acquire() as conn:
+            await conn.execute(
+                """
+                UPDATE sessions SET
+                    metadata = COALESCE(metadata, '{}'::jsonb) || $2::jsonb,
+                    pyramid_findings_count = COALESCE($3, pyramid_findings_count),
+                    mece_overlaps_count = COALESCE($4, mece_overlaps_count),
+                    updated_at = NOW()
+                WHERE id = $1::uuid
+                """,
+                session_id,
+                json.dumps(patch),
+                pyramid_count,
+                mece_count,
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.debug("persist_framework_results skipped for %s: %s", session_id, e)
 
 
 async def append_pipeline_trace_events(session_id: str, events: list[dict[str, Any]]) -> None:

@@ -113,7 +113,15 @@ class FinancialProfile(BaseModel):
 
 
 class Synergy(BaseModel):
-    type: str = Field(..., description="Short label, e.g. 'procurement consolidation' or 'cross-sell to legacy book'.")
+    # W8/D2: ``type`` is the natural-language label compared across
+    # parent synergy lists (revenue / cost / dis_synergies). Spec
+    # called the field ``description`` but the actual schema uses
+    # ``type`` for the human-readable text; same intent.
+    type: str = Field(
+        ...,
+        description="Short label, e.g. 'procurement consolidation' or 'cross-sell to legacy book'.",
+        json_schema_extra={"mece_check_within_parent_list": True},
+    )
     magnitude_gbp_m: float = Field(..., description="Annual run-rate synergy in £m at full realization.")
     timing_months: int = Field(..., ge=0, description="Months from close to full realization.")
     confidence: Literal["high", "medium", "low"] = Field(
@@ -180,7 +188,14 @@ class RiskAssessment(BaseModel):
     risk_category: Literal[
         "commercial", "operational", "financial", "legal", "regulatory"
     ] = Field(..., description="Top-level risk taxonomy bucket.")
-    description: str = Field(..., description="One-paragraph risk statement.")
+    # W8/D2: risk descriptions across risks_and_mitigations[] should be
+    # MECE — overlap means two risks are really one. Compared within
+    # the parent list.
+    description: str = Field(
+        ...,
+        description="One-paragraph risk statement.",
+        json_schema_extra={"mece_check_within_parent_list": True},
+    )
     severity: Literal["high", "medium", "low"]
     mitigation: str = Field(..., description="How the buyer plans to manage the risk pre- or post-close.")
     residual_risk: str = Field(
@@ -302,8 +317,15 @@ class DealStructureImplications(BaseModel):
         ),
     )
     rationale: str = Field(..., description="Why this structure given target shape, sponsor goals, tax treatment.")
+    # W8/D2: negotiation_priorities and walk_away_triggers are
+    # high-signal MECE candidates — duplicate priorities or triggers
+    # signal the writer is hedging instead of picking sharp bright
+    # lines.
     negotiation_priorities: list[str] = Field(
-        ..., min_length=1, description="Top 3-6 asks the buyer should hold the line on at the table."
+        ...,
+        min_length=1,
+        description="Top 3-6 asks the buyer should hold the line on at the table.",
+        json_schema_extra={"mece_check": True},
     )
     walk_away_triggers: list[str] = Field(
         ...,
@@ -313,6 +335,7 @@ class DealStructureImplications(BaseModel):
             "should read like 'If <observation> at <gate>, walk.' These "
             "are the bright lines that make the recommendation honest."
         ),
+        json_schema_extra={"mece_check": True},
     )
 
     model_config = {"extra": "ignore"}

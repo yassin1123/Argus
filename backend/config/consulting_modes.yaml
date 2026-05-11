@@ -26,6 +26,17 @@ growth_strategy:
     - market
     - capabilities
   min_evidence_objects: 2
+  # W8/D4: growth-strategy memos must run Porter's Five Forces on
+  # the target market — without an industry-attractiveness frame the
+  # "should we grow here" recommendation has no analytical anchor.
+  # Value Chain + 2x2 are available for the writer if the analyst
+  # surfaced enough material; not enforced.
+  frameworks:
+    required:
+      - porters_five_forces
+    optional:
+      - value_chain
+      - two_by_two
 
 # Phase 2 / Week 7 / Day 2 — first built-in mode shipping with the
 # richer schema fields (display_name, description, reasoning_slots,
@@ -88,3 +99,14 @@ m_and_a_diligence:
       model: openai/gpt-4o
     critic:
       model: openai/gpt-4o
+  # W8/D4: M&A diligence memos must include a 2x2 of the deal's key
+  # tiles (target capabilities, sub-options, segments) plotted against
+  # deal complexity vs strategic fit. Porter's Five Forces is
+  # available when the target's market analysis is rich enough but
+  # not enforced — many M&A briefs are about the target itself, not
+  # the surrounding market structure.
+  frameworks:
+    required:
+      - two_by_two
+    optional:
+      - porters_five_forces

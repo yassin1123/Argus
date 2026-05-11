@@ -35,3 +35,12 @@ from ._m_and_a import (  # noqa: F401
     ValuationRange,
 )
 from ._registry import _SCHEMA_REGISTRY, get_writer_schema  # noqa: F401
+from .frameworks import (  # noqa: F401 — W8/D3 framework payloads
+    ForceAssessment,
+    FrameworksPayload,
+    PortersFiveForcesAnalysis,
+    TwoByTwoItem,
+    TwoByTwoMatrix,
+    ValueChainActivity,
+    ValueChainAnalysis,
+)

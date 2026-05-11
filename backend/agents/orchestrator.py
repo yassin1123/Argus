@@ -40,6 +40,8 @@ from db.queries import (
     insert_pipeline_event,
     list_evidence_objects,
     merge_session_metadata,
+    persist_framework_results,
+    persist_pyramid_result,
     replace_claim_support_rows,
     save_agent_output,
     save_claim_evidence_links,
@@ -1120,7 +1122,13 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         try:
             from agents.critic_checks import apply_mode_checks
 
-            mode_check_issues = apply_mode_checks(report_mode, report)
+            # W8/D4: pass resolved_mode so the cross-mode framework check
+            # can fire (M&A requires two_by_two, growth_strategy requires
+            # porters_five_forces). Pre-W8 modes with no frameworks
+            # declaration produce no extra findings.
+            mode_check_issues = apply_mode_checks(
+                report_mode, report, resolved_mode=resolved_mode
+            )
             if mode_check_issues:
                 await merge_session_metadata(
                     session_id,
@@ -1140,6 +1148,45 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         except Exception:  # noqa: BLE001
             logger.exception(
                 "post-writer mode checks raised for %s â€” non-blocking", session_id
+            )
+
+        # W8/D1+D2: framework auto-checkers — Pyramid (structural +
+        # LLM judge on prose) and MECE (pairwise embedding similarity
+        # on annotated list fields). Both advisory; neither blocks
+        # deliverable_ready. Combined cost ~$0.002 per engagement.
+        # Persisted via one DB write (persist_framework_results).
+        try:
+            from core.frameworks.mece import run_mece_check
+            from core.frameworks.pyramid import run_pyramid_check
+
+            pyramid_result = await run_pyramid_check(report, session_id=session_id)
+            mece_result = await run_mece_check(report)
+            await persist_framework_results(
+                session_id,
+                pyramid=pyramid_result.model_dump(mode="json"),
+                mece=mece_result.model_dump(mode="json"),
+            )
+            if pyramid_result.findings:
+                logger.info(
+                    "pyramid check for %s surfaced %d finding(s) (errors=%d, warnings=%d, info=%d)",
+                    session_id,
+                    len(pyramid_result.findings),
+                    pyramid_result.error_count,
+                    pyramid_result.warning_count,
+                    pyramid_result.info_count,
+                )
+            if mece_result.overlaps:
+                logger.info(
+                    "mece check for %s surfaced %d overlap(s) across %d field(s) (threshold=%.2f, cost=$%.4f)",
+                    session_id,
+                    len(mece_result.overlaps),
+                    len(mece_result.fields_checked),
+                    mece_result.threshold,
+                    mece_result.cost_usd,
+                )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "framework checks raised for %s — non-blocking", session_id
             )
 
         evidence_bundle = build_evidence_bundle(research, evidence_objects)

@@ -62,3 +62,7 @@ w7d5_iterate_run.log
 w7_iterate*.log
 backend/eval_runs/week7_e2e/A_m_and_a.json
 backend/eval_runs/week7_e2e/B_growth_strategy.json
+
+# Week 8 / Day 5 frameworks-library e2e — same shape, only summary.json committed.
+backend/eval_runs/week8_e2e/A_m_and_a.json
+backend/eval_runs/week8_e2e/B_growth_strategy.json

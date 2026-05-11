@@ -29,6 +29,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+# W8/D3: imported here for the optional ``frameworks`` field below.
+# Importing from the package avoids a top-level circular when subclasses
+# of WriterReportBase that don't use frameworks are loaded first.
+from .frameworks import FrameworksPayload
+
 
 class SourceItem(BaseModel):
     title: str
@@ -65,9 +70,26 @@ class WriterReportBase(BaseModel):
     recommendation: str = Field(..., description="One-sentence specific recommendation naming the chosen option.")
     confidence_level: str = Field(..., description="Low | Medium | Medium-High | High.")
     summary: str = Field(..., description="2-4 sentence executive summary; no new facts beyond linked claims.")
-    key_reasons: list[str] = Field(..., description="4-7 evidence-cited reasons supporting the recommendation.")
-    risks: list[str] = Field(..., description="Material risks the recommendation must survive.")
-    counterarguments: list[str] = Field(..., description="Critic's strongest counterarguments + responses.")
+    # W8/D2: ``mece_check`` annotation marks fields the MECE checker
+    # should examine for pairwise overlap. Only high-signal lists
+    # (reasons, risks, counterarguments) — next_steps is sequential
+    # and intentionally skipped per the spec's "don't annotate noise
+    # fields" rule.
+    key_reasons: list[str] = Field(
+        ...,
+        description="4-7 evidence-cited reasons supporting the recommendation.",
+        json_schema_extra={"mece_check": True},
+    )
+    risks: list[str] = Field(
+        ...,
+        description="Material risks the recommendation must survive.",
+        json_schema_extra={"mece_check": True},
+    )
+    counterarguments: list[str] = Field(
+        ...,
+        description="Critic's strongest counterarguments + responses.",
+        json_schema_extra={"mece_check": True},
+    )
     next_steps: list[str] = Field(..., description="5-9 time-bound, action-verb steps.")
     sources: list[SourceItem] = Field(..., description="Sources cited; each {title, type}.")
     caveats: str = Field("", description="Limitations of this analysis.")
@@ -85,6 +107,19 @@ class WriterReportBase(BaseModel):
         description=(
             "Free-form bag for forward-compatible per-mode hints we "
             "haven't promoted to first-class fields yet."
+        ),
+    )
+
+    # W8/D3: structured frameworks — three first-class slots (2x2,
+    # Porter's Five Forces, Value Chain). All independently optional.
+    # Backward-compat: every legacy payload deserialises with
+    # ``frameworks=None`` and nothing changes downstream. Mode-level
+    # "this framework is required" enforcement is W8/D4, not today.
+    frameworks: FrameworksPayload | None = Field(
+        None,
+        description=(
+            "Optional structured-framework slot. When non-null, the renderer "
+            "dispatches each non-null sub-framework to its bespoke component."
         ),
     )
 
