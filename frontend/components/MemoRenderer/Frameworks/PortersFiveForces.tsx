@@ -128,7 +128,7 @@ export default function PortersFiveForces({ data }: PortersFiveForcesProps) {
     >
       <header className="mb-3 flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-serif text-[16px] font-semibold text-argus-primary">Porter's Five Forces</h3>
+          <h3 className="font-serif text-[16px] font-semibold text-argus-primary">Porter&rsquo;s Five Forces</h3>
           <p className="mt-1 text-[12px] text-argus-tertiary" data-testid="market-definition">
             {data.market_definition}
           </p>
