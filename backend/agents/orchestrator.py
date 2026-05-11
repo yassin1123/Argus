@@ -1122,7 +1122,13 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         try:
             from agents.critic_checks import apply_mode_checks
 
-            mode_check_issues = apply_mode_checks(report_mode, report)
+            # W8/D4: pass resolved_mode so the cross-mode framework check
+            # can fire (M&A requires two_by_two, growth_strategy requires
+            # porters_five_forces). Pre-W8 modes with no frameworks
+            # declaration produce no extra findings.
+            mode_check_issues = apply_mode_checks(
+                report_mode, report, resolved_mode=resolved_mode
+            )
             if mode_check_issues:
                 await merge_session_metadata(
                     session_id,

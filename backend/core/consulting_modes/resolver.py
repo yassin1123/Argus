@@ -21,11 +21,69 @@ from uuid import UUID
 import yaml
 
 from .types import (
+    FrameworksModeConfig,
     LayerName,
     ModeConfigError,
     ModeNotFoundError,
     ResolvedConsultingMode,
 )
+
+# W8/D4: valid framework slot names; resolver rejects typos at
+# config-load time. Kept in sync with the Literal in ``types.py`` and
+# the field names on ``FrameworksPayload``.
+_VALID_FRAMEWORK_SLOTS: tuple[str, ...] = (
+    "two_by_two",
+    "porters_five_forces",
+    "value_chain",
+)
+
+
+def _parse_frameworks_block(
+    raw: Any, layer_name: str
+) -> FrameworksModeConfig:
+    """Validate + project a YAML ``frameworks:`` block into a
+    :class:`FrameworksModeConfig`. Empty/missing → empty config.
+
+    Raises :class:`ModeConfigError` on shape problems or unknown slot
+    names — typos in firm overrides should surface, not silently
+    disable a requirement.
+    """
+    if raw is None:
+        return FrameworksModeConfig()
+    if not isinstance(raw, dict):
+        raise ModeConfigError(
+            f"{layer_name}.frameworks must be an object with 'required' / 'optional' lists, "
+            f"got {type(raw).__name__}"
+        )
+
+    def _validate_slot_list(key: str, value: Any) -> list[str]:
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise ModeConfigError(
+                f"{layer_name}.frameworks.{key} must be a list, got {type(value).__name__}"
+            )
+        out: list[str] = []
+        for item in value:
+            s = str(item).strip()
+            if s not in _VALID_FRAMEWORK_SLOTS:
+                raise ModeConfigError(
+                    f"{layer_name}.frameworks.{key} contains unknown framework {s!r}; "
+                    f"valid values: {list(_VALID_FRAMEWORK_SLOTS)}"
+                )
+            out.append(s)
+        return out
+
+    required = _validate_slot_list("required", raw.get("required"))
+    optional = _validate_slot_list("optional", raw.get("optional"))
+    # Spec: a framework can be in EITHER required OR optional, not both.
+    # Surface the inconsistency rather than silently dropping one.
+    overlap = set(required) & set(optional)
+    if overlap:
+        raise ModeConfigError(
+            f"{layer_name}.frameworks: {sorted(overlap)} appear in BOTH required and optional"
+        )
+    return FrameworksModeConfig(required=required, optional=optional)
 
 # 2000-char per-layer overlay cap — combined writer overhead therefore caps
 # at ~6000 chars (built-in + firm + engagement). Big enough to carry a
@@ -101,6 +159,7 @@ def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingM
         "min_evidence_objects",
         "metadata",
         "model_overrides",
+        "frameworks",
     )
     metadata: dict[str, Any] = {}
     raw_md = row.get("metadata")
@@ -119,6 +178,33 @@ def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingM
             if isinstance(params, dict):
                 model_overrides[str(tk)] = dict(params)
 
+    # W8/D4: frameworks declaration. Absent or empty → None (no claim).
+    # A non-empty block resolves into a ``FrameworksModeConfig``.
+    raw_fw = row.get("frameworks")
+    if raw_fw is not None:
+        fw_cfg = _parse_frameworks_block(raw_fw, f"built_in[{name}]")
+        # An empty config carries no signal — collapse to None so callers
+        # can ``if mode.frameworks:`` without checking both list fields.
+        frameworks_cfg: FrameworksModeConfig | None = (
+            fw_cfg if (fw_cfg.required or fw_cfg.optional) else None
+        )
+    else:
+        frameworks_cfg = None
+
+    provenance: dict[str, LayerName] = {
+        "display_name": "built_in",
+        "description": "built_in",
+        "required_branches": "built_in",
+        "reasoning_slots": "built_in",
+        "source_priorities_default": "built_in",
+        "trust_tier_rules": "built_in",
+        "writer_overlay": "built_in",
+        "planner_overlay": "built_in",
+        "model_overrides": "built_in",
+    }
+    if frameworks_cfg is not None:
+        provenance["frameworks"] = "built_in"
+
     return ResolvedConsultingMode(
         name=name,
         display_name=str(row.get("label") or row.get("display_name") or name),
@@ -132,17 +218,8 @@ def _built_in_to_resolved(name: str, row: dict[str, Any]) -> ResolvedConsultingM
         min_evidence_objects=int(row.get("min_evidence_objects") or 0),
         metadata=metadata,
         model_overrides=model_overrides,
-        layer_provenance={
-            "display_name": "built_in",
-            "description": "built_in",
-            "required_branches": "built_in",
-            "reasoning_slots": "built_in",
-            "source_priorities_default": "built_in",
-            "trust_tier_rules": "built_in",
-            "writer_overlay": "built_in",
-            "planner_overlay": "built_in",
-            "model_overrides": "built_in",
-        },
+        frameworks=frameworks_cfg,
+        layer_provenance=provenance,
     )
 
 
@@ -277,6 +354,7 @@ def _apply_layer(
     new_model_overrides = {
         tk: dict(params) for tk, params in (base.model_overrides or {}).items()
     }
+    new_frameworks = base.frameworks
 
     for key in _SCALAR_REPLACE_FIELDS:
         if key in layer_cfg:
@@ -352,6 +430,18 @@ def _apply_layer(
             )
         new_metadata.update(layer_md)
 
+    # W8/D4: frameworks — full-replace on both lists when the layer
+    # supplies a ``frameworks:`` key. Same shape as ``required_branches``
+    # full-replace; firms / engagements that want to add to (not replace)
+    # would need a future "extend:" syntax — not on the table today.
+    if "frameworks" in layer_cfg:
+        parsed = _parse_frameworks_block(layer_cfg["frameworks"], layer_name)
+        # Collapse empty config to None so provenance stays meaningful
+        # (i.e. an explicit ``frameworks: {required: [], optional: []}``
+        # clears the requirement, doesn't leave it ambiguous).
+        new_frameworks = parsed if (parsed.required or parsed.optional) else None
+        new_provenance["frameworks"] = layer_name
+
     # model_overrides: deep-merge by task_kind. Layer keys take
     # precedence within each task_kind; base keys not overridden stay.
     if "model_overrides" in layer_cfg:
@@ -385,6 +475,7 @@ def _apply_layer(
         min_evidence_objects=new_min_evidence,
         metadata=new_metadata,
         model_overrides=new_model_overrides,
+        frameworks=new_frameworks,
     )
 
 

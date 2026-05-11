@@ -31,6 +31,7 @@ from .resolver import (  # noqa: F401 — re-export
     resolve_mode,
 )
 from .types import (  # noqa: F401 — re-export
+    FrameworksModeConfig,
     ModeConfigError,
     ModeNotFoundError,
     ResolvedConsultingMode,

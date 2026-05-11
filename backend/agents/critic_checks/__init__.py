@@ -15,4 +15,5 @@ unknown modes fall back to the general checks.
 """
 
 from .types import CriticIssue, CriticIssueLevel  # noqa: F401
+from ._frameworks import check_required_frameworks  # noqa: F401 — W8/D4
 from ._registry import apply_mode_checks, get_mode_checks  # noqa: F401
