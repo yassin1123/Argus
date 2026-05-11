@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-11T07:19:34Z",
+  "generated_at": "2026-05-11T18:38:12Z",
   "headline_assertions": {
     "A_two_by_two_present": false,
     "A_two_by_two_items_ge_4": false,
@@ -23,19 +23,19 @@
     {
       "run_name": "A_m_and_a",
       "report_mode": "m_and_a_diligence",
-      "session_id": "aea4578b-97f4-4924-b877-d4bbcb74b4cc",
-      "wall_seconds": 207.53,
-      "cost_usd_total": 0.1266,
+      "session_id": "e56e92e7-4e64-4b3e-95a1-b9edd69a96a8",
+      "wall_seconds": 181.52,
+      "cost_usd_total": 0.1167,
       "evidence_total": 128,
       "diversity_counts": {
         "firm_library": 128
       },
       "firm_library_titles_cited": {
-        "M&A Target Screen Playbook (Boutique Edition)": 6,
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 91,
-        "Retail Sector Primer (UK + US)": 20,
-        "Albright & Marsh Pricing Diagnostic Pack": 2,
-        "Valuation Methodology (Firm House View)": 9
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 96,
+        "Retail Sector Primer (UK + US)": 9,
+        "Albright & Marsh Pricing Diagnostic Pack": 3,
+        "M&A Target Screen Playbook (Boutique Edition)": 5,
+        "Valuation Methodology (Firm House View)": 15
       },
       "frameworks_status": {
         "two_by_two": false,

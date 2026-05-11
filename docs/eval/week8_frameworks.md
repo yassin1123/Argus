@@ -138,16 +138,56 @@ never reached because there was no analysis to anchor it on.
 
 ## What's still open
 
-### Run A regression from W8/D5-iterate-3
+### Run A regression persists after schema revert; deeper investigation needed
 
-Tightening `TwoByTwoMatrix.items` to `min_length=4` in iterate-2
-caused the M&A pipeline to regress from its earlier shipping state
-(last successful: 7/7 fields + 4-item 2x2 + $0.16). Writer was
-reliably producing 2-3 items; `min_length=4` forced retries that
-all failed, aborting at the `evidence_insufficient` gate. Schema
-constraint reverted to `min_length=2`; prompt updated to demand
-4-6 items as a soft target. No re-fire this session; next session
-re-fires Run A first to confirm regression is resolved.
+Tightening `TwoByTwoMatrix.items` to `min_length=4` in iterate-2 was
+the suspected root cause of the Run A regression. The schema constraint
+was reverted to `min_length=2` (commit `665fe47`) and a re-fire
+attempted under spec'd single-shot conditions on 2026-05-11 18:15Z.
+
+**Result: Run A still failed.** Session
+`e56e92e7-4e64-4b3e-95a1-b9edd69a96a8` aborted at the
+`evidence_insufficient` gate with a different gap_report than the
+iterate-3 era:
+
+> "Lack of evidence for customer concentration risk claim."
+
+Missing-evidence list: "Detailed analysis of the competitive landscape
+and customer demographics in the key market segments."
+
+This is the same upstream evidence-sufficiency gate that fired
+during the earlier W8/D5 fires — the analyst sometimes manufactures
+a metric or claim the verifier can't ground, the gate rejects, the
+revise loop runs out of repair budget, and the pipeline aborts
+before the writer. The `min_length=4` revert was correct in
+hypothesis but wasn't the actual bottleneck.
+
+**Run B side note (this same fire):** session
+`248e3a78-46b3-4d06-9b42-3ee2bd3a0bdd` hung between
+`verification_done` and writer-start (no LLM activity for 12 min
+after the verifier completed; pipeline_trace stopped at
+`research_gathered` so we have no further breadcrumbs). Killed
+manually after ~1h wall, $0.64 spent on Run B alone. Not pursued
+further per session cost cap. The hang itself is a separate
+finding worth instrumenting next session.
+
+Run A cost: $0.12. Run B cost: $0.64 (incomplete). Total session
+spend: $0.76 of $1.00 cap.
+
+**Next session's actual diagnostic work:** the regression is
+not in the 2x2 schema. It's in whatever the analyst is emitting
+that the verifier can't ground (claim_013 / £41m / customer
+concentration — three different fabricated metrics across three
+runs). Possibilities to investigate:
+1. Analyst's verifier-feedback loop is too lenient — claims that
+   verifier-flags as unsupported survive into the gap_report.
+2. The orchestrator's revise budget (2 retries) is too small for
+   the analyst to clean up multiple unsupported claims in one
+   pass.
+3. The verifier itself is mis-flagging well-grounded claims.
+
+None of these are W8 framework code; they're W6/W7 analyst-loop
+plumbing. Phase 3 housekeeping work, not next-session emergency.
 
 ### Phase 3 escalation — library breadth, not W8 code
 
