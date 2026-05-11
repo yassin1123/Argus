@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-11T06:59:34Z",
+  "generated_at": "2026-05-11T07:19:34Z",
   "headline_assertions": {
-    "A_two_by_two_present": true,
-    "A_two_by_two_items_ge_4": true,
-    "A_two_by_two_items_all_have_citations": true,
-    "A_pyramid_present": true,
-    "A_mece_present": true,
+    "A_two_by_two_present": false,
+    "A_two_by_two_items_ge_4": false,
+    "A_two_by_two_items_all_have_citations": false,
+    "A_pyramid_present": false,
+    "A_mece_present": false,
     "B_porters_present": false,
     "B_porters_all_five_populated": false,
     "B_porters_all_five_with_evidence": false,
@@ -23,29 +23,29 @@
     {
       "run_name": "A_m_and_a",
       "report_mode": "m_and_a_diligence",
-      "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
-      "wall_seconds": 457.23,
-      "cost_usd_total": 0.2175,
+      "session_id": "aea4578b-97f4-4924-b877-d4bbcb74b4cc",
+      "wall_seconds": 207.53,
+      "cost_usd_total": 0.1266,
       "evidence_total": 128,
       "diversity_counts": {
         "firm_library": 128
       },
       "firm_library_titles_cited": {
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 84,
-        "Retail Sector Primer (UK + US)": 12,
-        "Albright & Marsh Pricing Diagnostic Pack": 7,
-        "M&A Target Screen Playbook (Boutique Edition)": 14,
-        "Valuation Methodology (Firm House View)": 11
+        "M&A Target Screen Playbook (Boutique Edition)": 6,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 91,
+        "Retail Sector Primer (UK + US)": 20,
+        "Albright & Marsh Pricing Diagnostic Pack": 2,
+        "Valuation Methodology (Firm House View)": 9
       },
       "frameworks_status": {
-        "two_by_two": true,
+        "two_by_two": false,
         "porters_five_forces": false,
         "value_chain": false
       },
       "two_by_two_quality": {
-        "items_count": 4,
-        "items_with_citations": 4,
-        "axes_labeled": true
+        "items_count": 0,
+        "items_with_citations": 0,
+        "axes_labeled": false
       },
       "porters_quality": {
         "all_five_populated": false,
@@ -54,33 +54,22 @@
         "overall_attractiveness": null
       },
       "pyramid": {
-        "present": true,
-        "passed": true,
-        "findings": 3,
-        "errors": 0,
-        "model_used": "openai/gpt-4o-mini",
+        "present": false,
+        "passed": null,
+        "findings": 0,
+        "model_used": null,
         "cost_usd": 0.0
       },
       "mece": {
-        "present": true,
-        "passed": true,
+        "present": false,
+        "passed": null,
         "overlaps": 0,
-        "overlaps_per_field": {},
-        "fields_checked": [
-          "key_reasons",
-          "risks",
-          "counterarguments",
-          "synergy_estimate.cost_synergies[].type",
-          "risks_and_mitigations[].description",
-          "deal_structure_implications.negotiation_priorities",
-          "deal_structure_implications.walk_away_triggers"
-        ],
-        "threshold": 0.85,
-        "cost_usd": 4e-06
+        "fields_checked": []
       },
       "expected_framework": "two_by_two",
-      "expected_framework_present": true,
-      "m_and_a_fields_present": [
+      "expected_framework_present": false,
+      "m_and_a_fields_present": [],
+      "m_and_a_fields_absent": [
         "deal_structure_implications",
         "financial_profile",
         "integration_plan",
@@ -89,33 +78,29 @@
         "target_overview",
         "valuation_range"
       ],
-      "m_and_a_fields_absent": [],
-      "report_recommendation": "PROCEED WITH CONDITIONS",
-      "report_summary_preview": "TargetCo Holdings demonstrates stable revenue growth and a strong market presence in the UK, with potential for expansion in the Republic of Ireland. The valuation range of \u00a3205m to \u00a3235m is supported by typical EV/EBITDA multiples for the sector. However, the acquisition is contingent upon the renewal of the 'Project Halo' contract and stable valuation multiples.",
+      "report_recommendation": "",
+      "report_summary_preview": "",
       "week7_carry_forward": {
-        "closes_week7": true,
-        "base_fields_missing": [],
-        "m_and_a_sections_missing": [],
-        "two_by_two_present": true
+        "closes_week7": false,
+        "reason": "no report row at all"
       },
       "error": null
     },
     {
       "run_name": "B_growth_strategy",
       "report_mode": "growth_strategy",
-      "session_id": "ed53216e-3b8b-43b7-a716-4caaaacba260",
-      "wall_seconds": 457.39,
-      "cost_usd_total": 0.3662,
-      "evidence_total": 56,
+      "session_id": "247beb21-fc83-4f16-b366-7e9117fed5bf",
+      "wall_seconds": 486.47,
+      "cost_usd_total": 0.3857,
+      "evidence_total": 40,
       "diversity_counts": {
-        "firm_library": 56
+        "firm_library": 40
       },
       "firm_library_titles_cited": {
-        "Growth Strategy Framework (Boutique Methodology)": 10,
-        "Retail Sector Primer (UK + US)": 24,
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 9,
-        "M&A Target Screen Playbook (Boutique Edition)": 6,
-        "Albright & Marsh Pricing Diagnostic Pack": 7
+        "Retail Sector Primer (UK + US)": 14,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 18,
+        "Albright & Marsh Pricing Diagnostic Pack": 7,
+        "M&A Target Screen Playbook (Boutique Edition)": 1
       },
       "frameworks_status": {
         "two_by_two": false,

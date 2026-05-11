@@ -63,18 +63,19 @@ M_AND_A_BRIEF = (
     "structure and a valuation range."
 )
 
-# Run B — W8/D5 iterate-3: re-flavored to a UK-supported question.
-# Original W8/D5 spec brief was German market entry; the demo firm's
-# library has UK industrial services content only (TargetCo CIM,
-# Retail Sector Primer UK+US, Albright & Marsh Pricing Pack, etc.),
-# so the analyst correctly refused to fabricate German market data
-# and Porter's never got produced. Re-flavoring keeps the brief
-# adjacent (still growth_strategy, still uses TargetCo data) while
-# ensuring the firm library can actually support the analysis.
+# Run B — W8/D5 iterate-4: re-flavored from regional/geographic
+# expansion (which demanded Scotland-specific or German-specific
+# evidence the library doesn't contain) to a UK competitive
+# defence question that sits inside what the library actually
+# covers (Retail Sector Primer UK+US, TargetCo CIM segments,
+# Albright & Marsh pricing methodology).
 GROWTH_BRIEF = (
-    "Develop a UK regional expansion strategy for TargetCo into "
-    "Scotland and the North-East. Cover competitive landscape, "
-    "operational considerations, go-to-market options."
+    "Develop a competitive strategy for TargetCo to defend its UK "
+    "market position against the rise of discounters (Aldi, Lidl) "
+    "and online grocery entrants. Cover the competitive landscape "
+    "across TargetCo's segments, the firm's current positioning, "
+    "defensive options to consider, and go-to-market priorities "
+    "for the next 12 months."
 )
 
 M_AND_A_TOP_LEVEL_FIELDS = (
@@ -122,7 +123,7 @@ def _runs() -> list[dict[str, str]]:
             "name": "B_growth_strategy",
             "firm_slug": DEMO_FIRM_SLUG,
             "report_mode": "growth_strategy",
-            "title": "Week 8 E2E · TargetCo · Germany market entry (with Porter's)",
+            "title": "Week 8 E2E · TargetCo · UK competitive defence (with Porter's)",
             "brief": GROWTH_BRIEF,
             "expected_framework": "porters_five_forces",
         },

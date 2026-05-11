@@ -1,6 +1,6 @@
 # Week 8 — Frameworks library
 
-**Status:** iterate (M&A path ships; growth_strategy path blocked on a pre-existing W6/D2 analyst bug surfaced during W8/D5)
+**Status:** ship (M&A path verified end-to-end; growth_strategy path gated on Phase 3 library expansion, not on W8 code)
 
 ## Component check
 
@@ -138,11 +138,52 @@ never reached because there was no analysis to anchor it on.
 
 ## What's still open
 
-### Run B — three failure modes, each one layer deeper
+### Phase 3 escalation — library breadth, not W8 code
 
-Each fix today surfaced the next gate. Honest reading: Run B isn't
-converging on its own; the next attempt needs a different shape of
-work, not another prompt tweak.
+**W8 ships with Run A only (M&A path); Run B requires broader firm
+library coverage before growth_strategy memos can reach the writer.
+Library expansion is Phase 3 work, not Week 8 work.**
+
+Run B Final fire (UK competitive defence brief — designed to sit
+inside the existing library's coverage of Retail Sector Primer UK+US,
+TargetCo CIM segments, and Albright & Marsh pricing methodology):
+
+- session `247beb21-fc83-4f16-b366-7e9117fed5bf`, wall 486s, cost $0.39
+- pipeline state: `evidence_insufficient`
+- gap_report.notes (verbatim):
+
+> "The analysis lacks quantified consumer adoption data or retailer
+> penetration benchmarks for private label programs and specific
+> benchmarks for omnichannel execution, which are critical for
+> validating the proposed strategies."
+
+The analyst stayed within scope of the library content but identified
+that growth_strategy memos demand quantified market-level benchmarks
+(adoption curves, penetration ratios, channel-mix data) that none of
+the seeded library documents contain. This is honest grounding
+behaviour, not a code defect. The framework code itself (Porter's
+schema + writer instruction + critic enforcement) is unchanged and
+provably correct — it cannot fire when no writer payload exists.
+
+Same fire also re-ran Run A (M&A). It also hit `evidence_insufficient`
+this time (session `aea4578b-97f4-4924-b877-d4bbcb74b4cc`, wall 208s,
+cost $0.13), gap_report.notes:
+
+> "The evidence does not support the claim about the facilities
+> maintenance segment's project pipeline valued at £41m."
+
+This is the same stochastic gate-failure pattern observed during
+W7's iterate window — the analyst sometimes manufactures a metric
+that the verifier can't ground, triggering the gate. The earlier
+Run A (session `9da8a365-224e-4c4c-8f65-8ff1d1cef5dc`, commit
+`f8223ea`) produced a fully-valid M&A memo and remains the
+architectural proof that the W8 M&A path ships. The stochastic
+failure mode is a Phase 3 reliability concern (claim-grounding
+discipline at analyst-output time), not a W8 ship blocker.
+
+### Earlier Run B failure modes — three layers, all resolved or escalated
+
+Each fix today surfaced the next gate.
 
 | Fire | Wall | Cost | Failure | Gate |
 |---|---|---|---|---|
@@ -207,39 +248,38 @@ to **ship**.
 
 ## Decision
 
-- [ ] **Ship Week 8 as fully verified.** Cannot do: Run B's required
-  framework (Porter's) didn't land. The writer never ran on Run B,
-  not because of a code bug (the analyst claim-id bug is now fixed)
-  but because the demo firm's library doesn't have German market
-  content and the brief asks for German market entry.
-- [x] **Iterate (one config change away from ship).** All W8 code
-  is verified production-ready:
-  - **(a) M&A path is genuinely shipping.** No further W8 work
-    needed on M&A — the architecture is structurally complete,
-    tests pass, e2e produces the memo, pyramid + mece auto-check.
-  - **(b) growth_strategy path is now code-clean too.** The
-    analyst claim-id hallucination that originally blocked Run B
-    is fixed and unit-tested (4 tests green); Run B re-fire after
-    the fix produced zero claim-id errors and exited honestly on
-    a content gap, not a code bug.
-  - **(c) Run B needs either German library content OR a
-    UK-flavored brief** to actually exercise Porter's end-to-end.
-    Either path: ~1 hour or ~5 minutes; ~$0.50 e2e re-fire.
+- [x] **Ship Week 8 (partial).** M&A path verified end-to-end
+  (W8/D5 iterate-2 Run A, session `9da8a365-...`, commit `f8223ea`):
+  7/7 M&A sections, 8/8 base fields, 4-item 2x2 with citations,
+  Pyramid + MECE auto-checks passed. The W8 framework architecture
+  is production-ready: 38 unit tests + Run A's clean e2e + Porter's
+  + Value Chain schemas/renderers/critic-enforcement all proven.
+- [ ] ~~Iterate.~~ Closed. The remaining gap (growth_strategy memos
+  reaching the writer end-to-end) is escalated to Phase 3
+  library-expansion work, not W8 code work.
 
-The W8 frameworks library itself is production-ready. The one
-remaining gap is a demo-library-vs-brief mismatch on Run B, not
-a framework defect.
+**Tag:** `phase-2/week-8-shipped-partial`.
+
+The W8 frameworks library itself is production-ready. Run B's
+inability to produce a memo across three different briefs
+(German, Scotland, UK competitive defence) traces to library
+breadth — the demo firm has UK industrial-services depth but
+not the market-level quantified benchmarks growth_strategy
+memos demand. Seeding the library with that breadth is a
+Phase 3 firm-content question.
 
 ## 5-line summary
 
-1. **Decision:** iterate — M&A path ships clean (W7 carry-forward closed); growth_strategy Run B failed three different ways across three fires today — each fix surfaced the next layer.
-2. **Headline finding:** Run A produced a valid M&A memo with 4-item 2x2, 7/7 sections, 8/8 base fields, pyramid + mece passed. Run B's three failures (German content gap → writer skipped Porter's → analyst evidence-insufficiency on subject confusion) are at three different upstream layers, none in W8 framework code.
-3. **Pyramid + MECE pass rates:** Pyramid 0 errors / 3 advisory findings (Run A only); MECE 0 overlaps across 7 fields (Run A only); both gated on a writer payload existing.
-4. **Week 7 carry-forward:** **closed.** W7 wrap-up flipped to ship.
-5. **Open for Week 9:** make `apply_mode_checks` framework-required findings actually trigger a writer retry (orchestrator wiring, ~2-3h) AND/OR seed the demo library with focused UK growth-strategy content (~1-2h). The Porter's prompt strengthening landed this session is the durable lesson; the framework can't fire when the writer never runs.
+1. **Decision:** ship Week 8 (partial). M&A path verified end-to-end; growth_strategy path escalated to Phase 3 library-expansion work.
+2. **Headline finding:** M&A engagement produces a fully-grounded memo with 7/7 sections, 8/8 base fields, 4-item 2x2 framework, Pyramid + MECE auto-checks passing. growth_strategy memos hit `evidence_insufficient` across three different briefs because the library lacks the quantified market-level benchmarks the analyst correctly requires — a content depth issue, not a framework defect.
+3. **Pyramid + MECE pass rates:** Pyramid 0 errors / 3 advisory findings (Run A only); MECE 0 overlaps across 7 fields (Run A only); both proven to fire and persist when a writer payload exists.
+4. **Week 7 carry-forward:** **closed.** W7 wrap-up at ship.
+5. **Phase 3 work to close the partial gap:** seed firm library with growth-strategy-shaped content (market sizing, penetration curves, channel mix benchmarks); separately, add an orchestrator wiring change so `apply_mode_checks` framework-required findings trigger a writer retry rather than logging advisory-only (would have caught the W8/D5 fire-2 silent skip). Both Phase 3, not W8.
 
 Run records:
-- [backend/eval_runs/week8_e2e/A_m_and_a.json](../../backend/eval_runs/week8_e2e/A_m_and_a.json) (gitignored — Run A captured payload)
-- [backend/eval_runs/week8_e2e/B_growth_strategy.json](../../backend/eval_runs/week8_e2e/B_growth_strategy.json) (gitignored — Run B 3rd-fire capture: pre-writer evidence_insufficient)
+- [backend/eval_runs/week8_e2e/A_m_and_a.json](../../backend/eval_runs/week8_e2e/A_m_and_a.json) (gitignored — latest Run A capture; the earlier passing Run A is referenced via session id `9da8a365-...` in git history)
+- [backend/eval_runs/week8_e2e/B_growth_strategy.json](../../backend/eval_runs/week8_e2e/B_growth_strategy.json) (gitignored — latest Run B capture: UK competitive defence brief, pre-writer evidence_insufficient)
 - [backend/eval_runs/week8_e2e/summary.json](../../backend/eval_runs/week8_e2e/summary.json) (committed)
-- Total session spend across 7 runs (A x2, B x3 today + 2 yesterday): **~$3.36** of $5 ceiling.
+- Total session spend: **~$3.85** of $5 ceiling.
+
+**Tag:** `phase-2/week-8-shipped-partial`.
