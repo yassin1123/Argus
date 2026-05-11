@@ -65,9 +65,26 @@ class WriterReportBase(BaseModel):
     recommendation: str = Field(..., description="One-sentence specific recommendation naming the chosen option.")
     confidence_level: str = Field(..., description="Low | Medium | Medium-High | High.")
     summary: str = Field(..., description="2-4 sentence executive summary; no new facts beyond linked claims.")
-    key_reasons: list[str] = Field(..., description="4-7 evidence-cited reasons supporting the recommendation.")
-    risks: list[str] = Field(..., description="Material risks the recommendation must survive.")
-    counterarguments: list[str] = Field(..., description="Critic's strongest counterarguments + responses.")
+    # W8/D2: ``mece_check`` annotation marks fields the MECE checker
+    # should examine for pairwise overlap. Only high-signal lists
+    # (reasons, risks, counterarguments) — next_steps is sequential
+    # and intentionally skipped per the spec's "don't annotate noise
+    # fields" rule.
+    key_reasons: list[str] = Field(
+        ...,
+        description="4-7 evidence-cited reasons supporting the recommendation.",
+        json_schema_extra={"mece_check": True},
+    )
+    risks: list[str] = Field(
+        ...,
+        description="Material risks the recommendation must survive.",
+        json_schema_extra={"mece_check": True},
+    )
+    counterarguments: list[str] = Field(
+        ...,
+        description="Critic's strongest counterarguments + responses.",
+        json_schema_extra={"mece_check": True},
+    )
     next_steps: list[str] = Field(..., description="5-9 time-bound, action-verb steps.")
     sources: list[SourceItem] = Field(..., description="Sources cited; each {title, type}.")
     caveats: str = Field("", description="Limitations of this analysis.")
