@@ -17,6 +17,12 @@ Public surface:
   exist on the source payload.
 """
 
+from .acceptance import (  # noqa: F401 — W9/D3
+    DeepeningNotAcceptableError,
+    DeepeningNotFoundError,
+    accept_deepening,
+    reject_deepening,
+)
 from .addressing import SectionNotFoundError, get_section, set_section  # noqa: F401
 from .service import deepen_section  # noqa: F401
 from .types import DeepeningRequest, DeepeningResult  # noqa: F401

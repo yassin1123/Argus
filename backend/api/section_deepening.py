@@ -23,7 +23,15 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from auth.dependencies import get_current_user
 from auth.permissions import can_read, can_write
-from core.section_deepening import DeepeningRequest, deepen_section
+from core.section_deepening import (
+    DeepeningNotAcceptableError,
+    DeepeningNotFoundError,
+    DeepeningRequest,
+    SectionNotFoundError,
+    accept_deepening,
+    deepen_section,
+    reject_deepening,
+)
 from db.connection import acquire
 
 logger = logging.getLogger(__name__)
@@ -82,7 +90,8 @@ async def _get_run(session_id: str, deepening_id: str) -> dict[str, Any] | None:
             SELECT id, session_id, firm_id, section_path, depth_directive,
                    triggered_by, original_section_json, deepened_section_json,
                    new_evidence_chunks_used, new_claim_ids, cost_usd, wall_seconds,
-                   status, failure_reason, created_at, completed_at
+                   status, failure_reason, created_at, completed_at,
+                   accepted_at, accepted_by, rejected_at, rejected_by
             FROM section_deepening_runs
             WHERE id = $1::uuid AND session_id = $2::uuid
             """,
@@ -188,3 +197,60 @@ async def list_deepenings_endpoint(
     """List all deepenings for the session, newest first."""
     await _require_read(session_id, user)
     return await _list_runs(session_id)
+
+
+# ---------------------------------------------------------------------------
+# W9/D3 — accept + reject
+# ---------------------------------------------------------------------------
+
+
+@router.post("/{session_id}/deepen/{deepening_id}/accept")
+async def accept_deepening_endpoint(
+    session_id: str,
+    deepening_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Accept a completed deepening: splice the deepened section
+    into the live report payload, snapshot the pre-accept state on
+    the deepening row, and write a ``section_deepening.accepted``
+    audit event. Idempotent — a second accept is a no-op."""
+    await _require_write(session_id, user)
+    try:
+        return await accept_deepening(
+            UUID(session_id),
+            UUID(deepening_id),
+            UUID(user["user_id"]),
+        )
+    except DeepeningNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except DeepeningNotAcceptableError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e
+    except SectionNotFoundError as e:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Section path no longer resolves against the current payload — "
+                f"the memo drifted since this deepening was created: {e}"
+            ),
+        ) from e
+
+
+@router.post("/{session_id}/deepen/{deepening_id}/reject")
+async def reject_deepening_endpoint(
+    session_id: str,
+    deepening_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Reject a deepening: mark the row rejected + write a
+    ``section_deepening.rejected`` audit event. Idempotent."""
+    await _require_write(session_id, user)
+    try:
+        return await reject_deepening(
+            UUID(session_id),
+            UUID(deepening_id),
+            UUID(user["user_id"]),
+        )
+    except DeepeningNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except DeepeningNotAcceptableError as e:
+        raise HTTPException(status_code=409, detail=str(e)) from e

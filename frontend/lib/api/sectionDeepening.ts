@@ -26,6 +26,26 @@ export interface DeepeningDetail extends Deepening {
   original_section_json: unknown;
   deepened_section_json: unknown;
   new_claim_ids: string[];
+  // W9/D3: accept/reject state surfaces on the detail endpoint.
+  accepted_at?: string | null;
+  accepted_by?: string | null;
+  rejected_at?: string | null;
+  rejected_by?: string | null;
+}
+
+export interface AcceptResponse {
+  deepening_id: string;
+  status: "accepted" | "already_accepted";
+  section_path?: string;
+  accepted_at?: string;
+  new_payload?: Record<string, unknown>;
+}
+
+export interface RejectResponse {
+  deepening_id: string;
+  status: "rejected" | "already_rejected";
+  section_path?: string;
+  rejected_at?: string;
 }
 
 export interface TriggerDeepeningResponse {
@@ -88,6 +108,36 @@ export async function listDeepenings(sessionId: string): Promise<Deepening[]> {
     throw new Error(`listDeepenings failed: ${r.status} ${text.slice(0, 200)}`);
   }
   return (await r.json()) as Deepening[];
+}
+
+export async function acceptDeepening(
+  sessionId: string,
+  deepeningId: string,
+): Promise<AcceptResponse> {
+  const r = await apiFetch(
+    `/api/sessions/${sessionId}/deepen/${deepeningId}/accept`,
+    { method: "POST" },
+  );
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(`acceptDeepening failed: ${r.status} ${text.slice(0, 200)}`);
+  }
+  return (await r.json()) as AcceptResponse;
+}
+
+export async function rejectDeepening(
+  sessionId: string,
+  deepeningId: string,
+): Promise<RejectResponse> {
+  const r = await apiFetch(
+    `/api/sessions/${sessionId}/deepen/${deepeningId}/reject`,
+    { method: "POST" },
+  );
+  if (!r.ok) {
+    const text = await r.text().catch(() => "");
+    throw new Error(`rejectDeepening failed: ${r.status} ${text.slice(0, 200)}`);
+  }
+  return (await r.json()) as RejectResponse;
 }
 
 // Section-path → human-readable display label.

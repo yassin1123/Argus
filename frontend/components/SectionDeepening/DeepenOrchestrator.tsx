@@ -28,6 +28,7 @@ import { ReactNode, useState } from "react";
 import { DeepeningDetail } from "@/lib/api/sectionDeepening";
 
 import DeepeningHistory from "./DeepeningHistory";
+import DiffPanel from "./DiffPanel";
 import StatusPanel from "./StatusPanel";
 import TriggerModal from "./TriggerModal";
 
@@ -39,6 +40,11 @@ export interface DeepenHook {
 export interface DeepenOrchestratorProps {
   sessionId: string;
   children: (hook: DeepenHook) => ReactNode;
+  /** W9/D3: called after a successful accept lands. The host
+   * should re-fetch the session report to pick up the merged
+   * section. Optional — if absent, the orchestrator still closes
+   * the diff panel cleanly. */
+  onPayloadUpdated?: (newPayload: Record<string, unknown>) => void;
 }
 
 type Mode =
@@ -50,6 +56,7 @@ type Mode =
 export default function DeepenOrchestrator({
   sessionId,
   children,
+  onPayloadUpdated,
 }: DeepenOrchestratorProps) {
   const [mode, setMode] = useState<Mode>({ kind: "idle" });
   const [reloadKey, setReloadKey] = useState(0);
@@ -108,58 +115,23 @@ export default function DeepenOrchestrator({
       ) : null}
 
       {mode.kind === "result" ? (
-        <DeepeningResultPreview
+        <DiffPanel
+          sessionId={sessionId}
           detail={mode.detail}
+          onAccepted={(newPayload) => {
+            setReloadKey((k) => k + 1);
+            if (onPayloadUpdated) {
+              onPayloadUpdated(newPayload);
+            }
+            setMode({ kind: "idle" });
+          }}
+          onRejected={() => {
+            setReloadKey((k) => k + 1);
+            setMode({ kind: "idle" });
+          }}
           onClose={() => setMode({ kind: "idle" })}
         />
       ) : null}
-    </div>
-  );
-}
-
-/**
- * Day 2 placeholder for Day 3's diff panel — just a labeled JSON
- * preview so the consultant can confirm the deepening landed.
- */
-function DeepeningResultPreview({
-  detail,
-  onClose,
-}: {
-  detail: DeepeningDetail;
-  onClose: () => void;
-}) {
-  return (
-    <div
-      data-testid="result-preview"
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-    >
-      <div className="w-[720px] max-w-[92vw] rounded-md border border-argus-border-subtle bg-surface p-5 shadow-lg">
-        <header className="mb-3 flex items-baseline justify-between">
-          <h3 className="font-serif text-[16px] font-semibold text-argus-primary">
-            Deepened section: {detail.section_path}
-          </h3>
-          <span className="font-mono text-[10px] text-argus-tertiary">
-            Day 3 will turn this into a diff panel
-          </span>
-        </header>
-        <pre
-          data-testid="result-json"
-          className="max-h-[60vh] overflow-auto rounded border border-argus-border-subtle bg-elevated p-3 text-[11px] text-argus-primary"
-        >
-          {JSON.stringify(detail.deepened_section_json, null, 2)}
-        </pre>
-        <div className="mt-3 flex items-center justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded border border-argus-border-subtle bg-surface px-3 py-1.5 text-[12px] text-argus-secondary hover:bg-elevated"
-          >
-            Close
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

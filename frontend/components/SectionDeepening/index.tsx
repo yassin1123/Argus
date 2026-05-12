@@ -25,3 +25,6 @@ export type { StatusPanelProps } from "./StatusPanel";
 
 export { default as DeepeningHistory } from "./DeepeningHistory";
 export type { DeepeningHistoryProps } from "./DeepeningHistory";
+
+export { default as DiffPanel } from "./DiffPanel";
+export type { DiffPanelProps } from "./DiffPanel";
