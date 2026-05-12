@@ -1,0 +1,21 @@
+{# M&A row: valuation range + top walk-away trigger. #}
+<div class="supplement">
+  {% if valuation_low_gbp_m is not none or valuation_base_gbp_m is not none or valuation_high_gbp_m is not none %}
+  <div>
+    <div class="label">Valuation range (£m)</div>
+    <div class="value">
+      {% if valuation_low_gbp_m is not none %}£{{ valuation_low_gbp_m }}{% else %}—{% endif %}
+      &nbsp;·&nbsp;
+      <strong>{% if valuation_base_gbp_m is not none %}£{{ valuation_base_gbp_m }}{% else %}—{% endif %}</strong>
+      &nbsp;·&nbsp;
+      {% if valuation_high_gbp_m is not none %}£{{ valuation_high_gbp_m }}{% else %}—{% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% if walk_away_trigger %}
+  <div>
+    <div class="label">Walk-away trigger</div>
+    <div class="value">{{ walk_away_trigger }}</div>
+  </div>
+  {% endif %}
+</div>

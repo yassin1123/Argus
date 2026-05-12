@@ -1,0 +1,25 @@
+{# Two columns: top 3 reasons (left) | top 3 risks (right). #}
+<div class="cols">
+  <div class="col">
+    <h2>Top reasons</h2>
+    {% if reasons %}
+      <ul>
+        {% for r in reasons %}<li>{{ r }}</li>{% endfor %}
+      </ul>
+      {% if reasons_truncated %}<div class="truncate-note">+ {{ reasons_truncated }} additional reason(s) trimmed for single-page layout</div>{% endif %}
+    {% else %}
+      <p class="truncate-note">No reasons provided by the writer for this engagement.</p>
+    {% endif %}
+  </div>
+  <div class="col">
+    <h2>Top risks</h2>
+    {% if risks %}
+      <ul>
+        {% for r in risks %}<li>{{ r }}</li>{% endfor %}
+      </ul>
+      {% if risks_truncated %}<div class="truncate-note">+ {{ risks_truncated }} additional risk(s) trimmed for single-page layout</div>{% endif %}
+    {% else %}
+      <p class="truncate-note">No risks provided by the writer for this engagement.</p>
+    {% endif %}
+  </div>
+</div>

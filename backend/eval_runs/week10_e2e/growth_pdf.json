@@ -1,0 +1,35 @@
+{
+  "run_name": "growth_pdf",
+  "engagement_label": "growth_strategy (TargetCo Scotland)",
+  "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+  "format": "pdf",
+  "artifact_id": "f468e32c-06c8-4ce0-bd18-46202f00ab7d",
+  "status": "ready",
+  "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/f468e32c-06c8-4ce0-bd18-46202f00ab7d.pdf",
+  "file_size_bytes": 28260,
+  "claim_citation_count": 12,
+  "generation_wall_seconds": 0.869,
+  "failure_reason": null,
+  "metadata": {
+    "mode": "growth_strategy",
+    "recommendation_color": "neutral",
+    "reasons_count": 2,
+    "risks_count": 2,
+    "reasons_truncated": 5,
+    "risks_truncated": 6,
+    "truncated_for_fit": true,
+    "page_count": 1,
+    "attempt_1_pages": 2,
+    "attempt_1_reasons_max": 3,
+    "attempt_1_risks_max": 3,
+    "attempt_2_pages": 1,
+    "attempt_2_reasons_max": 2,
+    "attempt_2_risks_max": 2
+  },
+  "porters_check": {
+    "ok": false,
+    "top_competitive_force_marker": false,
+    "fallback_marker": true,
+    "note": "Source payload lacks frameworks.porters_five_forces \u2014 renderer correctly shows fallback. Tracked as Phase 3 carry-forward (W8 Run B writer-truncation)."
+  }
+}

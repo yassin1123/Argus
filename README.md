@@ -13,12 +13,12 @@ Argus is the consulting platform where every claim in every deliverable links ba
 
 A consultant types a brief: *"M&A target screen for a payments business with €200M ticket size and EU exposure."* Two minutes of intake clarifies scope. Twelve minutes later, the firm has:
 
-- A **12-page sourced memo** with claim-level citations
-- A **1-page executive version** (recommendation + top 3 reasons + top 3 risks + decision criteria + kill criteria)
-- A **12-slide consulting deck** with the same evidence backbone
-- An **Excel comparables table** with traceable cells
-- A **client cover email** ready for the partner to send
-- A **45-minute expert interview guide** for the next validation step
+- A **sourced memo** with claim-level citations
+- A **1-page executive version** rendered to both HTML and PDF — *available today* (Phase 3 / Week 10): recommendation panel color-coded by verdict, top 3 reasons + risks, mode-specific data row (valuation range for M&A, top competitive force for growth), source-count panel, numbered citation chips tracing every factual claim back to its evidence
+- A **12-slide consulting deck** with the same evidence backbone — shipping Week 12
+- An **Excel comparables table** with traceable cells — shipping Week 13
+- A **client cover email** ready for the partner to send — shipping Week 13
+- A **45-minute expert interview guide** for the next validation step — shipping Week 13
 
 Every factual claim across all six artifacts traces back to a specific source passage. Every claim has been independently verified by a model from a different provider family than the one that wrote it. Every recommendation is gated on falsifiable thresholds — *"reduce exposure if Q2 automotive revenue declines exceed 15% YoY"*, not *"explore opportunities in the Asian market."*
 
@@ -205,7 +205,9 @@ Contact: hello@argus-consulting.io
 
 **Phase 2 (closed 2026-05-12, tag `phase-2-complete`):** Firm knowledge layer with firm-scoped retrieval. Layered consulting modes (built-in ← firm ← engagement). M&A diligence as the first built-in mode with deal-shaped schema (synergy estimate, integration plan, valuation framing). Structured frameworks library — 2×2, Pyramid, MECE, Porter's Five Forces, Value Chain — populated from verified claims and auto-checked post-write. Section deepening agent: point at a section, supply a directive, mode-aware re-retrieval + rewrite + schema validation + diff/accept under a $0.75 per-run cap, full audit trail. Wedge demonstrated end-to-end on a live M&A engagement. See [docs/eval/phase2_close.md](docs/eval/phase2_close.md).
 
-**Roadmap (Phase 3, H2 2026):** Deliverable variety (the six-artifact promise above, fully wired). Library breadth — growth strategy, pricing, market entry, target screen as first-class library tier. Real-time collaboration cursors. Firm-specific fine-tuning on internal corpus. Bloomberg / FactSet / Refinitiv connectors for finance-vertical firms. Mobile review experience. Public sample workspace for prospective firms to evaluate without sales contact.
+**Phase 3 in flight (Week 10 shipped, 2026-05-12):** Export-pipeline foundation (`export_artifacts` table, exporter registry, generate-artifact service, four `/api/sessions/{id}/exports` endpoints, on-disk file storage) plus the first artifact riding it: the 1-pager in HTML and PDF. Mode-aware section dispatch (M&A surfaces valuation triple + walk-away trigger; growth_strategy surfaces top competitive force or fallback), firm-branded via CSS variables driven by `firms.branding`, single-page guarantee via WeasyPrint with truncate-and-retry overflow handling. See [docs/eval/week10_one_pager.md](docs/eval/week10_one_pager.md).
+
+**Roadmap (Phase 3, H2 2026):** Memo (Week 11) → deck (Week 12) → Excel + email + interview guide (Week 13) — each adds a registry entry on the same export scaffolding shipped in Week 10. Library breadth — growth strategy, pricing, market entry, target screen as first-class library tier. Real-time collaboration cursors. Firm-specific fine-tuning on internal corpus. Bloomberg / FactSet / Refinitiv connectors for finance-vertical firms. Mobile review experience. Public sample workspace for prospective firms to evaluate without sales contact.
 
 **Out of scope:** Replacing the consultant. Argus makes consultants 3–5x faster on research-and-deliverable workflows. The judgment, the client relationship, the recommendation — those stay with the human.
 

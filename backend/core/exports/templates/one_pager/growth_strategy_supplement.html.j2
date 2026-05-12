@@ -1,0 +1,14 @@
+{# growth_strategy row: top competitive force from Porter's (if rendered). #}
+<div class="supplement">
+  {% if top_competitive_force %}
+  <div>
+    <div class="label">Top competitive force</div>
+    <div class="value">{{ top_competitive_force }} ({{ top_competitive_force_intensity }})</div>
+  </div>
+  {% else %}
+  <div>
+    <div class="label">Competitive context</div>
+    <div class="value">Porter's Five Forces not produced for this engagement.</div>
+  </div>
+  {% endif %}
+</div>

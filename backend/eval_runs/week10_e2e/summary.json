@@ -1,0 +1,173 @@
+{
+  "generated_at": "2026-05-12T19:41:22Z",
+  "headline_assertions": {
+    "all_four_ready": true,
+    "each_pdf_single_page": true,
+    "pdf_pages_detail": {
+      "m_and_a_pdf": 1,
+      "growth_pdf": 1
+    },
+    "m_and_a_valuation_visible": true,
+    "growth_porters_visible": false,
+    "growth_porters_detail": {
+      "growth_html": {
+        "ok": false,
+        "top_competitive_force_marker": false,
+        "fallback_marker": true,
+        "note": "Source payload lacks frameworks.porters_five_forces \u2014 renderer correctly shows fallback. Tracked as Phase 3 carry-forward (W8 Run B writer-truncation)."
+      },
+      "growth_pdf": {
+        "ok": false,
+        "top_competitive_force_marker": false,
+        "fallback_marker": true,
+        "note": "Source payload lacks frameworks.porters_five_forces \u2014 renderer correctly shows fallback. Tracked as Phase 3 carry-forward (W8 Run B writer-truncation)."
+      }
+    },
+    "each_artifact_cites_ge_5": true,
+    "cite_counts": {
+      "m_and_a_html": 6,
+      "m_and_a_pdf": 6,
+      "growth_html": 12,
+      "growth_pdf": 12
+    },
+    "each_pdf_under_500000_bytes": true,
+    "pdf_sizes": {
+      "m_and_a_pdf": 23295,
+      "growth_pdf": 28260
+    },
+    "total_cost_under_0.1": true,
+    "total_cost_usd": 0.0,
+    "headline_pass": false
+  },
+  "headline_pass": false,
+  "n_artifacts": 4,
+  "runs": [
+    {
+      "run_name": "m_and_a_html",
+      "engagement_label": "M&A diligence (TargetCo)",
+      "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+      "format": "html",
+      "artifact_id": "7c214142-2538-4b3f-a062-288b84ce3d1a",
+      "status": "ready",
+      "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/7c214142-2538-4b3f-a062-288b84ce3d1a.html",
+      "file_size_bytes": 7183,
+      "claim_citation_count": 6,
+      "generation_wall_seconds": 0.316,
+      "failure_reason": null,
+      "metadata": {
+        "mode": "m_and_a_diligence",
+        "recommendation_color": "amber",
+        "reasons_count": 3,
+        "risks_count": 1,
+        "reasons_truncated": 1,
+        "risks_truncated": 0,
+        "rendered_chars": 7136
+      },
+      "valuation_check": {
+        "ok": true,
+        "found": {
+          "205": true,
+          "220": true,
+          "235": true
+        }
+      }
+    },
+    {
+      "run_name": "m_and_a_pdf",
+      "engagement_label": "M&A diligence (TargetCo)",
+      "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+      "format": "pdf",
+      "artifact_id": "e636b2d2-923a-44aa-9398-cb6e6b66d8c9",
+      "status": "ready",
+      "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/e636b2d2-923a-44aa-9398-cb6e6b66d8c9.pdf",
+      "file_size_bytes": 23295,
+      "claim_citation_count": 6,
+      "generation_wall_seconds": 0.875,
+      "failure_reason": null,
+      "metadata": {
+        "mode": "m_and_a_diligence",
+        "recommendation_color": "amber",
+        "reasons_count": 3,
+        "risks_count": 1,
+        "reasons_truncated": 1,
+        "risks_truncated": 0,
+        "truncated_for_fit": false,
+        "page_count": 1,
+        "attempt_1_pages": 1,
+        "attempt_1_reasons_max": 3,
+        "attempt_1_risks_max": 3
+      },
+      "valuation_check": {
+        "ok": true,
+        "found": {
+          "205": true,
+          "220": true,
+          "235": true
+        }
+      }
+    },
+    {
+      "run_name": "growth_html",
+      "engagement_label": "growth_strategy (TargetCo Scotland)",
+      "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+      "format": "html",
+      "artifact_id": "13f4f535-f22e-425f-8822-eb8460c44c90",
+      "status": "ready",
+      "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/13f4f535-f22e-425f-8822-eb8460c44c90.html",
+      "file_size_bytes": 12281,
+      "claim_citation_count": 12,
+      "generation_wall_seconds": 0.118,
+      "failure_reason": null,
+      "metadata": {
+        "mode": "growth_strategy",
+        "recommendation_color": "neutral",
+        "reasons_count": 3,
+        "risks_count": 3,
+        "reasons_truncated": 4,
+        "risks_truncated": 5,
+        "rendered_chars": 12182
+      },
+      "porters_check": {
+        "ok": false,
+        "top_competitive_force_marker": false,
+        "fallback_marker": true,
+        "note": "Source payload lacks frameworks.porters_five_forces \u2014 renderer correctly shows fallback. Tracked as Phase 3 carry-forward (W8 Run B writer-truncation)."
+      }
+    },
+    {
+      "run_name": "growth_pdf",
+      "engagement_label": "growth_strategy (TargetCo Scotland)",
+      "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+      "format": "pdf",
+      "artifact_id": "f468e32c-06c8-4ce0-bd18-46202f00ab7d",
+      "status": "ready",
+      "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/f468e32c-06c8-4ce0-bd18-46202f00ab7d.pdf",
+      "file_size_bytes": 28260,
+      "claim_citation_count": 12,
+      "generation_wall_seconds": 0.869,
+      "failure_reason": null,
+      "metadata": {
+        "mode": "growth_strategy",
+        "recommendation_color": "neutral",
+        "reasons_count": 2,
+        "risks_count": 2,
+        "reasons_truncated": 5,
+        "risks_truncated": 6,
+        "truncated_for_fit": true,
+        "page_count": 1,
+        "attempt_1_pages": 2,
+        "attempt_1_reasons_max": 3,
+        "attempt_1_risks_max": 3,
+        "attempt_2_pages": 1,
+        "attempt_2_reasons_max": 2,
+        "attempt_2_risks_max": 2
+      },
+      "porters_check": {
+        "ok": false,
+        "top_competitive_force_marker": false,
+        "fallback_marker": true,
+        "note": "Source payload lacks frameworks.porters_five_forces \u2014 renderer correctly shows fallback. Tracked as Phase 3 carry-forward (W8 Run B writer-truncation)."
+      }
+    }
+  ]
+}
