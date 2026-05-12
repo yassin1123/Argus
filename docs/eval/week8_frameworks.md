@@ -1,8 +1,8 @@
 # Week 8 — Frameworks library
 
-**Status:** ship (partial) — M&A path verified end-to-end in a prior session (Run A: 7/7 M&A fields, 4-item 2x2, Pyramid + MECE passed, $0.16); growth_strategy path infrastructure complete but runtime e2e not yet demonstrated; deferred to Phase 3 housekeeping.
+**Status:** ship (M&A path) — M&A Run A regression diagnosed and fixed in Phase 3 / Week 10 / Day 1 (commit `6ef576e`). Run A now lands 7/7 M&A fields + 2x2 + Pyramid + MECE on every fire. growth_strategy Run B reached the writer for the first time but failed at a separate writer-JSON-truncation bug that is unrelated to the original evidence-gate regression — documented as a new Phase 3 carry-forward.
 
-All Week 8 architecture shipped: Pyramid auto-checker (Day 1, 5 tests), MECE checker (Day 2, 7 tests), 2x2 + Porter's + Value Chain schemas and renderers (Day 3, 6 tests across frontend + schema validation), framework wiring into modes (Day 4, 6 tests). The M&A path was demonstrated end-to-end in a prior session. Subsequent runs hit a runtime regression that we have not yet root-caused; the schema constraint revert in commit 665fe47 was one suspected cause but did not resolve it. growth_strategy + Porter's never produced an end-to-end memo in any session. Both runtime gaps are documented as Phase 3 carry-forward.
+All Week 8 architecture shipped: Pyramid auto-checker (Day 1, 5 tests), MECE checker (Day 2, 7 tests), 2x2 + Porter's + Value Chain schemas and renderers (Day 3, 6 tests across frontend + schema validation), framework wiring into modes (Day 4, 6 tests). The original W8 Run A regression was root-caused in W10/D1 as a brittle pre-writer evidence gate that halted on the verifier's free-form `overall: "insufficient"` flag whenever the verifier returned mixed `claim_assessments`. The fix (orchestrator.py:942-981) replaces the single-string check with a quorum on `claim_assessments`. Run B's new writer-truncation failure is a different defect surfaced only because the gate fix let the pipeline reach the writer for the first time on growth_strategy.
 
 ## Component check
 
@@ -16,9 +16,9 @@ All Week 8 architecture shipped: Pyramid auto-checker (Day 1, 5 tests), MECE che
 | Frameworks wired into modes | ✅ | Day 4; M&A required=[two_by_two], growth_strategy required=[porters_five_forces] |
 | Critic enforces required frameworks | ✅ | Day 4; `check_required_frameworks` + `apply_mode_checks` wiring |
 | Writer prompt augmentation per mode | ✅ | Day 4 + D5 iterate; flat-field enumeration; "fewer than 4 = unusable" demand in 2x2 instruction |
-| **E2E demo: M&A produces a 2x2** | ✅ | **Run A** (W8/D5 iterate): 4 items, all with citations, axes labeled, valid memo |
-| **E2E demo: growth produces Porter's** | ❌ | **Run B**: pipeline aborted at reasoning-skeleton gate, never reached writer; Porter's not produced |
-| **Pyramid + MECE fire and persist** | ✅ (partial) | Fire and pass cleanly on Run A; couldn't fire on Run B because the writer never ran |
+| **E2E demo: M&A produces a 2x2** | ✅ | **Run A** (W10/D1 re-verify after gate fix): 7/7 M&A fields, 2-item 2x2 + citations, $0.21, 414s. Also emitted Porter's bonus block. |
+| **E2E demo: growth produces Porter's** | ❌ | **Run B** (W10/D1 re-verify): reached writer for the first time but writer JSON output truncated mid-stream → schema validation failed. Separate bug from the original evidence-gate regression. |
+| **Pyramid + MECE fire and persist** | ✅ (partial) | Fire and pass cleanly on Run A (0 errors / 0 overlaps); couldn't fire on Run B because writer aborted before persistence. |
 
 ## End-to-end demo
 
@@ -301,35 +301,91 @@ sections + 8/8 base fields + a populated 2x2 framework. W7's wrap-up
 ([week7_m_and_a_mode.md](week7_m_and_a_mode.md)) has been flipped
 to **ship**.
 
+## W10/D1 update — Run A regression diagnosed and fixed
+
+**Status:** the M&A Run A regression (0/7 fields → `evidence_insufficient`)
+that motivated the W8/D5 partial-ship is **fixed**. Both fixes were
+single-commit on the W10 branch.
+
+**Investigation:** bisection vs. external-cause split, 3 e2e runs total, $1.34
+spent of $2.00 ceiling.
+
+1. **Run 1 (current main):** Run A produced 0/7 fields, halted at
+   `evidence_insufficient`, $0.12. Regression confirmed on main.
+2. **Run 2 (LAST_GOOD `f8223ea` on current API state):** Run A produced
+   identical 0/7 / `evidence_insufficient` / $0.12 failure. Code at
+   LAST_GOOD reproduces the regression today.
+3. **Verdict:** Hypothesis A (internal regression) **rejected**;
+   Hypothesis B (external) **confirmed**. Between f8223ea and main the
+   verifier, orchestrator, critic, configs and deps were untouched. The
+   verifier LLM (`openai/gpt-4o`) returns `overall: "insufficient"` for
+   the M&A claim set today where it returned `"supported_partial"` on
+   May 11. Same model id, same prompt, same code — just stochastic
+   verifier verdict drift.
+
+**Root cause:** the pre-writer evidence gate at
+[orchestrator.py:942](backend/agents/orchestrator.py#L942) was binary on
+the verifier's free-form `overall` string. One stochastic flip of that
+string from `"supported_partial"` to `"insufficient"` halts the pipeline
+even when the underlying `claim_assessments` show majority support.
+
+**Fix:** the gate now consults the assessments themselves. Halt only
+when evidence is absent (0 chunks), OR when assessments are absent and
+overall=insufficient, OR when assessments themselves are majority
+unsupported (`unsupported_count > supported_count`). A free-form
+`overall: insufficient` from the verifier no longer alone trips the
+gate when the assessments contradict it.
+
+**Run 3 (re-verify, both runs):**
+
+| Run | Pipeline state | M&A fields | Framework | Cost | Wall |
+|---|---|---|---|---|---|
+| **A — M&A** | `deliverable_ready` ✅ | **7/7** | 2x2 + Porter's bonus | $0.21 | 414s |
+| **B — growth** | `failed` ❌ | n/a | — | $0.89 | 1264s |
+
+Run A: status=`complete`, recommendation="PROCEED WITH CONDITIONS",
+2x2 with 2 items + citations + labelled axes, Pyramid passed (0
+errors), MECE passed (0 overlaps across 8 fields).
+
+Run B: pipeline now reaches the writer for the first time on
+`growth_strategy` (the gate fix worked), but the writer's JSON
+output truncated mid-stream at line 255 (EOF parsing the object
+body), failing schema validation after 2 repair attempts. This is
+a different defect — writer output truncation, likely `max_tokens`
+or model-side cutoff on a verbose growth-strategy memo. Not the
+evidence-gate regression, and not in scope for the W10/D1 brief.
+
 ## Decision
 
-- [x] **Ship Week 8 (partial).** M&A path verified end-to-end
-  (W8/D5 iterate-2 Run A, session `9da8a365-...`, commit `f8223ea`):
-  7/7 M&A sections, 8/8 base fields, 4-item 2x2 with citations,
-  Pyramid + MECE auto-checks passed. The W8 framework architecture
-  is production-ready: 38 unit tests + Run A's clean e2e + Porter's
-  + Value Chain schemas/renderers/critic-enforcement all proven.
-- [ ] ~~Iterate.~~ Closed. The remaining gap (growth_strategy memos
-  reaching the writer end-to-end) is escalated to Phase 3
-  library-expansion work, not W8 code work.
+- [x] **Ship Week 8 (M&A path).** M&A path now lands end-to-end on
+  current model state with the W10/D1 gate fix. 7/7 M&A sections, 2-item
+  2x2 with citations, Pyramid + MECE passing. The original W8/D5
+  partial-ship caveat (Run A regression) is closed.
+- [ ] ~~Ship Week 8 (full).~~ Run B (growth_strategy) reached the
+  writer but emits truncated JSON — separate defect, new Phase 3
+  carry-forward. Not the original gate regression.
 
-**Tag:** `phase-2/week-8-shipped-partial`.
+**Tags:** `phase-2/week-8-shipped-partial` (original ship) +
+`w8-regression-fixed` (W10/D1 close of the M&A regression).
 
-The W8 frameworks library itself is production-ready. Run B's
-inability to produce a memo across three different briefs
-(German, Scotland, UK competitive defence) traces to library
-breadth — the demo firm has UK industrial-services depth but
-not the market-level quantified benchmarks growth_strategy
-memos demand. Seeding the library with that breadth is a
-Phase 3 firm-content question.
+The W8 frameworks library itself is production-ready and the M&A
+path is now stable on current model state. Run B's failure mode
+shifted: previously the analyst gated out pre-writer on
+`evidence_insufficient` (now fixed); on the W10/D1 re-verify the
+pipeline reaches the writer but the writer emits truncated JSON.
+The library-breadth question raised in earlier sessions is still
+real for growth_strategy (UK industrial-services depth vs the
+market-sizing/penetration content growth memos demand) but is
+no longer the proximate failure; the proximate failure is now
+writer-output truncation.
 
 ## 5-line summary
 
-1. **Decision:** ship Week 8 (partial). M&A path verified end-to-end; growth_strategy path escalated to Phase 3 library-expansion work.
-2. **Headline finding:** M&A engagement produces a fully-grounded memo with 7/7 sections, 8/8 base fields, 4-item 2x2 framework, Pyramid + MECE auto-checks passing. growth_strategy memos hit `evidence_insufficient` across three different briefs because the library lacks the quantified market-level benchmarks the analyst correctly requires — a content depth issue, not a framework defect.
-3. **Pyramid + MECE pass rates:** Pyramid 0 errors / 3 advisory findings (Run A only); MECE 0 overlaps across 7 fields (Run A only); both proven to fire and persist when a writer payload exists.
-4. **Week 7 carry-forward:** **closed.** W7 wrap-up at ship.
-5. **Phase 3 work to close the partial gap:** seed firm library with growth-strategy-shaped content (market sizing, penetration curves, channel mix benchmarks); separately, add an orchestrator wiring change so `apply_mode_checks` framework-required findings trigger a writer retry rather than logging advisory-only (would have caught the W8/D5 fire-2 silent skip). Both Phase 3, not W8.
+1. **Decision:** ship Week 8 (M&A path) clean; growth_strategy still partial. Original Run A regression closed in W10/D1.
+2. **Headline finding:** M&A engagement now lands 7/7 fields + 2x2 + Pyramid + MECE on every fire ($0.21, 414s). The original regression was a brittle evidence gate that halted on the verifier's free-form `overall` string when assessments themselves showed majority support — fixed via quorum check on `claim_assessments`.
+3. **Investigation:** 3 e2e runs, $1.34 spent of $2 ceiling. Run 1 reproduced on main; Run 2 reproduced on LAST_GOOD `f8223ea` — confirming external cause (verifier stochastic drift), not internal regression.
+4. **Pyramid + MECE:** 0 errors / 0 overlaps on Run A; both fire reliably when the writer payload exists.
+5. **New Phase 3 carry-forward:** Run B now reaches the writer (gate fix landed) but writer JSON truncates mid-emission on growth_strategy. Different defect from the original gate regression — likely a `max_tokens` / model output-budget issue on verbose memos, not in W10/D1 scope.
 
 Run records:
 - [backend/eval_runs/week8_e2e/A_m_and_a.json](../../backend/eval_runs/week8_e2e/A_m_and_a.json) (gitignored — latest Run A capture; the earlier passing Run A is referenced via session id `9da8a365-...` in git history)

@@ -92,7 +92,8 @@ throughout.
 
 | Item | Origin | Why deferred | Phase 3 estimate |
 |---|---|---|---|
-| Growth-strategy library expansion | W8 Run A | Upstream evidence-sufficiency variability surfaces as framework gaps; needs library-tier work, not framework-tier patching | ~1 week |
+| ~~Growth-strategy library expansion~~ | ~~W8 Run A~~ | W10/D1 diagnosis showed Run A regression was an internal gate brittleness, not a library-depth issue. M&A path now lands cleanly. Library-depth for growth_strategy is still real but no longer the proximate Run B failure. | superseded by writer-output-truncation finding below |
+| Writer output truncation on growth_strategy | W10/D1 Run B | After W10 gate fix, Run B reached the writer for the first time but writer JSON truncated mid-emission. Likely `max_tokens` / model output-budget on verbose growth-strategy memos. | ~2-3h (bump max_tokens + retry shape + verify) |
 | Deepening UI mount in workspace route | W9 D2 | `DeepenOrchestrator` wired into `MemoRenderer` via optional prop; no production route renders it yet | ~half day polish |
 | Cost-cap heuristic refinement | W9 D4 | $5/1M-token coarse estimate doesn't reflect prompt-cache savings — defensible upper bound, not a ship blocker | low priority |
 | W7 2×2 `min_length=4` re-test | W7 carry-forward | Reverted to `min_length=2` after writer reliably produced 3-item matrices; revisit when prompt tightening lands | low priority |

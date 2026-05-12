@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-11T18:38:12Z",
+  "generated_at": "2026-05-12T09:23:19Z",
   "headline_assertions": {
-    "A_two_by_two_present": false,
+    "A_two_by_two_present": true,
     "A_two_by_two_items_ge_4": false,
-    "A_two_by_two_items_all_have_citations": false,
-    "A_pyramid_present": false,
-    "A_mece_present": false,
+    "A_two_by_two_items_all_have_citations": true,
+    "A_pyramid_present": true,
+    "A_mece_present": true,
     "B_porters_present": false,
     "B_porters_all_five_populated": false,
     "B_porters_all_five_with_evidence": false,
@@ -23,53 +23,65 @@
     {
       "run_name": "A_m_and_a",
       "report_mode": "m_and_a_diligence",
-      "session_id": "e56e92e7-4e64-4b3e-95a1-b9edd69a96a8",
-      "wall_seconds": 181.52,
-      "cost_usd_total": 0.1167,
-      "evidence_total": 128,
+      "session_id": "568ba70f-f95c-4a7b-8428-cdbe168417c3",
+      "wall_seconds": 414.01,
+      "cost_usd_total": 0.2145,
+      "evidence_total": 112,
       "diversity_counts": {
-        "firm_library": 128
+        "firm_library": 112
       },
       "firm_library_titles_cited": {
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 96,
-        "Retail Sector Primer (UK + US)": 9,
-        "Albright & Marsh Pricing Diagnostic Pack": 3,
-        "M&A Target Screen Playbook (Boutique Edition)": 5,
-        "Valuation Methodology (Firm House View)": 15
+        "M&A Target Screen Playbook (Boutique Edition)": 12,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 74,
+        "Retail Sector Primer (UK + US)": 13,
+        "Valuation Methodology (Firm House View)": 10,
+        "Albright & Marsh Pricing Diagnostic Pack": 3
       },
       "frameworks_status": {
-        "two_by_two": false,
-        "porters_five_forces": false,
+        "two_by_two": true,
+        "porters_five_forces": true,
         "value_chain": false
       },
       "two_by_two_quality": {
-        "items_count": 0,
-        "items_with_citations": 0,
-        "axes_labeled": false
+        "items_count": 2,
+        "items_with_citations": 2,
+        "axes_labeled": true
       },
       "porters_quality": {
-        "all_five_populated": false,
-        "forces_with_evidence": 0,
-        "market_definition_set": false,
-        "overall_attractiveness": null
+        "all_five_populated": true,
+        "forces_with_evidence": 5,
+        "market_definition_set": true,
+        "overall_attractiveness": "moderate"
       },
       "pyramid": {
-        "present": false,
-        "passed": null,
-        "findings": 0,
-        "model_used": null,
+        "present": true,
+        "passed": true,
+        "findings": 2,
+        "errors": 0,
+        "model_used": "openai/gpt-4o-mini",
         "cost_usd": 0.0
       },
       "mece": {
-        "present": false,
-        "passed": null,
+        "present": true,
+        "passed": true,
         "overlaps": 0,
-        "fields_checked": []
+        "overlaps_per_field": {},
+        "fields_checked": [
+          "key_reasons",
+          "risks",
+          "counterarguments",
+          "synergy_estimate.cost_synergies[].type",
+          "synergy_estimate.dis_synergies[].type",
+          "risks_and_mitigations[].description",
+          "deal_structure_implications.negotiation_priorities",
+          "deal_structure_implications.walk_away_triggers"
+        ],
+        "threshold": 0.85,
+        "cost_usd": 7e-06
       },
       "expected_framework": "two_by_two",
-      "expected_framework_present": false,
-      "m_and_a_fields_present": [],
-      "m_and_a_fields_absent": [
+      "expected_framework_present": true,
+      "m_and_a_fields_present": [
         "deal_structure_implications",
         "financial_profile",
         "integration_plan",
@@ -78,29 +90,33 @@
         "target_overview",
         "valuation_range"
       ],
-      "report_recommendation": "",
-      "report_summary_preview": "",
+      "m_and_a_fields_absent": [],
+      "report_recommendation": "PROCEED WITH CONDITIONS",
+      "report_summary_preview": "TargetCo Holdings shows promising growth potential with a 4% revenue increase in FY24 and first-time profitability in the ROI segment. The valuation range of \u00a3205-235m, based on a median EV/EBITDA multiple of 8.1x, supports the acquisition. However, reliance on key contracts and the need for strategic investment in the ROI segment present risks that require careful management.",
       "week7_carry_forward": {
-        "closes_week7": false,
-        "reason": "no report row at all"
+        "closes_week7": true,
+        "base_fields_missing": [],
+        "m_and_a_sections_missing": [],
+        "two_by_two_present": true
       },
       "error": null
     },
     {
       "run_name": "B_growth_strategy",
       "report_mode": "growth_strategy",
-      "session_id": "247beb21-fc83-4f16-b366-7e9117fed5bf",
-      "wall_seconds": 486.47,
-      "cost_usd_total": 0.3857,
-      "evidence_total": 40,
+      "session_id": "cf8cc0ad-ace5-484d-ad4b-e9bb997e9520",
+      "wall_seconds": 1678.4,
+      "cost_usd_total": 0.8931,
+      "evidence_total": 48,
       "diversity_counts": {
-        "firm_library": 40
+        "firm_library": 48
       },
       "firm_library_titles_cited": {
-        "Retail Sector Primer (UK + US)": 14,
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 18,
         "Albright & Marsh Pricing Diagnostic Pack": 7,
-        "M&A Target Screen Playbook (Boutique Edition)": 1
+        "Retail Sector Primer (UK + US)": 15,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 20,
+        "M&A Target Screen Playbook (Boutique Edition)": 5,
+        "Valuation Methodology (Firm House View)": 1
       },
       "frameworks_status": {
         "two_by_two": false,
@@ -149,7 +165,7 @@
         "closes_week7": false,
         "reason": "no report row at all"
       },
-      "error": null
+      "error": "WriterSchemaValidationError: GeneralReportPayload validation failed at (root)\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 134, in generate_structured\n    obj = model_cls.model_validate_json(_extract_json_payload(text))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pydantic\\main.py\", line 656, in model_validate_json\n    return cls.__pydantic_validator__.validate_json(json_data, strict=strict, context=context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npydantic_core._pydantic_core.ValidationError: 1 validation error for GeneralReportPayload\n  Invalid JSON: EOF while parsing an object at line 255 column 5 [type=json_invalid, input_value='{\\n  \"recommendation\": \"...pivot triggers.\"\\n    }', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/json_invalid\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\writer\\agent.py\", line 193, in run\n    out, _meta = await generate_structured(\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 150, in generate_structured\n    raise InferenceSchemaError(\ncore.inference.exceptions.InferenceSchemaError: Schema validation failed after 2 repairs\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\tools\\run_week8_e2e.py\", line 523, in _execute_run\n    await run_pipeline(session_id, run[\"brief\"])\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\orchestrator.py\", line 1063, in run_pipeline\n    report = await writer.run(\n             ^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\writer\\agent.py\", line 217, in run\n    raise WriterSchemaValidationError(\nagents.writer.agent.WriterSchemaValidationError: GeneralReportPayload validation failed at (root)\n"
     }
   ]
 }
