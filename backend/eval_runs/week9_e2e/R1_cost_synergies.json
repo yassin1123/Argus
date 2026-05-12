@@ -1,0 +1,64 @@
+{
+  "run_name": "R1_cost_synergies",
+  "section_path": "synergy_estimate.cost_synergies",
+  "directive": "The cost synergies feel generic. Add detail: which functions, what timing (year 1 vs year 2 vs year 3), and what is the basis (benchmark transactions, internal estimates).",
+  "deepening_id": "03c71d81-1e97-422d-ac30-caf2df2e297a",
+  "status": "complete",
+  "failure_reason": null,
+  "wall_seconds": 8.49,
+  "measured_cost_usd": 0.018,
+  "new_evidence_chunks_used": 20,
+  "new_claim_ids": [],
+  "original_section_json": [
+    {
+      "type": "Operational efficiencies",
+      "confidence": "medium",
+      "timing_months": 24,
+      "basis_citations": [
+        "claim_4"
+      ],
+      "magnitude_gbp_m": 5.0
+    }
+  ],
+  "deepened_section_json": [
+    {
+      "type": "Procurement consolidation",
+      "confidence": "medium",
+      "timing_months": 12,
+      "basis_citations": [
+        "claim_4"
+      ],
+      "magnitude_gbp_m": 1.8
+    },
+    {
+      "type": "Facilities rationalization",
+      "confidence": "medium",
+      "timing_months": 18,
+      "basis_citations": [
+        "claim_4"
+      ],
+      "magnitude_gbp_m": 1.2
+    },
+    {
+      "type": "Back-office integration (finance, HR, IT)",
+      "confidence": "medium",
+      "timing_months": 24,
+      "basis_citations": [
+        "claim_4"
+      ],
+      "magnitude_gbp_m": 1.5
+    },
+    {
+      "type": "Logistics and distribution network optimization",
+      "confidence": "low",
+      "timing_months": 36,
+      "basis_citations": [
+        "claim_4"
+      ],
+      "magnitude_gbp_m": 0.5
+    }
+  ],
+  "original_word_count": 4,
+  "deepened_word_count": 22,
+  "word_growth_ratio": 5.5
+}

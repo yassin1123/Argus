@@ -203,7 +203,9 @@ Contact: hello@argus-consulting.io
 
 **Shipped (v1.0):** SEC EDGAR + Companies House + earnings transcripts + news + uploaded firm content. Cross-family verification + three-signal NLI ensemble + claim-level source binding. Six deliverable types from one engagement. Per-firm modes, frameworks, branding. Human-in-the-loop with manager review. Eval harness + Langfuse + cost analytics. SSO + SOC 2 Type I + per-firm isolation. Two paid pilots running.
 
-**Roadmap (v1.1, H2 2026):** Real-time collaboration cursors. Firm-specific fine-tuning on internal corpus. Bloomberg / FactSet / Refinitiv connectors for finance-vertical firms. Mobile review experience. Public sample workspace for prospective firms to evaluate without sales contact.
+**Phase 2 (closed 2026-05-12, tag `phase-2-complete`):** Firm knowledge layer with firm-scoped retrieval. Layered consulting modes (built-in ← firm ← engagement). M&A diligence as the first built-in mode with deal-shaped schema (synergy estimate, integration plan, valuation framing). Structured frameworks library — 2×2, Pyramid, MECE, Porter's Five Forces, Value Chain — populated from verified claims and auto-checked post-write. Section deepening agent: point at a section, supply a directive, mode-aware re-retrieval + rewrite + schema validation + diff/accept under a $0.75 per-run cap, full audit trail. Wedge demonstrated end-to-end on a live M&A engagement. See [docs/eval/phase2_close.md](docs/eval/phase2_close.md).
+
+**Roadmap (Phase 3, H2 2026):** Deliverable variety (the six-artifact promise above, fully wired). Library breadth — growth strategy, pricing, market entry, target screen as first-class library tier. Real-time collaboration cursors. Firm-specific fine-tuning on internal corpus. Bloomberg / FactSet / Refinitiv connectors for finance-vertical firms. Mobile review experience. Public sample workspace for prospective firms to evaluate without sales contact.
 
 **Out of scope:** Replacing the consultant. Argus makes consultants 3–5x faster on research-and-deliverable workflows. The judgment, the client relationship, the recommendation — those stay with the human.
 

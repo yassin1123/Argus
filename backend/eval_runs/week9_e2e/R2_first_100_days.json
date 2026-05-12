@@ -1,0 +1,108 @@
+{
+  "run_name": "R2_first_100_days",
+  "section_path": "integration_plan.first_100_days",
+  "directive": "The 100-day plan is too high-level. Specify named owner roles (CFO, CHRO, Integration Lead, etc.) and the dependency chain between initiatives.",
+  "deepening_id": "4ab8a0bf-90d6-426f-89e6-aed0e30faced",
+  "status": "complete",
+  "failure_reason": null,
+  "wall_seconds": 12.99,
+  "measured_cost_usd": 0.0328,
+  "new_evidence_chunks_used": 20,
+  "new_claim_ids": [],
+  "original_section_json": [
+    {
+      "milestone": "Renew key contracts",
+      "owner_role": "Head of Sales",
+      "workstream": "Client Retention",
+      "dependencies": [
+        "Contract negotiations"
+      ]
+    }
+  ],
+  "deepened_section_json": [
+    {
+      "milestone": "Establish Integration Management Office and governance structure",
+      "owner_role": "Integration Lead",
+      "workstream": "Governance & Planning",
+      "dependencies": []
+    },
+    {
+      "milestone": "Complete organizational design and announce leadership structure",
+      "owner_role": "CHRO",
+      "workstream": "Organization & Talent",
+      "dependencies": [
+        "Establish Integration Management Office and governance structure"
+      ]
+    },
+    {
+      "milestone": "Identify and retain critical talent across both organizations",
+      "owner_role": "CHRO",
+      "workstream": "Organization & Talent",
+      "dependencies": [
+        "Complete organizational design and announce leadership structure"
+      ]
+    },
+    {
+      "milestone": "Conduct client risk assessment and prioritize top 20 accounts",
+      "owner_role": "Head of Sales",
+      "workstream": "Client Retention",
+      "dependencies": [
+        "Establish Integration Management Office and governance structure"
+      ]
+    },
+    {
+      "milestone": "Execute client communication plan and schedule executive visits",
+      "owner_role": "Head of Sales",
+      "workstream": "Client Retention",
+      "dependencies": [
+        "Conduct client risk assessment and prioritize top 20 accounts",
+        "Complete organizational design and announce leadership structure"
+      ]
+    },
+    {
+      "milestone": "Renew key contracts and secure commitment letters",
+      "owner_role": "Head of Sales",
+      "workstream": "Client Retention",
+      "dependencies": [
+        "Execute client communication plan and schedule executive visits"
+      ]
+    },
+    {
+      "milestone": "Integrate financial reporting systems and establish unified chart of accounts",
+      "owner_role": "CFO",
+      "workstream": "Financial Integration",
+      "dependencies": [
+        "Establish Integration Management Office and governance structure"
+      ]
+    },
+    {
+      "milestone": "Consolidate banking relationships and optimize cash management",
+      "owner_role": "CFO",
+      "workstream": "Financial Integration",
+      "dependencies": [
+        "Integrate financial reporting systems and establish unified chart of accounts"
+      ]
+    },
+    {
+      "milestone": "Harmonize IT infrastructure and migrate critical systems",
+      "owner_role": "CTO",
+      "workstream": "Technology Integration",
+      "dependencies": [
+        "Establish Integration Management Office and governance structure",
+        "Integrate financial reporting systems and establish unified chart of accounts"
+      ]
+    },
+    {
+      "milestone": "Launch quick-win cost reduction initiatives",
+      "owner_role": "Integration Lead",
+      "workstream": "Synergy Capture",
+      "dependencies": [
+        "Integrate financial reporting systems and establish unified chart of accounts",
+        "Complete organizational design and announce leadership structure"
+      ]
+    }
+  ],
+  "original_word_count": 10,
+  "deepened_word_count": 212,
+  "word_growth_ratio": 21.2
+}
