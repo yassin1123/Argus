@@ -1,6 +1,8 @@
 # Week 8 — Frameworks library
 
-**Status:** iterate (regression found; `min_length=4` schema constraint over-strict for writer; reverted to `min_length=2`)
+**Status:** ship (partial) — M&A path verified end-to-end in a prior session (Run A: 7/7 M&A fields, 4-item 2x2, Pyramid + MECE passed, $0.16); growth_strategy path infrastructure complete but runtime e2e not yet demonstrated; deferred to Phase 3 housekeeping.
+
+All Week 8 architecture shipped: Pyramid auto-checker (Day 1, 5 tests), MECE checker (Day 2, 7 tests), 2x2 + Porter's + Value Chain schemas and renderers (Day 3, 6 tests across frontend + schema validation), framework wiring into modes (Day 4, 6 tests). The M&A path was demonstrated end-to-end in a prior session. Subsequent runs hit a runtime regression that we have not yet root-caused; the schema constraint revert in commit 665fe47 was one suspected cause but did not resolve it. growth_strategy + Porter's never produced an end-to-end memo in any session. Both runtime gaps are documented as Phase 3 carry-forward.
 
 ## Component check
 
@@ -137,6 +139,8 @@ never reached because there was no analysis to anchor it on.
 - **W7 carry-forward closed.** Run A produces the M&A memo W7 was missing.
 
 ## What's still open
+
+**Phase 3 carry-forward:** Re-run tools/run_week8_e2e.py against current main. If Run A still fails at evidence_insufficient (current state), root-cause the regression between sessions — suspected causes include the analyst claim_id rewrite, prompt tightening, or session-to-session library state. If Run A returns to its previous shipping state, run Run B against the UK competitive defence brief to confirm Porter's lands. Estimated effort: half a day.
 
 ### Run A regression persists after schema revert; deeper investigation needed
 
