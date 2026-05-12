@@ -93,10 +93,15 @@ throughout.
 | Item | Origin | Why deferred | Phase 3 estimate |
 |---|---|---|---|
 | Growth-strategy library expansion | W8 Run A | Upstream evidence-sufficiency variability surfaces as framework gaps; needs library-tier work, not framework-tier patching | ~1 week |
-| Deepening claim-id minting discipline | W9 R1/R2 | Writer reuses stale `claim_4` ids; `InitiativeBlock` lacks `evidence_citations` field | ~1–2 hours prompt + schema |
 | Deepening UI mount in workspace route | W9 D2 | `DeepenOrchestrator` wired into `MemoRenderer` via optional prop; no production route renders it yet | ~half day polish |
 | Cost-cap heuristic refinement | W9 D4 | $5/1M-token coarse estimate doesn't reflect prompt-cache savings — defensible upper bound, not a ship blocker | low priority |
 | W7 2×2 `min_length=4` re-test | W7 carry-forward | Reverted to `min_length=2` after writer reliably produced 3-item matrices; revisit when prompt tightening lands | low priority |
+
+> Note: the W9/D5 e2e initially landed with 9/11 assertions
+> (claim-id minting gap on both runs). The structural fix —
+> prompt tightening + `InitiativeBlock.evidence_citations` field —
+> landed in the same shipping cycle, re-fire posted 11/11. Not a
+> Phase 3 carry-forward.
 
 None of the above is a wedge-defect. The platform ships with the
 wedge demonstrable end-to-end.

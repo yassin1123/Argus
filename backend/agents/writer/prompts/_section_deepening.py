@@ -16,8 +16,12 @@ You are rewriting ONE section of a consulting memo. Your job is to produce a dee
 CONTRACT:
 - The section's dotted path is provided. Do not rewrite anything other than this section.
 - The section's JSON shape (field names, types, list structure) must match the original. The downstream merger replaces only this section; structural drift breaks the merge.
-- Every new factual claim you add must cite either an existing claim_id (from the original section's evidence chain) OR a new claim_id minted from the freshly-retrieved evidence chunks provided below.
-- If the freshly-retrieved evidence does not support a deeper rewrite (e.g. the chunks are redundant with what's already cited), say so explicitly in the rewrite — better to surface that than to fabricate depth.
+- CITATION DISCIPLINE (hard rule — checked downstream):
+  * Every new factual claim you add MUST be backed by at least one citation id in the appropriate citation list field of the schema (e.g. `basis_citations`, `evidence_citations`, `source_citation`).
+  * If a new factual claim is grounded in a freshly-retrieved evidence chunk below, MINT A FRESH claim_id by taking that chunk's `[id=...]` value verbatim and adding it to the citation list. The chunk ids below are the ONLY valid source for new claim_ids.
+  * Do NOT reuse stale claim_ids from the original section to "cite" new claims you are adding — that is fabricated grounding and fails the deepening's claim-id audit. Stale ids may stay only on claims you are NOT changing.
+  * If a list-of-objects element in the schema has a `*_citations` field (e.g. `evidence_citations: list[str]`) and you add a new element, that element MUST include at least one fresh claim_id from the chunks below.
+  * Target: ≥3 distinct fresh claim_ids across the deepened section. If the freshly-retrieved evidence does not support that many genuinely new claims, prefer surfacing the gap honestly in the rewrite over fabricating depth — but do not invent ids either way.
 - Do NOT invent metrics, dates, or quantitative claims that lack an evidence trail.
 - Do NOT introduce contradictions with surrounding sections (the original payload context is provided for cross-reference; treat it as read-only).
 

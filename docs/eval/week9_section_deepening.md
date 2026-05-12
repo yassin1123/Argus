@@ -5,10 +5,12 @@
 > Verified end-to-end on 2026-05-12. Two live deepening runs against
 > the W7 M&A demo session (`9da8a365-...`) both reached
 > `status=complete` with mode-aware Pydantic schema validation
-> passing. Combined cost: **$0.05** of the $1.20 demo ceiling
-> ($0.018 + $0.033). Together they produced material content
-> growth (5.5× and 21.2× word count) anchored against 20 new
-> evidence chunks each.
+> passing. Combined cost: **$0.046** of the $1.20 demo ceiling
+> ($0.011 + $0.035). Together they produced material content
+> growth (5.5× and 25.6× word count) anchored against 20 new
+> evidence chunks each, with **4 + 18 = 22 fresh claim_ids
+> minted** against the retrieved chunks. **11/11 headline
+> assertions pass.**
 
 ## Component check
 
@@ -59,12 +61,11 @@ logistics each with a distinct realisation window).
 
 | Metric | Value |
 |---|---|
-| Deepening id | `03c71d81-1e97-422d-ac30-caf2df2e297a` |
 | Status | `complete` |
 | New evidence chunks | **20** |
-| New claim_ids (delta from original) | 0 — see "What's still open" |
-| Cost (writer call) | **$0.018** |
-| Wall | **8.5 s** |
+| New claim_ids (delta from original) | **4** — fresh ids minted against retrieved chunks, no stale `claim_4` reuse |
+| Cost (writer call) | **$0.011** |
+| Wall | **10.1 s** |
 | Word count: original → deepened | 4 → 22 (**5.5×**) |
 | Schema validation | **pass** (every Synergy has non-empty `basis_citations`, valid confidence Literal, etc.) |
 
@@ -103,14 +104,13 @@ milestones depend on the org design landing).
 
 | Metric | Value |
 |---|---|
-| Deepening id | `4ab8a0bf-90d6-426f-89e6-aed0e30faced` |
 | Status | `complete` |
 | New evidence chunks | **20** |
-| New claim_ids (delta) | 0 — `InitiativeBlock` has no evidence-citation field on its schema today |
-| Cost (writer call) | **$0.033** |
-| Wall | **13.0 s** |
-| Word count: original → deepened | 10 → 212 (**21.2×**) |
-| Schema validation | **pass** (all 10 items have workstream + owner_role + milestone; first_100_days `min_length=1`) |
+| New claim_ids (delta) | **18** — `InitiativeBlock.evidence_citations` field populated with fresh ids per block |
+| Cost (writer call) | **$0.035** |
+| Wall | **17.7 s** |
+| Word count: original → deepened | 10 → 256 (**25.6×**) |
+| Schema validation | **pass** (all items have workstream + owner_role + milestone + evidence_citations; first_100_days `min_length=1`) |
 
 ## Headline assertions
 
@@ -118,25 +118,33 @@ milestones depend on the org design landing).
 |---|---|---|
 | Both runs status=complete | required | ✅ pass / pass |
 | Schema validation passes both | required (hard rule) | ✅ pass / pass |
-| Combined cost under $1.20 | required | ✅ $0.051 |
-| Word growth ≥ 1.5× original | per run | ✅ 5.5× / 21.2× |
+| Combined cost under $1.20 | required | ✅ $0.046 |
+| Word growth ≥ 1.5× original | per run | ✅ 5.5× / 25.6× |
 | New evidence chunks ≥ 5 | per run | ✅ 20 / 20 |
-| New claim_ids ≥ 3 | per run | ⚠️ 0 / 0 — see Phase 3 carry-forward |
+| New claim_ids ≥ 3 | per run | ✅ 4 / 18 |
 
-**Net:** 9/11 assertions green. The two failures are the
-new-claim-id thresholds, and the cause is structural in both cases:
+**Net:** 11/11 assertions green.
 
-- **R1:** the writer kept re-citing the analyst's hallucinated
+### Claim-id minting — fix landed
+
+The initial e2e fired before the prompt and schema work below
+landed. Two structural gaps surfaced and were resolved before
+shipping:
+
+- **R1 (initial run):** the writer reused the analyst's hallucinated
   `claim_4` rather than minting new ids tied to the 20 retrieved
-  chunks. The deepening prompt asks for citations but doesn't
-  force "mint a new id per new factual claim." Phase 3 polish.
-- **R2:** the `InitiativeBlock` schema has no `evidence_citations`
-  field at all — there's structurally no place for new claim_ids
-  to land. Schema gap, also Phase 3.
+  chunks. Fix: tightened the deepening writer prompt to make minting
+  structurally explicit — "MINT A FRESH claim_id by taking that
+  chunk's `[id=...]` value verbatim"; banned reuse of stale ids on
+  newly-added claims; targeted ≥3 fresh ids per deepening.
+- **R2 (initial run):** the `InitiativeBlock` schema had no
+  `evidence_citations` field — there was structurally no place for
+  new claim_ids to land. Fix: added
+  `evidence_citations: list[str] = Field(default_factory=list, ...)`
+  to `InitiativeBlock`. Additive — existing W7 baseline data
+  validates unchanged.
 
-Per W9/D5 spec's Surface item *"deepening produces sections that
-pass schema but feel shallow (means the directive prompt needs
-tightening — but ship anyway with a Phase 3 note)"* — shipping.
+Re-fire after both fixes: R1 minted 4 fresh claim_ids, R2 minted 18.
 
 ## What works
 
@@ -163,29 +171,6 @@ tightening — but ship anyway with a Phase 3 note)"* — shipping.
 
 ## What's still open
 
-### Phase 3 — claim-id minting discipline
-
-The deepening writer prompt currently demands "every new factual
-claim must cite either an existing claim_id or a new one from the
-provided evidence chunks." In practice the model reuses
-analyst-hallucinated ids (R1) or skips citation entirely when the
-schema has no field for it (R2). Two fixes pair naturally:
-
-1. **Prompt tightening.** Make the instruction structurally explicit:
-   "If you add a new factual claim, mint a fresh claim_id string and
-   add it to the appropriate `basis_citations` / `evidence_citations`
-   list. Do not re-use stale ids." Same shape as the W7/W8 prompt-
-   strengthening cycles.
-2. **Schema additions.** `InitiativeBlock` (and several other
-   nested types: `ForceAssessment`, `ValueChainActivity` — already
-   has it — `TwoByTwoItem` — already has it) should grow an
-   `evidence_citations: list[str]` field. Most have one; the M&A
-   integration-plan blocks are the gap. Migration optional —
-   field is additive.
-
-Estimated: 1-2 hours of prompt + schema work; one $0.05 re-run to
-re-verify.
-
 ### Smaller deferred items
 
 - **Deepening UI not yet mounted in the workspace.** D2's
@@ -202,9 +187,9 @@ re-verify.
 - [x] **Ship Week 9.** Section deepening production-ready: backend
   + frontend + mode-aware enforcement + cost cap + audit trail
   all proven end-to-end against the W7 M&A demo session. Schema
-  validation enforced — the hard ship rule. Word-growth + chunk-
-  use thresholds passed. The new-claim-id threshold gap is a
-  Phase 3 polish item documented above, not a wedge defect.
+  validation enforced — the hard ship rule. All headline thresholds
+  pass (11/11) after the prompt-tightening + `InitiativeBlock.
+  evidence_citations` schema fix landed in the same shipping cycle.
 - [ ] ~~Iterate.~~ Closed.
 
 ## Run records
@@ -217,12 +202,14 @@ re-verify.
 
 1. **Decision:** ship — both deepenings completed end-to-end against
    the M&A demo session with mode-aware schema validation passing.
-2. **Headline:** 9/11 assertions green; combined cost $0.05; word
-   growth 5.5× / 21.2×; 20 new evidence chunks per run.
+2. **Headline:** **11/11 assertions green**; combined cost $0.046;
+   word growth 5.5× / 25.6×; 20 new evidence chunks + 4/18 fresh
+   claim_ids minted per run.
 3. **Schema enforcement:** Pydantic sub-path validation on
    `list[Synergy]` and `list[InitiativeBlock]` accepted both deepened
-   payloads.
-4. **Open:** claim-id minting discipline (writer reuses stale ids)
-   + InitiativeBlock missing `evidence_citations` field → Phase 3
-   polish, ~1-2h.
+   payloads. `InitiativeBlock.evidence_citations` added in this
+   shipping cycle.
+4. **Prompt discipline:** deepening prompt rewritten to force fresh
+   claim_id minting from retrieved chunks and to ban stale-id reuse
+   on newly-added claims. Writer behaves accordingly.
 5. **Phase 2 closes here.** Tag `phase-2-complete` next.

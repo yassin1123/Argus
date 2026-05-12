@@ -2,13 +2,18 @@
   "run_name": "R1_cost_synergies",
   "section_path": "synergy_estimate.cost_synergies",
   "directive": "The cost synergies feel generic. Add detail: which functions, what timing (year 1 vs year 2 vs year 3), and what is the basis (benchmark transactions, internal estimates).",
-  "deepening_id": "03c71d81-1e97-422d-ac30-caf2df2e297a",
+  "deepening_id": "4cbe0a47-fddd-4887-9060-c2e650969ab2",
   "status": "complete",
   "failure_reason": null,
-  "wall_seconds": 8.49,
-  "measured_cost_usd": 0.018,
+  "wall_seconds": 10.11,
+  "measured_cost_usd": 0.0108,
   "new_evidence_chunks_used": 20,
-  "new_claim_ids": [],
+  "new_claim_ids": [
+    "0047212b-7755-48c6-b62f-f634e3ffd7aa",
+    "962f06e3-ce41-47f5-9808-d1afe4ac7402",
+    "baead613-7706-45d6-86f8-8e784debff00",
+    "c148fad4-e2f0-4529-ada7-25ba503464a3"
+  ],
   "original_section_json": [
     {
       "type": "Operational efficiencies",
@@ -26,7 +31,8 @@
       "confidence": "medium",
       "timing_months": 12,
       "basis_citations": [
-        "claim_4"
+        "claim_4",
+        "c148fad4-e2f0-4529-ada7-25ba503464a3"
       ],
       "magnitude_gbp_m": 1.8
     },
@@ -35,27 +41,30 @@
       "confidence": "medium",
       "timing_months": 18,
       "basis_citations": [
-        "claim_4"
+        "claim_4",
+        "baead613-7706-45d6-86f8-8e784debff00"
       ],
       "magnitude_gbp_m": 1.2
     },
     {
-      "type": "Back-office integration (finance, HR, IT)",
-      "confidence": "medium",
-      "timing_months": 24,
-      "basis_citations": [
-        "claim_4"
-      ],
-      "magnitude_gbp_m": 1.5
-    },
-    {
-      "type": "Logistics and distribution network optimization",
+      "type": "IT systems integration",
       "confidence": "low",
       "timing_months": 36,
       "basis_citations": [
-        "claim_4"
+        "claim_4",
+        "0047212b-7755-48c6-b62f-f634e3ffd7aa"
       ],
-      "magnitude_gbp_m": 0.5
+      "magnitude_gbp_m": 1.0
+    },
+    {
+      "type": "Back-office function consolidation",
+      "confidence": "medium",
+      "timing_months": 24,
+      "basis_citations": [
+        "claim_4",
+        "962f06e3-ce41-47f5-9808-d1afe4ac7402"
+      ],
+      "magnitude_gbp_m": 1.0
     }
   ],
   "original_word_count": 4,

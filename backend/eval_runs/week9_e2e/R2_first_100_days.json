@@ -2,13 +2,32 @@
   "run_name": "R2_first_100_days",
   "section_path": "integration_plan.first_100_days",
   "directive": "The 100-day plan is too high-level. Specify named owner roles (CFO, CHRO, Integration Lead, etc.) and the dependency chain between initiatives.",
-  "deepening_id": "4ab8a0bf-90d6-426f-89e6-aed0e30faced",
+  "deepening_id": "7b579e73-c199-45c1-8938-8bb06714bb8d",
   "status": "complete",
   "failure_reason": null,
-  "wall_seconds": 12.99,
-  "measured_cost_usd": 0.0328,
+  "wall_seconds": 17.74,
+  "measured_cost_usd": 0.0352,
   "new_evidence_chunks_used": 20,
-  "new_claim_ids": [],
+  "new_claim_ids": [
+    "00e49b5f-1f34-472f-9e43-790ba52bbb76",
+    "0751410d-2cdf-4c60-a5f9-f087e800c20f",
+    "09fbc4ed-2a75-4d79-b0a9-76547e85b5c8",
+    "30c62510-c43f-4c6c-a167-57eb270e25a8",
+    "41506621-531c-4bb1-a3f4-2a752520d241",
+    "43bc68fb-8eb1-4ed4-b911-5fb0c5026272",
+    "46e5c62a-adb6-45b1-af4a-09b24c22c842",
+    "5f93ed42-b110-4689-82c5-21a1168cd53e",
+    "6e91cf5d-afe4-4556-8359-52c18527d54d",
+    "745892ac-ca64-4966-80b1-ee051536b466",
+    "78d7337e-a989-4552-b8c5-bb4a164c6dc9",
+    "b185c383-d639-4441-9d51-dcbf7547f0a3",
+    "baead613-7706-45d6-86f8-8e784debff00",
+    "be6deaf6-2c76-4125-bc5d-d839dbe965d8",
+    "c111324e-f87b-4831-a1e2-8d5bd1a58ee3",
+    "c148fad4-e2f0-4529-ada7-25ba503464a3",
+    "d505bcb3-3e30-4a1b-8597-5d9b56589826",
+    "f965dfe9-5239-49bd-89fd-b9989050e0d5"
+  ],
   "original_section_json": [
     {
       "milestone": "Renew key contracts",
@@ -24,7 +43,11 @@
       "milestone": "Establish Integration Management Office and governance structure",
       "owner_role": "Integration Lead",
       "workstream": "Governance & Planning",
-      "dependencies": []
+      "dependencies": [],
+      "basis_citations": [
+        "be6deaf6-2c76-4125-bc5d-d839dbe965d8",
+        "c111324e-f87b-4831-a1e2-8d5bd1a58ee3"
+      ]
     },
     {
       "milestone": "Complete organizational design and announce leadership structure",
@@ -32,77 +55,103 @@
       "workstream": "Organization & Talent",
       "dependencies": [
         "Establish Integration Management Office and governance structure"
+      ],
+      "basis_citations": [
+        "b185c383-d639-4441-9d51-dcbf7547f0a3",
+        "41506621-531c-4bb1-a3f4-2a752520d241"
       ]
     },
     {
-      "milestone": "Identify and retain critical talent across both organizations",
-      "owner_role": "CHRO",
-      "workstream": "Organization & Talent",
-      "dependencies": [
-        "Complete organizational design and announce leadership structure"
-      ]
-    },
-    {
-      "milestone": "Conduct client risk assessment and prioritize top 20 accounts",
-      "owner_role": "Head of Sales",
-      "workstream": "Client Retention",
+      "milestone": "Align financial reporting systems and close books under unified chart of accounts",
+      "owner_role": "CFO",
+      "workstream": "Finance & Systems",
       "dependencies": [
         "Establish Integration Management Office and governance structure"
+      ],
+      "basis_citations": [
+        "6e91cf5d-afe4-4556-8359-52c18527d54d",
+        "78d7337e-a989-4552-b8c5-bb4a164c6dc9"
       ]
     },
     {
-      "milestone": "Execute client communication plan and schedule executive visits",
+      "milestone": "Conduct client outreach and renew key contracts with top 20 accounts",
       "owner_role": "Head of Sales",
       "workstream": "Client Retention",
       "dependencies": [
-        "Conduct client risk assessment and prioritize top 20 accounts",
-        "Complete organizational design and announce leadership structure"
-      ]
-    },
-    {
-      "milestone": "Renew key contracts and secure commitment letters",
-      "owner_role": "Head of Sales",
-      "workstream": "Client Retention",
-      "dependencies": [
-        "Execute client communication plan and schedule executive visits"
-      ]
-    },
-    {
-      "milestone": "Integrate financial reporting systems and establish unified chart of accounts",
-      "owner_role": "CFO",
-      "workstream": "Financial Integration",
-      "dependencies": [
+        "Complete organizational design and announce leadership structure",
         "Establish Integration Management Office and governance structure"
+      ],
+      "basis_citations": [
+        "46e5c62a-adb6-45b1-af4a-09b24c22c842",
+        "00e49b5f-1f34-472f-9e43-790ba52bbb76"
       ]
     },
     {
-      "milestone": "Consolidate banking relationships and optimize cash management",
-      "owner_role": "CFO",
-      "workstream": "Financial Integration",
+      "milestone": "Consolidate vendor contracts and renegotiate top 10 supplier agreements",
+      "owner_role": "Chief Procurement Officer",
+      "workstream": "Cost Synergies",
       "dependencies": [
-        "Integrate financial reporting systems and establish unified chart of accounts"
+        "Align financial reporting systems and close books under unified chart of accounts"
+      ],
+      "basis_citations": [
+        "30c62510-c43f-4c6c-a167-57eb270e25a8",
+        "baead613-7706-45d6-86f8-8e784debff00"
       ]
     },
     {
-      "milestone": "Harmonize IT infrastructure and migrate critical systems",
+      "milestone": "Integrate IT infrastructure and migrate critical applications to unified platform",
       "owner_role": "CTO",
       "workstream": "Technology Integration",
       "dependencies": [
         "Establish Integration Management Office and governance structure",
-        "Integrate financial reporting systems and establish unified chart of accounts"
+        "Align financial reporting systems and close books under unified chart of accounts"
+      ],
+      "basis_citations": [
+        "745892ac-ca64-4966-80b1-ee051536b466",
+        "c148fad4-e2f0-4529-ada7-25ba503464a3"
       ]
     },
     {
-      "milestone": "Launch quick-win cost reduction initiatives",
-      "owner_role": "Integration Lead",
-      "workstream": "Synergy Capture",
+      "milestone": "Execute retention plan for critical talent and complete compensation harmonization",
+      "owner_role": "CHRO",
+      "workstream": "Organization & Talent",
       "dependencies": [
-        "Integrate financial reporting systems and establish unified chart of accounts",
         "Complete organizational design and announce leadership structure"
+      ],
+      "basis_citations": [
+        "0751410d-2cdf-4c60-a5f9-f087e800c20f",
+        "09fbc4ed-2a75-4d79-b0a9-76547e85b5c8"
+      ]
+    },
+    {
+      "milestone": "Launch unified brand identity and execute customer communication plan",
+      "owner_role": "Chief Marketing Officer",
+      "workstream": "Brand & Communications",
+      "dependencies": [
+        "Complete organizational design and announce leadership structure",
+        "Conduct client outreach and renew key contracts with top 20 accounts"
+      ],
+      "basis_citations": [
+        "5f93ed42-b110-4689-82c5-21a1168cd53e",
+        "d505bcb3-3e30-4a1b-8597-5d9b56589826"
+      ]
+    },
+    {
+      "milestone": "Achieve Day 1 operational readiness across all business-critical functions",
+      "owner_role": "Integration Lead",
+      "workstream": "Governance & Planning",
+      "dependencies": [
+        "Integrate IT infrastructure and migrate critical applications to unified platform",
+        "Align financial reporting systems and close books under unified chart of accounts",
+        "Complete organizational design and announce leadership structure"
+      ],
+      "basis_citations": [
+        "43bc68fb-8eb1-4ed4-b911-5fb0c5026272",
+        "f965dfe9-5239-49bd-89fd-b9989050e0d5"
       ]
     }
   ],
   "original_word_count": 10,
-  "deepened_word_count": 212,
-  "word_growth_ratio": 21.2
+  "deepened_word_count": 256,
+  "word_growth_ratio": 25.6
 }

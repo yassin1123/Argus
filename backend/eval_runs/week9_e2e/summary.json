@@ -1,55 +1,55 @@
 {
-  "generated_at": "2026-05-12T07:41:38Z",
+  "generated_at": "2026-05-12T07:52:34Z",
   "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
   "headline_assertions": {
     "R1_cost_synergies_status_complete": true,
-    "R1_cost_synergies_new_claim_ids_ge_3": false,
+    "R1_cost_synergies_new_claim_ids_ge_3": true,
     "R1_cost_synergies_new_chunks_ge_5": true,
     "R1_cost_synergies_schema_valid": true,
     "R1_cost_synergies_word_growth_ge_1.5x": true,
     "R2_first_100_days_status_complete": true,
-    "R2_first_100_days_new_claim_ids_ge_3": false,
+    "R2_first_100_days_new_claim_ids_ge_3": true,
     "R2_first_100_days_new_chunks_ge_5": true,
     "R2_first_100_days_schema_valid": true,
     "R2_first_100_days_word_growth_ge_1.5x": true,
     "combined_cost_under_1.2": true,
-    "combined_cost_usd": 0.0508,
-    "headline_pass": false
+    "combined_cost_usd": 0.046,
+    "headline_pass": true
   },
-  "headline_pass": false,
+  "headline_pass": true,
   "n_runs": 2,
   "runs": [
     {
       "run_name": "R1_cost_synergies",
       "section_path": "synergy_estimate.cost_synergies",
-      "deepening_id": "03c71d81-1e97-422d-ac30-caf2df2e297a",
+      "deepening_id": "4cbe0a47-fddd-4887-9060-c2e650969ab2",
       "status": "complete",
       "failure_reason": null,
-      "wall_seconds": 8.49,
-      "measured_cost_usd": 0.018,
+      "wall_seconds": 10.11,
+      "measured_cost_usd": 0.0108,
       "new_evidence_chunks_used": 20,
-      "new_claim_ids_count": 0,
+      "new_claim_ids_count": 4,
       "original_word_count": 4,
       "deepened_word_count": 22,
       "word_growth_ratio": 5.5,
       "original_excerpt": "Operational efficiencies medium claim_4",
-      "deepened_excerpt": "Procurement consolidation medium claim_4 Facilities rationalization medium claim_4 Back-office integration (finance, HR, IT) medium claim_4 Logistics and distribution network optimization low claim_4"
+      "deepened_excerpt": "Procurement consolidation medium claim_4 c148fad4-e2f0-4529-ada7-25ba503464a3 Facilities rationalization medium claim_4 baead613-7706-45d6-86f8-8e784debff00 IT systems integration low claim_4 0047212b-7755-48c6-b62f-f634e3ffd7aa Back-office function consolidation medium claim_4 962f06e3-ce41-47f5-9808-d1afe4ac7402"
     },
     {
       "run_name": "R2_first_100_days",
       "section_path": "integration_plan.first_100_days",
-      "deepening_id": "4ab8a0bf-90d6-426f-89e6-aed0e30faced",
+      "deepening_id": "7b579e73-c199-45c1-8938-8bb06714bb8d",
       "status": "complete",
       "failure_reason": null,
-      "wall_seconds": 12.99,
-      "measured_cost_usd": 0.0328,
+      "wall_seconds": 17.74,
+      "measured_cost_usd": 0.0352,
       "new_evidence_chunks_used": 20,
-      "new_claim_ids_count": 0,
+      "new_claim_ids_count": 18,
       "original_word_count": 10,
-      "deepened_word_count": 212,
-      "word_growth_ratio": 21.2,
+      "deepened_word_count": 256,
+      "word_growth_ratio": 25.6,
       "original_excerpt": "Renew key contracts Head of Sales Client Retention Contract negotiations",
-      "deepened_excerpt": "Establish Integration Management Office and governance structure Integration Lead Governance & Planning Complete organizational design and announce leadership structure CHRO Organization & Talent Establish Integration Management Office and governance structure Identify and retain critical talent across both organizations CHRO Organization & Talent Complete organizational design and announce leadership structure Conduct client risk assessment and prioritize top 20 accounts Head of \u2026"
+      "deepened_excerpt": "Establish Integration Management Office and governance structure Integration Lead Governance & Planning be6deaf6-2c76-4125-bc5d-d839dbe965d8 c111324e-f87b-4831-a1e2-8d5bd1a58ee3 Complete organizational design and announce leadership structure CHRO Organization & Talent Establish Integration Management Office and governance structure b185c383-d639-4441-9d51-dcbf7547f0a3 41506621-531c-4bb1-a3f4-2a752520d241 Align financial reporting systems and close books under unified chart of accounts CFO Finance & Systems Establish Integration Management Office and governance structure 6e91cf5d-afe4-4556-8359-52c18527d54d 78d7337e-a989-4552-b8c5-bb4a164c6dc9 Conduct \u2026"
     }
   ]
 }

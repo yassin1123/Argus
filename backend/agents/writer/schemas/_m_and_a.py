@@ -215,6 +215,15 @@ class InitiativeBlock(BaseModel):
     owner_role: str = Field(..., description="Role title accountable, e.g. 'CTO', 'Head of Integration Office'.")
     milestone: str = Field(..., description="Concrete, observable milestone for this block.")
     dependencies: list[str] = Field(default_factory=list, description="Other blocks or external events this depends on.")
+    evidence_citations: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Optional claim_ids backing this initiative block. "
+            "Populated when the block was generated or revised from "
+            "retrieved evidence (e.g. via section deepening). Empty "
+            "for blocks authored from a brief alone."
+        ),
+    )
 
     model_config = {"extra": "ignore"}
 
