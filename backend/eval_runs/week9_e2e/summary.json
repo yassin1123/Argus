@@ -1,0 +1,55 @@
+{
+  "generated_at": "2026-05-12T07:41:38Z",
+  "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+  "headline_assertions": {
+    "R1_cost_synergies_status_complete": true,
+    "R1_cost_synergies_new_claim_ids_ge_3": false,
+    "R1_cost_synergies_new_chunks_ge_5": true,
+    "R1_cost_synergies_schema_valid": true,
+    "R1_cost_synergies_word_growth_ge_1.5x": true,
+    "R2_first_100_days_status_complete": true,
+    "R2_first_100_days_new_claim_ids_ge_3": false,
+    "R2_first_100_days_new_chunks_ge_5": true,
+    "R2_first_100_days_schema_valid": true,
+    "R2_first_100_days_word_growth_ge_1.5x": true,
+    "combined_cost_under_1.2": true,
+    "combined_cost_usd": 0.0508,
+    "headline_pass": false
+  },
+  "headline_pass": false,
+  "n_runs": 2,
+  "runs": [
+    {
+      "run_name": "R1_cost_synergies",
+      "section_path": "synergy_estimate.cost_synergies",
+      "deepening_id": "03c71d81-1e97-422d-ac30-caf2df2e297a",
+      "status": "complete",
+      "failure_reason": null,
+      "wall_seconds": 8.49,
+      "measured_cost_usd": 0.018,
+      "new_evidence_chunks_used": 20,
+      "new_claim_ids_count": 0,
+      "original_word_count": 4,
+      "deepened_word_count": 22,
+      "word_growth_ratio": 5.5,
+      "original_excerpt": "Operational efficiencies medium claim_4",
+      "deepened_excerpt": "Procurement consolidation medium claim_4 Facilities rationalization medium claim_4 Back-office integration (finance, HR, IT) medium claim_4 Logistics and distribution network optimization low claim_4"
+    },
+    {
+      "run_name": "R2_first_100_days",
+      "section_path": "integration_plan.first_100_days",
+      "deepening_id": "4ab8a0bf-90d6-426f-89e6-aed0e30faced",
+      "status": "complete",
+      "failure_reason": null,
+      "wall_seconds": 12.99,
+      "measured_cost_usd": 0.0328,
+      "new_evidence_chunks_used": 20,
+      "new_claim_ids_count": 0,
+      "original_word_count": 10,
+      "deepened_word_count": 212,
+      "word_growth_ratio": 21.2,
+      "original_excerpt": "Renew key contracts Head of Sales Client Retention Contract negotiations",
+      "deepened_excerpt": "Establish Integration Management Office and governance structure Integration Lead Governance & Planning Complete organizational design and announce leadership structure CHRO Organization & Talent Establish Integration Management Office and governance structure Identify and retain critical talent across both organizations CHRO Organization & Talent Complete organizational design and announce leadership structure Conduct client risk assessment and prioritize top 20 accounts Head of \u2026"
+    }
+  ]
+}
