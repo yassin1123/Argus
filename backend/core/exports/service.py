@@ -1,0 +1,459 @@
+"""Export service — W10/D2.
+
+Loads payload + firm branding, builds citations, dispatches via
+:func:`get_exporter`, persists file to disk, writes the
+``export_artifacts`` row. The API endpoints in ``backend/api/exports.py``
+are thin wrappers over this module.
+
+Storage: files land under ``ARGUS_ARTIFACTS_ROOT`` (default
+``/tmp/argus_artifacts`` on POSIX, ``%TEMP%/argus_artifacts`` on
+Windows), partitioned by firm/session/artifact:
+``<root>/<firm_id>/<session_id>/<artifact_id>.<format>``.
+Phase 5 swaps this for S3/blob.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import os
+import tempfile
+import time
+import uuid
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+from uuid import UUID
+
+from db.connection import acquire
+
+from ._base import ClaimCitation
+from ._registry import get_exporter, list_registered
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Constants + helpers
+# ---------------------------------------------------------------------------
+
+
+def _artifacts_root() -> Path:
+    """Root directory for rendered artifact files.
+
+    Resolved at call time (not import time) so tests can override via
+    the ``ARGUS_ARTIFACTS_ROOT`` env var.
+    """
+    env = os.environ.get("ARGUS_ARTIFACTS_ROOT")
+    if env:
+        return Path(env)
+    # Cross-platform default: gettempdir gives /tmp on POSIX, %TEMP%
+    # on Windows. Keep the directory name stable across runs.
+    return Path(tempfile.gettempdir()) / "argus_artifacts"
+
+
+def artifact_file_path(firm_id: UUID, session_id: UUID, artifact_id: UUID, format: str) -> Path:
+    """Resolve the on-disk path for a (firm, session, artifact, format)."""
+    return _artifacts_root() / str(firm_id) / str(session_id) / f"{artifact_id}.{format}"
+
+
+# ---------------------------------------------------------------------------
+# Public DTOs
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class GenerateArtifactRequest:
+    session_id: UUID
+    artifact_type: str
+    format: str
+
+
+@dataclass
+class GenerateArtifactResult:
+    artifact_id: UUID
+    session_id: UUID
+    artifact_type: str
+    format: str
+    status: str  # 'ready' | 'failed'
+    file_path: str | None = None
+    file_size_bytes: int | None = None
+    claim_citation_count: int = 0
+    generation_wall_seconds: float = 0.0
+    failure_reason: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+class ArtifactNotFoundError(Exception):
+    """Raised when an artifact id is missing or scoped to another session."""
+
+
+# ---------------------------------------------------------------------------
+# DB helpers
+# ---------------------------------------------------------------------------
+
+
+async def _firm_id_for_session(session_id: UUID) -> UUID | None:
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT firm_id FROM sessions WHERE id = $1::uuid", session_id
+        )
+    return row["firm_id"] if row else None
+
+
+async def _firm_branding(firm_id: UUID) -> dict[str, Any]:
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            "SELECT branding FROM firms WHERE id = $1::uuid", firm_id
+        )
+    if not row:
+        return {}
+    b = row["branding"]
+    if isinstance(b, str):
+        try:
+            return json.loads(b) or {}
+        except Exception:
+            return {}
+    return dict(b or {})
+
+
+async def _load_payload(session_id: UUID) -> dict[str, Any] | None:
+    """Pull the writer payload from ``reports``. Merged shape:
+    base WriterReportBase fields + consulting_payload."""
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT recommendation, confidence_level, summary, key_reasons, risks,
+                   counterarguments, next_steps, sources, caveats, consulting_payload
+            FROM reports WHERE session_id = $1::uuid
+            """,
+            session_id,
+        )
+    if not row:
+        return None
+    out: dict[str, Any] = {k: row[k] for k in row.keys() if k != "consulting_payload"}
+    cp = row["consulting_payload"]
+    if isinstance(cp, str):
+        try:
+            cp = json.loads(cp)
+        except Exception:
+            cp = {}
+    if isinstance(cp, dict):
+        out.update(cp)
+    return out
+
+
+async def _build_citations(session_id: UUID) -> list[ClaimCitation]:
+    """Build the citation list from the latest analyst output + evidence
+    catalog. Best-effort: if the analyst row is missing or the shape
+    is unexpected, return an empty list — the exporter can still
+    render the recommendation without footnotes."""
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT output FROM agent_outputs
+            WHERE session_id = $1::uuid
+              AND agent_name IN ('analyst_revision', 'analyst')
+            ORDER BY CASE agent_name WHEN 'analyst_revision' THEN 0 ELSE 1 END,
+                     created_at DESC
+            LIMIT 1
+            """,
+            session_id,
+        )
+        evs = await conn.fetch(
+            """
+            SELECT id, source_title, source_type
+            FROM evidence_objects WHERE session_id = $1::uuid
+            """,
+            session_id,
+        )
+    if not row:
+        return []
+    try:
+        analysis = json.loads(row["output"]) if isinstance(row["output"], str) else row["output"]
+    except Exception:
+        return []
+    ev_map: dict[str, tuple[str, str]] = {
+        str(e["id"]): (str(e["source_title"] or ""), str(e["source_type"] or ""))
+        for e in evs
+    }
+    out: list[ClaimCitation] = []
+    for c in (analysis or {}).get("key_claims") or []:
+        if not isinstance(c, dict):
+            continue
+        cid = str(c.get("claim_id") or "")
+        if not cid:
+            continue
+        ev_ids = c.get("evidence_ids") or []
+        title, stype = "", ""
+        for eid in ev_ids:
+            if str(eid) in ev_map:
+                title, stype = ev_map[str(eid)]
+                break
+        out.append(
+            ClaimCitation(
+                claim_id=cid,
+                text=str(c.get("text") or ""),
+                source_title=title,
+                source_type=stype,
+            )
+        )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Persistence: row insert + transitions
+# ---------------------------------------------------------------------------
+
+
+async def _insert_generating_row(
+    artifact_id: UUID,
+    session_id: UUID,
+    firm_id: UUID,
+    artifact_type: str,
+    format: str,
+    payload_snapshot: dict[str, Any] | None,
+    triggered_by: UUID | None,
+) -> None:
+    async with acquire() as conn:
+        await conn.execute(
+            """
+            INSERT INTO export_artifacts (
+                id, session_id, firm_id, artifact_type, format,
+                payload_snapshot, generated_by, status
+            ) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5,
+                      $6::jsonb, $7, 'generating')
+            """,
+            artifact_id,
+            session_id,
+            firm_id,
+            artifact_type,
+            format,
+            json.dumps(payload_snapshot) if payload_snapshot is not None else None,
+            triggered_by,
+        )
+
+
+async def _mark_ready(
+    artifact_id: UUID,
+    *,
+    file_path: str,
+    file_size: int,
+    claim_citation_count: int,
+    wall_seconds: float,
+    metadata: dict[str, Any],
+) -> None:
+    async with acquire() as conn:
+        await conn.execute(
+            """
+            UPDATE export_artifacts
+            SET status = 'ready',
+                file_path = $2,
+                file_size_bytes = $3,
+                claim_citation_count = $4,
+                generation_wall_seconds = $5,
+                metadata = $6::jsonb
+            WHERE id = $1::uuid
+            """,
+            artifact_id,
+            file_path,
+            file_size,
+            claim_citation_count,
+            wall_seconds,
+            json.dumps(metadata or {}),
+        )
+
+
+async def _mark_failed(artifact_id: UUID, reason: str, wall_seconds: float) -> None:
+    async with acquire() as conn:
+        await conn.execute(
+            """
+            UPDATE export_artifacts
+            SET status = 'failed',
+                failure_reason = $2,
+                generation_wall_seconds = $3
+            WHERE id = $1::uuid
+            """,
+            artifact_id,
+            reason[:2000],
+            wall_seconds,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
+
+
+async def generate_artifact(
+    request: GenerateArtifactRequest,
+    triggered_by: UUID | None = None,
+) -> GenerateArtifactResult:
+    """End-to-end: load payload + branding + citations, dispatch exporter,
+    write file, persist row.
+
+    The row exists in ``status='generating'`` from the moment we accept
+    the request — the API can return the id immediately and the GET
+    endpoint will see the row whether the render is mid-flight, ready,
+    or failed.
+    """
+    t0 = time.perf_counter()
+    artifact_id = uuid.uuid4()
+    session_id = request.session_id
+    artifact_type = request.artifact_type
+    format = request.format
+
+    firm_id = await _firm_id_for_session(session_id)
+    if firm_id is None:
+        return GenerateArtifactResult(
+            artifact_id=artifact_id,
+            session_id=session_id,
+            artifact_type=artifact_type,
+            format=format,
+            status="failed",
+            failure_reason=f"session {session_id} not found or has no firm_id",
+            generation_wall_seconds=time.perf_counter() - t0,
+        )
+
+    exporter = get_exporter(artifact_type, format)
+    if exporter is None:
+        # Insert a failed row anyway so the caller can poll for it and
+        # see a clear reason instead of a silent dropped POST.
+        await _insert_generating_row(
+            artifact_id,
+            session_id,
+            firm_id,
+            artifact_type,
+            format,
+            payload_snapshot=None,
+            triggered_by=triggered_by,
+        )
+        reason = (
+            f"no exporter registered for ({artifact_type!r}, {format!r}); "
+            f"available: {list_registered()}"
+        )
+        await _mark_failed(artifact_id, reason, time.perf_counter() - t0)
+        return GenerateArtifactResult(
+            artifact_id=artifact_id,
+            session_id=session_id,
+            artifact_type=artifact_type,
+            format=format,
+            status="failed",
+            failure_reason=reason,
+            generation_wall_seconds=time.perf_counter() - t0,
+        )
+
+    payload = await _load_payload(session_id)
+    branding = await _firm_branding(firm_id)
+    citations = await _build_citations(session_id)
+
+    await _insert_generating_row(
+        artifact_id,
+        session_id,
+        firm_id,
+        artifact_type,
+        format,
+        payload_snapshot=payload,  # freeze it here
+        triggered_by=triggered_by,
+    )
+
+    try:
+        result = await exporter.render(
+            payload or {},
+            branding,
+            citations,
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.exception(
+            "exporter %s/%s failed for session %s", artifact_type, format, session_id
+        )
+        wall = time.perf_counter() - t0
+        await _mark_failed(artifact_id, f"render error: {e}", wall)
+        return GenerateArtifactResult(
+            artifact_id=artifact_id,
+            session_id=session_id,
+            artifact_type=artifact_type,
+            format=format,
+            status="failed",
+            failure_reason=f"render error: {e}",
+            generation_wall_seconds=wall,
+        )
+
+    # Persist file to disk.
+    fpath = artifact_file_path(firm_id, session_id, artifact_id, format)
+    fpath.parent.mkdir(parents=True, exist_ok=True)
+    fpath.write_bytes(result.file_bytes)
+
+    wall = time.perf_counter() - t0
+    await _mark_ready(
+        artifact_id,
+        file_path=str(fpath),
+        file_size=result.file_size,
+        claim_citation_count=result.claim_citation_count,
+        wall_seconds=wall,
+        metadata=result.metadata or {},
+    )
+
+    return GenerateArtifactResult(
+        artifact_id=artifact_id,
+        session_id=session_id,
+        artifact_type=artifact_type,
+        format=format,
+        status="ready",
+        file_path=str(fpath),
+        file_size_bytes=result.file_size,
+        claim_citation_count=result.claim_citation_count,
+        generation_wall_seconds=wall,
+        metadata=result.metadata or {},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Read helpers (API consumers)
+# ---------------------------------------------------------------------------
+
+
+async def get_artifact(session_id: UUID, artifact_id: UUID) -> dict[str, Any] | None:
+    """Fetch a single artifact row scoped to ``session_id`` (so an
+    artifact for session A is invisible when queried against session B
+    — the API layer also enforces firm-tier permissions on top)."""
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT id, session_id, firm_id, artifact_type, format,
+                   file_path, file_size_bytes, claim_citation_count,
+                   generation_cost_usd, generation_wall_seconds,
+                   generated_by, generated_at, metadata, status,
+                   failure_reason
+            FROM export_artifacts
+            WHERE id = $1::uuid AND session_id = $2::uuid
+            """,
+            artifact_id,
+            session_id,
+        )
+    if not row:
+        return None
+    out = dict(row)
+    md = out.get("metadata")
+    if isinstance(md, str):
+        try:
+            out["metadata"] = json.loads(md)
+        except Exception:
+            out["metadata"] = {}
+    return out
+
+
+async def list_artifacts(session_id: UUID) -> list[dict[str, Any]]:
+    async with acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, artifact_type, format, status, file_size_bytes,
+                   claim_citation_count, generation_wall_seconds,
+                   generated_at, failure_reason
+            FROM export_artifacts
+            WHERE session_id = $1::uuid
+            ORDER BY generated_at DESC
+            """,
+            session_id,
+        )
+    return [dict(r) for r in rows]

@@ -1,0 +1,1 @@
+ALTER TABLE firms DROP COLUMN IF EXISTS branding;
