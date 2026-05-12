@@ -47,29 +47,34 @@ export default function WorkspaceTopBar({
   const canManage = role === "lead";
   const isViewer = role === "viewer";
   const [teamOpen, setTeamOpen] = useState(false);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState<null | "html" | "pdf">(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  async function handleExportOnePagerHtml() {
+  async function handleExportOnePager(format: "html" | "pdf") {
     if (exporting) return;
+    setExportMenuOpen(false);
     setExportError(null);
-    setExporting(true);
+    setExporting(format);
     try {
-      const created = await createExport(session.id, "one_pager", "html");
+      const created = await createExport(session.id, "one_pager", format);
       if (created.status === "ready") {
-        window.open(downloadUrl(session.id, created.artifact_id), "_blank", "noopener");
+        // HTML opens in a new tab (preview); PDF downloads via
+        // Content-Disposition: attachment on the backend.
+        const target = format === "html" ? "_blank" : "_self";
+        window.open(downloadUrl(session.id, created.artifact_id), target, "noopener");
       } else if (created.status === "failed") {
         setExportError(created.failure_reason ?? "Export failed");
       } else {
-        // 'generating' — synchronous render is the default for HTML, but
-        // keep a fallback message in case the architecture transitions
-        // to async dispatch later.
+        // 'generating' — the architecture supports async dispatch
+        // (PDF can take a couple of seconds), but this codepath
+        // expects sync ready for both HTML and PDF in the W10 cut.
         setExportError("Render queued — refresh the artifacts panel shortly.");
       }
     } catch (e) {
       setExportError(e instanceof Error ? e.message : String(e));
     } finally {
-      setExporting(false);
+      setExporting(null);
     }
   }
 
@@ -110,21 +115,53 @@ export default function WorkspaceTopBar({
           Team
         </button>
 
-        <button
-          type="button"
-          onClick={handleExportOnePagerHtml}
-          disabled={exporting || isViewer}
-          className="rounded-sm border border-argus-border-subtle bg-surface px-2 py-1 text-[11px] font-medium text-argus-secondary transition-colors hover:border-argus-primary hover:text-argus-primary disabled:cursor-not-allowed disabled:opacity-60"
-          title={
-            isViewer
-              ? "Viewers cannot generate exports"
-              : exportError
-                ? `Last attempt: ${exportError}`
-                : "Render a single-page 1-pager (HTML) and open it in a new tab"
-          }
-        >
-          {exporting ? "Exporting…" : "Export → 1-pager"}
-        </button>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setExportMenuOpen(v => !v)}
+            disabled={exporting !== null || isViewer}
+            className="rounded-sm border border-argus-border-subtle bg-surface px-2 py-1 text-[11px] font-medium text-argus-secondary transition-colors hover:border-argus-primary hover:text-argus-primary disabled:cursor-not-allowed disabled:opacity-60"
+            title={
+              isViewer
+                ? "Viewers cannot generate exports"
+                : exportError
+                  ? `Last attempt: ${exportError}`
+                  : "Generate a single-page 1-pager"
+            }
+            aria-haspopup="menu"
+            aria-expanded={exportMenuOpen}
+          >
+            {exporting === "html"
+              ? "Exporting HTML…"
+              : exporting === "pdf"
+                ? "Exporting PDF…"
+                : "Export ▾"}
+          </button>
+          {exportMenuOpen && !exporting && (
+            <div
+              role="menu"
+              className="absolute right-0 mt-1 w-44 rounded-sm border border-argus-border-subtle bg-surface shadow-md z-10 text-[11px]"
+              onMouseLeave={() => setExportMenuOpen(false)}
+            >
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleExportOnePager("html")}
+                className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary"
+              >
+                1-pager (HTML)
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleExportOnePager("pdf")}
+                className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary border-t border-argus-border-subtle"
+              >
+                1-pager (PDF)
+              </button>
+            </div>
+          )}
+        </div>
 
         <button
           type="button"

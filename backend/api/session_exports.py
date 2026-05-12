@@ -187,7 +187,16 @@ async def download_export_endpoint(
     fmt = str(row.get("format") or "")
     media = _CONTENT_TYPES.get(fmt, "application/octet-stream")
     filename = f"{row.get('artifact_type','artifact')}.{fmt}"
-    return FileResponse(Path(fp), media_type=media, filename=filename)
+    # Browser-renderable formats preview inline; binary formats (PDF,
+    # PPTX, XLSX, DOCX) ship as Content-Disposition: attachment so the
+    # frontend's "1-pager (PDF)" click triggers a file download.
+    disposition = "inline" if fmt in ("html", "md") else "attachment"
+    return FileResponse(
+        Path(fp),
+        media_type=media,
+        filename=filename,
+        content_disposition_type=disposition,
+    )
 
 
 @router.get("/{session_id}/exports")

@@ -151,19 +151,19 @@ def _stringify_item(x: Any) -> str:
     return str(x).strip()
 
 
-def _extract_reasons(payload: Any) -> tuple[list[str], int]:
-    """Top-3 reasons across schema variants. Returns
-    ``(top_3, trimmed_count)``."""
+def _extract_reasons(payload: Any, *, max_items: int = _REASONS_RISKS_MAX) -> tuple[list[str], int]:
+    """Top-N reasons across schema variants. Returns
+    ``(top_n, trimmed_count)``."""
     direct = _coerce_to_list(payload_get(payload, "key_reasons", default=[]))
     items: list[str] = [_stringify_item(x) for x in direct if _stringify_item(x)]
     if not items:
         ei = _coerce_to_list(payload_get(payload, "executive_insights", default=[]))
         items = [_stringify_item(x) for x in ei if _stringify_item(x)]
-    return items[:_REASONS_RISKS_MAX], max(0, len(items) - _REASONS_RISKS_MAX)
+    return items[:max_items], max(0, len(items) - max_items)
 
 
-def _extract_risks(payload: Any) -> tuple[list[str], int]:
-    """Top-3 risks across schema variants."""
+def _extract_risks(payload: Any, *, max_items: int = _REASONS_RISKS_MAX) -> tuple[list[str], int]:
+    """Top-N risks across schema variants."""
     direct = _coerce_to_list(payload_get(payload, "risks", default=[]))
     items: list[str] = [_stringify_item(x) for x in direct if _stringify_item(x)]
     if not items:
@@ -172,7 +172,7 @@ def _extract_risks(payload: Any) -> tuple[list[str], int]:
     if not items:
         rms = _coerce_to_list(payload_get(payload, "risks_and_mitigations", default=[]))
         items = [_stringify_item(x) for x in rms if _stringify_item(x)]
-    return items[:_REASONS_RISKS_MAX], max(0, len(items) - _REASONS_RISKS_MAX)
+    return items[:max_items], max(0, len(items) - max_items)
 
 
 # ---------------------------------------------------------------------------
@@ -339,11 +339,15 @@ def build_one_pager_context(
     mode_hint: str | None = None,
     firm_name: str = "Argus",
     now: datetime | None = None,
+    reasons_max: int = _REASONS_RISKS_MAX,
+    risks_max: int = _REASONS_RISKS_MAX,
 ) -> dict[str, Any]:
     """Build the Jinja render context for the 1-pager.
 
     Pure: no DB / no IO. Tolerant of payloads arriving as Pydantic
-    instances or plain dicts.
+    instances or plain dicts. ``reasons_max`` / ``risks_max`` allow
+    the PDF exporter to retry with a tighter cap when content
+    overflows a single page (W10/D4).
     """
     branding = firm_branding or {}
     now = now or datetime.now(tz=timezone.utc)
@@ -351,8 +355,8 @@ def build_one_pager_context(
     mode = _detect_mode(payload, mode_hint)
     rec_text = get_recommendation_text(payload)
     rec_color = classify_recommendation(rec_text)
-    reasons, reasons_trim = _extract_reasons(payload)
-    risks, risks_trim = _extract_risks(payload)
+    reasons, reasons_trim = _extract_reasons(payload, max_items=reasons_max)
+    risks, risks_trim = _extract_risks(payload, max_items=risks_max)
     ctx_citations = _index_citations(citations or [])
 
     supplement: dict[str, Any] = {}
