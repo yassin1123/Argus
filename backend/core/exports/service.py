@@ -101,25 +101,75 @@ async def _firm_id_for_session(session_id: UUID) -> UUID | None:
     return row["firm_id"] if row else None
 
 
+async def _session_meta(session_id: UUID) -> dict[str, Any]:
+    """Pull session-level metadata used to populate the artifact header
+    (title, target name, mode hint). Best-effort: keys may be missing
+    on older sessions, in which case the renderer falls back to
+    generic defaults."""
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT title, query, report_mode, metadata
+            FROM sessions WHERE id = $1::uuid
+            """,
+            session_id,
+        )
+    if not row:
+        return {}
+    out: dict[str, Any] = {
+        "title": row["title"] or "",
+        "report_mode": row["report_mode"] or "",
+    }
+    md = row["metadata"]
+    if isinstance(md, str):
+        try:
+            md = json.loads(md)
+        except Exception:
+            md = {}
+    if isinstance(md, dict):
+        out["target_name"] = str(
+            md.get("target_name") or md.get("target") or ""
+        )
+    return out
+
+
 async def _firm_branding(firm_id: UUID) -> dict[str, Any]:
     async with acquire() as conn:
         row = await conn.fetchrow(
-            "SELECT branding FROM firms WHERE id = $1::uuid", firm_id
+            "SELECT name, branding FROM firms WHERE id = $1::uuid", firm_id
         )
     if not row:
         return {}
     b = row["branding"]
     if isinstance(b, str):
         try:
-            return json.loads(b) or {}
+            b = json.loads(b) or {}
         except Exception:
-            return {}
-    return dict(b or {})
+            b = {}
+    out = dict(b or {})
+    # ``firm_name`` is not formally part of the branding JSONB but the
+    # renderer wants it for the header fallback when logo_url is empty.
+    out.setdefault("_firm_name", row["name"] or "Argus")
+    return out
+
+
+def _decode_jsonb(v: Any) -> Any:
+    """asyncpg returns jsonb as str by default in this project's
+    connection setup. Decode it to native Python; pass-through if
+    already a list/dict/None."""
+    if isinstance(v, str):
+        try:
+            return json.loads(v)
+        except Exception:
+            return v
+    return v
 
 
 async def _load_payload(session_id: UUID) -> dict[str, Any] | None:
     """Pull the writer payload from ``reports``. Merged shape:
-    base WriterReportBase fields + consulting_payload."""
+    base WriterReportBase fields + consulting_payload. All jsonb
+    columns are decoded so downstream consumers see lists/dicts, not
+    raw JSON strings."""
     async with acquire() as conn:
         row = await conn.fetchrow(
             """
@@ -131,13 +181,16 @@ async def _load_payload(session_id: UUID) -> dict[str, Any] | None:
         )
     if not row:
         return None
-    out: dict[str, Any] = {k: row[k] for k in row.keys() if k != "consulting_payload"}
-    cp = row["consulting_payload"]
-    if isinstance(cp, str):
-        try:
-            cp = json.loads(cp)
-        except Exception:
-            cp = {}
+    out: dict[str, Any] = {}
+    for k in row.keys():
+        if k == "consulting_payload":
+            continue
+        v = row[k]
+        # The 4 list-shaped columns + sources arrive as jsonb; decode.
+        if k in ("key_reasons", "risks", "counterarguments", "next_steps", "sources"):
+            v = _decode_jsonb(v)
+        out[k] = v
+    cp = _decode_jsonb(row["consulting_payload"])
     if isinstance(cp, dict):
         out.update(cp)
     return out
@@ -343,9 +396,22 @@ async def generate_artifact(
             generation_wall_seconds=time.perf_counter() - t0,
         )
 
-    payload = await _load_payload(session_id)
+    payload = await _load_payload(session_id) or {}
     branding = await _firm_branding(firm_id)
     citations = await _build_citations(session_id)
+    sess = await _session_meta(session_id)
+
+    # Inject engagement metadata onto the payload under reserved
+    # underscore-prefixed keys. The exporter reads these for the
+    # header and mode hint; they're not part of the writer schema and
+    # don't pollute the frozen snapshot semantically (they're
+    # session-derived, not writer-derived).
+    payload.setdefault("_engagement_title", sess.get("title") or "Argus 1-pager")
+    payload.setdefault("_mode_hint", sess.get("report_mode") or None)
+    payload.setdefault("_target_name", sess.get("target_name") or "")
+    payload.setdefault("_firm_name", branding.get("_firm_name") or "Argus")
+    if triggered_by:
+        payload.setdefault("_prepared_by", str(triggered_by))
 
     await _insert_generating_row(
         artifact_id,

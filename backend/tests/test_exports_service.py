@@ -105,10 +105,18 @@ def _fake_acquire_factory(
 
         async def fetchrow(self, sql: str, *args: Any) -> Any:
             s = " ".join(sql.split()).lower()
-            if "from sessions where id" in s:
+            if "select firm_id from sessions" in s:
                 return {"firm_id": firm_id}
+            if "from sessions where id" in s:
+                # _session_meta query
+                return {
+                    "title": "Test Engagement",
+                    "query": "test brief",
+                    "report_mode": stored.get("report_mode") or "general",
+                    "metadata": {},
+                }
             if "from firms where id" in s:
-                return {"branding": dict(branding)}
+                return {"name": "Test Firm", "branding": dict(branding)}
             if "from reports where session_id" in s:
                 cp_keys = (
                     "recommendation", "confidence_level", "summary",
@@ -293,6 +301,9 @@ async def test_generation_creates_file_on_disk(tmp_artifacts_root: Path) -> None
     assert str(firm_id) in fp.as_posix()
     assert str(session_id) in fp.as_posix()
     assert str(result.artifact_id) in fp.name
-    # File contains the rendered HTML (stub: just the recommendation in <h1>)
+    # File contains the rendered HTML (D3: recommendation panel +
+    # branding-driven CSS variables + the actual recommendation text).
     body = fp.read_text(encoding="utf-8")
-    assert "<h1>" in body and "PROCEED WITH CONDITIONS" in body
+    assert "PROCEED WITH CONDITIONS" in body
+    assert "recommendation" in body  # panel marker
+    assert "#0F6E56" in body  # primary_color from _SAMPLE_BRANDING

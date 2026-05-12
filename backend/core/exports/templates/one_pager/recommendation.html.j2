@@ -1,0 +1,5 @@
+{# Recommendation panel — color coded by classify_recommendation(). #}
+<div class="recommendation rec-{{ recommendation_color }}">
+  <div class="label">Recommendation · confidence {{ confidence_level or "unspecified" }}</div>
+  <div class="text">{{ recommendation_text }}</div>
+</div>

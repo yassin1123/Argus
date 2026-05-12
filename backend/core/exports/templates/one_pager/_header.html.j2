@@ -1,0 +1,18 @@
+{# Header band: logo (or firm name) | engagement meta | prepared-by. #}
+<div class="header">
+  <div class="logo">
+    {% if logo_url %}
+      <img src="{{ logo_url }}" alt="{{ firm_name }} logo">
+    {% else %}
+      {{ firm_name }}
+    {% endif %}
+  </div>
+  <div class="meta">
+    <div class="title">{{ engagement_title }}</div>
+    {% if target_name %}<div class="target">{{ target_name }}</div>{% endif %}
+  </div>
+  <div class="prepared">
+    {{ generated_at_display }}<br>
+    {% if prepared_by %}Prepared by {{ prepared_by }}{% endif %}
+  </div>
+</div>

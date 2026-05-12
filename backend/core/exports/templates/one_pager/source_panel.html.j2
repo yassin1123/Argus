@@ -1,0 +1,17 @@
+{# Source counts + numbered claim citation chips. #}
+<div class="sources-panel">
+  {% if source_counts %}
+    <div class="counts">
+      {% for sc in source_counts %}<span><strong>{{ sc.count }}</strong> {{ sc.label }}</span>{% endfor %}
+    </div>
+  {% endif %}
+  {% if citations %}
+  <div class="citation-list">
+    {% for c in citations %}
+      <span class="ref" data-claim-id="{{ c.claim_id }}" title="{{ c.text }}">
+        <sup>{{ c.idx }}</sup> {{ c.claim_id }}{% if c.source_title %} — {{ c.source_title }}{% endif %}
+      </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

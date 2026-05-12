@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { createExport, downloadUrl } from "@/lib/api/sessionExports";
 import type { SessionDetail } from "@/lib/types";
 
 import TeamPanel from "./TeamPanel";
@@ -46,6 +47,31 @@ export default function WorkspaceTopBar({
   const canManage = role === "lead";
   const isViewer = role === "viewer";
   const [teamOpen, setTeamOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  async function handleExportOnePagerHtml() {
+    if (exporting) return;
+    setExportError(null);
+    setExporting(true);
+    try {
+      const created = await createExport(session.id, "one_pager", "html");
+      if (created.status === "ready") {
+        window.open(downloadUrl(session.id, created.artifact_id), "_blank", "noopener");
+      } else if (created.status === "failed") {
+        setExportError(created.failure_reason ?? "Export failed");
+      } else {
+        // 'generating' — synchronous render is the default for HTML, but
+        // keep a fallback message in case the architecture transitions
+        // to async dispatch later.
+        setExportError("Render queued — refresh the artifacts panel shortly.");
+      }
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setExporting(false);
+    }
+  }
 
   return (
     <header className="argus-topbar">
@@ -82,6 +108,22 @@ export default function WorkspaceTopBar({
           title="View engagement team"
         >
           Team
+        </button>
+
+        <button
+          type="button"
+          onClick={handleExportOnePagerHtml}
+          disabled={exporting || isViewer}
+          className="rounded-sm border border-argus-border-subtle bg-surface px-2 py-1 text-[11px] font-medium text-argus-secondary transition-colors hover:border-argus-primary hover:text-argus-primary disabled:cursor-not-allowed disabled:opacity-60"
+          title={
+            isViewer
+              ? "Viewers cannot generate exports"
+              : exportError
+                ? `Last attempt: ${exportError}`
+                : "Render a single-page 1-pager (HTML) and open it in a new tab"
+          }
+        >
+          {exporting ? "Exporting…" : "Export → 1-pager"}
         </button>
 
         <button
