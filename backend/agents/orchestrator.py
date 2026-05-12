@@ -939,12 +939,45 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                     + " Programmatic check: no valid claim_assessments after catalog sanitization."
                 ).strip()
 
+        # W10/D1: harden the pre-writer evidence gate against verifier
+        # stochasticity. Previously this gate was binary on the
+        # verifier's free-form ``overall`` string: a single
+        # ``"insufficient"`` would halt the pipeline. That made the
+        # W8 Run A regression deterministic on current model state
+        # even when LAST_GOOD code produced the same failure — the
+        # verifier just returns mixed verdicts day-to-day. The gate
+        # now consults the assessments themselves: halt only when
+        # genuine majority-unsupported coverage, OR when the verifier
+        # both declared insufficient AND the assessments are too
+        # sparse to override.
         insufficient = False
-        if isinstance(verification, dict):
-            if str(verification.get("overall", "")).lower() == "insufficient":
-                insufficient = True
         if len(evidence_objects) == 0:
             insufficient = True
+        elif isinstance(verification, dict):
+            overall_str = str(verification.get("overall", "")).lower()
+            cas = verification.get("claim_assessments") or []
+            cas = [a for a in cas if isinstance(a, dict)]
+            supported = sum(
+                1 for a in cas
+                if str(a.get("verdict", "")).lower().startswith("supp")
+            )
+            unsupported = sum(
+                1 for a in cas
+                if str(a.get("verdict", "")).lower() in (
+                    "unsupported", "contradicted", "weak"
+                )
+            )
+            # Halt cases:
+            #  - verifier explicitly insufficient AND assessments empty
+            #    or majority-unsupported (genuine coverage failure)
+            #  - assessments majority-unsupported regardless of overall
+            #    (verifier under-reporting failure)
+            if overall_str == "insufficient" and (
+                not cas or unsupported > supported
+            ):
+                insufficient = True
+            elif unsupported > supported and cas:
+                insufficient = True
 
         await update_pipeline_state(session_id, "verification_done")
         if insufficient:
