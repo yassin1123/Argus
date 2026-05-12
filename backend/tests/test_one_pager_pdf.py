@@ -246,6 +246,7 @@ async def test_overflow_triggers_truncation(exporter: OnePagerPdfExporter) -> No
     assert result.metadata["attempt_1_pages"] == 2
     assert result.metadata["attempt_2_pages"] == 1
     assert result.metadata["attempt_2_risks_max"] == 2
+    assert result.metadata["attempt_2_reasons_max"] == 2
     # Final renderer config landed at risks=2; risks_truncated reflects
     # 8 - 2 = 6 trimmed.
     assert result.metadata["risks_count"] == 2

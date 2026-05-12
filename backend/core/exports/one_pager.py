@@ -184,18 +184,22 @@ class OnePagerPdfExporter(ExporterBase):
         truncated_for_fit = False
 
         if pages != 1:
-            # Retry pass: trim risks to 2 (per spec). Reasons stay at 3
-            # — the spec calls out risks specifically as the trim target.
+            # Retry pass: trim risks to 2 (spec-called) + reasons to 2.
+            # The spec's primary truncation target is risks, but
+            # growth_strategy memos can carry 5-sentence recommendation
+            # prose that consumes vertical space the spec's M&A example
+            # didn't account for. Reasons also collapsing keeps the
+            # single-page contract holdable for verbose payloads.
             truncated_for_fit = True
             html, ctx = _render_one_pager_html(
-                payload, firm_branding, citations, risks_max=2
+                payload, firm_branding, citations, reasons_max=2, risks_max=2
             )
             pdf_bytes = _html_to_pdf(html)
             pages_retry = _pdf_page_count(pdf_bytes)
             attempt_meta.update(
                 {
                     "attempt_2_pages": pages_retry,
-                    "attempt_2_reasons_max": 3,
+                    "attempt_2_reasons_max": 2,
                     "attempt_2_risks_max": 2,
                 }
             )
