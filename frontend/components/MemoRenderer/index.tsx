@@ -20,17 +20,54 @@
  * Renamed to `MemoRenderer/` to avoid the collision.
  */
 
+import { isDeepenable } from "@/lib/api/sectionDeepening";
+import SectionWrapper from "@/components/SectionDeepening/SectionWrapper";
+
 import FrameworksSection, { type FrameworksData } from "./Frameworks";
 import IntegrationTimeline from "./M_and_A/IntegrationTimeline";
 import SynergyBreakdown from "./M_and_A/SynergyBreakdown";
 import ValuationRangeTable from "./M_and_A/ValuationRangeTable";
 import SchemaDrivenSection, { type JsonValue } from "./SchemaDrivenSection";
 
+/** W9/D2: the orchestrator's deepen hook, threaded into each
+ * renderable section's :class:`SectionWrapper`. Optional — when
+ * absent the memo renders without the deepen affordance, preserving
+ * pre-W9 behaviour. */
+export interface DeepeningHook {
+  inFlight: boolean;
+  onDeepen: (sectionPath: string) => void;
+}
+
 export interface MemoRendererProps {
   /** The writer's structured payload — any WriterReportBase subclass dump. */
   payload: Record<string, JsonValue>;
   /** The consulting mode the engagement ran under. Drives dispatch. */
   modeName: string;
+  /** When supplied, each deepenable section gets a hover-state
+   * "Deepen" affordance that calls ``onDeepen(path)``. */
+  deepening?: DeepeningHook;
+}
+
+/** Wrap a rendered section in :class:`SectionWrapper` iff the host
+ * supplied a deepening hook AND the section path is deepenable
+ * (``isDeepenable`` excludes the recommendation per W9/D2 hard rule).
+ */
+function maybeWrap(
+  sectionPath: string,
+  deepening: DeepeningHook | undefined,
+  content: JSX.Element | null,
+): JSX.Element | null {
+  if (!content) return content;
+  if (!deepening || !isDeepenable(sectionPath)) return content;
+  return (
+    <SectionWrapper
+      sectionPath={sectionPath}
+      inFlight={deepening.inFlight}
+      onDeepen={deepening.onDeepen}
+    >
+      {content}
+    </SectionWrapper>
+  );
 }
 
 const M_AND_A_RENDERED_KEYS = new Set([
@@ -95,7 +132,7 @@ function orderedKeys(payload: Record<string, JsonValue>, modeName: string): stri
   return known;
 }
 
-export default function MemoRenderer({ payload, modeName }: MemoRendererProps) {
+export default function MemoRenderer({ payload, modeName, deepening }: MemoRendererProps) {
   const isMandA = modeName === "m_and_a_diligence";
   const ordered = orderedKeys(payload, modeName);
 
@@ -112,12 +149,18 @@ export default function MemoRenderer({ payload, modeName }: MemoRendererProps) {
         </span>
       </header>
 
-      {/* Structured-payload base fields, in canonical order. */}
+      {/* Structured-payload base fields, in canonical order. Each
+          section gets a hover-state Deepen affordance when the host
+          supplied a deepening hook (W9/D2). */}
       {ordered.map((k) => {
         const v = payload[k];
         if (v === undefined) return null;
         return (
-          <SchemaDrivenSection key={`gen-${k}`} title={k} value={v} />
+          <div key={`gen-${k}`}>
+            {maybeWrap(k, deepening, (
+              <SchemaDrivenSection title={k} value={v} />
+            ))}
+          </div>
         );
       })}
 
@@ -126,15 +169,21 @@ export default function MemoRenderer({ payload, modeName }: MemoRendererProps) {
           structured deal sections follow. */}
       {isMandA ? (
         <>
-          {payload.synergy_estimate && typeof payload.synergy_estimate === "object" && !Array.isArray(payload.synergy_estimate) ? (
-            <SynergyBreakdown data={payload.synergy_estimate as never} />
-          ) : null}
-          {payload.valuation_range && typeof payload.valuation_range === "object" && !Array.isArray(payload.valuation_range) ? (
-            <ValuationRangeTable data={payload.valuation_range as never} />
-          ) : null}
-          {payload.integration_plan && typeof payload.integration_plan === "object" && !Array.isArray(payload.integration_plan) ? (
-            <IntegrationTimeline data={payload.integration_plan as never} />
-          ) : null}
+          {payload.synergy_estimate && typeof payload.synergy_estimate === "object" && !Array.isArray(payload.synergy_estimate)
+            ? maybeWrap("synergy_estimate", deepening, (
+                <SynergyBreakdown data={payload.synergy_estimate as never} />
+              ))
+            : null}
+          {payload.valuation_range && typeof payload.valuation_range === "object" && !Array.isArray(payload.valuation_range)
+            ? maybeWrap("valuation_range", deepening, (
+                <ValuationRangeTable data={payload.valuation_range as never} />
+              ))
+            : null}
+          {payload.integration_plan && typeof payload.integration_plan === "object" && !Array.isArray(payload.integration_plan)
+            ? maybeWrap("integration_plan", deepening, (
+                <IntegrationTimeline data={payload.integration_plan as never} />
+              ))
+            : null}
         </>
       ) : null}
 
@@ -142,8 +191,16 @@ export default function MemoRenderer({ payload, modeName }: MemoRendererProps) {
           Forces, Value Chain). Mode-agnostic — any memo can carry one,
           two, all three, or none. FrameworksSection is a no-op when
           payload.frameworks is null or all slots are null, so
-          backward compat is preserved. */}
-      <FrameworksSection data={(payload.frameworks ?? null) as FrameworksData | null} />
+          backward compat is preserved.
+
+          W9/D2: frameworks now accept a deepening hook too. The
+          FrameworksSection wraps each non-null framework in its own
+          SectionWrapper internally — same affordance pattern as
+          the base sections. */}
+      <FrameworksSection
+        data={(payload.frameworks ?? null) as FrameworksData | null}
+        deepening={deepening}
+      />
     </div>
   );
 }

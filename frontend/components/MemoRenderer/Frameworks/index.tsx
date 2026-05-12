@@ -15,6 +15,9 @@
  * <FrameworksSection /> and gets all three for free.
  */
 
+import { isDeepenable } from "@/lib/api/sectionDeepening";
+import SectionWrapper from "@/components/SectionDeepening/SectionWrapper";
+
 import PortersFiveForces, { type PortersFiveForcesData } from "./PortersFiveForces";
 import TwoByTwoMatrix, { type TwoByTwoMatrixData } from "./TwoByTwoMatrix";
 import ValueChain, { type ValueChainData } from "./ValueChain";
@@ -25,20 +28,54 @@ export interface FrameworksData {
   value_chain?: ValueChainData | null;
 }
 
-export interface FrameworksSectionProps {
-  data?: FrameworksData | null;
+/** W9/D2: optional deepening hook threaded through MemoRenderer. */
+export interface FrameworksDeepeningHook {
+  inFlight: boolean;
+  onDeepen: (sectionPath: string) => void;
 }
 
-export default function FrameworksSection({ data }: FrameworksSectionProps) {
+export interface FrameworksSectionProps {
+  data?: FrameworksData | null;
+  deepening?: FrameworksDeepeningHook;
+}
+
+function wrap(
+  sectionPath: string,
+  deepening: FrameworksDeepeningHook | undefined,
+  content: JSX.Element,
+): JSX.Element {
+  if (!deepening || !isDeepenable(sectionPath)) return content;
+  return (
+    <SectionWrapper
+      sectionPath={sectionPath}
+      inFlight={deepening.inFlight}
+      onDeepen={deepening.onDeepen}
+    >
+      {content}
+    </SectionWrapper>
+  );
+}
+
+export default function FrameworksSection({ data, deepening }: FrameworksSectionProps) {
   if (!data) return null;
   const { two_by_two, porters_five_forces, value_chain } = data;
   if (!two_by_two && !porters_five_forces && !value_chain) return null;
 
   return (
     <section data-testid="frameworks-section" className="mt-6 space-y-6">
-      {two_by_two ? <TwoByTwoMatrix data={two_by_two} /> : null}
-      {porters_five_forces ? <PortersFiveForces data={porters_five_forces} /> : null}
-      {value_chain ? <ValueChain data={value_chain} /> : null}
+      {two_by_two
+        ? wrap("frameworks.two_by_two", deepening, <TwoByTwoMatrix data={two_by_two} />)
+        : null}
+      {porters_five_forces
+        ? wrap(
+            "frameworks.porters_five_forces",
+            deepening,
+            <PortersFiveForces data={porters_five_forces} />,
+          )
+        : null}
+      {value_chain
+        ? wrap("frameworks.value_chain", deepening, <ValueChain data={value_chain} />)
+        : null}
     </section>
   );
 }
