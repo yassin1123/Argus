@@ -24,5 +24,9 @@ from .acceptance import (  # noqa: F401 — W9/D3
     reject_deepening,
 )
 from .addressing import SectionNotFoundError, get_section, set_section  # noqa: F401
-from .service import deepen_section  # noqa: F401
+from .service import MAX_DEEPENING_COST_USD, deepen_section  # noqa: F401
 from .types import DeepeningRequest, DeepeningResult  # noqa: F401
+from .validation import (  # noqa: F401 — W9/D4
+    SchemaPathError,
+    validate_section_against_schema,
+)

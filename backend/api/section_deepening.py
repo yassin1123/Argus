@@ -50,8 +50,16 @@ async def _require_read(session_id: str, user: dict) -> None:
 
 
 async def _require_write(session_id: str, user: dict) -> None:
+    """W9/D4: a non-member returns 404 (session is hidden); a
+    read-only member returns 403 (session visible but not writable).
+    Same pattern as sessions.py and the spec's permissions rule
+    ("firm_member can deepen; non-member gets 404")."""
+    if not await can_read(session_id, user):
+        raise HTTPException(status_code=404, detail="Session not found")
     if not await can_write(session_id, user):
-        raise HTTPException(status_code=403, detail="Write access required to deepen sections")
+        raise HTTPException(
+            status_code=403, detail="Write access required to deepen sections"
+        )
 
 
 # ---------------------------------------------------------------------------

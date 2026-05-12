@@ -43,6 +43,8 @@ from typing import Any
 from uuid import UUID
 
 from agents.writer.prompts import SECTION_DEEPENING_WRITER_PROMPT
+from agents.writer.schemas import GeneralReportPayload, get_writer_schema
+from core.consulting_modes import ResolvedConsultingMode, resolve_mode
 from core.json_util import parse_llm_json
 from core.llm import llm_call_for_task
 from core.retrieval_chunks import hybrid_search
@@ -50,6 +52,7 @@ from db.connection import acquire
 
 from .addressing import SectionNotFoundError, get_section
 from .types import DeepeningRequest, DeepeningResult
+from .validation import SchemaPathError, validate_section_against_schema
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +66,45 @@ MAX_NEW_CHUNKS = 20
 # is built from. Keeps the embedding/keyword query focused on the
 # section's actual material, not the whole memo.
 _SECTION_CONTEXT_TRUNCATE = 800
+
+# W9/D4: per-deepening cost ceiling. Bounded cost is part of the
+# trust contract with firms — exceeding this aborts pre-firing
+# with ``failure_reason='exceeded_per_run_cost_cap'``. Don't raise
+# without a real-world reason. Cost estimation uses a coarse
+# heuristic over the prompt-token volume + retrieved-chunk volume
+# (see ``_estimate_call_cost_usd``).
+MAX_DEEPENING_COST_USD = 0.75
+
+# Coarse pricing assumption used for the pre-flight estimate.
+# Real cost lands on the ``llm_calls`` row after the call; this
+# guard rail just refuses to fire obviously-over-budget requests.
+# Tuned against ``writer`` task config in models.yaml; treat as
+# an upper bound (OpenAI gpt-4o pricing as of 2025).
+_ESTIMATED_PROMPT_USD_PER_TOKEN = 5.0 / 1_000_000   # $5 / 1M input tokens
+_ESTIMATED_OUTPUT_USD_PER_TOKEN = 15.0 / 1_000_000  # $15 / 1M output tokens
+_CHARS_PER_TOKEN_EST = 4
+_ESTIMATED_OUTPUT_TOKENS = 2000  # writer output budget per deepening
+
+
+def _estimate_call_cost_usd(
+    *,
+    system_prompt: str,
+    user_msg: str,
+    output_tokens: int = _ESTIMATED_OUTPUT_TOKENS,
+) -> float:
+    """Coarse pre-flight cost estimate for one writer call.
+
+    Auto-decided heuristic per W9/D4 spec: prompt chars / 4 →
+    tokens × prompt rate + fixed output budget × output rate. Drift
+    from actuals is acceptable — the ``llm_calls`` row carries the
+    truth post-flight. This only fires the pre-flight refusal when
+    the upper bound would clearly exceed the cap.
+    """
+    prompt_tokens = max(0, (len(system_prompt) + len(user_msg)) // _CHARS_PER_TOKEN_EST)
+    return (
+        prompt_tokens * _ESTIMATED_PROMPT_USD_PER_TOKEN
+        + output_tokens * _ESTIMATED_OUTPUT_USD_PER_TOKEN
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -158,6 +200,46 @@ async def _persist_failed(
             reason[:2000],
             wall_seconds,
         )
+
+
+# ---------------------------------------------------------------------------
+# Audit events — W9/D4
+# ---------------------------------------------------------------------------
+# The audit_events table (not audit_log — spec drift, naming-only)
+# already has the ``action`` column granularity we need; no schema
+# change. ``actor_user_id`` is the triggering consultant for
+# ``triggered`` / ``accepted`` / ``rejected``, and NULL for
+# system-driven ``completed`` / ``failed`` / ``cost_cap_exceeded``.
+
+
+async def _audit_deepening(
+    action: str,
+    *,
+    actor_user_id: UUID | None,
+    deepening_id: UUID,
+    payload: dict[str, Any],
+) -> None:
+    """Append one ``audit_events`` row for a deepening lifecycle event.
+
+    Best-effort — never raises; audit-log hiccups must not abort
+    the pipeline.
+    """
+    try:
+        async with acquire() as conn:
+            await conn.execute(
+                """
+                INSERT INTO audit_events
+                  (actor_user_id, action, resource_type, resource_id, payload)
+                VALUES
+                  ($1::uuid, $2, 'section_deepening', $3, $4::jsonb)
+                """,
+                actor_user_id,
+                action,
+                str(deepening_id),
+                json.dumps(payload),
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.debug("audit insert skipped for %s/%s: %s", action, deepening_id, e)
 
 
 # ---------------------------------------------------------------------------
@@ -321,6 +403,58 @@ def _format_chunks_for_prompt(chunks: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _build_mode_aware_user_msg(
+    *,
+    section_path: str,
+    original_section: Any,
+    depth_directive: str | None,
+    new_chunks: list[dict[str, Any]],
+    resolved_mode: ResolvedConsultingMode | None,
+    schema_class_name: str,
+) -> str:
+    """Compose the user message for the focused deepening writer pass.
+
+    Mode-aware additions (W9/D4): leads with display_name + slug so
+    the LLM sees what kind of memo this is; stitches in the resolved
+    mode's ``writer_overlay`` (firm-overridden when applicable); names
+    the schema class + section path explicitly so the LLM understands
+    which Pydantic validators will run against the output.
+    """
+    directive_block = (
+        depth_directive.strip()
+        if depth_directive
+        else "(no specific directive — produce a generally deeper, better-grounded version)"
+    )
+    mode_header = ""
+    overlay_block = ""
+    if resolved_mode is not None:
+        mode_header = (
+            f"Engagement mode: {resolved_mode.display_name} (slug: {resolved_mode.name})\n"
+        )
+        if (resolved_mode.writer_overlay or "").strip():
+            overlay_block = (
+                f"\nMODE WRITER OVERLAY (firm-resolved, applies to the rewrite):\n"
+                f"{resolved_mode.writer_overlay.strip()[:2500]}\n"
+            )
+    schema_block = (
+        f"\nSchema class: {schema_class_name}\n"
+        f"Section path: {section_path}\n"
+        f"The Pydantic validator for this section path runs on the deepened output. "
+        f"Field-level constraints (required keys, list min/max, literal enums, "
+        f"non-empty citation lists, etc.) are enforced — schema violation fails "
+        f"the deepening with no retry.\n"
+    )
+    return (
+        f"{mode_header}{schema_block}{overlay_block}\n"
+        f"Depth directive:\n{directive_block}\n\n"
+        f"Original section (JSON):\n{json.dumps(original_section, ensure_ascii=False, indent=2)[:6000]}\n\n"
+        f"Newly retrieved evidence chunks (cite their ids as claim_ids):\n"
+        f"{_format_chunks_for_prompt(new_chunks)}\n\n"
+        f"Produce the deepened section JSON now. Same shape as the original; "
+        f"no extra fields; no markdown wrapper."
+    )
+
+
 async def _call_deepening_writer(
     *,
     section_path: str,
@@ -328,21 +462,23 @@ async def _call_deepening_writer(
     depth_directive: str | None,
     new_chunks: list[dict[str, Any]],
     session_id: UUID,
-) -> tuple[Any, list[str]]:
-    """Run the section-deepening writer pass; return
-    ``(deepened_section, new_claim_ids_used)``. ``new_claim_ids``
-    are extracted from the deepened section after the fact via the
-    same sweep used to compute ``already_cited``.
+    resolved_mode: ResolvedConsultingMode | None,
+    schema_class_name: str,
+) -> tuple[Any, list[str], str]:
+    """Run the focused writer pass; return
+    ``(deepened_section, new_claim_ids_used, user_msg)``.
+
+    ``user_msg`` is returned for cost-estimation pre-flight + test
+    introspection (so tests can assert the writer_overlay landed in
+    the prompt without having to spy on ``llm_call_for_task``).
     """
-    directive_block = depth_directive.strip() if depth_directive else "(no specific directive — produce a generally deeper, better-grounded version)"
-    user_msg = (
-        f"Section path: {section_path}\n\n"
-        f"Depth directive:\n{directive_block}\n\n"
-        f"Original section (JSON):\n{json.dumps(original_section, ensure_ascii=False, indent=2)[:6000]}\n\n"
-        f"Newly retrieved evidence chunks (cite their ids as claim_ids):\n"
-        f"{_format_chunks_for_prompt(new_chunks)}\n\n"
-        f"Produce the deepened section JSON now. Same shape as the original; "
-        f"no extra fields; no markdown wrapper."
+    user_msg = _build_mode_aware_user_msg(
+        section_path=section_path,
+        original_section=original_section,
+        depth_directive=depth_directive,
+        new_chunks=new_chunks,
+        resolved_mode=resolved_mode,
+        schema_class_name=schema_class_name,
     )
     raw = await llm_call_for_task(
         "writer",
@@ -361,7 +497,7 @@ async def _call_deepening_writer(
             # path can persist it for forensic inspection.
             parsed = {"_raw": raw[:4000]}
     new_ids = sorted(_existing_claim_ids(parsed))
-    return parsed, new_ids
+    return parsed, new_ids, user_msg
 
 
 # ---------------------------------------------------------------------------
@@ -436,7 +572,41 @@ async def deepen_section(
     deepening_id = await _insert_queued_run(
         request, triggered_by, firm_id, original_section
     )
+    await _audit_deepening(
+        "section_deepening.triggered",
+        actor_user_id=triggered_by,
+        deepening_id=deepening_id,
+        payload={
+            "session_id": str(request.session_id),
+            "section_path": request.section_path,
+            "depth_directive": request.depth_directive,
+        },
+    )
     await _mark_running(deepening_id)
+
+    # W9/D4: resolve mode + writer schema for the engagement. Mode
+    # resolution failure is non-blocking — we fall through to a
+    # mode-less rewrite (matches D1 behaviour). Schema lookup falls
+    # back to GeneralReportPayload when the mode isn't in the
+    # registry.
+    resolved_mode: ResolvedConsultingMode | None = None
+    schema_cls: type = GeneralReportPayload
+    try:
+        async with acquire() as conn:
+            sess_row = await conn.fetchrow(
+                "SELECT report_mode FROM sessions WHERE id=$1::uuid",
+                request.session_id,
+            )
+        mode_name = str((sess_row or {}).get("report_mode") or "general")
+        try:
+            resolved_mode = await resolve_mode(
+                mode_name, firm_id=firm_id, engagement_id=request.session_id
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception("mode resolution failed for deepening %s; continuing mode-less", deepening_id)
+        schema_cls = get_writer_schema(mode_name)
+    except Exception:  # noqa: BLE001
+        logger.exception("schema lookup failed for deepening %s", deepening_id)
 
     try:
         already_cited = _existing_claim_ids(original_section)
@@ -444,13 +614,105 @@ async def deepen_section(
         new_chunks = await _retrieve_new_chunks(
             request.session_id, query, already_cited
         )
-        deepened_section, new_claim_ids = await _call_deepening_writer(
+
+        # W9/D4: cost-cap pre-flight. Build the user_msg to estimate
+        # the prompt-size cost; refuse if over the per-run cap. Don't
+        # fire any LLM call in this branch.
+        preview_msg = _build_mode_aware_user_msg(
+            section_path=request.section_path,
+            original_section=original_section,
+            depth_directive=request.depth_directive,
+            new_chunks=new_chunks,
+            resolved_mode=resolved_mode,
+            schema_class_name=schema_cls.__name__,
+        )
+        est_cost = _estimate_call_cost_usd(
+            system_prompt=SECTION_DEEPENING_WRITER_PROMPT,
+            user_msg=preview_msg,
+        )
+        if est_cost > MAX_DEEPENING_COST_USD:
+            wall = time.perf_counter() - t0
+            reason = (
+                f"exceeded_per_run_cost_cap: estimated ${est_cost:.4f} > "
+                f"${MAX_DEEPENING_COST_USD:.2f} cap "
+                f"(prompt chars: {len(SECTION_DEEPENING_WRITER_PROMPT) + len(preview_msg)})"
+            )
+            await _persist_failed(deepening_id, reason=reason, wall_seconds=wall)
+            await _audit_deepening(
+                "section_deepening.cost_cap_exceeded",
+                actor_user_id=None,
+                deepening_id=deepening_id,
+                payload={
+                    "session_id": str(request.session_id),
+                    "section_path": request.section_path,
+                    "estimated_cost_usd": round(est_cost, 4),
+                    "cap_usd": MAX_DEEPENING_COST_USD,
+                },
+            )
+            return DeepeningResult(
+                deepening_id=deepening_id,
+                section_path=request.section_path,
+                original_section_json=original_section,
+                deepened_section_json=None,
+                status="failed",
+                failure_reason=reason,
+                wall_seconds=wall,
+            )
+
+        deepened_section, new_claim_ids, _user_msg = await _call_deepening_writer(
             section_path=request.section_path,
             original_section=original_section,
             depth_directive=request.depth_directive,
             new_chunks=new_chunks,
             session_id=request.session_id,
+            resolved_mode=resolved_mode,
+            schema_class_name=schema_cls.__name__,
         )
+
+        # W9/D4: post-LLM schema validation. The deepened section
+        # must validate against the type at section_path on the
+        # resolved schema (M&A synergies still need basis_citations,
+        # 2x2 still needs ≥2 items, etc.). No retries — hard rule.
+        try:
+            errors = validate_section_against_schema(
+                schema_cls, request.section_path, deepened_section
+            )
+        except SchemaPathError as e:
+            # The section_path resolved against the runtime payload
+            # at request time but doesn't resolve against the
+            # schema class — implies a mode-vs-payload mismatch
+            # (e.g. M&A path on a general engagement). Treat as
+            # failure with the path error verbatim.
+            errors = [f"schema-path: {e}"]
+
+        if errors:
+            wall = time.perf_counter() - t0
+            reason = (
+                f"Deepened {request.section_path} failed schema validation: "
+                + "; ".join(errors[:5])
+            )
+            await _persist_failed(deepening_id, reason=reason, wall_seconds=wall)
+            await _audit_deepening(
+                "section_deepening.failed",
+                actor_user_id=None,
+                deepening_id=deepening_id,
+                payload={
+                    "session_id": str(request.session_id),
+                    "section_path": request.section_path,
+                    "failure_reason": reason[:500],
+                    "validation_errors": errors[:10],
+                },
+            )
+            return DeepeningResult(
+                deepening_id=deepening_id,
+                section_path=request.section_path,
+                original_section_json=original_section,
+                deepened_section_json=deepened_section,  # preserve for forensic inspection
+                status="failed",
+                failure_reason=reason,
+                wall_seconds=wall,
+            )
+
         # New claim ids = those in the deepened section but not in
         # the original section's cited set. Bounded sweep, no LLM.
         truly_new = sorted(set(new_claim_ids) - already_cited)
@@ -458,8 +720,8 @@ async def deepen_section(
         wall = time.perf_counter() - t0
         # Cost is captured by the cost-tracking row in ``llm_calls`` for
         # the writer task call; pulling it back requires an extra
-        # query. For Day 1 we leave cost_usd=0.0 on the deepening row
-        # — the truth lives in llm_calls, and a Day 2+ pass can sum it.
+        # query. We leave cost_usd=0.0 on the deepening row — the
+        # truth lives in llm_calls.
         await _persist_complete(
             deepening_id,
             deepened_section=deepened_section,
@@ -467,6 +729,18 @@ async def deepen_section(
             new_evidence_chunks_used=len(new_chunks),
             cost_usd=0.0,
             wall_seconds=wall,
+        )
+        await _audit_deepening(
+            "section_deepening.completed",
+            actor_user_id=None,
+            deepening_id=deepening_id,
+            payload={
+                "session_id": str(request.session_id),
+                "section_path": request.section_path,
+                "wall_seconds": round(wall, 2),
+                "new_chunks": len(new_chunks),
+                "new_claim_ids": truly_new,
+            },
         )
         return DeepeningResult(
             deepening_id=deepening_id,
@@ -484,6 +758,16 @@ async def deepen_section(
         wall = time.perf_counter() - t0
         reason = f"{type(e).__name__}: {e}"
         await _persist_failed(deepening_id, reason=reason, wall_seconds=wall)
+        await _audit_deepening(
+            "section_deepening.failed",
+            actor_user_id=None,
+            deepening_id=deepening_id,
+            payload={
+                "session_id": str(request.session_id),
+                "section_path": request.section_path,
+                "failure_reason": reason[:500],
+            },
+        )
         return DeepeningResult(
             deepening_id=deepening_id,
             section_path=request.section_path,
