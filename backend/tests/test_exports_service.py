@@ -225,12 +225,14 @@ async def test_unknown_exporter_returns_failed(tmp_artifacts_root: Path) -> None
     stored: dict[str, Any] = {}
     fake_acquire = _fake_acquire_factory(stored)
 
-    # ``deck/pptx`` is in the schema's whitelist but no exporter is
-    # registered for it yet — exact shape of the W10/D2 ship gap.
+    # ``excel_model/xlsx`` is in the schema whitelist but no exporter
+    # is registered yet (W13 work). The exporter-not-found path is
+    # what we want to exercise. (W11/D1 registered deck/pptx so we
+    # can't reuse that combination here any more.)
     req = GenerateArtifactRequest(
         session_id=uuid4(),
-        artifact_type="deck",
-        format="pptx",
+        artifact_type="excel_model",
+        format="xlsx",
     )
     with mock.patch.object(exports_service, "acquire", new=fake_acquire):
         result = await generate_artifact(req)
@@ -238,7 +240,7 @@ async def test_unknown_exporter_returns_failed(tmp_artifacts_root: Path) -> None
     assert result.status == "failed"
     assert result.failure_reason is not None
     assert "no exporter registered" in result.failure_reason
-    assert "deck" in result.failure_reason and "pptx" in result.failure_reason
+    assert "excel_model" in result.failure_reason and "xlsx" in result.failure_reason
     # Failed row persisted (not silently dropped)
     assert stored["status"] == "failed"
 
