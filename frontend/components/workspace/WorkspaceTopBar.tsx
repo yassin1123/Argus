@@ -47,28 +47,31 @@ export default function WorkspaceTopBar({
   const canManage = role === "lead";
   const isViewer = role === "viewer";
   const [teamOpen, setTeamOpen] = useState(false);
-  const [exporting, setExporting] = useState<null | "html" | "pdf">(null);
+  const [exporting, setExporting] = useState<null | string>(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  async function handleExportOnePager(format: "html" | "pdf") {
+  type ExportTarget =
+    | { artifact_type: "one_pager"; format: "html" }
+    | { artifact_type: "one_pager"; format: "pdf" }
+    | { artifact_type: "deck"; format: "pptx" };
+
+  async function handleExport(target: ExportTarget) {
     if (exporting) return;
     setExportMenuOpen(false);
     setExportError(null);
-    setExporting(format);
+    const label = `${target.artifact_type}/${target.format}`;
+    setExporting(label);
     try {
-      const created = await createExport(session.id, "one_pager", format);
+      const created = await createExport(session.id, target.artifact_type, target.format);
       if (created.status === "ready") {
-        // HTML opens in a new tab (preview); PDF downloads via
+        // HTML previews inline in a new tab; PDF + PPTX download via
         // Content-Disposition: attachment on the backend.
-        const target = format === "html" ? "_blank" : "_self";
-        window.open(downloadUrl(session.id, created.artifact_id), target, "noopener");
+        const newTab = target.format === "html" ? "_blank" : "_self";
+        window.open(downloadUrl(session.id, created.artifact_id), newTab, "noopener");
       } else if (created.status === "failed") {
         setExportError(created.failure_reason ?? "Export failed");
       } else {
-        // 'generating' — the architecture supports async dispatch
-        // (PDF can take a couple of seconds), but this codepath
-        // expects sync ready for both HTML and PDF in the W10 cut.
         setExportError("Render queued — refresh the artifacts panel shortly.");
       }
     } catch (e) {
@@ -131,22 +134,20 @@ export default function WorkspaceTopBar({
             aria-haspopup="menu"
             aria-expanded={exportMenuOpen}
           >
-            {exporting === "html"
-              ? "Exporting HTML…"
-              : exporting === "pdf"
-                ? "Exporting PDF…"
-                : "Export ▾"}
+            {exporting
+              ? `Exporting ${exporting}…`
+              : "Export ▾"}
           </button>
           {exportMenuOpen && !exporting && (
             <div
               role="menu"
-              className="absolute right-0 mt-1 w-44 rounded-sm border border-argus-border-subtle bg-surface shadow-md z-10 text-[11px]"
+              className="absolute right-0 mt-1 w-48 rounded-sm border border-argus-border-subtle bg-surface shadow-md z-10 text-[11px]"
               onMouseLeave={() => setExportMenuOpen(false)}
             >
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => handleExportOnePager("html")}
+                onClick={() => handleExport({ artifact_type: "one_pager", format: "html" })}
                 className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary"
               >
                 1-pager (HTML)
@@ -154,10 +155,18 @@ export default function WorkspaceTopBar({
               <button
                 type="button"
                 role="menuitem"
-                onClick={() => handleExportOnePager("pdf")}
+                onClick={() => handleExport({ artifact_type: "one_pager", format: "pdf" })}
                 className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary border-t border-argus-border-subtle"
               >
                 1-pager (PDF)
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => handleExport({ artifact_type: "deck", format: "pptx" })}
+                className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary border-t border-argus-border-subtle"
+              >
+                Deck (PPTX)
               </button>
             </div>
           )}
