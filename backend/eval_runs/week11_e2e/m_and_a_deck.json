@@ -1,0 +1,94 @@
+{
+  "run_name": "m_and_a_deck",
+  "engagement_label": "M&A diligence (TargetCo)",
+  "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+  "expected_slide_count": 11,
+  "expected_sequence": [
+    "title",
+    "exec_summary",
+    "target_overview",
+    "financial_profile",
+    "valuation_range",
+    "two_by_two_visual",
+    "risks_matrix",
+    "integration_plan",
+    "recommendation",
+    "next_steps",
+    "sources"
+  ],
+  "framework_slide": "two_by_two_visual",
+  "artifact_id": "5b66e8eb-180b-4203-95a2-bee73f85ed00",
+  "status": "ready",
+  "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/5b66e8eb-180b-4203-95a2-bee73f85ed00.pptx",
+  "file_size_bytes": 51923,
+  "claim_citation_count": 5,
+  "generation_wall_seconds": 0.107,
+  "failure_reason": null,
+  "metadata": {
+    "mode": "m_and_a_diligence",
+    "slide_count": 11,
+    "slide_sequence": [
+      "title",
+      "exec_summary",
+      "target_overview",
+      "financial_profile",
+      "valuation_range",
+      "two_by_two_visual",
+      "risks_matrix",
+      "integration_plan",
+      "recommendation",
+      "next_steps",
+      "sources"
+    ],
+    "cited_claim_ids": [
+      "claim_1",
+      "claim_2",
+      "claim_3",
+      "claim_4",
+      "claim_5"
+    ]
+  },
+  "copied_to": "/host_out/m_and_a_deck.pptx",
+  "pptx_inspection": {
+    "slide_count": 11,
+    "slide_dimensions_in": {
+      "width": 13.33299978127734,
+      "height": 7.5
+    },
+    "content_slides": 10,
+    "content_slides_with_title_bar": 10,
+    "content_slides_with_footer_text": 10,
+    "content_slides_with_page_number": 10,
+    "title_slide_branded": true,
+    "chip_count_per_slide": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "footnote_count_per_slide": [
+      0,
+      4,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      4,
+      0,
+      0
+    ],
+    "framework_slide_name": "two_by_two_visual",
+    "framework_text_excerpt": "Strategic options matrix \u2014 not produced for this engagement.\nStrategic Options Matrix\nArgus Demo Boutique \u00b7 Confidential\n6 / 11\n",
+    "framework_rect_count": 1,
+    "framework_fallback": true
+  }
+}

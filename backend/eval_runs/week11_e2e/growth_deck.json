@@ -1,0 +1,90 @@
+{
+  "run_name": "growth_deck",
+  "engagement_label": "growth_strategy (TargetCo Scotland)",
+  "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+  "expected_slide_count": 9,
+  "expected_sequence": [
+    "title",
+    "exec_summary",
+    "context",
+    "market_landscape",
+    "porters_five_forces_visual",
+    "recommendation",
+    "risks_matrix",
+    "next_steps",
+    "sources"
+  ],
+  "framework_slide": "porters_five_forces_visual",
+  "artifact_id": "3fe37a7c-f6b6-4d52-b2d7-079ad5c92968",
+  "status": "ready",
+  "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/3fe37a7c-f6b6-4d52-b2d7-079ad5c92968.pptx",
+  "file_size_bytes": 45880,
+  "claim_citation_count": 9,
+  "generation_wall_seconds": 0.105,
+  "failure_reason": null,
+  "metadata": {
+    "mode": "growth_strategy",
+    "slide_count": 9,
+    "slide_sequence": [
+      "title",
+      "exec_summary",
+      "context",
+      "market_landscape",
+      "porters_five_forces_visual",
+      "recommendation",
+      "risks_matrix",
+      "next_steps",
+      "sources"
+    ],
+    "cited_claim_ids": [
+      "claim_001",
+      "claim_002",
+      "claim_003",
+      "claim_004",
+      "claim_005",
+      "claim_006",
+      "claim_008",
+      "claim_011",
+      "claim_012"
+    ]
+  },
+  "copied_to": "/host_out/growth_deck.pptx",
+  "pptx_inspection": {
+    "slide_count": 9,
+    "slide_dimensions_in": {
+      "width": 13.33299978127734,
+      "height": 7.5
+    },
+    "content_slides": 8,
+    "content_slides_with_title_bar": 8,
+    "content_slides_with_footer_text": 8,
+    "content_slides_with_page_number": 8,
+    "title_slide_branded": true,
+    "chip_count_per_slide": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "footnote_count_per_slide": [
+      0,
+      6,
+      0,
+      0,
+      0,
+      5,
+      5,
+      0,
+      0
+    ],
+    "framework_slide_name": "porters_five_forces_visual",
+    "framework_text_excerpt": "Porter's Five Forces \u2014 not produced for this engagement.\nIndustry Forces\nArgus Demo Boutique \u00b7 Confidential\n5 / 9\n",
+    "framework_rect_count": 1,
+    "framework_fallback": true
+  }
+}
