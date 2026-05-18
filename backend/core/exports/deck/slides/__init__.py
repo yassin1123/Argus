@@ -38,6 +38,10 @@ from . import valuation_range  # noqa: F401,E402
 from . import market_landscape  # noqa: F401,E402
 from . import options_matrix  # noqa: F401,E402
 
+# Day 3 framework visuals (replace text stubs):
+from . import porters_visual  # noqa: F401,E402
+from . import two_by_two_visual  # noqa: F401,E402
+
 __all__ = [
     "SlideBuilderBase",
     "SlideResult",
