@@ -27,6 +27,9 @@ pydyf==0.10.0
 # but the bump unblocks any future builder that wants newer features.
 python-pptx==1.0.2
 python-docx==1.1.2
+# W12/D1: openpyxl powers the Excel financial-model exporter
+# (backend/core/exports/excel/). Pure Python, no system deps.
+openpyxl==3.1.5
 pydantic==2.7.4
 python-multipart==0.0.6
 python-dotenv==1.0.1
