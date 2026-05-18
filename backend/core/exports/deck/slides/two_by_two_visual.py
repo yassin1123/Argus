@@ -70,6 +70,7 @@ def _render_items_in_quadrant(
     cited: list[str],
     *,
     primary_hex: str, secondary_hex: str,
+    deck_context: Any = None,
 ) -> None:
     if not items:
         return
@@ -109,16 +110,23 @@ def _render_items_in_quadrant(
                 color=parse_hex(DEFAULT_MUTED),
                 align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
             )
-        # Citation chip top-right of the row.
+        # Citation chip top-right of the row. Chip number resolved
+        # via DeckContext so it matches the deck-wide footnote
+        # numbering chrome renders below the slide.
         if cits:
             cid = str(cits[0])
             if cid not in cited:
                 cited.append(cid)
+            if deck_context is not None:
+                number = deck_context.assign_chip(cid)
+                deck_context.record_chip_on_current_slide(number)
+            else:
+                number = len(cited)
             add_citation_chip(
                 slide,
                 left=cell_left + cell_width - 0.34,
                 top=item_top + 0.02,
-                number=len(cited),
+                number=number,
                 claim_id=cid,
                 primary_hex=primary_hex,
             )
@@ -132,28 +140,17 @@ class TwoByTwoVisualSlide(SlideBuilderBase):
         payload: Any,
         firm_branding: dict[str, Any],
         citations: list[Any],
+        deck_context: Any = None,
     ) -> SlideResult:
         primary = (firm_branding or {}).get("primary_color") or DEFAULT_PRIMARY
         secondary_hex = (firm_branding or {}).get("secondary_color") or DEFAULT_SECONDARY
 
         slide = add_blank_slide(presentation)
-        add_horizontal_band(
-            slide, left=0.0, top=0.0, width=SLIDE_WIDTH_IN, height=0.4,
-            color_hex=str(primary),
-        )
-
         # Pull the framework block. Tolerant of:
         #   payload.frameworks.two_by_two (the canonical writer shape).
         frameworks = payload_get(payload, "frameworks", default={}) or {}
         tb = frameworks.get("two_by_two") if isinstance(frameworks, dict) else None
         if not isinstance(tb, dict) or not _coerce_to_list(tb.get("items") or []):
-            add_textbox(
-                slide, left=0.5, top=0.5, width=SLIDE_WIDTH_IN - 1.0, height=0.5,
-                text="Strategic Options Matrix",
-                font_size=24, bold=True,
-                color=parse_hex(secondary_hex),
-                align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
-            )
             add_textbox(
                 slide, left=0.5, top=1.5, width=SLIDE_WIDTH_IN - 1.0, height=0.6,
                 text="Strategic options matrix — not produced for this engagement.",
@@ -163,15 +160,7 @@ class TwoByTwoVisualSlide(SlideBuilderBase):
             )
             return SlideResult(slide_index=len(presentation.slides) - 1, citation_ids=[])
 
-        # Title
-        title = str(tb.get("title") or "Strategic Options")[:120]
-        add_textbox(
-            slide, left=0.5, top=0.5, width=SLIDE_WIDTH_IN - 1.0, height=0.5,
-            text=title,
-            font_size=24, bold=True,
-            color=parse_hex(secondary_hex),
-            align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
-        )
+        # (Title bar drawn by DeckBuilder.finalize_chrome.)
 
         # Grid
         regions = add_quadrant_grid(
@@ -197,6 +186,7 @@ class TwoByTwoVisualSlide(SlideBuilderBase):
                 cited,
                 primary_hex=str(primary),
                 secondary_hex=secondary_hex,
+                deck_context=deck_context,
             )
 
         # Interpretation narrative — bottom strip below the grid.
