@@ -17,9 +17,26 @@ from ._registry import (  # noqa: F401
 )
 
 # Importing the concrete modules registers them.
+# Day 1 base trio:
 from . import exec_summary  # noqa: F401,E402
 from . import recommendation  # noqa: F401,E402
 from . import title_slide  # noqa: F401,E402
+
+# Day 2 mode-agnostic content slides:
+from . import context  # noqa: F401,E402
+from . import next_steps  # noqa: F401,E402
+from . import risks_matrix  # noqa: F401,E402
+from . import sources  # noqa: F401,E402
+
+# Day 2 M&A-specific:
+from . import financial_profile  # noqa: F401,E402
+from . import integration_plan  # noqa: F401,E402
+from . import target_overview  # noqa: F401,E402
+from . import valuation_range  # noqa: F401,E402
+
+# Day 2 growth-specific:
+from . import market_landscape  # noqa: F401,E402
+from . import options_matrix  # noqa: F401,E402
 
 __all__ = [
     "SlideBuilderBase",

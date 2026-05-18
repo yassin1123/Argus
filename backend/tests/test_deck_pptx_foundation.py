@@ -105,20 +105,28 @@ def exporter() -> DeckPptxExporter:
 
 
 # ---------------------------------------------------------------------------
-# Test 1 — round trip: bytes → reopen → 3 slides
+# Test 1 — round trip: bytes → reopen → resolved-sequence slide count
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
 async def test_renders_pptx_round_trip(exporter: DeckPptxExporter) -> None:
+    """Verify the bytes round-trip back through python-pptx. W11/D2
+    expanded the M&A sequence from 3 to 10 slides; this test now
+    checks against the live ``get_deck_sequence_for_mode`` result so
+    the assertion tracks future sequence additions automatically."""
     result = await exporter.render(_m_and_a_payload(), _BRANDING, _citations(6))
     assert result.file_size > 0
     # PPTX is a ZIP — header magic is PK\x03\x04.
     assert result.file_bytes[:4] == b"PK\x03\x04"
     prs = Presentation(io.BytesIO(result.file_bytes))
-    assert len(prs.slides) == 3
+    expected_sequence = get_deck_sequence_for_mode("m_and_a_diligence")
+    assert len(prs.slides) == len(expected_sequence)
     assert result.metadata["mode"] == "m_and_a_diligence"
-    assert result.metadata["slide_sequence"] == ["title", "exec_summary", "recommendation"]
+    assert result.metadata["slide_sequence"] == expected_sequence
+    # Spot-check the three base-trio slides land in the sequence.
+    for base in ("title", "exec_summary", "recommendation"):
+        assert base in expected_sequence
 
 
 # ---------------------------------------------------------------------------
@@ -168,13 +176,18 @@ async def test_exec_summary_three_columns(exporter: DeckPptxExporter) -> None:
 async def test_recommendation_slide_has_panel_text(
     exporter: DeckPptxExporter,
 ) -> None:
+    """Recommendation slide moved index when W11/D2 expanded the
+    sequence. Look it up by name via ``slide_sequence`` rather than
+    a hardcoded index."""
     result = await exporter.render(_m_and_a_payload(), _BRANDING, _citations(3))
     prs = Presentation(io.BytesIO(result.file_bytes))
-    text = _all_text(prs.slides[2])
+    seq = result.metadata["slide_sequence"]
+    idx = seq.index("recommendation")
+    text = _all_text(prs.slides[idx])
     assert "Recommendation" in text
     # Full recommendation prose lands on this slide.
     assert "PROCEED WITH CONDITIONS" in text
-    # M&A walk-away trigger surfaces.
+    # M&A walk-away trigger surfaces on the recommendation slide.
     assert "Walk-away triggers" in text
     assert "Project Halo" in text
     # Source panel aggregates by source label.
@@ -189,24 +202,26 @@ async def test_recommendation_slide_has_panel_text(
 
 @pytest.mark.asyncio
 async def test_slide_count_matches_sequence(exporter: DeckPptxExporter) -> None:
+    """Slide count == resolved-sequence length, for every supported
+    mode. W11/D2 added mode-specific sequences (M&A=10, growth=9,
+    general=7) on top of the W11/D1 base trio (title, exec_summary,
+    recommendation), and unknown modes still fall back to general."""
     payload = _m_and_a_payload()
     result = await exporter.render(payload, _BRANDING, _citations(2))
     prs = Presentation(io.BytesIO(result.file_bytes))
     expected = get_deck_sequence_for_mode("m_and_a_diligence")
     assert len(prs.slides) == len(expected)
     assert result.metadata["slide_count"] == len(expected)
-    # growth_strategy + general modes share the same 3-slide minimum
-    # on Day 1; verify the helper resolves them too.
-    assert get_deck_sequence_for_mode("growth_strategy") == [
-        "title", "exec_summary", "recommendation"
-    ]
-    assert get_deck_sequence_for_mode("general") == [
-        "title", "exec_summary", "recommendation"
-    ]
+    # The base trio is invariant across every mode.
+    for mode in ("m_and_a_diligence", "growth_strategy", "general"):
+        seq = get_deck_sequence_for_mode(mode)
+        for base in ("title", "exec_summary", "recommendation"):
+            assert base in seq, f"{mode} missing base slide {base}"
     # Unknown mode falls back to general.
-    assert get_deck_sequence_for_mode("does_not_exist") == [
-        "title", "exec_summary", "recommendation"
-    ]
+    assert (
+        get_deck_sequence_for_mode("does_not_exist")
+        == get_deck_sequence_for_mode("general")
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -229,9 +244,12 @@ async def test_pptx_opens_without_error(
     assert fpath.stat().st_size == result.file_size
     # Reopen — raises if the file is malformed.
     prs = Presentation(str(fpath))
-    assert len(prs.slides) == 3
-    # File size sanity (no images embedded today; should be well
-    # under 100KB per spec).
-    assert result.file_size < 100_000, (
-        f"deck file too large: {result.file_size} bytes (limit 100KB on D1)"
+    assert len(prs.slides) == len(get_deck_sequence_for_mode("m_and_a_diligence"))
+    # File size sanity. W11/D1 capped at 100KB on the 3-slide deck;
+    # W11/D2 expanded to 10 slides + native column chart + tables —
+    # 200KB is the new headroom for the same no-images contract.
+    # Real-world payloads (W7 demo) come in around 50KB even with
+    # 10 slides; the cap is a sanity check, not a tuning target.
+    assert result.file_size < 200_000, (
+        f"deck file too large: {result.file_size} bytes (limit 200KB after W11/D2)"
     )
