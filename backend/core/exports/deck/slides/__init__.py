@@ -9,7 +9,7 @@ critic_findings, sources.
 
 from __future__ import annotations
 
-from ._base import SlideBuilderBase, SlideResult  # noqa: F401
+from ._base import DeckContext, SlideBuilderBase, SlideResult  # noqa: F401
 from ._registry import (  # noqa: F401
     get_slide_builder,
     list_registered_slides,

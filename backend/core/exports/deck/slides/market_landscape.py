@@ -96,23 +96,12 @@ class MarketLandscapeSlide(SlideBuilderBase):
         payload: Any,
         firm_branding: dict[str, Any],
         citations: list[Any],
+        deck_context: Any = None,
     ) -> SlideResult:
         primary = (firm_branding or {}).get("primary_color") or DEFAULT_PRIMARY
         secondary_hex = (firm_branding or {}).get("secondary_color") or DEFAULT_SECONDARY
 
         slide = add_blank_slide(presentation)
-        add_horizontal_band(
-            slide, left=0.0, top=0.0, width=SLIDE_WIDTH_IN, height=0.4,
-            color_hex=str(primary),
-        )
-        add_textbox(
-            slide, left=0.5, top=0.5, width=SLIDE_WIDTH_IN - 1.0, height=0.5,
-            text="Market Landscape",
-            font_size=24, bold=True,
-            color=parse_hex(secondary_hex),
-            align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
-        )
-
         narrative = _market_narrative(payload)
         players = _key_players(payload)
 

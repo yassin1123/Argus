@@ -84,6 +84,7 @@ def _draw_force_box(
     force: str, force_data: dict[str, Any],
     primary_hex: str, secondary_hex: str,
     cited: list[str],
+    deck_context: Any = None,
 ) -> None:
     left, top = _force_position(force)
     label = _FORCE_LABELS.get(force, force.replace("_", " ").title())
@@ -166,15 +167,22 @@ def _draw_force_box(
         )
 
     # Citation chip — top-right corner, on top of the header strip.
+    # Chip number flows through DeckContext so it matches the
+    # deck-wide footnote numbering rendered by the chrome pass.
     if citations:
         cid = citations[0]
         if cid not in cited:
             cited.append(cid)
+        if deck_context is not None:
+            number = deck_context.assign_chip(cid)
+            deck_context.record_chip_on_current_slide(number)
+        else:
+            number = len(cited)
         add_citation_chip(
             slide,
             left=left + _BOX_W - 0.34,
             top=top + 0.36,
-            number=len(cited),
+            number=number,
             claim_id=cid,
             primary_hex=primary_hex,
         )
@@ -188,26 +196,15 @@ class PortersVisualSlide(SlideBuilderBase):
         payload: Any,
         firm_branding: dict[str, Any],
         citations: list[Any],
+        deck_context: Any = None,
     ) -> SlideResult:
         primary = (firm_branding or {}).get("primary_color") or DEFAULT_PRIMARY
         secondary_hex = (firm_branding or {}).get("secondary_color") or DEFAULT_SECONDARY
 
         slide = add_blank_slide(presentation)
-        add_horizontal_band(
-            slide, left=0.0, top=0.0, width=SLIDE_WIDTH_IN, height=0.4,
-            color_hex=str(primary),
-        )
-
         frameworks = payload_get(payload, "frameworks", default={}) or {}
         p5 = frameworks.get("porters_five_forces") if isinstance(frameworks, dict) else None
         if not isinstance(p5, dict):
-            add_textbox(
-                slide, left=0.5, top=0.5, width=SLIDE_WIDTH_IN - 1.0, height=0.5,
-                text="Industry Forces — Porter's Five Forces",
-                font_size=24, bold=True,
-                color=parse_hex(secondary_hex),
-                align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
-            )
             add_textbox(
                 slide, left=0.5, top=1.5, width=SLIDE_WIDTH_IN - 1.0, height=0.6,
                 text="Porter's Five Forces — not produced for this engagement.",
@@ -217,22 +214,10 @@ class PortersVisualSlide(SlideBuilderBase):
             )
             return SlideResult(slide_index=len(presentation.slides) - 1, citation_ids=[])
 
-        # Title
-        market = str(p5.get("market_definition") or "").strip()
-        title_text = (
-            f"Industry Forces — {market}" if market else "Industry Forces — Porter's Five Forces"
-        )
-        # Truncate aggressively so the long-form market definitions
-        # don't blow the title row.
-        if len(title_text) > 110:
-            title_text = title_text[:107].rstrip() + "…"
-        add_textbox(
-            slide, left=0.5, top=0.5, width=SLIDE_WIDTH_IN - 1.0, height=0.6,
-            text=title_text,
-            font_size=22, bold=True,
-            color=parse_hex(secondary_hex),
-            align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.TOP,
-        )
+        # (Title bar handled by DeckBuilder.finalize_chrome — title
+        #  text comes from the default-title map; the market definition
+        #  is surfaced on the force boxes themselves rather than the
+        #  title row to give the layout more breathing room.)
 
         cited: list[str] = []
         for force in (
@@ -246,6 +231,7 @@ class PortersVisualSlide(SlideBuilderBase):
                     force=force, force_data=fd,
                     primary_hex=str(primary), secondary_hex=secondary_hex,
                     cited=cited,
+                    deck_context=deck_context,
                 )
 
         # Bottom strip: overall attractiveness + rationale.

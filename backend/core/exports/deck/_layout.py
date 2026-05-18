@@ -146,6 +146,189 @@ def add_paragraph(
     return p
 
 
+# W11/D4: title bar reserved 0.65 in tall × full width. Footer reserved
+# 0.32 in tall. Footnote strip sits just above the footer (max 0.45 in).
+# Content sits between (top edge 0.85 in, bottom edge 6.85 in usable).
+TITLE_BAR_HEIGHT_IN = 0.65
+FOOTER_HEIGHT_IN = 0.32
+FOOTNOTES_MAX_HEIGHT_IN = 0.45
+CONTENT_TOP_IN = TITLE_BAR_HEIGHT_IN + 0.20  # 0.85
+CONTENT_BOTTOM_IN = SLIDE_HEIGHT_IN - FOOTER_HEIGHT_IN - FOOTNOTES_MAX_HEIGHT_IN  # 6.73
+
+
+def add_title_bar(
+    slide: Any,
+    *,
+    title_text: str,
+    primary_hex: str,
+    secondary_hex: str = "#FFFFFF",
+    font_size: int = 22,
+) -> None:
+    """Branded title bar — full width, height TITLE_BAR_HEIGHT_IN,
+    primary-colour fill, white-on-primary bold text.
+
+    Used by every content slide for visual coherence so the partner
+    can flip through the deck and immediately know which firm it
+    came from.
+    """
+    # Coloured band.
+    band = add_horizontal_band(
+        slide,
+        left=0.0, top=0.0,
+        width=SLIDE_WIDTH_IN, height=TITLE_BAR_HEIGHT_IN,
+        color_hex=primary_hex,
+    )
+    # Title text inside the band — left-padded.
+    shape = slide.shapes.add_textbox(
+        Inches(0.5), Inches(0.05),
+        Inches(SLIDE_WIDTH_IN - 1.0), Inches(TITLE_BAR_HEIGHT_IN - 0.1),
+    )
+    tf = shape.text_frame
+    tf.margin_left = Inches(0.02)
+    tf.margin_right = Inches(0.02)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.LEFT
+    run = p.add_run()
+    run.text = (title_text or "").strip()
+    run.font.name = DEFAULT_FONT
+    run.font.size = Pt(font_size)
+    run.font.bold = True
+    run.font.color.rgb = parse_hex(secondary_hex)
+
+
+def add_footer(
+    slide: Any,
+    *,
+    footer_text: str,
+    page_number: int,
+    total_pages: int,
+    muted_hex: str = "#5b6470",
+) -> None:
+    """Footer strip — left text + right page number — at the bottom
+    of every slide. Small grey 8pt monospace-ish styling so it reads
+    "professional doc" rather than "PowerPoint default."""
+    top = SLIDE_HEIGHT_IN - FOOTER_HEIGHT_IN
+    # Footer text left.
+    left_shape = slide.shapes.add_textbox(
+        Inches(0.5), Inches(top),
+        Inches(SLIDE_WIDTH_IN * 0.75), Inches(FOOTER_HEIGHT_IN),
+    )
+    tf = left_shape.text_frame
+    tf.margin_left = Inches(0.02)
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.LEFT
+    run = p.add_run()
+    run.text = (footer_text or "").strip()
+    run.font.name = DEFAULT_FONT
+    run.font.size = Pt(8)
+    run.font.color.rgb = parse_hex(muted_hex)
+
+    # Page number right.
+    right_shape = slide.shapes.add_textbox(
+        Inches(SLIDE_WIDTH_IN - 1.5), Inches(top),
+        Inches(1.0), Inches(FOOTER_HEIGHT_IN),
+    )
+    tf2 = right_shape.text_frame
+    tf2.margin_right = Inches(0.02)
+    tf2.vertical_anchor = MSO_ANCHOR.MIDDLE
+    p2 = tf2.paragraphs[0]
+    p2.alignment = PP_ALIGN.RIGHT
+    run2 = p2.add_run()
+    run2.text = f"{page_number} / {total_pages}"
+    run2.font.name = DEFAULT_FONT
+    run2.font.size = Pt(8)
+    run2.font.color.rgb = parse_hex(muted_hex)
+
+
+def add_citation_footnotes(
+    slide: Any,
+    *,
+    footnotes: list[tuple[int, str]],
+    muted_hex: str = "#5b6470",
+) -> int:
+    """Add a per-slide footnote strip just above the footer.
+
+    ``footnotes`` is a list of ``(number, label)`` where number is the
+    chip number rendered on the slide and label is the source-breadcrumb
+    text (e.g. ``"SEC 10-K · Apple Inc. · Item 1A"``).
+
+    Returns the count of footnotes actually rendered. If the joined
+    string would exceed ~2 lines at 7pt, truncate with ``…`` rather
+    than overflowing per spec hard rule.
+    """
+    if not footnotes:
+        return 0
+    parts = [f"^{n} {label}" for n, label in footnotes]
+    joined = "    ".join(parts)
+    # Heuristic character cap for ~2 lines at 7pt monospace across a
+    # 13.333-in slide minus 1-in margins: ~280 chars/line × 2.
+    max_chars = 560
+    if len(joined) > max_chars:
+        joined = joined[: max_chars - 1].rstrip() + "…"
+
+    top = SLIDE_HEIGHT_IN - FOOTER_HEIGHT_IN - FOOTNOTES_MAX_HEIGHT_IN
+    shape = slide.shapes.add_textbox(
+        Inches(0.5), Inches(top),
+        Inches(SLIDE_WIDTH_IN - 1.0), Inches(FOOTNOTES_MAX_HEIGHT_IN),
+    )
+    tf = shape.text_frame
+    tf.word_wrap = True
+    tf.margin_left = Inches(0.02)
+    tf.margin_right = Inches(0.02)
+    tf.vertical_anchor = MSO_ANCHOR.TOP
+    p = tf.paragraphs[0]
+    p.alignment = PP_ALIGN.LEFT
+    run = p.add_run()
+    run.text = joined
+    run.font.name = "Consolas, monospace"  # cosmetic, falls back if not present
+    run.font.size = Pt(7)
+    run.font.color.rgb = parse_hex(muted_hex)
+    # Mark the shape so tests can find it by name.
+    try:
+        shape.name = "argus-citation-footnotes"
+    except Exception:
+        pass
+    return len(footnotes)
+
+
+def apply_theme_font(presentation: Any, font_name: str) -> None:
+    """Set the slide-master's default font so every new text frame
+    inherits the firm's font_family. python-pptx exposes
+    ``slide_master.theme`` only partially — we walk the
+    ``slide_master.element`` XML and set ``majorFont`` / ``minorFont``
+    inside the ``fontScheme``.
+
+    Per spec hard rule: don't replace the master theme entirely;
+    only override fonts (and colour set further down). Falls back
+    silently if the master XML doesn't expose the expected nodes.
+    """
+    try:
+        master = presentation.slide_master
+        # The slide-master XML uses the standard a: namespace.
+        from pptx.oxml.ns import qn
+
+        theme_elem = master.element.find(".//" + qn("a:theme"))
+        if theme_elem is None:
+            return
+        font_scheme = theme_elem.find(".//" + qn("a:fontScheme"))
+        if font_scheme is None:
+            return
+        for tag in ("a:majorFont", "a:minorFont"):
+            section = font_scheme.find(qn(tag))
+            if section is None:
+                continue
+            latin = section.find(qn("a:latin"))
+            if latin is not None:
+                latin.set("typeface", font_name)
+    except Exception:
+        # Theme XML shapes vary; never let a theme override break the
+        # whole render. The per-shape font we set on add_textbox runs
+        # is the fallback path that still works.
+        pass
+
+
 def add_horizontal_band(
     slide: Any,
     *,

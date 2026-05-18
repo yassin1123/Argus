@@ -11,6 +11,7 @@ from __future__ import annotations
 from .deck_builder import DeckBuilder
 from .sequences import get_deck_sequence_for_mode
 from .slides import (
+    DeckContext,
     SlideBuilderBase,
     SlideResult,
     get_slide_builder,
@@ -20,6 +21,7 @@ from .slides import (
 
 __all__ = [
     "DeckBuilder",
+    "DeckContext",
     "SlideBuilderBase",
     "SlideResult",
     "get_deck_sequence_for_mode",
