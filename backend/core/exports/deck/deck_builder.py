@@ -37,6 +37,7 @@ class DeckBuilder:
         self._presentation = Presentation()
         set_slide_size_16_9(self._presentation)
         self._results: list[SlideResult] = []
+        self._slide_names_ordered: list[str] = []
         self._all_citation_ids: list[str] = []
         self._seen_citation_ids: set[str] = set()
 
@@ -59,10 +60,10 @@ class DeckBuilder:
     @property
     def slide_names(self) -> list[str]:
         """The ordered list of slide_name strings actually rendered.
-        Useful for tests + the artifact metadata block."""
-        return [type(r).__name__ for r in self._results] if False else [
-            getattr(s, "_argus_slide_name", "") for s in self._presentation.slides
-        ]
+        Useful for tests + the artifact metadata block. Tracked on
+        the builder itself because pptx ``Slide`` objects use C-level
+        proxies that reject arbitrary attribute assignment."""
+        return list(self._slide_names_ordered)
 
     def add_slide(self, slide_name: str) -> SlideResult:
         builder_cls = get_slide_builder(slide_name)
@@ -74,13 +75,7 @@ class DeckBuilder:
             self._citations,
         )
         self._results.append(result)
-        # Stamp the slide_name onto the slide object so tests +
-        # downstream introspection can reconstruct the sequence.
-        new_slide = self._presentation.slides[result.slide_index]
-        try:
-            new_slide._argus_slide_name = slide_name  # type: ignore[attr-defined]
-        except Exception:
-            pass
+        self._slide_names_ordered.append(slide_name)
         for cid in result.citation_ids:
             if cid and cid not in self._seen_citation_ids:
                 self._seen_citation_ids.add(cid)
