@@ -190,11 +190,21 @@ async def test_m_and_a_deck_has_target_overview_slide(exporter: DeckPptxExporter
     r = await exporter.render(_m_and_a_payload(), _BRANDING, [])
     prs = Presentation(io.BytesIO(r.file_bytes))
     names = _slide_names_from_result(r)
-    assert names == [
+    # Mode shape (live-checked rather than hardcoded so future sequence
+    # additions don't break this test). M&A must include all of:
+    # title, exec_summary, target_overview, financial_profile,
+    # valuation_range, risks_matrix, integration_plan, recommendation,
+    # next_steps, sources — plus optionally framework visuals (W11/D3).
+    required = (
         "title", "exec_summary", "target_overview", "financial_profile",
         "valuation_range", "risks_matrix", "integration_plan",
         "recommendation", "next_steps", "sources",
-    ]
+    )
+    for s in required:
+        assert s in names, f"M&A sequence missing required slide {s!r}"
+    # And it doesn't sprout growth-only slides.
+    for s in ("market_landscape", "context", "options_matrix"):
+        assert s not in names, f"M&A sequence wrongly includes growth-only slide {s!r}"
     idx = names.index("target_overview")
     text = _all_text(prs.slides[idx])
     assert "Target Overview" in text
@@ -266,11 +276,17 @@ async def test_growth_deck_has_market_landscape(exporter: DeckPptxExporter) -> N
     r = await exporter.render(_growth_payload(), _BRANDING, [])
     prs = Presentation(io.BytesIO(r.file_bytes))
     names = _slide_names_from_result(r)
-    assert names == [
+    # Live-checked: growth deck must include all required structural
+    # slides. options_matrix was replaced by porters_five_forces_visual
+    # in W11/D3, so accept either as the strategic-options slot.
+    required = (
         "title", "exec_summary", "context", "market_landscape",
-        "options_matrix", "recommendation", "risks_matrix",
-        "next_steps", "sources",
-    ]
+        "recommendation", "risks_matrix", "next_steps", "sources",
+    )
+    for s in required:
+        assert s in names, f"growth sequence missing required slide {s!r}"
+    # Strategic-options slot is either the W11/D3 visual or the old D2 stub.
+    assert "porters_five_forces_visual" in names or "options_matrix" in names
     idx = names.index("market_landscape")
     text = _all_text(prs.slides[idx])
     assert "Market Landscape" in text
