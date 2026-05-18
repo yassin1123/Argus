@@ -29,6 +29,7 @@ from .service import (
 # Keep the import after the registry symbols so circular-import is safe.
 from . import one_pager  # noqa: F401,E402
 from . import deck_pptx  # noqa: F401,E402
+from . import excel_model  # noqa: F401,E402
 
 __all__ = [
     "ArtifactNotFoundError",
