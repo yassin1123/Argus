@@ -24,6 +24,13 @@ from . import title  # noqa: F401,E402
 from . import cost_build  # noqa: F401,E402
 from . import revenue_build  # noqa: F401,E402
 
+# Day 3 M&A-specific sheets:
+from . import comparables  # noqa: F401,E402
+from . import dcf  # noqa: F401,E402
+from . import sensitivity  # noqa: F401,E402
+from . import synergies  # noqa: F401,E402
+from . import working_capital  # noqa: F401,E402
+
 __all__ = [
     "SheetBuilderBase",
     "SheetResult",
