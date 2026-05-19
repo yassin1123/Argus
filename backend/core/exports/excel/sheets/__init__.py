@@ -31,6 +31,9 @@ from . import sensitivity  # noqa: F401,E402
 from . import synergies  # noqa: F401,E402
 from . import working_capital  # noqa: F401,E402
 
+# Day 4 mode-agnostic summary.
+from . import summary  # noqa: F401,E402
+
 __all__ = [
     "SheetBuilderBase",
     "SheetResult",

@@ -16,8 +16,13 @@ from __future__ import annotations
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 # RGB colour constants (without the leading #).
+# Industry-standard Excel modelling palette per the W12 spec:
+#   BLUE on YELLOW  = input cells (consultant edits)
+#   BLACK on white  = computed cells (formulas)
+#   GREEN on white  = link cells (cross-sheet references)
+#   GREY            = labels / notes
 INPUT_FILL_HEX = "FFFF99"   # industry-standard yellow for inputs
-INPUT_TEXT_HEX = "0070C0"   # blue
+INPUT_TEXT_HEX = "1F4E79"   # blue per W12/D4 spec
 FORMULA_TEXT_HEX = "000000"  # black
 LINK_TEXT_HEX = "00B050"    # green
 HEADING_TEXT_HEX = "0F6E56"  # firm primary (default; overridden per-firm)

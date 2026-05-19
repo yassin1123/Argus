@@ -14,9 +14,27 @@ from typing import Any
 
 from openpyxl import Workbook
 
+from .._base import payload_get
+from ._branding import add_firm_header, apply_tab_color, freeze_top_row
 from ._refs import CellRegistry
+from ._styles import HEADING_TEXT_HEX
 from .sheets import get_sheet_builder, list_registered_sheets  # noqa: F401
 from .sheets._base import SheetResult
+from .sheets.sequences import SHEET_VISUAL_POSITION
+
+# Display names for each sheet in the row-1 firm header band.
+_SHEET_DISPLAY_NAMES: dict[str, str] = {
+    "title":           "Cover",
+    "summary":         "Summary",
+    "assumptions":     "Assumptions",
+    "revenue_build":   "Revenue Build",
+    "cost_build":      "Cost Build",
+    "working_capital": "Working Capital",
+    "dcf":             "DCF",
+    "comparables":     "Comparables",
+    "sensitivity":     "Sensitivity",
+    "synergies":       "Synergies",
+}
 
 
 class WorkbookBuilder:
@@ -111,7 +129,95 @@ class WorkbookBuilder:
                 self._all_citation_ids.append(cid)
         return result
 
+    def _reorder_visual(self) -> None:
+        """Move sheets whose registry name has a SHEET_VISUAL_POSITION
+        override to their target visual index. openpyxl exposes
+        ``_sheets`` for direct manipulation — we work on it carefully,
+        preserving every other sheet's relative position.
+
+        After reordering, refresh ``sheet_index`` on EVERY slot
+        (build-order list ↔ visual-order list mapping) so the
+        downstream branding pass walks the worksheets through the
+        right slot result.
+        """
+        # Capture each slot's worksheet object BEFORE reordering so the
+        # reference survives the move.
+        slot_to_ws = {
+            i: self._workbook.worksheets[slot.sheet_index]
+            for i, slot in enumerate(self._results)
+        }
+
+        for sheet_name, target_idx in SHEET_VISUAL_POSITION.items():
+            if sheet_name not in self._sheet_names_ordered:
+                continue
+            build_idx = self._sheet_names_ordered.index(sheet_name)
+            ws = slot_to_ws[build_idx]
+            try:
+                sheets = list(self._workbook._sheets)
+                sheets.remove(ws)
+                target = min(target_idx, len(sheets))
+                sheets.insert(target, ws)
+                self._workbook._sheets = sheets
+            except Exception:
+                # Private API shifted; fall back to build order.
+                pass
+
+        # Refresh every slot.sheet_index against the new visual order
+        # so finalize_branding's worksheets[slot.sheet_index] lookup
+        # works.
+        for build_idx, ws in slot_to_ws.items():
+            try:
+                self._results[build_idx].sheet_index = (
+                    self._workbook.worksheets.index(ws)
+                )
+            except ValueError:
+                pass
+
+    def finalize_branding(self) -> None:
+        """Apply firm-branding chrome (row-1 header + tab colour +
+        freeze panes) on every sheet that didn't opt out.
+
+        Runs after the sheet builders have placed their content so
+        the chrome composes on top of fully-rendered sheets and the
+        engagement title / firm name come from a single canonical
+        source.
+        """
+        firm_name = (
+            self._branding.get("_firm_name")
+            or payload_get(self._payload, "_firm_name", default="Argus")
+            or "Argus"
+        )
+        engagement_title = str(
+            payload_get(self._payload, "_engagement_title", default="Argus engagement")
+            or "Argus engagement"
+        )
+        primary_hex = str(
+            self._branding.get("primary_color") or f"#{HEADING_TEXT_HEX}"
+        )
+
+        for i, slot in enumerate(self._results):
+            ws = self._workbook.worksheets[slot.sheet_index]
+            apply_tab_color(ws, primary_hex=primary_hex)
+            if slot.skip_branding_header:
+                continue
+            sheet_key = self._sheet_names_ordered[i]
+            display_name = _SHEET_DISPLAY_NAMES.get(sheet_key, sheet_key.replace("_", " ").title())
+            add_firm_header(
+                ws,
+                firm_name=str(firm_name),
+                sheet_display_name=display_name,
+                engagement_title=engagement_title,
+                primary_hex=primary_hex,
+                last_data_col=max(ws.max_column, 6),
+            )
+            freeze_top_row(ws)
+
     def serialize(self) -> bytes:
+        # Reorder before branding so the branding pass walks the
+        # final visual sequence and applies header / tab colour / freeze
+        # in the order the user will see them.
+        self._reorder_visual()
+        self.finalize_branding()
         buf = io.BytesIO()
         self._workbook.save(buf)
         return buf.getvalue()

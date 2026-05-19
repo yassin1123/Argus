@@ -40,6 +40,9 @@ class SheetResult:
     sheet_index: int
     citation_ids: list[str] = field(default_factory=list)
     cell_count: int = 0
+    # W12/D4: opt out of the firm-header post-pass (Cover + Summary
+    # own their top rows explicitly).
+    skip_branding_header: bool = False
 
 
 class SheetBuilderBase(ABC):
