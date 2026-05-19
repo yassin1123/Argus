@@ -1,0 +1,125 @@
+{
+  "run_name": "growth_model",
+  "engagement_label": "growth_strategy (TargetCo Scotland)",
+  "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+  "expected_sheet_count": 5,
+  "expected_sheet_order": [
+    "Cover",
+    "Summary",
+    "Assumptions",
+    "Revenue Build",
+    "Cost Build"
+  ],
+  "is_m_and_a": false,
+  "artifact_id": "04359503-b659-408c-b559-ed0ae3ea1e77",
+  "status": "ready",
+  "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\e5b64285-6941-4d4c-8a07-820a165fb068\\bcb54507-31fc-4069-8c0d-585d075b0d07\\04359503-b659-408c-b559-ed0ae3ea1e77.xlsx",
+  "file_size_bytes": 14030,
+  "claim_citation_count": 6,
+  "generation_wall_seconds": 0.457,
+  "failure_reason": null,
+  "metadata": {
+    "mode": "growth_strategy",
+    "sheet_count": 5,
+    "sheet_sequence": [
+      "title",
+      "assumptions",
+      "revenue_build",
+      "cost_build",
+      "summary"
+    ],
+    "cited_claim_ids": [
+      "claim_001",
+      "claim_004",
+      "claim_002",
+      "claim_005",
+      "claim_003",
+      "claim_006"
+    ]
+  },
+  "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\growth_model.xlsx",
+  "xlsx_inspection": {
+    "sheet_names": [
+      "Cover",
+      "Summary",
+      "Assumptions",
+      "Revenue Build",
+      "Cost Build"
+    ],
+    "sheet_count": 5,
+    "formula_cells": 12,
+    "static_value_cells": 131,
+    "total_value_cells": 143,
+    "numeric_cells": 16,
+    "string_cells": 115,
+    "input_styled_cells": 16,
+    "link_styled_cells": 6,
+    "formula_styled_cells": 6,
+    "cells_with_comment": 7,
+    "formula_fraction": 0.0839,
+    "per_sheet": {
+      "Cover": {
+        "formula_cells": 0,
+        "static_value_cells": 12,
+        "cells_with_comment": 0,
+        "max_row": 13,
+        "max_column": 1
+      },
+      "Summary": {
+        "formula_cells": 3,
+        "static_value_cells": 23,
+        "cells_with_comment": 6,
+        "max_row": 16,
+        "max_column": 4
+      },
+      "Assumptions": {
+        "formula_cells": 0,
+        "static_value_cells": 63,
+        "cells_with_comment": 0,
+        "max_row": 24,
+        "max_column": 6
+      },
+      "Revenue Build": {
+        "formula_cells": 0,
+        "static_value_cells": 12,
+        "cells_with_comment": 1,
+        "max_row": 5,
+        "max_column": 6
+      },
+      "Cost Build": {
+        "formula_cells": 9,
+        "static_value_cells": 21,
+        "cells_with_comment": 0,
+        "max_row": 12,
+        "max_column": 6
+      }
+    },
+    "audit_missing": [],
+    "audit_sheets_passed": [
+      "Assumptions",
+      "Cost Build",
+      "Revenue Build",
+      "Summary"
+    ],
+    "audit_sheets_requiring_citations": [
+      "Assumptions",
+      "Cost Build",
+      "Revenue Build",
+      "Summary",
+      "Synergies"
+    ],
+    "header_text_per_sheet": {
+      "Cover": "Argus Demo Boutique",
+      "Summary": "Argus Demo Boutique",
+      "Assumptions": "Argus Demo Boutique",
+      "Revenue Build": "Argus Demo Boutique",
+      "Cost Build": "Argus Demo Boutique"
+    },
+    "sheets_with_firm_header": 5,
+    "m_and_a_dcf_ev_coord": null,
+    "m_and_a_dcf_ev_value": null,
+    "m_and_a_dcf_ev_is_formula": null,
+    "m_and_a_sensitivity_table_titles_count": null,
+    "m_and_a_sensitivity_table_titles_sample": null
+  }
+}
