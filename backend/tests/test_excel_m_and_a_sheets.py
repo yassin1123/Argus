@@ -401,8 +401,11 @@ async def test_growth_strategy_does_not_have_dcf_sheet(
     assert "Sensitivity" not in wb.sheetnames
     assert "Synergies" not in wb.sheetnames
     assert "Working Capital" not in wb.sheetnames
-    # Stays at the 4-sheet baseline.
-    assert len(wb.sheetnames) == 4
+    # W12/D4 added Summary across all modes — growth_strategy is
+    # now 5 sheets (Cover, Summary, Assumptions, Revenue Build,
+    # Cost Build).
+    assert len(wb.sheetnames) == 5
+    assert "Summary" in wb.sheetnames
 
 
 # ---------------------------------------------------------------------------
@@ -412,14 +415,18 @@ async def test_growth_strategy_does_not_have_dcf_sheet(
 
 @pytest.mark.asyncio
 async def test_m_and_a_workbook_has_9_sheets(exporter: ExcelModelExporter) -> None:
+    """W12/D4: Summary slots at visual index 1, so M&A is now 10
+    sheets total — kept the test name for traceability."""
     result = await exporter.render(_m_and_a_payload(), _BRANDING, _citations())
     wb = load_workbook(io.BytesIO(result.file_bytes))
-    assert len(wb.sheetnames) == 9
+    assert len(wb.sheetnames) == 10
     assert wb.sheetnames == [
-        "Cover", "Assumptions", "Revenue Build", "Cost Build",
+        "Cover", "Summary",
+        "Assumptions", "Revenue Build", "Cost Build",
         "Working Capital", "DCF", "Comparables", "Sensitivity", "Synergies",
     ]
-    # File size < 200 KB per spec.
-    assert result.file_size < 200_000, (
-        f"M&A workbook too large: {result.file_size} bytes (cap 200 KB)"
+    # File size cap raised to 250 KB on W12/D4 (logo embed + Summary
+    # + branding finalize add overhead).
+    assert result.file_size < 250_000, (
+        f"M&A workbook too large: {result.file_size} bytes (cap 250 KB)"
     )

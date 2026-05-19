@@ -109,9 +109,13 @@ async def test_renders_xlsx_round_trip(exporter: ExcelModelExporter) -> None:
     assert result.metadata["sheet_sequence"] == expected_seq
     assert result.metadata["sheet_count"] == len(expected_seq)
     assert result.metadata["mode"] == "m_and_a_diligence"
-    # Cover + Assumptions are invariant across modes; verify they're
-    # the first two sheets.
-    assert wb.sheetnames[:2] == ["Cover", "Assumptions"]
+    # W12/D4: Cover always lands first; Summary moves to visual
+    # index 1 via the WorkbookBuilder reorder pass. Assumptions
+    # follows at index 2.
+    assert wb.sheetnames[0] == "Cover"
+    if "summary" in expected_seq:
+        assert wb.sheetnames[1] == "Summary"
+        assert "Assumptions" in wb.sheetnames
 
 
 # ---------------------------------------------------------------------------
@@ -259,13 +263,13 @@ async def test_xlsx_opens_without_corruption(
     # Reopen — raises on malformed XLSX.
     wb = load_workbook(str(fpath))
     # W12/D2 expanded the sheet set to include Revenue Build + Cost
-    # Build. Cover + Assumptions stay the first two sheets.
-    assert wb.sheetnames[:2] == ["Cover", "Assumptions"]
-    # File size sanity. W12/D1 capped at 50 KB on the 2-sheet
-    # baseline; W12/D2 adds two more formula-heavy sheets so we
-    # raise the cap to 75 KB. Realistic decks come in around 10 KB
-    # even with the new sheets — the cap is a sanity check, not a
-    # tuning target.
-    assert result.file_size < 75_000, (
-        f"xlsx larger than expected: {result.file_size} bytes (cap 75 KB after W12/D2)"
+    # Build. W12/D4 added Summary at visual index 1.
+    assert wb.sheetnames[0] == "Cover"
+    assert "Summary" in wb.sheetnames
+    assert "Assumptions" in wb.sheetnames
+    # File size sanity. Successive Ds grow the workbook:
+    # D1=50KB, D2=75KB, D4=200KB cap (D3 already capped M&A at 200
+    # KB; D4 adds Summary + branding finalize but stays well within).
+    assert result.file_size < 200_000, (
+        f"xlsx larger than expected: {result.file_size} bytes (cap 200 KB after W12/D4)"
     )

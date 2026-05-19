@@ -9,19 +9,31 @@ citation comments to every payload-derived cell.
 from __future__ import annotations
 
 _WORKBOOK_SHEETS: dict[str, list[str]] = {
-    # W12/D3: M&A mode gains 5 diligence-grade sheets (working_capital,
-    # dcf, comparables, sensitivity, synergies). Other modes stay at
-    # the 4-sheet baseline — they don't have the payload shape
-    # (target_overview, valuation_range, synergy_estimate, etc.) the
-    # DCF/synergies sheets need.
+    # W12/D4: every mode gains a Summary sheet (mode-agnostic executive
+    # landing page synthesizing recommendation + valuation + assumptions
+    # + top-3 reasons/risks). Summary visually slots after Cover so a
+    # partner opening the workbook lands on it second.
+    # NOTE: Summary needs cell_registry entries that get populated by
+    # downstream sheets (enterprise_value from DCF, wacc from
+    # Assumptions, etc.). So it BUILDS last but DISPLAYS second — the
+    # WorkbookBuilder reorders worksheets in finalize_branding()
+    # using SUMMARY_VISUAL_INDEX below.
     "m_and_a_diligence": [
         "title", "assumptions", "revenue_build", "cost_build",
-        "working_capital", "dcf", "comparables", "sensitivity", "synergies",
+        "working_capital", "dcf", "comparables", "sensitivity",
+        "synergies", "summary",
     ],
-    "growth_strategy":        ["title", "assumptions", "revenue_build", "cost_build"],
-    "boutique_pricing_review":["title", "assumptions", "revenue_build", "cost_build"],
-    "market_entry":           ["title", "assumptions", "revenue_build", "cost_build"],
-    "general":                ["title", "assumptions", "revenue_build", "cost_build"],
+    "growth_strategy":        ["title", "assumptions", "revenue_build", "cost_build", "summary"],
+    "boutique_pricing_review":["title", "assumptions", "revenue_build", "cost_build", "summary"],
+    "market_entry":           ["title", "assumptions", "revenue_build", "cost_build", "summary"],
+    "general":                ["title", "assumptions", "revenue_build", "cost_build", "summary"],
+}
+
+# Visual-order overrides: ``summary`` builds last but displays at
+# index 1 (right after Cover). The WorkbookBuilder applies this in
+# finalize_branding by moving the sheet to its target position.
+SHEET_VISUAL_POSITION: dict[str, int] = {
+    "summary": 1,
 }
 
 

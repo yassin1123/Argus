@@ -17,12 +17,17 @@ landing page, not a derived-data sheet.
 
 from __future__ import annotations
 
+import asyncio
+import io
+import logging
 from datetime import datetime, timezone
 from typing import Any
 
+from openpyxl.drawing.image import Image as OpenpyxlImage
 from openpyxl.utils import get_column_letter
 
 from ..._base import payload_get
+from ...asset_cache import _cache_fresh, _cache_path, fetch_and_cache_logo
 from .._styles import (
     DEFAULT_FONT,
     HEADING_TEXT_HEX,
@@ -34,6 +39,36 @@ from .._styles import (
 )
 from ._base import SheetBuilderBase, SheetResult
 from ._registry import register_sheet
+
+logger = logging.getLogger(__name__)
+
+
+def _resolve_logo_sync(firm_id: Any, logo_url: str) -> bytes | None:
+    """Sync wrapper around the async asset cache. Mirrors the W11/D4
+    deck title slide helper:
+      - outside a running loop: drive the coroutine via asyncio.run
+      - inside a running loop: read the cache file directly so we
+        never block the rendering coroutine.
+    """
+    if not logo_url:
+        return None
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    if loop is not None and loop.is_running():
+        p = _cache_path(firm_id)
+        if _cache_fresh(p):
+            try:
+                return p.read_bytes()
+            except OSError:
+                return None
+        return None
+    try:
+        return asyncio.run(fetch_and_cache_logo(firm_id, logo_url))
+    except Exception as e:  # noqa: BLE001
+        logger.info("xlsx Cover logo resolve failed (%s) — falling back to text", e)
+        return None
 
 
 @register_sheet("title")
@@ -66,6 +101,27 @@ class TitleSheet(SheetBuilderBase):
         ws["A1"].font = heading_font(color_hex=primary_hex, size=24)
         ws["A1"].alignment = left_align()
         ws.row_dimensions[1].height = 36
+
+        # Logo embed (top-right, columns C-D, row 1-3) — reuses the
+        # W11/D4 deck asset cache so a single fetch + resize +
+        # 24h disk TTL covers HTML / PDF / PPTX / XLSX. Falls back
+        # silently to the firm-name text banner when the URL is
+        # missing / unreachable / undecodable.
+        logo_url = str((firm_branding or {}).get("logo_url") or "").strip()
+        firm_id = (firm_branding or {}).get("_firm_id") or firm_name
+        if logo_url:
+            logo_bytes = _resolve_logo_sync(firm_id, logo_url)
+            if logo_bytes:
+                try:
+                    img = OpenpyxlImage(io.BytesIO(logo_bytes))
+                    # Constrain visible size — Pillow resize already
+                    # caps source at 300px wide, but openpyxl's
+                    # OOXML image cell size also needs setting.
+                    img.height = min(img.height, 80)
+                    img.width = min(img.width, 200)
+                    ws.add_image(img, "C1")
+                except Exception as e:  # noqa: BLE001
+                    logger.info("xlsx Cover logo embed failed (%s)", e)
 
         # A2-A5: engagement metadata block.
         engagement_title = str(
@@ -107,4 +163,5 @@ class TitleSheet(SheetBuilderBase):
             sheet_index=workbook.worksheets.index(ws),
             citation_ids=[],
             cell_count=4 + 1 + len(overview_lines),
+            skip_branding_header=True,  # Cover owns its own row-1 banner
         )
