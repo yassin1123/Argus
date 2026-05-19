@@ -103,6 +103,27 @@ def _latest_trajectory_point(payload: Any, key: str) -> tuple[str, float, list[s
     return (period or "Latest", v, [cid] if cid else [])
 
 
+def _default_ebitda_margin_from_payload(payload: Any) -> float:
+    """Extract a default EBITDA margin (decimal) from
+    ``payload.financial_profile.margin_profile.ebitda_margin`` when
+    present. Returns 0.10 when missing — flagged ASSUMPTION on the
+    sheet so a consultant knows to override.
+    """
+    fp = payload_get(payload, "financial_profile", default=None)
+    if not isinstance(fp, dict):
+        return 0.10
+    mp = fp.get("margin_profile") or {}
+    if not isinstance(mp, dict):
+        return 0.10
+    raw = str(mp.get("ebitda_margin") or "").strip().rstrip("%")
+    if not raw:
+        return 0.10
+    try:
+        return float(raw) / 100.0
+    except ValueError:
+        return 0.10
+
+
 def _valuation_scenario(payload: Any, key: str) -> tuple[float, str] | None:
     """Pull ``(gbp_m, methodology)`` from valuation_range[key]."""
     vr = payload_get(payload, "valuation_range", default=None)
@@ -126,6 +147,7 @@ class AssumptionsSheet(SheetBuilderBase):
         payload: Any,
         firm_branding: dict[str, Any],
         citations: list[Any],
+        cell_registry: Any = None,
     ) -> SheetResult:
         ws = workbook.create_sheet("Assumptions")
 
@@ -221,43 +243,67 @@ class AssumptionsSheet(SheetBuilderBase):
         _write_section_band(ws, row, "Consultant inputs (editable)", primary_hex)
         row += 1
 
-        _write_input_row(
-            ws, row,
-            parameter="WACC",
-            value=_DEFAULT_WACC,
-            unit="%",
-            source_note=_ASSUMPTION_NOTE,
-            number_format="0.0%",
-        )
-        row += 1; cell_count += 1
-        _write_input_row(
-            ws, row,
-            parameter="Terminal growth rate",
-            value=_DEFAULT_TERMINAL_GROWTH,
-            unit="%",
-            source_note=_ASSUMPTION_NOTE,
-            number_format="0.0%",
-        )
-        row += 1; cell_count += 1
-        _write_input_row(
-            ws, row,
-            parameter="Tax rate",
-            value=_DEFAULT_TAX_RATE,
-            unit="%",
-            source_note=_ASSUMPTION_NOTE,
-            number_format="0.0%",
-        )
-        row += 1; cell_count += 1
-        _write_input_row(
-            ws, row,
-            parameter="Revenue growth (Y+1)",
-            value=_DEFAULT_PROJECTED_GROWTH,
-            unit="%",
-            source_note=_ASSUMPTION_NOTE
-            + " — defaulted; W12/D2 extrapolates from trajectory.",
-            number_format="0.0%",
-        )
-        row += 1; cell_count += 1
+        # Core DCF inputs (used by W12/D3 DCF sheet too).
+        for name, label, value in (
+            ("wacc",             "WACC",                  _DEFAULT_WACC),
+            ("terminal_growth",  "Terminal growth rate",  _DEFAULT_TERMINAL_GROWTH),
+            ("tax_rate",         "Tax rate",              _DEFAULT_TAX_RATE),
+        ):
+            _write_input_row(
+                ws, row,
+                parameter=label,
+                value=value,
+                unit="%",
+                source_note=_ASSUMPTION_NOTE,
+                number_format="0.0%",
+            )
+            if cell_registry is not None:
+                cell_registry.set(name, "Assumptions", f"B{row}")
+            row += 1; cell_count += 1
+
+        # Per-year revenue growth (Y+1 … Y+5). Downstream Revenue Build
+        # references these per projection column. Flagged
+        # ASSUMPTION — spec hard rule "Don't auto-extrapolate growth
+        # rates from historical CAGR."
+        row += 1  # subsection spacer
+        _write_section_band(ws, row, "Revenue growth — projection years", primary_hex)
+        row += 1
+        for year in range(1, 6):
+            _write_input_row(
+                ws, row,
+                parameter=f"Revenue growth (Y+{year})",
+                value=_DEFAULT_PROJECTED_GROWTH,
+                unit="%",
+                source_note=_ASSUMPTION_NOTE
+                + " — single default; consultant tunes per year.",
+                number_format="0.0%",
+            )
+            if cell_registry is not None:
+                cell_registry.set(f"revenue_growth_y{year}", "Assumptions", f"B{row}")
+            row += 1; cell_count += 1
+
+        # Per-year EBITDA margin (Y+1 … Y+5). Downstream Cost Build
+        # references these to project EBITDA off Revenue Build.
+        row += 1  # subsection spacer
+        _write_section_band(ws, row, "EBITDA margin — projection years", primary_hex)
+        row += 1
+        _default_ebitda_margin = _default_ebitda_margin_from_payload(payload)
+        for year in range(1, 6):
+            _write_input_row(
+                ws, row,
+                parameter=f"EBITDA margin (Y+{year})",
+                value=_default_ebitda_margin,
+                unit="%",
+                source_note=(
+                    _ASSUMPTION_NOTE
+                    + " — defaulted from payload.financial_profile.margin_profile"
+                    + " when available, else 10%."
+                ),
+                number_format="0.0%",
+            )
+            if cell_registry is not None:
+                cell_registry.set(f"ebitda_margin_y{year}", "Assumptions", f"B{row}")
+            row += 1; cell_count += 1
 
         return SheetResult(
             sheet_index=workbook.worksheets.index(ws),

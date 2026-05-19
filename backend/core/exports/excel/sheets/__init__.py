@@ -16,8 +16,13 @@ from ._registry import (  # noqa: F401
 from .sequences import get_workbook_sheets_for_mode  # noqa: F401
 
 # Importing concrete sheet modules registers them.
+# Day 1 base pair:
 from . import assumptions  # noqa: F401,E402
 from . import title  # noqa: F401,E402
+
+# Day 2 projection sheets:
+from . import cost_build  # noqa: F401,E402
+from . import revenue_build  # noqa: F401,E402
 
 __all__ = [
     "SheetBuilderBase",

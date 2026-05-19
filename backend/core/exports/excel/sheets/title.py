@@ -44,6 +44,7 @@ class TitleSheet(SheetBuilderBase):
         payload: Any,
         firm_branding: dict[str, Any],
         citations: list[Any],
+        cell_registry: Any = None,
     ) -> SheetResult:
         ws = workbook.create_sheet("Cover")
 

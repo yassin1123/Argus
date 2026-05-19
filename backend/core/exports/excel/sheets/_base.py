@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from openpyxl import Workbook
 
     from ..._base import ClaimCitation
+    from .._refs import CellRegistry
 
 
 @dataclass
@@ -54,5 +55,16 @@ class SheetBuilderBase(ABC):
         payload: Any,
         firm_branding: dict[str, Any],
         citations: "list[ClaimCitation]",
+        cell_registry: "CellRegistry | None" = None,
     ) -> SheetResult:
+        """Build the sheet onto ``workbook``.
+
+        W12/D2: ``cell_registry`` is the per-workbook named-cell store
+        threaded by :class:`WorkbookBuilder`. Sheet builders that
+        produce reference targets (Assumptions writes ``wacc`` / per-year
+        growth rows) call :meth:`CellRegistry.set` so downstream sheets
+        (Revenue Build / Cost Build / DCF) can resolve those names
+        into stable cross-sheet formulas via :meth:`CellRegistry.require`
+        without baking row coordinates into multiple files.
+        """
         raise NotImplementedError

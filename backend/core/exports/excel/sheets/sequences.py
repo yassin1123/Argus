@@ -9,11 +9,15 @@ citation comments to every payload-derived cell.
 from __future__ import annotations
 
 _WORKBOOK_SHEETS: dict[str, list[str]] = {
-    "m_and_a_diligence": ["title", "assumptions"],
-    "growth_strategy":   ["title", "assumptions"],
-    "boutique_pricing_review": ["title", "assumptions"],
-    "market_entry":      ["title", "assumptions"],
-    "general":           ["title", "assumptions"],
+    # W12/D2: Revenue Build + Cost Build join the workbook. Both modes
+    # get both sheets; the per-mode projection horizon (5y vs 3y) and
+    # segment-vs-single-line shape are handled inside the sheet
+    # builders rather than the sequence list.
+    "m_and_a_diligence":      ["title", "assumptions", "revenue_build", "cost_build"],
+    "growth_strategy":        ["title", "assumptions", "revenue_build", "cost_build"],
+    "boutique_pricing_review":["title", "assumptions", "revenue_build", "cost_build"],
+    "market_entry":           ["title", "assumptions", "revenue_build", "cost_build"],
+    "general":                ["title", "assumptions", "revenue_build", "cost_build"],
 }
 
 
