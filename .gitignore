@@ -18,6 +18,11 @@ htmlcov/
 pgdata/
 .claude/
 
+# Local artifact output dir — produced by the Wxx/D5 e2e runners.
+# Generated .pdf/.pptx/.xlsx binaries are large and reproducible from
+# the eval_runs JSONs + the source.
+artifacts_out/
+
 # Week 1 benchmark raw outputs — only the runner and summary.json/csv are committed.
 backend/eval_runs/**/run_*.json
 backend/eval_runs/**/run_*.md

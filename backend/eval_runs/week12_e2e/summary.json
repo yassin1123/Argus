@@ -1,0 +1,364 @@
+{
+  "generated_at": "2026-05-19T15:54:45Z",
+  "headline_assertions": {
+    "both_models_ready": true,
+    "m_and_a_sheet_count_10": true,
+    "growth_sheet_count_5": true,
+    "m_and_a_sheet_order_matches": true,
+    "growth_sheet_order_matches": true,
+    "m_and_a_audit_clean": true,
+    "growth_audit_clean": true,
+    "m_and_a_total_formulas_ge_80": true,
+    "m_and_a_total_formulas": 112,
+    "m_and_a_per_sheet_formulas_meet_min": true,
+    "m_and_a_per_sheet_formulas_detail": {
+      "DCF": {
+        "formulas": 40,
+        "min": 10
+      },
+      "Revenue Build": {
+        "formulas": 17,
+        "min": 10
+      },
+      "Cost Build": {
+        "formulas": 25,
+        "min": 10
+      }
+    },
+    "m_and_a_formula_fraction_informational": 0.1915,
+    "growth_formula_fraction_informational": 0.0839,
+    "m_and_a_dcf_ev_is_formula": true,
+    "m_and_a_dcf_ev_formula": "=SUM(B14:F14)+F20",
+    "m_and_a_sensitivity_has_4_tables": true,
+    "m_and_a_sensitivity_table_titles_count": 8,
+    "m_and_a_firm_header_every_sheet": true,
+    "growth_firm_header_every_sheet": true,
+    "each_xlsx_under_250000_bytes": true,
+    "file_sizes": {
+      "m_and_a_model": 27495,
+      "growth_model": 14030
+    },
+    "total_cost_zero": true,
+    "total_cost_usd": 0.0,
+    "headline_pass": true
+  },
+  "headline_pass": true,
+  "n_models": 2,
+  "runs": [
+    {
+      "run_name": "m_and_a_model",
+      "engagement_label": "M&A diligence (TargetCo)",
+      "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+      "expected_sheet_count": 10,
+      "expected_sheet_order": [
+        "Cover",
+        "Summary",
+        "Assumptions",
+        "Revenue Build",
+        "Cost Build",
+        "Working Capital",
+        "DCF",
+        "Comparables",
+        "Sensitivity",
+        "Synergies"
+      ],
+      "is_m_and_a": true,
+      "artifact_id": "ec8e7f20-813f-46d3-92ab-f01271167b04",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\e5b64285-6941-4d4c-8a07-820a165fb068\\9da8a365-224e-4c4c-8f65-8ff1d1cef5dc\\ec8e7f20-813f-46d3-92ab-f01271167b04.xlsx",
+      "file_size_bytes": 27495,
+      "claim_citation_count": 6,
+      "generation_wall_seconds": 0.568,
+      "failure_reason": null,
+      "metadata": {
+        "mode": "m_and_a_diligence",
+        "sheet_count": 10,
+        "sheet_sequence": [
+          "title",
+          "assumptions",
+          "revenue_build",
+          "cost_build",
+          "working_capital",
+          "dcf",
+          "comparables",
+          "sensitivity",
+          "synergies",
+          "summary"
+        ],
+        "cited_claim_ids": [
+          "TargetCo Holdings Financial Report FY24",
+          "TargetCo Holdings Financial Report FY22",
+          "claim_4",
+          "claim_1",
+          "claim_2",
+          "claim_3"
+        ]
+      },
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\m_and_a_model.xlsx",
+      "xlsx_inspection": {
+        "sheet_names": [
+          "Cover",
+          "Summary",
+          "Assumptions",
+          "Revenue Build",
+          "Cost Build",
+          "Working Capital",
+          "DCF",
+          "Comparables",
+          "Sensitivity",
+          "Synergies"
+        ],
+        "sheet_count": 10,
+        "formula_cells": 112,
+        "static_value_cells": 473,
+        "total_value_cells": 585,
+        "numeric_cells": 211,
+        "string_cells": 262,
+        "input_styled_cells": 56,
+        "link_styled_cells": 35,
+        "formula_styled_cells": 77,
+        "cells_with_comment": 12,
+        "formula_fraction": 0.1915,
+        "per_sheet": {
+          "Cover": {
+            "formula_cells": 0,
+            "static_value_cells": 12,
+            "cells_with_comment": 0,
+            "max_row": 13,
+            "max_column": 1
+          },
+          "Summary": {
+            "formula_cells": 5,
+            "static_value_cells": 26,
+            "cells_with_comment": 4,
+            "max_row": 20,
+            "max_column": 4
+          },
+          "Assumptions": {
+            "formula_cells": 0,
+            "static_value_cells": 83,
+            "cells_with_comment": 2,
+            "max_row": 29,
+            "max_column": 6
+          },
+          "Revenue Build": {
+            "formula_cells": 17,
+            "static_value_cells": 18,
+            "cells_with_comment": 4,
+            "max_row": 7,
+            "max_column": 8
+          },
+          "Cost Build": {
+            "formula_cells": 25,
+            "static_value_cells": 25,
+            "cells_with_comment": 1,
+            "max_row": 12,
+            "max_column": 8
+          },
+          "Working Capital": {
+            "formula_cells": 10,
+            "static_value_cells": 38,
+            "cells_with_comment": 0,
+            "max_row": 11,
+            "max_column": 8
+          },
+          "DCF": {
+            "formula_cells": 40,
+            "static_value_cells": 40,
+            "cells_with_comment": 0,
+            "max_row": 25,
+            "max_column": 6
+          },
+          "Comparables": {
+            "formula_cells": 8,
+            "static_value_cells": 35,
+            "cells_with_comment": 0,
+            "max_row": 20,
+            "max_column": 6
+          },
+          "Sensitivity": {
+            "formula_cells": 0,
+            "static_value_cells": 156,
+            "cells_with_comment": 0,
+            "max_row": 45,
+            "max_column": 7
+          },
+          "Synergies": {
+            "formula_cells": 7,
+            "static_value_cells": 40,
+            "cells_with_comment": 1,
+            "max_row": 19,
+            "max_column": 6
+          }
+        },
+        "audit_missing": [],
+        "audit_sheets_passed": [
+          "Assumptions",
+          "Cost Build",
+          "Revenue Build",
+          "Summary",
+          "Synergies"
+        ],
+        "audit_sheets_requiring_citations": [
+          "Assumptions",
+          "Cost Build",
+          "Revenue Build",
+          "Summary",
+          "Synergies"
+        ],
+        "header_text_per_sheet": {
+          "Cover": "Argus Demo Boutique",
+          "Summary": "Argus Demo Boutique",
+          "Assumptions": "Argus Demo Boutique",
+          "Revenue Build": "Argus Demo Boutique",
+          "Cost Build": "Argus Demo Boutique",
+          "Working Capital": "Argus Demo Boutique",
+          "DCF": "Argus Demo Boutique",
+          "Comparables": "Argus Demo Boutique",
+          "Sensitivity": "Argus Demo Boutique",
+          "Synergies": "Argus Demo Boutique"
+        },
+        "sheets_with_firm_header": 10,
+        "m_and_a_dcf_ev_coord": "B23",
+        "m_and_a_dcf_ev_value": "=SUM(B14:F14)+F20",
+        "m_and_a_dcf_ev_is_formula": true,
+        "m_and_a_sensitivity_table_titles_count": 8,
+        "m_and_a_sensitivity_table_titles_sample": [
+          "Grid 1 \u2014 WACC \u00d7 Terminal Growth \u2192 Enterprise Value (\u00a3m)",
+          "Gordon Growth method; FCF grows at base 5% before terminal.",
+          "WACC \u2193 / Terminal Growth \u2192",
+          "Grid 2 \u2014 WACC \u00d7 Exit Multiple \u2192 Enterprise Value (\u00a3m)",
+          "Exit-multiple method; FCF grows at base 5% before terminal.",
+          "WACC \u2193 / Exit Multiple \u2192",
+          "Grid 3 \u2014 Revenue Growth \u00d7 EBITDA Margin \u2192 Terminal EBITDA (\u00a3m)",
+          "Revenue Growth \u2193 / EBITDA Margin \u2192"
+        ]
+      }
+    },
+    {
+      "run_name": "growth_model",
+      "engagement_label": "growth_strategy (TargetCo Scotland)",
+      "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+      "expected_sheet_count": 5,
+      "expected_sheet_order": [
+        "Cover",
+        "Summary",
+        "Assumptions",
+        "Revenue Build",
+        "Cost Build"
+      ],
+      "is_m_and_a": false,
+      "artifact_id": "04359503-b659-408c-b559-ed0ae3ea1e77",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\e5b64285-6941-4d4c-8a07-820a165fb068\\bcb54507-31fc-4069-8c0d-585d075b0d07\\04359503-b659-408c-b559-ed0ae3ea1e77.xlsx",
+      "file_size_bytes": 14030,
+      "claim_citation_count": 6,
+      "generation_wall_seconds": 0.457,
+      "failure_reason": null,
+      "metadata": {
+        "mode": "growth_strategy",
+        "sheet_count": 5,
+        "sheet_sequence": [
+          "title",
+          "assumptions",
+          "revenue_build",
+          "cost_build",
+          "summary"
+        ],
+        "cited_claim_ids": [
+          "claim_001",
+          "claim_004",
+          "claim_002",
+          "claim_005",
+          "claim_003",
+          "claim_006"
+        ]
+      },
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\growth_model.xlsx",
+      "xlsx_inspection": {
+        "sheet_names": [
+          "Cover",
+          "Summary",
+          "Assumptions",
+          "Revenue Build",
+          "Cost Build"
+        ],
+        "sheet_count": 5,
+        "formula_cells": 12,
+        "static_value_cells": 131,
+        "total_value_cells": 143,
+        "numeric_cells": 16,
+        "string_cells": 115,
+        "input_styled_cells": 16,
+        "link_styled_cells": 6,
+        "formula_styled_cells": 6,
+        "cells_with_comment": 7,
+        "formula_fraction": 0.0839,
+        "per_sheet": {
+          "Cover": {
+            "formula_cells": 0,
+            "static_value_cells": 12,
+            "cells_with_comment": 0,
+            "max_row": 13,
+            "max_column": 1
+          },
+          "Summary": {
+            "formula_cells": 3,
+            "static_value_cells": 23,
+            "cells_with_comment": 6,
+            "max_row": 16,
+            "max_column": 4
+          },
+          "Assumptions": {
+            "formula_cells": 0,
+            "static_value_cells": 63,
+            "cells_with_comment": 0,
+            "max_row": 24,
+            "max_column": 6
+          },
+          "Revenue Build": {
+            "formula_cells": 0,
+            "static_value_cells": 12,
+            "cells_with_comment": 1,
+            "max_row": 5,
+            "max_column": 6
+          },
+          "Cost Build": {
+            "formula_cells": 9,
+            "static_value_cells": 21,
+            "cells_with_comment": 0,
+            "max_row": 12,
+            "max_column": 6
+          }
+        },
+        "audit_missing": [],
+        "audit_sheets_passed": [
+          "Assumptions",
+          "Cost Build",
+          "Revenue Build",
+          "Summary"
+        ],
+        "audit_sheets_requiring_citations": [
+          "Assumptions",
+          "Cost Build",
+          "Revenue Build",
+          "Summary",
+          "Synergies"
+        ],
+        "header_text_per_sheet": {
+          "Cover": "Argus Demo Boutique",
+          "Summary": "Argus Demo Boutique",
+          "Assumptions": "Argus Demo Boutique",
+          "Revenue Build": "Argus Demo Boutique",
+          "Cost Build": "Argus Demo Boutique"
+        },
+        "sheets_with_firm_header": 5,
+        "m_and_a_dcf_ev_coord": null,
+        "m_and_a_dcf_ev_value": null,
+        "m_and_a_dcf_ev_is_formula": null,
+        "m_and_a_sensitivity_table_titles_count": null,
+        "m_and_a_sensitivity_table_titles_sample": null
+      }
+    }
+  ]
+}

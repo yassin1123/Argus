@@ -186,6 +186,8 @@ def audit_citations(workbook: Any) -> dict[str, Any]:
         with_comment = 0
         argus_authored = 0
         numeric_data_cells = 0
+        default_flagged_rows = 0
+        rows_with_value_in_b = 0
         for row in ws.iter_rows():
             for cell in row:
                 if cell.comment is not None:
@@ -202,10 +204,27 @@ def audit_citations(workbook: Any) -> dict[str, Any]:
                     and not isinstance(cell.value, bool)
                 ):
                     numeric_data_cells += 1
+            # Per-row default flag: a populated B-column value paired
+            # with an "ASSUMPTION" or "DEFAULT" marker in col D means
+            # this row is a consultant default, not payload data — no
+            # citation required. The audit's vacuous-pass rule uses
+            # this to avoid flagging all-default Assumptions sheets.
+            try:
+                b_val = ws.cell(row=row[0].row, column=2).value if row else None
+                d_val = ws.cell(row=row[0].row, column=4).value if row else None
+            except Exception:
+                b_val, d_val = None, None
+            if isinstance(b_val, (int, float)) and not isinstance(b_val, bool):
+                rows_with_value_in_b += 1
+                d_text = str(d_val or "").upper()
+                if "ASSUMPTION" in d_text or "DEFAULT" in d_text:
+                    default_flagged_rows += 1
         coverage[sheet_name] = {
             "cells_with_comment": with_comment,
             "argus_authored": argus_authored,
             "numeric_data_cells": numeric_data_cells,
+            "default_flagged_rows": default_flagged_rows,
+            "rows_with_value_in_b": rows_with_value_in_b,
         }
         if sheet_name in _SHEETS_REQUIRING_CITATIONS:
             if argus_authored >= 1:
@@ -213,6 +232,15 @@ def audit_citations(workbook: Any) -> dict[str, Any]:
             elif numeric_data_cells == 0:
                 # Sheet is structurally empty of payload data — nothing
                 # to cite. Pass vacuously.
+                sheets_passed.append(sheet_name)
+            elif (
+                rows_with_value_in_b > 0
+                and default_flagged_rows == rows_with_value_in_b
+            ):
+                # Every value row is a consultant default flagged
+                # ASSUMPTION — no payload-derived numbers on this
+                # sheet, so the citation contract is vacuously
+                # satisfied.
                 sheets_passed.append(sheet_name)
             else:
                 missing.append((sheet_name, "<no citations>"))
