@@ -94,15 +94,24 @@ def _all_text(ws: Any) -> str:
 
 @pytest.mark.asyncio
 async def test_renders_xlsx_round_trip(exporter: ExcelModelExporter) -> None:
+    """Round-trip — bytes round-trip back through openpyxl. W12/D2
+    expanded the M&A sequence beyond [title, assumptions]; this test
+    now asserts against the live ``get_workbook_sheets_for_mode``
+    result so sequence additions don't break the round-trip check."""
+    from core.exports.excel.sheets.sequences import get_workbook_sheets_for_mode
+
     result = await exporter.render(_payload(), _BRANDING, _citations())
     assert result.file_size > 0
     # XLSX is a ZIP — header magic is PK\x03\x04.
     assert result.file_bytes[:4] == b"PK\x03\x04"
     wb = load_workbook(io.BytesIO(result.file_bytes))
-    assert wb.sheetnames == ["Cover", "Assumptions"]
+    expected_seq = get_workbook_sheets_for_mode("m_and_a_diligence")
+    assert result.metadata["sheet_sequence"] == expected_seq
+    assert result.metadata["sheet_count"] == len(expected_seq)
     assert result.metadata["mode"] == "m_and_a_diligence"
-    assert result.metadata["sheet_sequence"] == ["title", "assumptions"]
-    assert result.metadata["sheet_count"] == 2
+    # Cover + Assumptions are invariant across modes; verify they're
+    # the first two sheets.
+    assert wb.sheetnames[:2] == ["Cover", "Assumptions"]
 
 
 # ---------------------------------------------------------------------------
@@ -249,8 +258,14 @@ async def test_xlsx_opens_without_corruption(
     assert fpath.stat().st_size == result.file_size
     # Reopen — raises on malformed XLSX.
     wb = load_workbook(str(fpath))
-    assert wb.sheetnames == ["Cover", "Assumptions"]
-    # File size sanity (no charts / images yet; D1 cap is 50 KB).
-    assert result.file_size < 50_000, (
-        f"xlsx larger than expected on D1: {result.file_size} bytes (cap 50 KB)"
+    # W12/D2 expanded the sheet set to include Revenue Build + Cost
+    # Build. Cover + Assumptions stay the first two sheets.
+    assert wb.sheetnames[:2] == ["Cover", "Assumptions"]
+    # File size sanity. W12/D1 capped at 50 KB on the 2-sheet
+    # baseline; W12/D2 adds two more formula-heavy sheets so we
+    # raise the cap to 75 KB. Realistic decks come in around 10 KB
+    # even with the new sheets — the cap is a sanity check, not a
+    # tuning target.
+    assert result.file_size < 75_000, (
+        f"xlsx larger than expected: {result.file_size} bytes (cap 75 KB after W12/D2)"
     )
