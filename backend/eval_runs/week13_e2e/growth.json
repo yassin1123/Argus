@@ -1,0 +1,146 @@
+[
+  {
+    "engagement_id": "growth",
+    "engagement_label": "growth_strategy (TargetCo Scotland)",
+    "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+    "artifact_type": "email",
+    "format": "md",
+    "artifact_id": "8f1a938e-79f5-4623-9952-6b1884a9a86c",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/8f1a938e-79f5-4623-9952-6b1884a9a86c.md",
+    "file_size_bytes": 1929,
+    "claim_citation_count": 2,
+    "generation_wall_seconds": 0.122,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "markdown",
+      "mode": "growth_strategy",
+      "subject": "Week 8 E2E \u00b7 TargetCo \u00b7 Germany market entry (with Porter's) \u2014 strategy review and supporting materials",
+      "cited_claim_ids": [
+        "reasons",
+        "risks"
+      ],
+      "body_word_count": 246,
+      "body_word_count_observed": 246,
+      "attachment_lines": [
+        "1. Executive 1-pager (HTML)",
+        "2. Executive 1-pager (PDF, 1 page)",
+        "3. Deck (PPTX, 9 slides)",
+        "4. Financial model (XLSX, 5 sheets)",
+        "5. Interview Guide (MD)",
+        "6. Interview Guide (PDF, 7 pages)"
+      ]
+    },
+    "copied_to": "/tmp/artifacts_out/growth_email.md"
+  },
+  {
+    "engagement_id": "growth",
+    "engagement_label": "growth_strategy (TargetCo Scotland)",
+    "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+    "artifact_type": "email",
+    "format": "html",
+    "artifact_id": "be984c89-5025-4ceb-aa0f-54e3f4a5818e",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/be984c89-5025-4ceb-aa0f-54e3f4a5818e.html",
+    "file_size_bytes": 3777,
+    "claim_citation_count": 2,
+    "generation_wall_seconds": 0.179,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "html",
+      "mode": "growth_strategy",
+      "subject": "Week 8 E2E \u00b7 TargetCo \u00b7 Germany market entry (with Porter's) \u2014 strategy review and supporting materials",
+      "cited_claim_ids": [
+        "reasons",
+        "risks"
+      ],
+      "primary_color": "#0F6E56",
+      "body_word_count": 246
+    },
+    "copied_to": "/tmp/artifacts_out/growth_email.html"
+  },
+  {
+    "engagement_id": "growth",
+    "engagement_label": "growth_strategy (TargetCo Scotland)",
+    "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+    "artifact_type": "email",
+    "format": "pdf",
+    "artifact_id": "d038ebd1-4ddc-4ec7-bfce-6cf4f97d48ac",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/d038ebd1-4ddc-4ec7-bfce-6cf4f97d48ac.pdf",
+    "file_size_bytes": 13164,
+    "claim_citation_count": 2,
+    "generation_wall_seconds": 0.339,
+    "failure_reason": null,
+    "metadata": {
+      "mode": "growth_strategy",
+      "subject": "Week 8 E2E \u00b7 TargetCo \u00b7 Germany market entry (with Porter's) \u2014 strategy review and supporting materials",
+      "cited_claim_ids": [
+        "reasons",
+        "risks"
+      ],
+      "primary_color": "#0F6E56",
+      "body_word_count": 246,
+      "format_subtype": "pdf",
+      "page_count": 1,
+      "attempt_1_pages": 2,
+      "truncated_for_fit": true,
+      "attempt_2_pages": 1,
+      "pages_with_firm_name": 1,
+      "page_count_observed": 1
+    },
+    "copied_to": "/tmp/artifacts_out/growth_email.pdf"
+  },
+  {
+    "engagement_id": "growth",
+    "engagement_label": "growth_strategy (TargetCo Scotland)",
+    "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+    "artifact_type": "interview_guide",
+    "format": "md",
+    "artifact_id": "77170507-40fe-4639-b710-b4dea738c7a9",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/77170507-40fe-4639-b710-b4dea738c7a9.md",
+    "file_size_bytes": 7908,
+    "claim_citation_count": 0,
+    "generation_wall_seconds": 0.048,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "markdown",
+      "mode": "growth_strategy",
+      "question_count": 10,
+      "section_a_count": 0,
+      "section_b_count": 5,
+      "section_c_count": 5,
+      "cited_claim_ids": []
+    },
+    "copied_to": "/tmp/artifacts_out/growth_interview_guide.md"
+  },
+  {
+    "engagement_id": "growth",
+    "engagement_label": "growth_strategy (TargetCo Scotland)",
+    "session_id": "bcb54507-31fc-4069-8c0d-585d075b0d07",
+    "artifact_type": "interview_guide",
+    "format": "pdf",
+    "artifact_id": "49f038f5-5a0c-48f0-a01f-d08f23a28065",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/bcb54507-31fc-4069-8c0d-585d075b0d07/49f038f5-5a0c-48f0-a01f-d08f23a28065.pdf",
+    "file_size_bytes": 37549,
+    "claim_citation_count": 0,
+    "generation_wall_seconds": 0.431,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "pdf",
+      "mode": "growth_strategy",
+      "question_count": 10,
+      "section_a_count": 0,
+      "section_b_count": 5,
+      "section_c_count": 5,
+      "cited_claim_ids": [],
+      "page_count": 7,
+      "firm_name": "Argus Demo Boutique",
+      "pages_with_firm_name": 7,
+      "page_count_observed": 7
+    },
+    "copied_to": "/tmp/artifacts_out/growth_interview_guide.pdf"
+  }
+]

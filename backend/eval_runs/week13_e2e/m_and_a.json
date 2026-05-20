@@ -1,0 +1,148 @@
+[
+  {
+    "engagement_id": "m_and_a",
+    "engagement_label": "M&A diligence (TargetCo)",
+    "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+    "artifact_type": "email",
+    "format": "md",
+    "artifact_id": "8c3ba8b4-1dab-4986-b719-c1753eb38aaa",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/8c3ba8b4-1dab-4986-b719-c1753eb38aaa.md",
+    "file_size_bytes": 1679,
+    "claim_citation_count": 3,
+    "generation_wall_seconds": 0.123,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "markdown",
+      "mode": "m_and_a_diligence",
+      "subject": "Week 8 E2E \u00b7 TargetCo \u00b7 M&A diligence (with 2x2) diligence \u2014 recommendation and supporting materials",
+      "cited_claim_ids": [
+        "reasons",
+        "valuation",
+        "risks"
+      ],
+      "body_word_count": 224,
+      "body_word_count_observed": 224,
+      "attachment_lines": [
+        "1. Executive 1-pager (HTML) \u2014 may need refresh, generated 7 days ago",
+        "2. Executive 1-pager (PDF, 1 page) \u2014 may need refresh, generated 7 days ago",
+        "3. Deck (PPTX, 11 slides) \u2014 may need refresh, generated 1 day ago",
+        "4. Financial model (XLSX, 10 sheets) \u2014 may need refresh, generated 10 hours ago",
+        "5. Interview Guide (MD)",
+        "6. Interview Guide (PDF, 6 pages)"
+      ]
+    },
+    "copied_to": "/tmp/artifacts_out/m_and_a_email.md"
+  },
+  {
+    "engagement_id": "m_and_a",
+    "engagement_label": "M&A diligence (TargetCo)",
+    "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+    "artifact_type": "email",
+    "format": "html",
+    "artifact_id": "d0618ac1-a892-4c6f-93ba-3b79107cde1d",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/d0618ac1-a892-4c6f-93ba-3b79107cde1d.html",
+    "file_size_bytes": 3580,
+    "claim_citation_count": 3,
+    "generation_wall_seconds": 0.125,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "html",
+      "mode": "m_and_a_diligence",
+      "subject": "Week 8 E2E \u00b7 TargetCo \u00b7 M&A diligence (with 2x2) diligence \u2014 recommendation and supporting materials",
+      "cited_claim_ids": [
+        "reasons",
+        "valuation",
+        "risks"
+      ],
+      "primary_color": "#0F6E56",
+      "body_word_count": 224
+    },
+    "copied_to": "/tmp/artifacts_out/m_and_a_email.html"
+  },
+  {
+    "engagement_id": "m_and_a",
+    "engagement_label": "M&A diligence (TargetCo)",
+    "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+    "artifact_type": "email",
+    "format": "pdf",
+    "artifact_id": "88d00966-a7f8-42f2-8f91-0f1924b32a80",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/88d00966-a7f8-42f2-8f91-0f1924b32a80.pdf",
+    "file_size_bytes": 17083,
+    "claim_citation_count": 3,
+    "generation_wall_seconds": 0.57,
+    "failure_reason": null,
+    "metadata": {
+      "mode": "m_and_a_diligence",
+      "subject": "Week 8 E2E \u00b7 TargetCo \u00b7 M&A diligence (with 2x2) diligence \u2014 recommendation and supporting materials",
+      "cited_claim_ids": [
+        "reasons",
+        "valuation",
+        "risks"
+      ],
+      "primary_color": "#0F6E56",
+      "body_word_count": 224,
+      "format_subtype": "pdf",
+      "page_count": 1,
+      "attempt_1_pages": 1,
+      "truncated_for_fit": false,
+      "pages_with_firm_name": 1,
+      "page_count_observed": 1
+    },
+    "copied_to": "/tmp/artifacts_out/m_and_a_email.pdf"
+  },
+  {
+    "engagement_id": "m_and_a",
+    "engagement_label": "M&A diligence (TargetCo)",
+    "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+    "artifact_type": "interview_guide",
+    "format": "md",
+    "artifact_id": "0b5f8bfe-4040-4242-b5f1-60289e871ac6",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/0b5f8bfe-4040-4242-b5f1-60289e871ac6.md",
+    "file_size_bytes": 6254,
+    "claim_citation_count": 0,
+    "generation_wall_seconds": 0.064,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "markdown",
+      "mode": "m_and_a_diligence",
+      "question_count": 9,
+      "section_a_count": 0,
+      "section_b_count": 4,
+      "section_c_count": 5,
+      "cited_claim_ids": []
+    },
+    "copied_to": "/tmp/artifacts_out/m_and_a_interview_guide.md"
+  },
+  {
+    "engagement_id": "m_and_a",
+    "engagement_label": "M&A diligence (TargetCo)",
+    "session_id": "9da8a365-224e-4c4c-8f65-8ff1d1cef5dc",
+    "artifact_type": "interview_guide",
+    "format": "pdf",
+    "artifact_id": "32096f16-5497-400e-9039-c3d2888417cc",
+    "status": "ready",
+    "file_path": "/tmp/argus_artifacts/e5b64285-6941-4d4c-8a07-820a165fb068/9da8a365-224e-4c4c-8f65-8ff1d1cef5dc/32096f16-5497-400e-9039-c3d2888417cc.pdf",
+    "file_size_bytes": 34727,
+    "claim_citation_count": 0,
+    "generation_wall_seconds": 0.414,
+    "failure_reason": null,
+    "metadata": {
+      "format_subtype": "pdf",
+      "mode": "m_and_a_diligence",
+      "question_count": 9,
+      "section_a_count": 0,
+      "section_b_count": 4,
+      "section_c_count": 5,
+      "cited_claim_ids": [],
+      "page_count": 6,
+      "firm_name": "Argus Demo Boutique",
+      "pages_with_firm_name": 6,
+      "page_count_observed": 6
+    },
+    "copied_to": "/tmp/artifacts_out/m_and_a_interview_guide.pdf"
+  }
+]
