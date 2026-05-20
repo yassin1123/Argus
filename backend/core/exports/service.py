@@ -171,12 +171,29 @@ async def _firm_branding(firm_id: UUID) -> dict[str, Any]:
 def _decode_jsonb(v: Any) -> Any:
     """asyncpg returns jsonb as str by default in this project's
     connection setup. Decode it to native Python; pass-through if
-    already a list/dict/None."""
+    already a list/dict/None.
+
+    Tolerates one layer of double-encoding (historical writer bug
+    where some report fields were stored via
+    ``json.dumps(json.dumps([...]))``). If the first decode yields a
+    string that itself parses as JSON, decode once more — but only
+    when the inner result is a list/dict so we don't strip the quotes
+    off legitimate string payloads.
+    """
     if isinstance(v, str):
         try:
-            return json.loads(v)
+            decoded = json.loads(v)
         except Exception:
             return v
+        if isinstance(decoded, str):
+            try:
+                inner = json.loads(decoded)
+            except Exception:
+                return decoded
+            if isinstance(inner, (list, dict)):
+                return inner
+            return decoded
+        return decoded
     return v
 
 
@@ -296,13 +313,18 @@ async def _available_artifacts_for_email(
         fp_snap = _payload_fingerprint(snap) if isinstance(snap, dict) else ""
         is_stale = bool(fp_current and fp_snap and fp_snap != fp_current)
         md = _decode_jsonb(row["metadata"]) or {}
+        # Coerce ``generated_at`` to ISO string so the payload_snapshot
+        # round-trips through json.dumps cleanly (asyncpg returns
+        # datetime objects which the encoder rejects).
+        gen_at = row["generated_at"]
+        gen_at_iso = gen_at.isoformat() if hasattr(gen_at, "isoformat") else gen_at
         out.append({
             "artifact_id": str(row["id"]),
             "artifact_type": row["artifact_type"],
             "format": row["format"],
             "file_size_bytes": row["file_size_bytes"],
             "claim_citation_count": row["claim_citation_count"],
-            "generated_at": row["generated_at"],
+            "generated_at": gen_at_iso,
             "metadata": md if isinstance(md, dict) else {},
             "is_stale": is_stale,
         })
