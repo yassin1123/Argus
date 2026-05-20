@@ -1,0 +1,25 @@
+Dear [Client name],
+
+{{ lede }}
+
+{{ recommendation_paragraph }}
+
+{{ caveat_paragraph }}
+
+**Attached for your review:**
+
+{% for item in attachments %}
+{{ loop.index }}. {{ item }}
+{% endfor %}
+
+{{ next_step }}
+
+Best regards,
+{{ signature.partner_name }}
+{{ signature.title }}
+{{ signature.firm_name }}
+
+---
+{{ sources_line }}
+
+{{ confidentiality_footer }}
