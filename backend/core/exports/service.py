@@ -105,11 +105,15 @@ async def _session_meta(session_id: UUID) -> dict[str, Any]:
     """Pull session-level metadata used to populate the artifact header
     (title, target name, mode hint). Best-effort: keys may be missing
     on older sessions, in which case the renderer falls back to
-    generic defaults."""
+    generic defaults.
+
+    W13/D3: also reads ``gap_report`` (used by the interview_guide
+    builder for Section A — critical evidence gaps).
+    """
     async with acquire() as conn:
         row = await conn.fetchrow(
             """
-            SELECT title, query, report_mode, metadata
+            SELECT title, query, report_mode, metadata, gap_report
             FROM sessions WHERE id = $1::uuid
             """,
             session_id,
@@ -130,6 +134,17 @@ async def _session_meta(session_id: UUID) -> dict[str, Any]:
         out["target_name"] = str(
             md.get("target_name") or md.get("target") or ""
         )
+    # ``row`` may be a real asyncpg Record or a test-side dict that
+    # only mocks the columns the older service.py expected. Tolerate
+    # both by checking membership first.
+    gap = row["gap_report"] if "gap_report" in row.keys() else None
+    if isinstance(gap, str):
+        try:
+            gap = json.loads(gap)
+        except Exception:
+            gap = {}
+    if isinstance(gap, dict):
+        out["gap_report"] = gap
     return out
 
 
@@ -518,6 +533,16 @@ async def generate_artifact(
     if artifact_type == "email":
         available = await _available_artifacts_for_email(session_id, payload)
         payload["_available_artifacts"] = available
+
+    # W13/D3: interview_guide Section A pulls from the session's
+    # gap_report. Inject it under the reserved underscore-prefixed key
+    # so the builder doesn't need a separate DB round-trip and the
+    # frozen payload_snapshot captures the gap_report state at
+    # generation time.
+    if artifact_type == "interview_guide":
+        gap_report = sess.get("gap_report")
+        if isinstance(gap_report, dict):
+            payload.setdefault("_gap_report", gap_report)
 
     await _insert_generating_row(
         artifact_id,
