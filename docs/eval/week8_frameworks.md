@@ -1,6 +1,11 @@
 # Week 8 — Frameworks library
 
-**Status:** ship (M&A path) — M&A Run A regression diagnosed and fixed in Phase 3 / Week 10 / Day 1 (commit `868c9a4`). Run A now lands 7/7 M&A fields + 2x2 + Pyramid + MECE on every fire. growth_strategy Run B reached the writer for the first time but failed at a separate writer-JSON-truncation bug that is unrelated to the original evidence-gate regression — documented as a new Phase 3 carry-forward.
+**Status:** ship (M&A path) — M&A Run A regression diagnosed and fixed in Phase 3 / Week 10 / Day 1 (commit `868c9a4`). Run A now lands 7/7 M&A fields + 2x2 + Pyramid + MECE on every fire. growth_strategy Run B reached the writer for the first time but failed at a separate writer-JSON-truncation bug.
+
+**Run B writer-truncation carry-forward (Phase 3 / Week 14 / Day 1):**
+Path A fix landed — growth_strategy now ships `model_overrides.writer.model: openai/gpt-4o` plus `max_tokens: 16000` in `consulting_modes.yaml`. The W8 Run B writer call previously hit `anthropic/claude-sonnet-4-5`'s 8192-token default ceiling (DB telemetry: `completion_tokens=8174` on the past growth call — diagnosed without spending a run). Path A swap mirrors the W7 iterate fix that closed M&A truncation. **Verify run on a fresh W8 growth engagement (session `a44923a8-…`, cost $0.60, wall 21 min):** writer ran clean on gpt-4o — full payload emitted, no truncation. Original writer-truncation symptom is **closed**.
+
+**However, a separate bug surfaced behind the now-removed truncation:** the writer emitted `frameworks: null` despite the explicit "REQUIRED, not optional" framework instructions in the system prompt. Root cause: `GeneralReportPayload.frameworks` is `Optional[FrameworksBlock]` (mode-config declares `porters_five_forces` as required, but the Pydantic schema permits omission). gpt-4o legitimately produces `null`; the validator accepts it. A growth-specific schema class (analogous to `MAndADiligenceReportPayload`) that makes `frameworks.porters_five_forces` non-nullable would close this — that's Path B scope, deferred to Phase 4 with a clear plan below.
 
 All Week 8 architecture shipped: Pyramid auto-checker (Day 1, 5 tests), MECE checker (Day 2, 7 tests), 2x2 + Porter's + Value Chain schemas and renderers (Day 3, 6 tests across frontend + schema validation), framework wiring into modes (Day 4, 6 tests). The original W8 Run A regression was root-caused in W10/D1 as a brittle pre-writer evidence gate that halted on the verifier's free-form `overall: "insufficient"` flag whenever the verifier returned mixed `claim_assessments`. The fix (orchestrator.py:942-981) replaces the single-string check with a quorum on `claim_assessments`. Run B's new writer-truncation failure is a different defect surfaced only because the gate fix let the pipeline reach the writer for the first time on growth_strategy.
 
@@ -17,7 +22,7 @@ All Week 8 architecture shipped: Pyramid auto-checker (Day 1, 5 tests), MECE che
 | Critic enforces required frameworks | ✅ | Day 4; `check_required_frameworks` + `apply_mode_checks` wiring |
 | Writer prompt augmentation per mode | ✅ | Day 4 + D5 iterate; flat-field enumeration; "fewer than 4 = unusable" demand in 2x2 instruction |
 | **E2E demo: M&A produces a 2x2** | ✅ | **Run A** (W10/D1 re-verify after gate fix): 7/7 M&A fields, 2-item 2x2 + citations, $0.21, 414s. Also emitted Porter's bonus block. |
-| **E2E demo: growth produces Porter's** | ❌ | **Run B** (W10/D1 re-verify): reached writer for the first time but writer JSON output truncated mid-stream → schema validation failed. Separate bug from the original evidence-gate regression. |
+| **E2E demo: growth produces Porter's** | ⚠️ partial — writer-truncation closed (W14/D1), schema-enforcement gap open | **Run B** writer-truncation symptom closed by gpt-4o swap + max_tokens 16000 override in `consulting_modes.yaml`. Verify run completed at $0.60 / 21 min wall; writer emitted a full, non-truncated payload but set `frameworks: null` despite explicit "REQUIRED" prompt instructions. Schema-enforcement gap (Optional FrameworksBlock + no growth-specific WriterReportPayload subclass) deferred to Phase 4. |
 | **Pyramid + MECE fire and persist** | ✅ (partial) | Fire and pass cleanly on Run A (0 errors / 0 overlaps); couldn't fire on Run B because writer aborted before persistence. |
 
 ## End-to-end demo
@@ -385,7 +390,24 @@ writer-output truncation.
 2. **Headline finding:** M&A engagement now lands 7/7 fields + 2x2 + Pyramid + MECE on every fire ($0.21, 414s). The original regression was a brittle evidence gate that halted on the verifier's free-form `overall` string when assessments themselves showed majority support — fixed via quorum check on `claim_assessments`.
 3. **Investigation:** 3 e2e runs, $1.34 spent of $2 ceiling. Run 1 reproduced on main; Run 2 reproduced on LAST_GOOD `f8223ea` — confirming external cause (verifier stochastic drift), not internal regression.
 4. **Pyramid + MECE:** 0 errors / 0 overlaps on Run A; both fire reliably when the writer payload exists.
-5. **New Phase 3 carry-forward:** Run B now reaches the writer (gate fix landed) but writer JSON truncates mid-emission on growth_strategy. Different defect from the original gate regression — likely a `max_tokens` / model output-budget issue on verbose memos, not in W10/D1 scope.
+5. **New Phase 3 carry-forward:** Run B now reaches the writer (gate fix landed) but writer JSON truncates mid-emission on growth_strategy. Different defect from the original gate regression — likely a `max_tokens` / model output-budget issue on verbose memos, not in W10/D1 scope. **W14/D1 update:** writer-truncation closed via gpt-4o swap. A second-layer schema-enforcement bug surfaced behind it; bounded Phase 4 plan below.
+
+## W14/D1 update — writer-truncation closed; new schema-enforcement carry-forward opened
+
+**What W14/D1 fixed:** added `model_overrides.writer.model: openai/gpt-4o` + `max_tokens: 16000` to `growth_strategy` in `backend/config/consulting_modes.yaml`. Diagnosis used no LLM budget — past writer call on `bcb54507-…` was already in `llm_calls` with `model=anthropic/claude-sonnet-4-5`, `completion_tokens=8174` (exactly Sonnet's 8192 default cap), confirming hypothesis statically. Anthropic's extended-output beta header is wired as a no-op (W7 found Anthropic rejected it), so raising `max_tokens` on Sonnet wouldn't have worked. The proven W7 pattern is the model swap. **Verify run on session `a44923a8-…`:** cost $0.60, wall 21 min, writer ran clean on gpt-4o — full structured payload emitted, no truncation, all base sections (key_reasons, risks, executive_insights, options_matrix, decision_criteria, etc.) populated. **Runs spent: 1 of 3 budgeted. Spend: $0.60 of $2 ceiling.**
+
+**Bug surfaced behind the fix:** the writer set `frameworks: null` even though the system prompt's framework-instruction block explicitly states "REQUIRED, not optional. You MUST emit this block". Root cause is structural, not prompt-strength: `agents/writer/schemas/_base.py:GeneralReportPayload.frameworks` is `Optional[FrameworksBlock]`, and `agents/writer/schemas/_registry.py:get_writer_schema('growth_strategy')` returns `GeneralReportPayload` (no growth-specific subclass). gpt-4o legitimately emits `null`; the Pydantic validator accepts it; the orchestrator's required-frameworks check evidently doesn't gate the report on a missing-frameworks finding (it logs a finding but doesn't block persistence). So growth memos persist without Porter's despite the mode declaring it required.
+
+### Phase 4 bounded plan (Path B — two-pass writer)
+
+The simplest fix that doesn't weaken the Porter's schema (per W14/D1 hard rule):
+
+1. **Add `GrowthStrategyReportPayload`** in `agents/writer/schemas/_growth.py`, mirroring `_m_and_a.py`. Override `frameworks: FrameworksBlock` (non-optional) and inside FrameworksBlock for this subclass, override `porters_five_forces: PortersFiveForcesAnalysis` (non-optional). Register it in `_registry.py` for `growth_strategy`. Pydantic will then reject any writer output that omits Porter's, forcing a repair pass.
+2. **OR — two-pass writer** if the single-pass with strict schema still proves flaky: split the writer into (a) base memo (no frameworks block) → (b) focused framework-only writer call that takes the base memo's key_claims as input and emits only `frameworks.porters_five_forces`. Validate each pass independently. Merge. Gate behind a `requires_two_pass_writer: true` flag in `consulting_modes.yaml` so only framework-heavy modes pay the second call. This mirrors the W9 section-deepening pattern (separate focused LLM call, separate budget, separate schema validation).
+3. **Verify**: re-run `tools/run_week8_e2e.py --runs B_growth_strategy`. Expect Porter's populated, all 5 forces present with evidence_citations + intensity + rationale ≥30 chars.
+4. **Estimated effort:** half a day for option 1 (Pydantic subclass + registry wiring + 1 verify run), one full day for option 2 (orchestrator state-machine change + retry coordination + merge logic + 1-2 verify runs). Start with option 1.
+
+The growth Run B writer-truncation symptom (the original W8 carry-forward) IS closed by W14/D1. The Porter's content gap downstream is a separate, newly-surfaced bug — not the same defect, not the same fix shape.
 
 Run records:
 - [backend/eval_runs/week8_e2e/A_m_and_a.json](../../backend/eval_runs/week8_e2e/A_m_and_a.json) (gitignored — latest Run A capture; the earlier passing Run A is referenced via session id `9da8a365-...` in git history)
