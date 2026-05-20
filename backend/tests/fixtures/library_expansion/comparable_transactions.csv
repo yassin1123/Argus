@@ -1,0 +1,31 @@
+deal_id,announce_date,target_sector,target_country,target_revenue_gbp_m,target_ebitda_gbp_m,ev_gbp_m,ev_revenue,ev_ebitda,acquirer_archetype,structure,notes
+DEAL-SYN-001,2024-02-15,saas_horizontal,UK,28.4,5.2,153.0,5.4,29.4,us_platform,full_acquisition,Founder rollover 15%; 18-mo earnout on retention
+DEAL-SYN-002,2024-03-22,saas_fintech,UK,42.1,9.8,287.0,6.8,29.3,uk_strategic,full_acquisition,Clean exit; founders departed
+DEAL-SYN-003,2024-04-09,saas_healthtech,UK,18.7,2.4,92.0,4.9,38.3,pe_growth,minority_growth,40% stake; preferred liquidation
+DEAL-SYN-004,2024-05-30,saas_vertical_legal,UK,31.2,8.1,201.0,6.4,24.8,us_platform,full_acquisition,European go-to-market premium
+DEAL-SYN-005,2024-06-12,consumer_branded_food,UK,67.3,8.4,235.0,3.5,28.0,pe_roll_up,full_acquisition,Roll-up #3 in PE platform
+DEAL-SYN-006,2024-07-18,consumer_pet_care,UK,84.5,15.2,418.0,4.9,27.5,uk_strategic,full_acquisition,Existing customer overlap drove premium
+DEAL-SYN-007,2024-08-25,consumer_premium_beverages,UK,22.6,3.1,98.0,4.3,31.6,us_strategic,full_acquisition,Distribution-led thesis
+DEAL-SYN-008,2024-09-04,industrial_services_uk,UK,156.8,21.3,612.0,3.9,28.7,pe_growth,full_acquisition,Multi-region consolidation play
+DEAL-SYN-009,2024-09-19,fintech_payments,UK,52.4,7.3,287.0,5.5,39.3,us_strategic,full_acquisition,Capability acquisition + customer access
+DEAL-SYN-010,2024-10-02,saas_data_analytics,UK,38.9,7.6,261.0,6.7,34.3,pe_growth,full_acquisition,Best-in-class NDR drove premium
+DEAL-SYN-011,2024-10-21,healthtech_b2b,UK,14.3,1.8,71.0,5.0,39.4,us_platform,full_acquisition,Strategic SaaS expansion
+DEAL-SYN-012,2024-11-15,consumer_household_goods,UK,124.1,17.6,486.0,3.9,27.6,uk_strategic,full_acquisition,Defensive consolidation in discounter pressure
+DEAL-SYN-013,2024-12-04,industrial_b2b_software,UK,29.5,4.2,162.0,5.5,38.6,pe_growth,full_acquisition,Vertical SaaS roll-up
+DEAL-SYN-014,2025-01-09,saas_horizontal,UK,17.8,2.1,84.0,4.7,40.0,us_platform,full_acquisition,Early-stage capability acquisition
+DEAL-SYN-015,2025-01-22,consumer_personal_care,UK,46.7,6.8,178.0,3.8,26.2,pe_roll_up,full_acquisition,Roll-up #2 in platform
+DEAL-SYN-016,2025-02-14,fintech_lending,UK,71.2,12.4,367.0,5.2,29.6,uk_strategic,full_acquisition,FCA-authorised; clean balance sheet
+DEAL-SYN-017,2025-03-08,consumer_premium_grocery,UK,38.4,4.1,142.0,3.7,34.6,us_strategic,full_acquisition,Brand premiumisation thesis
+DEAL-SYN-018,2025-03-25,saas_vertical_property,UK,25.7,5.4,165.0,6.4,30.6,pe_growth,full_acquisition,Switching costs drove multiple
+DEAL-SYN-019,2025-04-11,industrial_services_uk,UK,89.4,12.1,341.0,3.8,28.2,pe_roll_up,full_acquisition,Carve-out from larger parent
+DEAL-SYN-020,2025-04-29,saas_edtech,UK,21.3,2.7,89.0,4.2,33.0,uk_strategic,full_acquisition,Consolidation in MAT services
+DEAL-SYN-021,2025-05-18,consumer_branded_food,UK,52.1,6.9,196.0,3.8,28.4,pe_growth,full_acquisition,Defensive against discounter share
+DEAL-SYN-022,2025-06-03,saas_healthtech,UK,33.8,4.5,178.0,5.3,39.6,us_platform,full_acquisition,Class IIa medical device + customers
+DEAL-SYN-023,2025-06-29,fintech_wealth_management,UK,61.7,11.2,328.0,5.3,29.3,uk_strategic,full_acquisition,Capability + book consolidation
+DEAL-SYN-024,2025-07-14,consumer_pet_care,UK,18.2,2.3,76.0,4.2,33.0,pe_growth,minority_growth,40% stake; founder retains control
+DEAL-SYN-025,2025-08-07,saas_horizontal,UK,45.6,8.2,287.0,6.3,35.0,us_platform,full_acquisition,Premium for NDR + sector depth
+DEAL-SYN-026,2025-09-12,industrial_services_uk,UK,67.9,9.4,256.0,3.8,27.2,uk_strategic,full_acquisition,Defensive consolidation
+DEAL-SYN-027,2025-10-04,consumer_household_goods,UK,98.3,14.1,387.0,3.9,27.4,pe_roll_up,full_acquisition,Roll-up #4 in platform
+DEAL-SYN-028,2025-10-21,saas_data_analytics,UK,52.8,11.4,321.0,6.1,28.2,us_strategic,full_acquisition,Usage-based pricing rebuild
+DEAL-SYN-029,2025-11-09,fintech_payments,UK,38.5,5.7,196.0,5.1,34.4,us_platform,full_acquisition,European expansion thesis
+DEAL-SYN-030,2025-12-02,saas_vertical_legal,UK,67.1,15.6,425.0,6.3,27.2,pe_growth,full_acquisition,Best-in-class workflow lock-in
