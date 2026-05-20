@@ -1,0 +1,870 @@
+{
+  "generated_at": "2026-05-20T13:43:03Z",
+  "n_engagements": 2,
+  "n_artifact_generations": 20,
+  "headline_assertions": {
+    "status_counts": {
+      "ready": 14,
+      "skipped_no_weasyprint": 6,
+      "failed": 0,
+      "exception": 0
+    },
+    "all_generations_succeed": true,
+    "mode_aware_no_cross_contamination": true,
+    "mode_aware_detail": {
+      "Halcyon Health Group \u2014 UK SaaS expansion": {
+        "missing_consulting_payload_keys": [],
+        "leaked_text_markers": []
+      },
+      "Kestrel Logistics \u2014 M&A diligence": {
+        "missing_consulting_payload_keys": [],
+        "leaked_text_markers": []
+      }
+    },
+    "growth_porters_real_not_fallback": true,
+    "growth_porters_detail": {
+      "5fae9ebd-95e1-4fc8-8266-dd5897b22063": {
+        "deck_force_keywords_found": 5,
+        "deck_has_fallback_marker": false,
+        "one_pager_fallback_rendered": false
+      }
+    },
+    "citation_completeness_detail": {
+      "Halcyon Health Group \u2014 UK SaaS expansion": {
+        "distinct_claim_ids": [
+          "claim_competitor_share_1",
+          "claim_entrant_1",
+          "claim_infrastructure_1",
+          "claim_pricing_1",
+          "claim_procurement_1",
+          "claim_substitute_1",
+          "reasons",
+          "risks"
+        ],
+        "max_per_artifact_count": 9,
+        "engagement_floor": 9
+      },
+      "Kestrel Logistics \u2014 M&A diligence": {
+        "distinct_claim_ids": [
+          "claim_dissynergy_1",
+          "claim_ebitda_1",
+          "claim_revenue_1",
+          "claim_synergy_cost_1",
+          "claim_synergy_cost_2",
+          "claim_synergy_rev_1",
+          "reasons",
+          "risks",
+          "valuation"
+        ],
+        "max_per_artifact_count": 8,
+        "engagement_floor": 9
+      }
+    },
+    "citation_completeness": true,
+    "firm_branding_visible": true,
+    "branding_detail": {
+      "Halcyon Health Group \u2014 UK SaaS expansion/deck/pptx": "ok",
+      "Halcyon Health Group \u2014 UK SaaS expansion/excel_model/xlsx": "ok",
+      "Kestrel Logistics \u2014 M&A diligence/deck/pptx": "ok",
+      "Kestrel Logistics \u2014 M&A diligence/excel_model/xlsx": "ok"
+    },
+    "cross_artifact_consistent": true,
+    "consistency_per_engagement": {
+      "5fae9ebd-95e1-4fc8-8266-dd5897b22063": {
+        "consistent": true,
+        "distinct_normalisations": [
+          "expand_into:scotland"
+        ],
+        "source_match": true
+      },
+      "a2545021-5142-4cbd-9210-69ee10bfff15": {
+        "consistent": true,
+        "distinct_normalisations": [
+          "proceed_with_conditions"
+        ],
+        "source_match": true
+      }
+    },
+    "excel_citation_audit_clean": true,
+    "excel_audit_detail": {
+      "Halcyon Health Group \u2014 UK SaaS expansion": [],
+      "Kestrel Logistics \u2014 M&A diligence": []
+    },
+    "total_cost_zero": true,
+    "total_cost_usd": 0.0,
+    "headline_pass": true
+  },
+  "headline_pass": true,
+  "engagements": [
+    {
+      "session_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "recommendation": "EXPAND INTO SCOTLAND via a partner-led entry into NHS Highland over the next 18 months. The capability set transfers and the addressable spend is durable; the recommendation gates on signed pilot agreement with one of two named regional partners before any direct hiring."
+    },
+    {
+      "session_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "recommendation": "PROCEED WITH CONDITIONS at a \u00a3215\u2013\u00a3235m enterprise value range, anchored to a base case of \u00a3225m (EV/EBITDA 10.7x) subject to confirmation of the top-three customer contract block."
+    }
+  ],
+  "runs": [
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "one_pager",
+      "format": "html",
+      "artifact_id": "2416b762-7f61-4c99-becf-110735afe91c",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\2416b762-7f61-4c99-becf-110735afe91c.html",
+      "file_size_bytes": 9340,
+      "claim_citation_count": 9,
+      "metadata": {
+        "mode": "growth_strategy",
+        "recommendation_color": "neutral",
+        "reasons_count": 3,
+        "risks_count": 3,
+        "reasons_truncated": 1,
+        "risks_truncated": 1,
+        "rendered_chars": 9292
+      },
+      "wall_seconds": 0.418,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_one_pager_html.html",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive",
+          "channel"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 9292
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "one_pager",
+      "format": "pdf",
+      "status": "skipped_no_weasyprint",
+      "file_size_bytes": null,
+      "wall_seconds": 0.0
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "deck",
+      "format": "pptx",
+      "artifact_id": "8e6a09c2-c7a1-4c02-8cb0-fd416c6b993a",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\8e6a09c2-c7a1-4c02-8cb0-fd416c6b993a.pptx",
+      "file_size_bytes": 45007,
+      "claim_citation_count": 6,
+      "metadata": {
+        "mode": "growth_strategy",
+        "slide_count": 9,
+        "slide_sequence": [
+          "title",
+          "exec_summary",
+          "context",
+          "market_landscape",
+          "porters_five_forces_visual",
+          "recommendation",
+          "risks_matrix",
+          "next_steps",
+          "sources"
+        ],
+        "cited_claim_ids": [
+          "claim_competitor_share_1",
+          "claim_pricing_1",
+          "claim_infrastructure_1",
+          "claim_procurement_1",
+          "claim_substitute_1",
+          "claim_entrant_1"
+        ]
+      },
+      "wall_seconds": 0.5,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_deck_pptx.pptx",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive",
+          "channel"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 6579
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "excel_model",
+      "format": "xlsx",
+      "artifact_id": "cf1accc9-2383-4d88-888e-783847048ef7",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\cf1accc9-2383-4d88-888e-783847048ef7.xlsx",
+      "file_size_bytes": 13919,
+      "claim_citation_count": 6,
+      "metadata": {
+        "mode": "growth_strategy",
+        "sheet_count": 5,
+        "sheet_sequence": [
+          "title",
+          "assumptions",
+          "revenue_build",
+          "cost_build",
+          "summary"
+        ],
+        "cited_claim_ids": [
+          "claim_competitor_share_1",
+          "claim_procurement_1",
+          "claim_pricing_1",
+          "claim_substitute_1",
+          "claim_infrastructure_1",
+          "claim_entrant_1"
+        ]
+      },
+      "wall_seconds": 0.544,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_excel_model_xlsx.xlsx",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive",
+          "channel"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 4346
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "email",
+      "format": "md",
+      "artifact_id": "af6fd75b-5b8d-401b-b5e7-9932d87b7815",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\af6fd75b-5b8d-401b-b5e7-9932d87b7815.md",
+      "file_size_bytes": 1557,
+      "claim_citation_count": 2,
+      "metadata": {
+        "format_subtype": "markdown",
+        "mode": "growth_strategy",
+        "subject": "Halcyon Health Group \u2014 strategy review and supporting materials",
+        "cited_claim_ids": [
+          "reasons",
+          "risks"
+        ],
+        "body_word_count": 183
+      },
+      "wall_seconds": 0.47,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_email_md.md",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 1547
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "email",
+      "format": "html",
+      "artifact_id": "adea96ef-bb4f-4516-b001-a0c0da4468bc",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\adea96ef-bb4f-4516-b001-a0c0da4468bc.html",
+      "file_size_bytes": 3361,
+      "claim_citation_count": 2,
+      "metadata": {
+        "format_subtype": "html",
+        "mode": "growth_strategy",
+        "subject": "Halcyon Health Group \u2014 strategy review and supporting materials",
+        "cited_claim_ids": [
+          "reasons",
+          "risks"
+        ],
+        "primary_color": "#1F3A5F",
+        "body_word_count": 183
+      },
+      "wall_seconds": 0.536,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_email_html.html",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 3349
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "email",
+      "format": "pdf",
+      "status": "skipped_no_weasyprint",
+      "file_size_bytes": null,
+      "wall_seconds": 0.0
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "interview_guide",
+      "format": "md",
+      "artifact_id": "f3292eb5-4d92-4735-b4dd-c1f7fb1fe03c",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\f3292eb5-4d92-4735-b4dd-c1f7fb1fe03c.md",
+      "file_size_bytes": 7262,
+      "claim_citation_count": 0,
+      "metadata": {
+        "format_subtype": "markdown",
+        "mode": "growth_strategy",
+        "question_count": 10,
+        "section_a_count": 0,
+        "section_b_count": 5,
+        "section_c_count": 5,
+        "cited_claim_ids": []
+      },
+      "wall_seconds": 0.407,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_interview_guide_md.md",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive",
+          "channel"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 7212
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "interview_guide",
+      "format": "html",
+      "artifact_id": "ff4d9b6b-0cc8-4a11-8b84-592034be44a8",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\ff4d9b6b-0cc8-4a11-8b84-592034be44a8.html",
+      "file_size_bytes": 10861,
+      "claim_citation_count": 0,
+      "metadata": {
+        "format_subtype": "html",
+        "mode": "growth_strategy",
+        "question_count": 10,
+        "section_a_count": 0,
+        "section_b_count": 5,
+        "section_c_count": 5,
+        "cited_claim_ids": []
+      },
+      "wall_seconds": 0.42,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\growth_strategy_interview_guide_html.html",
+      "mode_markers": {
+        "must_have_present": [
+          "competitive",
+          "channel"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 10809
+    },
+    {
+      "engagement_id": "5fae9ebd-95e1-4fc8-8266-dd5897b22063",
+      "engagement_title": "Halcyon Health Group \u2014 UK SaaS expansion",
+      "mode": "growth_strategy",
+      "artifact_type": "interview_guide",
+      "format": "pdf",
+      "status": "skipped_no_weasyprint",
+      "file_size_bytes": null,
+      "wall_seconds": 0.0
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "one_pager",
+      "format": "html",
+      "artifact_id": "69268ef6-2cca-4158-8a11-3dab751f0b1e",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\69268ef6-2cca-4158-8a11-3dab751f0b1e.html",
+      "file_size_bytes": 8758,
+      "claim_citation_count": 8,
+      "metadata": {
+        "mode": "m_and_a_diligence",
+        "recommendation_color": "amber",
+        "reasons_count": 3,
+        "risks_count": 3,
+        "reasons_truncated": 1,
+        "risks_truncated": 1,
+        "rendered_chars": 8704
+      },
+      "wall_seconds": 0.406,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_one_pager_html.html",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "valuation",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 8704
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "one_pager",
+      "format": "pdf",
+      "status": "skipped_no_weasyprint",
+      "file_size_bytes": null,
+      "wall_seconds": 0.0
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "deck",
+      "format": "pptx",
+      "artifact_id": "352badcc-30db-469d-9f56-445b500bbce1",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\352badcc-30db-469d-9f56-445b500bbce1.pptx",
+      "file_size_bytes": 52645,
+      "claim_citation_count": 6,
+      "metadata": {
+        "mode": "m_and_a_diligence",
+        "slide_count": 11,
+        "slide_sequence": [
+          "title",
+          "exec_summary",
+          "target_overview",
+          "financial_profile",
+          "valuation_range",
+          "two_by_two_visual",
+          "risks_matrix",
+          "integration_plan",
+          "recommendation",
+          "next_steps",
+          "sources"
+        ],
+        "cited_claim_ids": [
+          "claim_revenue_1",
+          "claim_ebitda_1",
+          "claim_synergy_rev_1",
+          "claim_synergy_cost_1",
+          "claim_synergy_cost_2",
+          "claim_dissynergy_1"
+        ]
+      },
+      "wall_seconds": 0.488,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_deck_pptx.pptx",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "valuation",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 5011
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "excel_model",
+      "format": "xlsx",
+      "artifact_id": "4fa77f1b-a04c-428e-9f7f-3b036d1617e9",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\4fa77f1b-a04c-428e-9f7f-3b036d1617e9.xlsx",
+      "file_size_bytes": 28520,
+      "claim_citation_count": 6,
+      "metadata": {
+        "mode": "m_and_a_diligence",
+        "sheet_count": 10,
+        "sheet_sequence": [
+          "title",
+          "assumptions",
+          "revenue_build",
+          "cost_build",
+          "working_capital",
+          "dcf",
+          "comparables",
+          "sensitivity",
+          "synergies",
+          "summary"
+        ],
+        "cited_claim_ids": [
+          "claim_revenue_1",
+          "claim_ebitda_1",
+          "claim_synergy_rev_1",
+          "claim_synergy_cost_1",
+          "claim_synergy_cost_2",
+          "claim_dissynergy_1"
+        ]
+      },
+      "wall_seconds": 0.579,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_excel_model_xlsx.xlsx",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "valuation",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 7050
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "email",
+      "format": "md",
+      "artifact_id": "dd44644a-3a85-423f-8cf0-12ed87e52855",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\dd44644a-3a85-423f-8cf0-12ed87e52855.md",
+      "file_size_bytes": 1532,
+      "claim_citation_count": 3,
+      "metadata": {
+        "format_subtype": "markdown",
+        "mode": "m_and_a_diligence",
+        "subject": "Kestrel Logistics diligence \u2014 recommendation and supporting materials",
+        "cited_claim_ids": [
+          "reasons",
+          "valuation",
+          "risks"
+        ],
+        "body_word_count": 186
+      },
+      "wall_seconds": 0.466,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_email_md.md",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "valuation",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 1510
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "email",
+      "format": "html",
+      "artifact_id": "6d2e730e-6b00-4748-af39-8f758e628ddd",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\6d2e730e-6b00-4748-af39-8f758e628ddd.html",
+      "file_size_bytes": 3397,
+      "claim_citation_count": 3,
+      "metadata": {
+        "format_subtype": "html",
+        "mode": "m_and_a_diligence",
+        "subject": "Kestrel Logistics diligence \u2014 recommendation and supporting materials",
+        "cited_claim_ids": [
+          "reasons",
+          "valuation",
+          "risks"
+        ],
+        "primary_color": "#1F3A5F",
+        "body_word_count": 186
+      },
+      "wall_seconds": 0.427,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_email_html.html",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "valuation",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 3373
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "email",
+      "format": "pdf",
+      "status": "skipped_no_weasyprint",
+      "file_size_bytes": null,
+      "wall_seconds": 0.0
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "interview_guide",
+      "format": "md",
+      "artifact_id": "43e5df10-a329-48fb-82da-053fb71d3bc9",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\43e5df10-a329-48fb-82da-053fb71d3bc9.md",
+      "file_size_bytes": 7131,
+      "claim_citation_count": 0,
+      "metadata": {
+        "format_subtype": "markdown",
+        "mode": "m_and_a_diligence",
+        "question_count": 10,
+        "section_a_count": 0,
+        "section_b_count": 5,
+        "section_c_count": 5,
+        "cited_claim_ids": []
+      },
+      "wall_seconds": 0.38,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_interview_guide_md.md",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 7078
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "interview_guide",
+      "format": "html",
+      "artifact_id": "af2dd94b-6c88-43d3-bde9-798209934ff3",
+      "status": "ready",
+      "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\af2dd94b-6c88-43d3-bde9-798209934ff3.html",
+      "file_size_bytes": 10766,
+      "claim_citation_count": 0,
+      "metadata": {
+        "format_subtype": "html",
+        "mode": "m_and_a_diligence",
+        "question_count": 10,
+        "section_a_count": 0,
+        "section_b_count": 5,
+        "section_c_count": 5,
+        "cited_claim_ids": []
+      },
+      "wall_seconds": 0.405,
+      "failure_reason": null,
+      "copied_to": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\artifacts_out\\phase3_regression\\m_and_a_diligence_interview_guide_html.html",
+      "mode_markers": {
+        "must_have_present": [
+          "PROCEED",
+          "EBITDA"
+        ],
+        "must_not_have_leaked": []
+      },
+      "text_chars": 10711
+    },
+    {
+      "engagement_id": "a2545021-5142-4cbd-9210-69ee10bfff15",
+      "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+      "mode": "m_and_a_diligence",
+      "artifact_type": "interview_guide",
+      "format": "pdf",
+      "status": "skipped_no_weasyprint",
+      "file_size_bytes": null,
+      "wall_seconds": 0.0
+    }
+  ],
+  "consistency": {
+    "5fae9ebd-95e1-4fc8-8266-dd5897b22063": {
+      "consistent": true,
+      "distinct_normalisations": [
+        "expand_into:scotland"
+      ],
+      "source_normalisation_match": true,
+      "source_normalisation": "expand_into:scotland",
+      "per_artifact": [
+        {
+          "artifact_type": "one_pager",
+          "format": "html",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\2416b762-7f61-4c99-becf-110735afe91c.html",
+          "extracted": "Recommendation \u00b7 confidence Medium EXPAND INTO SCOTLAND via a partner-led entry into NHS Highland over the next 18 months. The capability set transfers and the addressable spend is durable; the recommendation gates on signed pilot agreement with one of two named regional partners before any direct hiring.",
+          "normalised": "expand_into:scotland",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "one_pager",
+          "format": "pdf",
+          "file_path": null,
+          "extracted": "",
+          "normalised": "",
+          "skip_reason": "status=skipped_no_weasyprint"
+        },
+        {
+          "artifact_type": "deck",
+          "format": "pptx",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\8e6a09c2-c7a1-4c02-8cb0-fd416c6b993a.pptx",
+          "extracted": "EXPAND INTO SCOTLAND via a partner-led entry into NHS Highland over the next 18 months",
+          "normalised": "expand_into:scotland",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "excel_model",
+          "format": "xlsx",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\cf1accc9-2383-4d88-888e-783847048ef7.xlsx",
+          "extracted": "EXPAND INTO SCOTLAND via a partner-led entry into NHS Highland over the next 18 months. The capability set transfers and the addressable spend is durable; the recommendation gates on signed pilot agreement with one of two named regional partners before any direct hiring.",
+          "normalised": "expand_into:scotland",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "email",
+          "format": "md",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\af6fd75b-5b8d-401b-b5e7-9932d87b7815.md",
+          "extracted": "**Critical caveat:** Incumbent competitive response: ClinicCore Scotland (the named local provider) holds 38% share in NHS Highland and could respond on price or accelerate their roadmap. This is the watch-item \u2014 if it materialises, the recommended path needs revisiting.",
+          "normalised": "",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "email",
+          "format": "html",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\adea96ef-bb4f-4516-b001-a0c0da4468bc.html",
+          "extracted": "Critical caveat: Incumbent competitive response: ClinicCore Scotland (the named local provider) holds 38% share in NHS Highland and could respond on price or accelerate their roadmap. This is the watch-item \u2014 if it materialises, the recommended path needs revisiting.",
+          "normalised": "",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "email",
+          "format": "pdf",
+          "file_path": null,
+          "extracted": "",
+          "normalised": "",
+          "skip_reason": "status=skipped_no_weasyprint"
+        },
+        {
+          "artifact_type": "interview_guide",
+          "format": "md",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\f3292eb5-4d92-4735-b4dd-c1f7fb1fe03c.md",
+          "extracted": "EXPAND INTO SCOTLAND via a partner-led entry into NHS Highland over the next 18 months",
+          "normalised": "expand_into:scotland",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "interview_guide",
+          "format": "html",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\5fae9ebd-95e1-4fc8-8266-dd5897b22063\\ff4d9b6b-0cc8-4a11-8b84-592034be44a8.html",
+          "extracted": "Expert Validation Interview Guide",
+          "normalised": "",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "interview_guide",
+          "format": "pdf",
+          "file_path": null,
+          "extracted": "",
+          "normalised": "",
+          "skip_reason": "status=skipped_no_weasyprint"
+        }
+      ]
+    },
+    "a2545021-5142-4cbd-9210-69ee10bfff15": {
+      "consistent": true,
+      "distinct_normalisations": [
+        "proceed_with_conditions"
+      ],
+      "source_normalisation_match": true,
+      "source_normalisation": "proceed_with_conditions",
+      "per_artifact": [
+        {
+          "artifact_type": "one_pager",
+          "format": "html",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\69268ef6-2cca-4158-8a11-3dab751f0b1e.html",
+          "extracted": "Recommendation \u00b7 confidence Medium-High PROCEED WITH CONDITIONS at a \u00a3215\u2013\u00a3235m enterprise value range, anchored to a base case of \u00a3225m (EV/EBITDA 10.7x) subject to confirmation of the top-three customer contract block.",
+          "normalised": "proceed_with_conditions",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "one_pager",
+          "format": "pdf",
+          "file_path": null,
+          "extracted": "",
+          "normalised": "",
+          "skip_reason": "status=skipped_no_weasyprint"
+        },
+        {
+          "artifact_type": "deck",
+          "format": "pptx",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\352badcc-30db-469d-9f56-445b500bbce1.pptx",
+          "extracted": "PROCEED WITH CONDITIONS at a \u00a3215\u2013\u00a3235m enterprise value range, anchored to a base case of \u00a3225m (EV/EBITDA 10",
+          "normalised": "proceed_with_conditions",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "excel_model",
+          "format": "xlsx",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\4fa77f1b-a04c-428e-9f7f-3b036d1617e9.xlsx",
+          "extracted": "PROCEED WITH CONDITIONS at a \u00a3215\u2013\u00a3235m enterprise value range, anchored to a base case of \u00a3225m (EV/EBITDA 10.7x) subject to confirmation of the top-three customer contract block.",
+          "normalised": "proceed_with_conditions",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "email",
+          "format": "md",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\dd44644a-3a85-423f-8cf0-12ed87e52855.md",
+          "extracted": "Please find attached our diligence package on **Kestrel Logistics**. On the headline question, our recommendation is **to proceed with conditions** \u2014 the supporting analysis, valuation, and risk register are in the materials below.",
+          "normalised": "proceed_with_conditions",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "email",
+          "format": "html",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\6d2e730e-6b00-4748-af39-8f758e628ddd.html",
+          "extracted": "Please find attached our diligence package on Kestrel Logistics . On the headline question, our recommendation is to proceed with conditions \u2014 the supporting analysis, valuation, and risk register are in the materials below.",
+          "normalised": "proceed_with_conditions",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "email",
+          "format": "pdf",
+          "file_path": null,
+          "extracted": "",
+          "normalised": "",
+          "skip_reason": "status=skipped_no_weasyprint"
+        },
+        {
+          "artifact_type": "interview_guide",
+          "format": "md",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\43e5df10-a329-48fb-82da-053fb71d3bc9.md",
+          "extracted": "PROCEED WITH CONDITIONS at a \u00a3215\u2013\u00a3235m enterprise value range, anchored to a base case of \u00a3225m (EV/EBITDA 10",
+          "normalised": "proceed_with_conditions",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "interview_guide",
+          "format": "html",
+          "file_path": "C:\\Users\\yassi\\AppData\\Local\\Temp\\argus_artifacts\\95b3d3bb-07dd-46fb-b53d-b390cac37ea2\\a2545021-5142-4cbd-9210-69ee10bfff15\\af2dd94b-6c88-43d3-bde9-798209934ff3.html",
+          "extracted": "Expert Validation Interview Guide",
+          "normalised": "",
+          "skip_reason": null
+        },
+        {
+          "artifact_type": "interview_guide",
+          "format": "pdf",
+          "file_path": null,
+          "extracted": "",
+          "normalised": "",
+          "skip_reason": "status=skipped_no_weasyprint"
+        }
+      ]
+    }
+  }
+}
