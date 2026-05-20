@@ -25,17 +25,44 @@ from __future__ import annotations
 import importlib
 import json
 import os
+import socket
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pytest
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
+
+def _postgres_reachable() -> bool:
+    """Quick TCP probe at the DATABASE_URL host:port. Returns False when
+    the env var is unset OR the socket connect fails inside ~1 second
+    — the integration tests are skipped cleanly in either case.
+
+    Without this probe, CI with DATABASE_URL set but no Postgres
+    listening erros every test at the fixture layer instead of skipping
+    cleanly.
+    """
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        return False
+    try:
+        parsed = urlparse(db_url)
+        host = parsed.hostname or "127.0.0.1"
+        port = parsed.port or 5432
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(1.0)
+            sock.connect((host, port))
+        return True
+    except Exception:
+        return False
+
+
 pytestmark = pytest.mark.skipif(
-    not os.environ.get("DATABASE_URL"),
-    reason="phase 3 regression tests need DATABASE_URL set + Postgres available",
+    not _postgres_reachable(),
+    reason="phase 3 regression tests need a reachable Postgres at DATABASE_URL",
 )
 
 

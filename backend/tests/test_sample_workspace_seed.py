@@ -23,9 +23,11 @@ import asyncio
 import importlib
 import json
 import os
+import socket
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import pytest
 
@@ -34,11 +36,33 @@ import pytest
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-# Skip the whole module if DATABASE_URL isn't set — these tests are
-# integration-tier and need the live Postgres.
+
+def _postgres_reachable() -> bool:
+    """Quick TCP probe at DATABASE_URL host:port. Skip cleanly in CI
+    when no Postgres is listening (DATABASE_URL set but unreachable
+    is the failure mode we hit in CI; pure env-var checks let those
+    tests error at the fixture layer instead of skipping)."""
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        return False
+    try:
+        parsed = urlparse(db_url)
+        host = parsed.hostname or "127.0.0.1"
+        port = parsed.port or 5432
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(1.0)
+            sock.connect((host, port))
+        return True
+    except Exception:
+        return False
+
+
+# Skip the whole module if Postgres isn't reachable — these tests are
+# integration-tier and need a live DB. In CI without Postgres they
+# skip cleanly; with Postgres reachable they run.
 pytestmark = pytest.mark.skipif(
-    not os.environ.get("DATABASE_URL"),
-    reason="sample-workspace tests need DATABASE_URL set + Postgres available",
+    not _postgres_reachable(),
+    reason="sample-workspace tests need a reachable Postgres at DATABASE_URL",
 )
 
 
