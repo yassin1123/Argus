@@ -54,7 +54,10 @@ export default function WorkspaceTopBar({
   type ExportTarget =
     | { artifact_type: "one_pager"; format: "html" }
     | { artifact_type: "one_pager"; format: "pdf" }
-    | { artifact_type: "deck"; format: "pptx" };
+    | { artifact_type: "deck"; format: "pptx" }
+    | { artifact_type: "email"; format: "md" }
+    | { artifact_type: "email"; format: "html" }
+    | { artifact_type: "email"; format: "pdf" };
 
   async function handleExport(target: ExportTarget) {
     if (exporting) return;
@@ -65,7 +68,7 @@ export default function WorkspaceTopBar({
     try {
       const created = await createExport(session.id, target.artifact_type, target.format);
       if (created.status === "ready") {
-        // HTML previews inline in a new tab; PDF + PPTX download via
+        // HTML previews inline in a new tab; PDF/PPTX/MD download via
         // Content-Disposition: attachment on the backend.
         const newTab = target.format === "html" ? "_blank" : "_self";
         window.open(downloadUrl(session.id, created.artifact_id), newTab, "noopener");
@@ -73,6 +76,43 @@ export default function WorkspaceTopBar({
         setExportError(created.failure_reason ?? "Export failed");
       } else {
         setExportError("Render queued — refresh the artifacts panel shortly.");
+      }
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setExporting(null);
+    }
+  }
+
+  // W13/D2: "Cover email" fires three exports in one click — markdown
+  // (default for paste-into-mail-client), HTML (rich preview), and PDF
+  // (attachment-friendly). The markdown render opens for copy-paste; the
+  // others land in the artifacts panel for download.
+  async function handleEmailBundle() {
+    if (exporting) return;
+    setExportMenuOpen(false);
+    setExportError(null);
+    setExporting("email bundle");
+    try {
+      const [md, htmlR, pdfR] = await Promise.all([
+        createExport(session.id, "email", "md"),
+        createExport(session.id, "email", "html"),
+        createExport(session.id, "email", "pdf"),
+      ]);
+      if (md.status === "ready") {
+        // Open the markdown version for copy-paste into the partner's mail client.
+        window.open(downloadUrl(session.id, md.artifact_id), "_self", "noopener");
+      } else if (md.status === "failed") {
+        setExportError(md.failure_reason ?? "Email markdown export failed");
+      }
+      // The HTML + PDF renders surface in the artifacts panel; only flag
+      // their failures (don't auto-open — markdown is the default for the
+      // consultant's flow).
+      if (htmlR.status === "failed") {
+        setExportError(prev => prev ?? `Email HTML: ${htmlR.failure_reason ?? "failed"}`);
+      }
+      if (pdfR.status === "failed") {
+        setExportError(prev => prev ?? `Email PDF: ${pdfR.failure_reason ?? "failed"}`);
       }
     } catch (e) {
       setExportError(e instanceof Error ? e.message : String(e));
@@ -167,6 +207,15 @@ export default function WorkspaceTopBar({
                 className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary border-t border-argus-border-subtle"
               >
                 Deck (PPTX)
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={handleEmailBundle}
+                className="block w-full px-2 py-1.5 text-left text-argus-secondary hover:bg-elevated hover:text-argus-primary border-t border-argus-border-subtle"
+                title="Generates markdown (default), HTML, and PDF together — markdown opens for paste-into-mail-client"
+              >
+                Cover email (MD / HTML / PDF)
               </button>
             </div>
           )}

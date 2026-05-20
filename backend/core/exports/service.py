@@ -196,6 +196,104 @@ async def _load_payload(session_id: UUID) -> dict[str, Any] | None:
     return out
 
 
+def _payload_fingerprint(payload: dict[str, Any] | None) -> str:
+    """Stable hash of the writer-derived parts of a payload.
+
+    Excludes underscore-prefixed engagement keys (``_engagement_title``,
+    ``_target_name``, etc.) — those are session-derived metadata, not
+    writer output, so a session title rename shouldn't make every prior
+    artifact look "stale". Also sorts list contents so cosmetic reorders
+    in ``sources``/``key_reasons``/etc. don't trigger false positives.
+    """
+    import hashlib
+
+    if not isinstance(payload, dict):
+        return ""
+    keep: dict[str, Any] = {}
+    for k, v in payload.items():
+        if not isinstance(k, str) or k.startswith("_"):
+            continue
+        keep[k] = _canonicalise(v)
+    # ``key_reasons`` / ``risks`` / ``sources`` arrive as lists; sort
+    # them so ordering changes don't trip the diff.
+    for k in ("key_reasons", "risks", "counterarguments", "next_steps", "sources"):
+        v = keep.get(k)
+        if isinstance(v, list):
+            try:
+                keep[k] = sorted(v, key=lambda x: json.dumps(x, sort_keys=True))
+            except TypeError:
+                keep[k] = v
+    blob = json.dumps(keep, sort_keys=True, default=str)
+    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
+
+
+def _canonicalise(value: Any) -> Any:
+    """Recursively turn dict/list/scalar trees into a comparable shape.
+
+    Strips whitespace at the edges of strings so trailing whitespace
+    in a key_reason doesn't show up as a fresh fingerprint.
+    """
+    if isinstance(value, dict):
+        return {k: _canonicalise(v) for k, v in value.items() if not (isinstance(k, str) and k.startswith("_"))}
+    if isinstance(value, list):
+        return [_canonicalise(v) for v in value]
+    if isinstance(value, str):
+        return value.strip()
+    return value
+
+
+async def _available_artifacts_for_email(
+    session_id: UUID,
+    current_payload: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    """Return the list of READY artifacts for the session (excluding
+    ``email`` itself) annotated with stale flags.
+
+    Used by ``generate_artifact`` when rendering an email artifact —
+    the email then references real attachments rather than the
+    hardcoded mode-default placeholder.
+    """
+    fp_current = _payload_fingerprint(current_payload)
+    async with acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, artifact_type, format, file_size_bytes,
+                   claim_citation_count, generated_at, metadata,
+                   payload_snapshot
+            FROM export_artifacts
+            WHERE session_id = $1::uuid
+              AND status = 'ready'
+              AND artifact_type <> 'email'
+            ORDER BY artifact_type, format, generated_at DESC
+            """,
+            session_id,
+        )
+    out: list[dict[str, Any]] = []
+    seen_pairs: set[tuple[str, str]] = set()
+    for row in rows:
+        key = (str(row["artifact_type"]), str(row["format"]))
+        # Dedup multiple regenerations of the same (type, format): the
+        # newest wins because the ORDER BY puts it first.
+        if key in seen_pairs:
+            continue
+        seen_pairs.add(key)
+        snap = _decode_jsonb(row["payload_snapshot"])
+        fp_snap = _payload_fingerprint(snap) if isinstance(snap, dict) else ""
+        is_stale = bool(fp_current and fp_snap and fp_snap != fp_current)
+        md = _decode_jsonb(row["metadata"]) or {}
+        out.append({
+            "artifact_id": str(row["id"]),
+            "artifact_type": row["artifact_type"],
+            "format": row["format"],
+            "file_size_bytes": row["file_size_bytes"],
+            "claim_citation_count": row["claim_citation_count"],
+            "generated_at": row["generated_at"],
+            "metadata": md if isinstance(md, dict) else {},
+            "is_stale": is_stale,
+        })
+    return out
+
+
 async def _build_citations(session_id: UUID) -> list[ClaimCitation]:
     """Build the citation list from the latest analyst output + evidence
     catalog. Best-effort: if the analyst row is missing or the shape
@@ -412,6 +510,14 @@ async def generate_artifact(
     payload.setdefault("_firm_name", branding.get("_firm_name") or "Argus")
     if triggered_by:
         payload.setdefault("_prepared_by", str(triggered_by))
+
+    # W13/D2: when rendering an email, attach the list of already-ready
+    # artifacts for the same session so the EmailBuilder references
+    # real attachments instead of the mode-default placeholder. The
+    # builder's stale-flagging logic uses ``is_stale`` per row.
+    if artifact_type == "email":
+        available = await _available_artifacts_for_email(session_id, payload)
+        payload["_available_artifacts"] = available
 
     await _insert_generating_row(
         artifact_id,

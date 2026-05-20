@@ -71,6 +71,42 @@ _VERDICT_PHRASE = {
     "neutral": "the path forward",
 }
 
+_ARTIFACT_LABELS: dict[str, str] = {
+    "memo":          "Diligence memo",
+    "one_pager":     "Executive 1-pager",
+    "deck":          "Deck",
+    "excel_model":   "Financial model",
+    "email":         "Cover email",
+}
+
+
+def _relative_age(generated_at: Any) -> str:
+    """Render a generated_at timestamp as a relative phrase.
+    Accepts datetimes, ISO strings, or anything else (returns ""
+    for unparseable input)."""
+    from datetime import datetime, timezone
+
+    dt: datetime | None = None
+    if isinstance(generated_at, datetime):
+        dt = generated_at
+    elif isinstance(generated_at, str):
+        try:
+            dt = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+        except ValueError:
+            return ""
+    if dt is None:
+        return ""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    delta = datetime.now(tz=timezone.utc) - dt
+    days = delta.days
+    if days >= 1:
+        return f"{days} day{'s' if days != 1 else ''} ago"
+    hours = delta.seconds // 3600
+    if hours >= 1:
+        return f"{hours} hour{'s' if hours != 1 else ''} ago"
+    return "just now"
+
 
 class EmailBuilder:
     """Pure builder — produces subject, markdown body, and the context
@@ -83,11 +119,38 @@ class EmailBuilder:
         payload: Any,
         firm_branding: dict[str, Any] | None,
         citations: list[ClaimCitation] | None,
+        available_artifacts: list[dict[str, Any]] | None = None,
     ) -> None:
         self._payload = payload
         self._branding = dict(firm_branding or {})
         self._citations = list(citations or [])
         self._cited_ids: list[str] = []  # populated during build_*
+        # W13/D2: the service layer passes the list of already-generated
+        # ready artifacts for the same session. Callers from tests can
+        # pass an explicit list; the builder will also fall back to a
+        # ``_available_artifacts`` payload key for fixture convenience.
+        # Tracking whether the caller / payload explicitly set this
+        # lets us distinguish "use service truth (possibly empty)" from
+        # "no service truth provided — use mode default".
+        if available_artifacts is not None:
+            self._available_artifacts: list[dict[str, Any]] = list(available_artifacts)
+            self._available_artifacts_explicit: bool = True
+        else:
+            # ``payload_get`` treats empty lists as missing — but the
+            # spec needs an empty list to mean "service confirmed zero
+            # ready artifacts" (omit the section), distinct from "key
+            # absent" (use the W13/D1 default bundle). Use direct dict
+            # / attr access here to preserve that distinction.
+            if isinstance(payload, dict):
+                payload_av = payload.get("_available_artifacts", None)
+            else:
+                payload_av = getattr(payload, "_available_artifacts", None)
+            if payload_av is not None:
+                self._available_artifacts = list(payload_av)
+                self._available_artifacts_explicit = True
+            else:
+                self._available_artifacts = []
+                self._available_artifacts_explicit = False
 
         # Mode resolution mirrors the one_pager/excel builders.
         mode_hint = payload_get(payload, "_mode_hint", default=None)
@@ -167,8 +230,9 @@ class EmailBuilder:
         # Critical caveat paragraph — 2-3 sentences, mode-aware.
         caveat_paragraph = self._build_caveat_paragraph()
 
-        # Attached bundle — payload override or mode default.
+        # Attached bundle — payload override, service truth, or mode default.
         attachments = self._resolve_attachments()
+        has_attachments = bool(attachments)
 
         # Suggested next step.
         next_step = (
@@ -200,6 +264,7 @@ class EmailBuilder:
             "recommendation_paragraph": recommendation_paragraph,
             "caveat_paragraph": caveat_paragraph,
             "attachments": attachments,
+            "has_attachments": has_attachments,
             "next_step": next_step,
             "signature": signature,
             "sources_line": sources_line,
@@ -413,6 +478,8 @@ class EmailBuilder:
         return ""
 
     def _resolve_attachments(self) -> list[str]:
+        # Priority 1: caller-supplied (or payload-supplied) hardcoded list
+        # — used by tests and one-off engagements that want a custom bundle.
         explicit = payload_get(self._payload, "_attached_artifacts", default=None)
         if isinstance(explicit, list) and explicit:
             out: list[str] = []
@@ -427,7 +494,93 @@ class EmailBuilder:
                     out.append(item)
             if out:
                 return out
+
+        # Priority 2: service-layer / fixture-provided ``available_artifacts``
+        # — derives the bundle from what actually exists in the engagement.
+        # Order is logical (memo → 1-pager → deck → excel_model), not
+        # generation-order — partners expect the memo first regardless of
+        # when each piece was rendered.
+        #
+        # If the caller explicitly passed an empty list, we honour it
+        # (the email omits the attachment section entirely — see
+        # ``build_context`` where ``attachments=[]`` flips the
+        # ``has_attachments`` flag the template branches on).
+        if self._available_artifacts_explicit:
+            return self._render_available_artifacts()
+
+        # Priority 3: mode-default placeholder text — used when the
+        # service layer hasn't been wired yet OR the caller passed
+        # nothing explicit. This is the W13/D1 behaviour.
         return list(_DEFAULT_ATTACHMENTS.get(self.mode, _DEFAULT_ATTACHMENTS["general"]))
+
+    def _render_available_artifacts(self) -> list[str]:
+        """Turn the service-layer artifact rows into the numbered bundle.
+
+        Each row carries: ``artifact_type``, ``format``, ``metadata``,
+        ``generated_at`` (optional), ``is_stale`` (optional bool already
+        computed by the service), and ``stale_reason`` (optional).
+
+        We render in the logical order memo → 1-pager → deck →
+        excel_model regardless of generation order, and annotate stale
+        artifacts with "(may need refresh)".
+        """
+        order = ["memo", "one_pager", "deck", "excel_model"]
+        by_type: dict[str, list[dict[str, Any]]] = {}
+        for art in self._available_artifacts:
+            t = str(art.get("artifact_type") or "").strip()
+            if t and t != "email":
+                by_type.setdefault(t, []).append(art)
+
+        out: list[str] = []
+        for t in order:
+            for art in by_type.get(t, []):
+                out.append(self._format_artifact_line(art))
+        # Surface any artifact types we didn't list explicitly (forward-
+        # compat for future formats — they land at the end so the logical
+        # order above isn't disturbed).
+        for t, rows in by_type.items():
+            if t in order:
+                continue
+            for art in rows:
+                out.append(self._format_artifact_line(art))
+        return out
+
+    def _format_artifact_line(self, art: dict[str, Any]) -> str:
+        """One bullet for the numbered list. Format mirrors the W13/D1
+        default strings: ``<Label> (<format/detail>)`` with an optional
+        stale annotation at the end."""
+        atype = str(art.get("artifact_type") or "").strip()
+        fmt = str(art.get("format") or "").strip()
+        md = art.get("metadata") or {}
+        label = _ARTIFACT_LABELS.get(atype, atype.replace("_", " ").title() or "Artifact")
+        # Pull a useful detail string from metadata when available.
+        detail_bits: list[str] = []
+        if fmt:
+            detail_bits.append(fmt.upper())
+        if isinstance(md, dict):
+            slide_count = md.get("slide_count")
+            sheet_count = md.get("sheet_count")
+            page_count = md.get("page_count")
+            if slide_count:
+                detail_bits.append(f"{slide_count} slides")
+            if sheet_count:
+                detail_bits.append(f"{sheet_count} sheets")
+            if page_count and atype != "email":
+                detail_bits.append(f"{page_count} page" + ("s" if page_count != 1 else ""))
+        line = label
+        if detail_bits:
+            line += " (" + ", ".join(detail_bits) + ")"
+
+        if art.get("is_stale"):
+            age_phrase = ""
+            generated_at = art.get("generated_at")
+            if generated_at is not None:
+                age_phrase = _relative_age(generated_at)
+                if age_phrase:
+                    age_phrase = f", generated {age_phrase}"
+            line += f" — may need refresh{age_phrase}"
+
+        return line
 
     # ------------------------------------------------------------------
     # Citation bookkeeping
