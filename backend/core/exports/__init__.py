@@ -30,6 +30,7 @@ from .service import (
 from . import one_pager  # noqa: F401,E402
 from . import deck_pptx  # noqa: F401,E402
 from . import excel_model  # noqa: F401,E402
+from . import email  # noqa: F401,E402
 
 __all__ = [
     "ArtifactNotFoundError",
