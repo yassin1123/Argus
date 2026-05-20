@@ -6,11 +6,13 @@ Dear [Client name],
 
 {{ caveat_paragraph }}
 
+{% if has_attachments %}
 **Attached for your review:**
 
 {% for item in attachments %}
 {{ loop.index }}. {{ item }}
 {% endfor %}
+{% endif %}
 
 {{ next_step }}
 

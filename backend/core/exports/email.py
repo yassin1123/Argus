@@ -205,6 +205,162 @@ class EmailHtmlExporter(ExporterBase):
         )
 
 
+# ---------------------------------------------------------------------------
+# PDF exporter (W13/D2)
+# ---------------------------------------------------------------------------
+
+
+# A4 page with generous margins — the email body should breathe, not
+# crash the page edge. Cover-email PDFs are reading material, not data
+# dumps, so we trade density for line-height.
+_EMAIL_PRINT_CSS = """
+@page { size: A4; margin: 18mm; }
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  strong { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+.page { max-height: calc(297mm - 36mm); overflow: hidden; }
+"""
+
+_TRUNCATION_SUFFIX_HTML = (
+    '<p style="font-family:Georgia,serif;font-size:9pt;line-height:1.4;'
+    'color:#5B6470;margin:12px 0 0 0;font-style:italic;">'
+    "… [body truncated; see markdown version for the full email].</p>"
+)
+
+
+class EmailPdfRuntimeError(RuntimeError):
+    """WeasyPrint's runtime (pango/cairo/gdk-pixbuf) isn't loadable.
+
+    Distinct from :class:`EmailPdfOverflowError` so the service layer
+    can tell environment issues apart from content overflow.
+    """
+
+
+class EmailPdfOverflowError(RuntimeError):
+    """Email body can't fit on a single A4 page even after truncation."""
+
+
+def _html_to_pdf(html: str) -> bytes:
+    try:
+        from weasyprint import CSS, HTML  # type: ignore
+    except (ImportError, OSError) as e:  # pragma: no cover — env-only
+        raise EmailPdfRuntimeError(
+            f"WeasyPrint runtime not available: {e}. "
+            f"Install pango/cairo/gdk-pixbuf system libs "
+            f"(see backend/core/exports/README.md) or run inside Docker."
+        ) from e
+    return HTML(string=html).write_pdf(stylesheets=[CSS(string=_EMAIL_PRINT_CSS)])
+
+
+def _pdf_page_count(pdf_bytes: bytes) -> int:
+    try:
+        import fitz  # PyMuPDF
+    except ImportError:  # pragma: no cover
+        return 1
+    try:
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            return doc.page_count
+    except Exception:  # noqa: BLE001
+        return -1
+
+
+def _truncate_body_html(html: str) -> str:
+    """Trim the rendered email HTML by dropping the recommendation +
+    caveat paragraphs' tail sentences. Each <p> is shortened to its
+    first sentence; the final paragraph gains the truncation suffix.
+
+    The signature + sources/footer block (after the <hr>) is
+    preserved verbatim — the consultant still needs the sign-off
+    even when the body is trimmed.
+    """
+    import re as _re
+
+    # Split on the horizontal-rule (rendered as <hr ...> or <hr/>) so
+    # we can preserve the post-rule footer block unchanged.
+    hr_match = _re.search(r"<hr[^>]*>", html, flags=_re.IGNORECASE)
+    if hr_match:
+        head = html[: hr_match.start()]
+        tail = html[hr_match.start():]
+    else:
+        head, tail = html, ""
+
+    # Shorten each <p> in the head to its first sentence.
+    def _shorten(m: _re.Match[str]) -> str:
+        attrs = m.group(1) or ""
+        inner = m.group(2) or ""
+        # Strip child tags for the sentence-split (keep them in the
+        # final output of the first sentence).
+        plain = _re.sub(r"<[^>]+>", "", inner)
+        first_sentence_split = _re.split(r"(?<=[.!?])\s+", plain.strip(), maxsplit=1)
+        if not first_sentence_split:
+            return m.group(0)
+        first = first_sentence_split[0]
+        if not first:
+            return m.group(0)
+        return f"<p{attrs}>{first}</p>"
+
+    shortened = _re.sub(r"<p([^>]*)>(.*?)</p>", _shorten, head, flags=_re.DOTALL)
+
+    # Drop <ol>/<ul> attachments — they consume vertical space and the
+    # markdown version preserves them.
+    shortened = _re.sub(r"<(ol|ul)[^>]*>.*?</\1>", "", shortened, flags=_re.DOTALL | _re.IGNORECASE)
+
+    return shortened + _TRUNCATION_SUFFIX_HTML + tail
+
+
+@register("email", "pdf")
+class EmailPdfExporter(ExporterBase):
+    artifact_type = "email"
+    format = "pdf"
+
+    async def render(
+        self,
+        payload: Any,
+        firm_branding: dict[str, Any],
+        citations: list[ClaimCitation],
+    ) -> ExporterResult:
+        html_result = await EmailHtmlExporter().render(payload, firm_branding, citations)
+        html = html_result.file_bytes.decode("utf-8")
+
+        # Attempt 1: full body.
+        pdf_bytes = _html_to_pdf(html)
+        pages = _pdf_page_count(pdf_bytes)
+        attempt_meta: dict[str, Any] = {
+            "attempt_1_pages": pages,
+            "truncated_for_fit": False,
+        }
+        if pages != 1:
+            # Attempt 2: truncated body. The W13/D1 builder caps the
+            # email at 250 words, so this branch is rare — only fires
+            # on payloads with overly long key_reasons / risks prose
+            # that pushed the rendered email onto a second page.
+            attempt_meta["truncated_for_fit"] = True
+            truncated_html = _truncate_body_html(html)
+            pdf_bytes = _html_to_pdf(truncated_html)
+            pages_retry = _pdf_page_count(pdf_bytes)
+            attempt_meta["attempt_2_pages"] = pages_retry
+            if pages_retry != 1:
+                raise EmailPdfOverflowError(
+                    f"email_pdf_overflow_after_truncation: "
+                    f"attempt 1 = {pages} page(s), attempt 2 = {pages_retry} page(s)"
+                )
+            pages = pages_retry
+
+        return ExporterResult(
+            file_bytes=pdf_bytes,
+            file_size=len(pdf_bytes),
+            claim_citation_count=html_result.claim_citation_count,
+            metadata={
+                **{k: v for k, v in (html_result.metadata or {}).items()
+                   if k != "format_subtype"},
+                "format_subtype": "pdf",
+                "page_count": pages,
+                **attempt_meta,
+            },
+        )
+
+
 def _word_count(text: str) -> int:
     """Word count of the markdown body, excluding the signature /
     sources / confidentiality lines. The spec's 250-word cap measures
@@ -216,4 +372,10 @@ def _word_count(text: str) -> int:
     return len([w for w in body.split() if w.strip()])
 
 
-__all__ = ["EmailMarkdownExporter", "EmailHtmlExporter"]
+__all__ = [
+    "EmailHtmlExporter",
+    "EmailMarkdownExporter",
+    "EmailPdfExporter",
+    "EmailPdfOverflowError",
+    "EmailPdfRuntimeError",
+]
