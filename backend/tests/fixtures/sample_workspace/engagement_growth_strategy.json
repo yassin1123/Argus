@@ -1,0 +1,209 @@
+{
+  "title": "Halcyon Health Group — UK SaaS expansion",
+  "query": "Halcyon Health Group is a £14m ARR UK health-tech SaaS sitting on a B2B clinic-management platform. Strategy question: should Halcyon expand into Scotland's NHS Highland health board catchment over the next 18 months, and if so, via what channel mix? Consider competitive response and the regulatory environment.",
+  "report_mode": "growth_strategy",
+  "target_name": "Halcyon Health Group",
+  "engagement_title": "Halcyon Health Group — UK SaaS expansion",
+  "owner_email": "helena.voss@meridian.invalid",
+  "team_emails": ["marcus.thorne@meridian.invalid", "priya.shah@meridian.invalid"],
+  "report": {
+    "recommendation": "EXPAND INTO SCOTLAND via a partner-led entry into NHS Highland over the next 18 months. The capability set transfers and the addressable spend is durable; the recommendation gates on signed pilot agreement with one of two named regional partners before any direct hiring.",
+    "confidence_level": "Medium",
+    "summary": "Scotland's NHS Highland catchment is a structurally attractive expansion target for Halcyon's clinic-management SaaS. The capability set transfers without major hiring; channel economics favour a partner-led motion in year 1 with direct sales scaled from year 2. Top competitive risk is incumbent response from a named local provider; mitigation is the pilot-then-scale design.",
+    "key_reasons": [
+      "Adjacent capability set transfers: Halcyon's existing England-focused platform requires only the NHS Scotland CHI-number module + Scottish-formulary integration; estimated 4-month engineering effort at current team size.",
+      "Addressable spend in NHS Highland clinic-management is £12.4m annually; Halcyon's typical 8-12% capture in comparable English health boards implies £1.0–£1.5m ARR opportunity by month 18.",
+      "Channel economics favour partner-led entry: two regional integrator partners (named in attached deck) have existing NHS Highland relationships and would carry the procurement-cycle burden.",
+      "Switching costs are high once installed (workflow lock-in into clinic ops), which protects the early-mover margin."
+    ],
+    "risks": [
+      "Incumbent competitive response: ClinicCore Scotland (the named local provider) holds 38% share in NHS Highland and could respond on price or accelerate their roadmap.",
+      "Regulatory exposure: Scotland Information Governance Toolkit + data-residency expectations differ from England; legal cost estimated at £45–£65k before first pilot signs.",
+      "Pilot conversion uncertainty: comparable health-tech roll-outs show 55-75% pilot→production conversion; budget needs to assume the bottom of that range.",
+      "Partner exclusivity dynamics: signing one regional partner may lock out the other; channel-conflict downside if the chosen partner under-performs."
+    ],
+    "counterarguments": [
+      "Wait-and-watch: defer to FY26 once the Scottish Government's clinic-systems framework refresh completes. Lower risk but cedes 12 months to ClinicCore.",
+      "Direct-only entry: skip the partner motion and hire two Scotland-based reps. Higher upside on margin retention but 9-12 month longer time-to-revenue and a much larger commercial risk.",
+      "Geographic pivot: focus on Wales or Northern Ireland instead — smaller addressable spend but lower competitive intensity."
+    ],
+    "next_steps": [
+      "Open partnership conversations with both candidate integrators in parallel; aim for a signed pilot LOI within 8 weeks.",
+      "Scope the engineering build for the CHI-number module + Scottish-formulary integration; firm-up the 4-month estimate against the engineering manager's bottom-up plan.",
+      "Engage legal counsel on Scotland Information Governance Toolkit pre-pilot — completion before any data flows.",
+      "Set up monthly competitive monitoring on ClinicCore product + pricing moves; trigger re-plan if their pricing drops >12% on the named SKUs.",
+      "Schedule expert validation interviews on partner economics + NHS Highland procurement cycle (see attached interview guide)."
+    ],
+    "sources": [
+      {"type": "firm_library", "title": "UK SaaS Sector Primer"},
+      {"type": "firm_library", "title": "Growth Strategy Framework (Boutique Methodology)"},
+      {"type": "firm_library", "title": "UK Regulatory Environment Brief"},
+      {"type": "firm_library", "title": "Consumer Goods Market Sizing — Methodology + UK Reference Pack"},
+      {"type": "news", "title": "NHS Scotland clinic-systems framework refresh (synthetic)"},
+      {"type": "transcript", "title": "Sector earnings call — UK health-tech SaaS (synthetic)"}
+    ],
+    "caveats": "Recommendation rests on the assumption that one of the two named regional partners signs a pilot LOI within 8 weeks. If both decline or stall, the recommendation flips to defer-to-FY26 with a fresh look in Q2.",
+    "consulting_payload": {
+      "mode": "growth_strategy",
+      "geography": "Scotland (NHS Highland health board catchment)",
+      "competitive_landscape": {
+        "competitors": [
+          {"name": "ClinicCore Scotland", "estimated_share": "38%", "stance": "incumbent — likely to respond on price"},
+          {"name": "PracticePoint UK", "estimated_share": "24%", "stance": "national player; under-investing in Scotland"},
+          {"name": "Highland Clinical Systems", "estimated_share": "18%", "stance": "regional specialist; partnership candidate"}
+        ]
+      },
+      "executive_insights": [
+        "Partner-led year 1, direct-led year 2 is the consistent pattern across the firm's comparable health-tech entries.",
+        "ClinicCore's response speed is the single biggest variable — model both a 90-day and a 9-month response scenario.",
+        "Regulatory pre-work pays back fast: legal cost is bounded; the cost of stalling at first pilot for a missing IG Toolkit is unbounded."
+      ],
+      "frameworks": {
+        "porters_five_forces": {
+          "market_definition": "NHS Highland clinic-management software in primary care and secondary outpatient clinics, FY24 addressable spend ~£12.4m.",
+          "rivalry": {
+            "intensity": "high",
+            "rationale": "Three named competitors hold ~80% combined share; ClinicCore's incumbency in Highland is sticky, and recent procurement cycles have seen aggressive pricing on initial-term contracts.",
+            "key_drivers": ["High switching costs once installed", "Named regional incumbent with installed base", "Short procurement cycles relative to ARR growth"],
+            "evidence_citations": ["claim_competitor_share_1", "claim_pricing_1"]
+          },
+          "supplier_power": {
+            "intensity": "low",
+            "rationale": "Cloud infrastructure supply is fungible; integration libraries (CHI, Scottish formulary) are accessible via documented APIs. No single supplier holds pricing leverage.",
+            "key_drivers": ["Multi-cloud infrastructure standard", "Public-API integration ecosystem", "Standardised UK health-data formats"],
+            "evidence_citations": ["claim_infrastructure_1"]
+          },
+          "buyer_power": {
+            "intensity": "moderate",
+            "rationale": "NHS Highland procurement is centralised but clinic-level discretion exists on adjacency software. Buyer power is moderate — bound by the framework refresh cycle but with real negotiating leverage at multi-clinic agreements.",
+            "key_drivers": ["Centralised procurement framework", "Multi-clinic aggregation increases buyer leverage", "Framework refresh dates set negotiation windows"],
+            "evidence_citations": ["claim_procurement_1"]
+          },
+          "substitute_threat": {
+            "intensity": "low",
+            "rationale": "Generic practice-management tools (NHS-provided + horizontal SaaS) lack the clinic-workflow depth Halcyon delivers. The functional gap is wide and well-understood by buyers.",
+            "key_drivers": ["NHS-provided tooling is foundational, not clinic-deep", "Workflow integration depth defends against horizontal SaaS"],
+            "evidence_citations": ["claim_substitute_1"]
+          },
+          "new_entrant_threat": {
+            "intensity": "high",
+            "rationale": "Low capital barriers + a clear regulatory path mean a credible new entrant (a UK SaaS player or a US health-tech expanding into the UK) could land within 12 months. This is the highest-volatility force in the analysis.",
+            "key_drivers": ["Low capital intensity in SaaS market entry", "Regulatory path is documented + traversable in 6 months", "US health-tech expansion into UK is increasing"],
+            "evidence_citations": ["claim_entrant_1", "claim_entrant_2"]
+          },
+          "overall_attractiveness": "moderate",
+          "overall_rationale": "Rivalry + new-entrant threat are the binding constraints; supplier + buyer + substitute pressures are favourable. A partner-led entry that establishes installed-base switching costs early is the path that respects this force profile."
+        },
+        "value_chain": null,
+        "two_by_two": null
+      },
+      "options_matrix": [
+        {
+          "name": "Partner-led NHS Highland entry (recommended)",
+          "thesis": "Sign one of two named regional partners; pilot in 6 months; expand to direct sales in year 2.",
+          "investment_gbp_m": 0.85,
+          "year_3_arr_gbp_m": 2.1,
+          "risk": "medium"
+        },
+        {
+          "name": "Direct-only entry",
+          "thesis": "Hire two Scotland-based reps; no partner reliance; full margin retention.",
+          "investment_gbp_m": 1.4,
+          "year_3_arr_gbp_m": 2.5,
+          "risk": "high"
+        },
+        {
+          "name": "Wait-and-watch (defer to FY26)",
+          "thesis": "Defer until NHS Scotland framework refresh; lower risk but cedes time.",
+          "investment_gbp_m": 0.1,
+          "year_3_arr_gbp_m": 1.2,
+          "risk": "low"
+        },
+        {
+          "name": "Geographic pivot to Wales / NI",
+          "thesis": "Smaller addressable spend but lower competitive intensity.",
+          "investment_gbp_m": 0.7,
+          "year_3_arr_gbp_m": 1.4,
+          "risk": "medium"
+        }
+      ],
+      "decision_criteria": [
+        "Time-to-first-revenue ≤ 9 months",
+        "Year-3 ARR ≥ £1.5m",
+        "Investment ≤ £1m through pilot phase",
+        "Competitive response risk manageable via channel + switching-cost moat"
+      ],
+      "recommendation_claim_ids": ["claim_competitor_share_1", "claim_procurement_1", "claim_entrant_1"]
+    }
+  },
+  "citations": [
+    {
+      "claim_id": "claim_competitor_share_1",
+      "text": "ClinicCore Scotland holds 38% share in NHS Highland clinic-management software; PracticePoint UK 24%; Highland Clinical Systems 18%.",
+      "source_title": "UK SaaS Sector Primer",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_pricing_1",
+      "text": "Recent NHS Highland procurement cycles have seen 8-14% initial-term discounting from the incumbent ClinicCore.",
+      "source_title": "Sector earnings call — UK health-tech SaaS (synthetic)",
+      "source_type": "transcript"
+    },
+    {
+      "claim_id": "claim_infrastructure_1",
+      "text": "AWS / Azure / GCP all support UK-region health-data residency; the CHI-number and Scottish formulary APIs are publicly documented and stable.",
+      "source_title": "UK Regulatory Environment Brief",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_procurement_1",
+      "text": "NHS Highland procurement framework refreshes on a 4-year cycle; multi-clinic agreements aggregate up to 30% of board spend in a single negotiation.",
+      "source_title": "NHS Scotland clinic-systems framework refresh (synthetic)",
+      "source_type": "news"
+    },
+    {
+      "claim_id": "claim_substitute_1",
+      "text": "NHS-provided practice-management tooling lacks the clinic-specific workflow depth (booking + dispense + clinical-coding integration) that Halcyon delivers.",
+      "source_title": "UK SaaS Sector Primer",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_entrant_1",
+      "text": "Capital intensity for UK SaaS market entry is low (~£0.5–£1.5m to first pilot); regulatory path documented in 6 months.",
+      "source_title": "UK SaaS Sector Primer",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_entrant_2",
+      "text": "US health-tech expansion into UK has increased ~40% YoY across the synthetic peer set; NHS Scotland mentioned in 7 of 12 recent US health-tech S-1 filings.",
+      "source_title": "Sector earnings call — UK health-tech SaaS (synthetic)",
+      "source_type": "transcript"
+    },
+    {
+      "claim_id": "claim_capability_1",
+      "text": "Halcyon's existing platform covers ~85% of NHS Highland clinic-workflow requirements; the CHI-number module + Scottish-formulary integration are the named additions required.",
+      "source_title": "Halcyon engineering scope note (synthetic)",
+      "source_type": "uploaded"
+    },
+    {
+      "claim_id": "claim_addressable_1",
+      "text": "NHS Highland clinic-management addressable spend is £12.4m annually based on the 2024 framework benchmarks.",
+      "source_title": "NHS Scotland clinic-systems framework refresh (synthetic)",
+      "source_type": "news"
+    }
+  ],
+  "deepenings": [
+    {
+      "section_path": "consulting_payload.frameworks.porters_five_forces.new_entrant_threat",
+      "directive": "Strengthen the new-entrant threat assessment with specific evidence on US health-tech expansion into the UK.",
+      "outcome": "accepted",
+      "rationale": "Added the named 40% YoY expansion data and the S-1 filing reference; intensity stays HIGH with a clearer drivers list."
+    },
+    {
+      "section_path": "consulting_payload.options_matrix",
+      "directive": "Add a geographic-pivot option (Wales / NI) for completeness even if not the recommendation.",
+      "outcome": "accepted",
+      "rationale": "Geographic-pivot option added with smaller ARR + lower risk profile; helps frame why Scotland is the right answer rather than the default."
+    }
+  ]
+}
