@@ -225,16 +225,16 @@ async def test_unknown_exporter_returns_failed(tmp_artifacts_root: Path) -> None
     stored: dict[str, Any] = {}
     fake_acquire = _fake_acquire_factory(stored)
 
-    # ``interview_guide/pdf`` is in the schema whitelist but no exporter
-    # is registered yet (W13/D4 work). The exporter-not-found path is
-    # what we want to exercise. (W11/D1 registered deck/pptx, W12/D1
-    # registered excel_model/xlsx, W13/D1+D2 registered email/md+html+pdf
-    # and W13/D3 registered interview_guide/md — so we can't reuse those
-    # combinations here any more.)
+    # ``memo/json`` is in the schema whitelist but no exporter is
+    # registered (W14 work). The exporter-not-found path is what we
+    # want to exercise. By W13/D4 the registered combinations are
+    # one_pager/html+pdf, deck/pptx, excel_model/xlsx, email/md+html+pdf,
+    # interview_guide/md+html+pdf — so we use the still-unregistered
+    # memo/json pair here.
     req = GenerateArtifactRequest(
         session_id=uuid4(),
-        artifact_type="interview_guide",
-        format="pdf",
+        artifact_type="memo",
+        format="json",
     )
     with mock.patch.object(exports_service, "acquire", new=fake_acquire):
         result = await generate_artifact(req)
@@ -242,7 +242,7 @@ async def test_unknown_exporter_returns_failed(tmp_artifacts_root: Path) -> None
     assert result.status == "failed"
     assert result.failure_reason is not None
     assert "no exporter registered" in result.failure_reason
-    assert "interview_guide" in result.failure_reason and "pdf" in result.failure_reason
+    assert "memo" in result.failure_reason and "json" in result.failure_reason
     # Failed row persisted (not silently dropped)
     assert stored["status"] == "failed"
 

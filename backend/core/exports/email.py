@@ -25,7 +25,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from . import _pdf_helpers
 from ._base import ClaimCitation, ExporterBase, ExporterResult
+from ._pdf_helpers import PdfRuntimeError as _SharedPdfRuntimeError
 from ._registry import register
 from .email_builder import EmailBuilder
 
@@ -242,27 +244,20 @@ class EmailPdfOverflowError(RuntimeError):
 
 
 def _html_to_pdf(html: str) -> bytes:
+    """W13/D4 — delegates to the shared ``_pdf_helpers.html_to_pdf``
+    wrapper so the email PDF path and the interview-guide PDF path
+    share one WeasyPrint integration point. Existing tests patch this
+    symbol on this module, so it stays in place as a forwarder."""
     try:
-        from weasyprint import CSS, HTML  # type: ignore
-    except (ImportError, OSError) as e:  # pragma: no cover — env-only
-        raise EmailPdfRuntimeError(
-            f"WeasyPrint runtime not available: {e}. "
-            f"Install pango/cairo/gdk-pixbuf system libs "
-            f"(see backend/core/exports/README.md) or run inside Docker."
-        ) from e
-    return HTML(string=html).write_pdf(stylesheets=[CSS(string=_EMAIL_PRINT_CSS)])
+        return _pdf_helpers.html_to_pdf(html, extra_css=[_EMAIL_PRINT_CSS])
+    except _SharedPdfRuntimeError as e:
+        raise EmailPdfRuntimeError(str(e)) from e
 
 
 def _pdf_page_count(pdf_bytes: bytes) -> int:
-    try:
-        import fitz  # PyMuPDF
-    except ImportError:  # pragma: no cover
-        return 1
-    try:
-        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
-            return doc.page_count
-    except Exception:  # noqa: BLE001
-        return -1
+    """W13/D4 — delegates to ``_pdf_helpers.pdf_page_count`` while
+    preserving the existing module-local symbol that tests patch."""
+    return _pdf_helpers.pdf_page_count(pdf_bytes)
 
 
 def _truncate_body_html(html: str) -> str:
