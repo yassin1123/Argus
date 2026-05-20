@@ -1,0 +1,48 @@
+{
+  "firm": {
+    "slug": "meridian-advisory",
+    "name": "Meridian Advisory",
+    "branding": {
+      "primary_color": "#1F3A5F",
+      "secondary_color": "#C97B3A",
+      "footer_text": "Meridian Advisory · Confidential",
+      "logo_url": "",
+      "_firm_name": "Meridian Advisory",
+      "_partner_name": "Helena Voss",
+      "_partner_title": "Partner — Strategy & Diligence"
+    },
+    "metadata": {
+      "seeded_by": "tools/seed_sample_workspace.py",
+      "seed_version": "w14-d3"
+    }
+  },
+  "users": [
+    {
+      "email": "helena.voss@meridian.invalid",
+      "full_name": "Helena Voss",
+      "password": "MeridianSample!2026",
+      "system_role": "member",
+      "firm_role": "admin",
+      "title": "Partner",
+      "is_default_firm": true
+    },
+    {
+      "email": "marcus.thorne@meridian.invalid",
+      "full_name": "Marcus Thorne",
+      "password": "MeridianSample!2026",
+      "system_role": "member",
+      "firm_role": "member",
+      "title": "Senior Consultant",
+      "is_default_firm": true
+    },
+    {
+      "email": "priya.shah@meridian.invalid",
+      "full_name": "Priya Shah",
+      "password": "MeridianSample!2026",
+      "system_role": "member",
+      "firm_role": "member",
+      "title": "Junior Analyst",
+      "is_default_firm": true
+    }
+  ]
+}

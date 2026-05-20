@@ -1,0 +1,224 @@
+{
+  "title": "Kestrel Logistics — M&A diligence",
+  "query": "Diligence on Kestrel Logistics, a UK regional pallet-network operator currently held by a PE seller running a process. Target: £180m revenue / £21m EBITDA. Recommendation needed on whether to bid, the appropriate valuation range, and the post-close integration risks.",
+  "report_mode": "m_and_a_diligence",
+  "target_name": "Kestrel Logistics",
+  "engagement_title": "Kestrel Logistics — M&A diligence",
+  "owner_email": "helena.voss@meridian.invalid",
+  "team_emails": ["marcus.thorne@meridian.invalid", "priya.shah@meridian.invalid"],
+  "report": {
+    "recommendation": "PROCEED WITH CONDITIONS at a £215–£235m enterprise value range, anchored to a base case of £225m (EV/EBITDA 10.7x) subject to confirmation of the top-three customer contract block.",
+    "confidence_level": "Medium-High",
+    "summary": "Kestrel Logistics is a structurally attractive carve-out candidate at the high end of the UK regional logistics peer set. Resilient gross margin and durable customer relationships support a base-case £225m EV. Top-three customer concentration (47% of revenue) and a heavy reliance on the seller's IT infrastructure are the conditions that gate a PROCEED.",
+    "key_reasons": [
+      "Resilient gross margin trajectory (38.2% → 39.8% across FY21–FY24) underpinned by network-density advantages on UK regional pallet routes.",
+      "Top-three customer block carries multi-year framework agreements running to FY27 with explicit assignment-of-contract clauses confirmed in diligence.",
+      "EBITDA conversion from gross profit is structurally above peer median (54% vs 47%), driven by an efficient owned-fleet operating model.",
+      "Synergy estimate of ~£8m (revenue + cost combined) is conservative against the bidder's UK network overlap and is grounded in named integration playbooks."
+    ],
+    "risks": [
+      "Customer concentration: top three customers account for 47% of FY24 revenue. Loss of any single account would trigger a >£35m EV impairment.",
+      "TSA exposure on IT systems: the seller's group ERP runs Kestrel's billing + dispatch. Independent stand-up is scoped at 14–18 months under a TSA.",
+      "Working-capital seasonality compresses Q1 cash position by 22% — covenant headroom on the proposed acquisition financing tightens here.",
+      "Driver-shortage exposure remains an open variable; the diligence assumes current labour costs hold through FY26."
+    ],
+    "counterarguments": [
+      "Strategic alternative: pursue the smaller Halton Distribution carve-out instead — cleaner stand-alone P&L but lacks Kestrel's network density.",
+      "Pass entirely: pallet-network economics are mature and consolidation is well-advanced; the multiple uplift on Kestrel may not be repeatable."
+    ],
+    "next_steps": [
+      "Open confirmatory diligence on the top-three customer renewal trajectory (legal + commercial workstream, 4 weeks).",
+      "Pressure-test the TSA scope with a named third-party IT-separation specialist (target term sheet within 6 weeks).",
+      "Finalise debt structure with the lead bank — covenant headroom modelled at ≥18% under stressed Q1 working-capital case.",
+      "Schedule expert validation calls on driver-shortage and pallet-network competitive intensity (see attached interview guide)."
+    ],
+    "sources": [
+      {"type": "firm_library", "title": "M&A Carve-out & Divestiture Playbook"},
+      {"type": "firm_library", "title": "Diligence Checklist Template"},
+      {"type": "firm_library", "title": "Comparable Transactions Database (UK, synthetic)"},
+      {"type": "firm_library", "title": "UK Regulatory Environment Brief"},
+      {"type": "firm_library", "title": "Valuation Methodology (Firm House View)"},
+      {"type": "sec_filing", "title": "Listed peer 10-K — regional logistics (synthetic comparable)"},
+      {"type": "transcript", "title": "Sector earnings call — UK pallet networks (synthetic)"}
+    ],
+    "caveats": "Recommendation hinges on confirming the assignment-of-contract clauses with the top three customers before close. If any of the three signals reluctance, base case re-prices to £190m.",
+    "consulting_payload": {
+      "mode": "m_and_a_diligence",
+      "valuation_range": {
+        "low": {"gbp_m": 215.0, "methodology": "DCF @ WACC 10.5% (stressed)"},
+        "base": {"gbp_m": 225.0, "methodology": "EV/EBITDA 10.7x (peer median)"},
+        "high": {"gbp_m": 235.0, "methodology": "EV/Sales 1.31x (top-quartile peer)"}
+      },
+      "target_overview": {
+        "name": "Kestrel Logistics",
+        "geography": "United Kingdom (regional)",
+        "fy24_revenue_gbp_m": 180.0,
+        "fy24_ebitda_gbp_m": 21.0,
+        "fy24_ebitda_margin": 0.117,
+        "employees": 1850,
+        "ownership": "PE-held; current owner exiting via process"
+      },
+      "financial_profile": {
+        "revenue_trajectory": {
+          "points": [
+            {"period": "FY21", "value_gbp_m": 142.5, "source_citation": "claim_revenue_1"},
+            {"period": "FY22", "value_gbp_m": 156.8, "source_citation": "claim_revenue_1"},
+            {"period": "FY23", "value_gbp_m": 172.3, "source_citation": "claim_revenue_1"},
+            {"period": "FY24", "value_gbp_m": 180.0, "source_citation": "claim_revenue_1"}
+          ]
+        },
+        "ebitda_trajectory": {
+          "points": [
+            {"period": "FY23", "value_gbp_m": 18.4, "source_citation": "claim_ebitda_1"},
+            {"period": "FY24", "value_gbp_m": 21.0, "source_citation": "claim_ebitda_1"}
+          ]
+        },
+        "margin_profile": {
+          "gross_margin": "39.8%",
+          "ebitda_margin": "11.7%",
+          "fcf_margin": "7.3%"
+        },
+        "working_capital_dynamics": "Q1 compression typical (~22% peak-to-trough); manageable with the proposed RCF structure.",
+        "debt_structure": "Net debt £42m at close; proposed structure adds £140m senior term + £20m RCF.",
+        "capex_intensity": "Maintenance capex ~3.5% of revenue; growth capex driven by fleet refresh cycle.",
+        "cash_flow_quality": "Strong cash conversion from EBITDA (~92%); receivable days steady at 38."
+      },
+      "deal_structure_implications": {
+        "structure": "Asset purchase preferred; share purchase contingent on assignment confirmations.",
+        "walk_away_triggers": [
+          "Any of the top-three customer contracts signals reluctance to assign at close.",
+          "TSA scope on the seller's ERP expands beyond 18 months on the critical path.",
+          "Q1 stressed-case working-capital absorption exceeds £18m, breaking covenant headroom."
+        ]
+      },
+      "synergy_estimate": {
+        "revenue_synergies": [
+          {
+            "type": "Cross-sell pallet capacity to bidder's existing customer base",
+            "magnitude_gbp_m": 3.5,
+            "timing_months": 18,
+            "confidence": "medium",
+            "basis_citations": ["claim_synergy_rev_1"]
+          }
+        ],
+        "cost_synergies": [
+          {
+            "type": "Network depot consolidation across overlap regions",
+            "magnitude_gbp_m": 4.2,
+            "timing_months": 12,
+            "confidence": "high",
+            "basis_citations": ["claim_synergy_cost_1"]
+          },
+          {
+            "type": "Procurement leverage on fuel and tyres",
+            "magnitude_gbp_m": 1.1,
+            "timing_months": 9,
+            "confidence": "high",
+            "basis_citations": ["claim_synergy_cost_2"]
+          }
+        ],
+        "dis_synergies": [
+          {
+            "type": "Customer revenue attrition risk during integration",
+            "magnitude_gbp_m": 1.8,
+            "timing_months": 12,
+            "confidence": "medium",
+            "basis_citations": ["claim_dissynergy_1"]
+          }
+        ]
+      },
+      "integration_plan": {
+        "day_1_priorities": [
+          "Customer communications (top 50 customers within 48 hours)",
+          "Driver retention bonus issued to all FTE drivers",
+          "IT bridge: agreed TSA across seller's ERP + dispatch"
+        ],
+        "100_day_priorities": [
+          "Depot consolidation in the East Midlands overlap zone",
+          "Procurement re-tender on fuel + tyres",
+          "Customer-pricing harmonisation kick-off"
+        ],
+        "12_month_priorities": [
+          "Stand-alone ERP go-live (replaces TSA dependency)",
+          "Driver-shortage mitigation via partner-tier network",
+          "FY26 plan: target +8% revenue + 80bps EBITDA margin"
+        ]
+      },
+      "executive_insights": [
+        "Network-density advantage is the durable moat; treat it as the primary thesis pillar.",
+        "Customer-concentration risk is real but mitigated by the assignment-clause confirmation path.",
+        "TSA scope is the single biggest source of post-close surprise — invest in third-party scoping pre-close."
+      ],
+      "recommendation_claim_ids": ["claim_revenue_1", "claim_ebitda_1", "claim_synergy_cost_1"],
+      "kill_criteria": [
+        "Top-three customer assignment refused",
+        "TSA scope exceeds 24 months",
+        "Stressed-case Q1 working-capital absorption breaks covenant headroom"
+      ]
+    }
+  },
+  "citations": [
+    {
+      "claim_id": "claim_revenue_1",
+      "text": "Kestrel Logistics revenue grew from £142.5m in FY21 to £180m in FY24, a 26.3% absolute lift.",
+      "source_title": "Kestrel Logistics CIM (synthetic)",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_ebitda_1",
+      "text": "FY24 EBITDA of £21.0m represents an 11.7% EBITDA margin, structurally above the UK regional pallet-network peer median of 9.8%.",
+      "source_title": "Kestrel Logistics CIM (synthetic)",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_synergy_rev_1",
+      "text": "Bidder's existing UK customer base overlaps with Kestrel's pallet-capacity offering in 12 named accounts.",
+      "source_title": "Diligence: cross-sell analysis (synthetic)",
+      "source_type": "uploaded"
+    },
+    {
+      "claim_id": "claim_synergy_cost_1",
+      "text": "Bidder operates a depot within 8 miles of Kestrel's East Midlands hub; combined throughput supports closure of the smaller site, yielding £4.2m run-rate savings.",
+      "source_title": "Integration scoping note (synthetic)",
+      "source_type": "uploaded"
+    },
+    {
+      "claim_id": "claim_synergy_cost_2",
+      "text": "Combined fuel + tyre procurement volume crosses the threshold for the next pricing tier with both major suppliers.",
+      "source_title": "Procurement leverage analysis (synthetic)",
+      "source_type": "uploaded"
+    },
+    {
+      "claim_id": "claim_dissynergy_1",
+      "text": "Comparable acquisitions in UK logistics show 0.8–1.2% revenue attrition in the 12 months post-close on customer churn risk.",
+      "source_title": "Comparable Transactions Database (UK, synthetic)",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_walkaway_1",
+      "text": "Top-three customer block (Customer A + Customer B + Customer C) accounts for 47% of FY24 revenue.",
+      "source_title": "Kestrel Logistics CIM (synthetic)",
+      "source_type": "firm_library"
+    },
+    {
+      "claim_id": "claim_tsa_1",
+      "text": "Seller's group ERP runs billing + dispatch for Kestrel; independent stand-up scoped at 14–18 months on critical path.",
+      "source_title": "Diligence: IT separation note (synthetic)",
+      "source_type": "uploaded"
+    }
+  ],
+  "deepenings": [
+    {
+      "section_path": "consulting_payload.deal_structure_implications.walk_away_triggers",
+      "directive": "Pressure-test the walk-away triggers against actual customer signals and prior-comparable deal experience.",
+      "outcome": "accepted",
+      "rationale": "Tightened the triggers to explicit reluctance signals + numeric covenant headroom; replaced the prior soft formulation."
+    },
+    {
+      "section_path": "consulting_payload.synergy_estimate.dis_synergies",
+      "directive": "Quantify the dis-synergy floor using the firm's comparable-transactions database.",
+      "outcome": "accepted",
+      "rationale": "Dis-synergy magnitude moved from a placeholder note to a £1.8m estimate sourced from the comparable-transactions database."
+    }
+  ]
+}
