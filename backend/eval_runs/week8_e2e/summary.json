@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T09:23:19Z",
+  "generated_at": "2026-05-20T12:46:19Z",
   "headline_assertions": {
     "A_two_by_two_present": true,
     "A_two_by_two_items_ge_4": false,
@@ -9,8 +9,8 @@
     "B_porters_present": false,
     "B_porters_all_five_populated": false,
     "B_porters_all_five_with_evidence": false,
-    "B_pyramid_present": false,
-    "B_mece_present": false,
+    "B_pyramid_present": true,
+    "B_mece_present": true,
     "pyramid_at_least_one_zero_errors": true,
     "pyramid_other_at_most_2_errors": true,
     "mece_zero_on_key_reasons_at_least_one": true,
@@ -104,19 +104,18 @@
     {
       "run_name": "B_growth_strategy",
       "report_mode": "growth_strategy",
-      "session_id": "cf8cc0ad-ace5-484d-ad4b-e9bb997e9520",
-      "wall_seconds": 1678.4,
-      "cost_usd_total": 0.8931,
+      "session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "wall_seconds": 1265.93,
+      "cost_usd_total": 0.6019,
       "evidence_total": 48,
       "diversity_counts": {
         "firm_library": 48
       },
       "firm_library_titles_cited": {
-        "Albright & Marsh Pricing Diagnostic Pack": 7,
+        "TargetCo Holdings \u2014 Project Lighthouse CIM": 24,
         "Retail Sector Primer (UK + US)": 15,
-        "TargetCo Holdings \u2014 Project Lighthouse CIM": 20,
-        "M&A Target Screen Playbook (Boutique Edition)": 5,
-        "Valuation Methodology (Firm House View)": 1
+        "M&A Target Screen Playbook (Boutique Edition)": 3,
+        "Albright & Marsh Pricing Diagnostic Pack": 6
       },
       "frameworks_status": {
         "two_by_two": false,
@@ -135,17 +134,25 @@
         "overall_attractiveness": null
       },
       "pyramid": {
-        "present": false,
-        "passed": null,
-        "findings": 0,
-        "model_used": null,
+        "present": true,
+        "passed": true,
+        "findings": 1,
+        "errors": 0,
+        "model_used": "openai/gpt-4o-mini",
         "cost_usd": 0.0
       },
       "mece": {
-        "present": false,
-        "passed": null,
+        "present": true,
+        "passed": true,
         "overlaps": 0,
-        "fields_checked": []
+        "overlaps_per_field": {},
+        "fields_checked": [
+          "key_reasons",
+          "risks",
+          "counterarguments"
+        ],
+        "threshold": 0.85,
+        "cost_usd": 6e-06
       },
       "expected_framework": "porters_five_forces",
       "expected_framework_present": false,
@@ -159,13 +166,23 @@
         "target_overview",
         "valuation_range"
       ],
-      "report_recommendation": "",
-      "report_summary_preview": "",
+      "report_recommendation": "Execute a three-pronged defense strategy over 12 months: divest the Republic of Ireland operation to fund private-label expansion in the Food segment and enhance omnichannel capabilities.",
+      "report_summary_preview": "TargetCo should divest its Republic of Ireland operations to fund a strategic defense against discounters like Aldi and Lidl by expanding private-label offerings and enhancing omnichannel capabilities. This approach aims to retain 2-3% market share in the Food segment. The biggest risk is the potential failure of the private-label strategy to achieve the desired penetration, which would necessitate a pivot to a harvest strategy.",
       "week7_carry_forward": {
         "closes_week7": false,
-        "reason": "no report row at all"
+        "base_fields_missing": [],
+        "m_and_a_sections_missing": [
+          "target_overview",
+          "financial_profile",
+          "synergy_estimate",
+          "risks_and_mitigations",
+          "integration_plan",
+          "valuation_range",
+          "deal_structure_implications"
+        ],
+        "two_by_two_present": false
       },
-      "error": "WriterSchemaValidationError: GeneralReportPayload validation failed at (root)\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 134, in generate_structured\n    obj = model_cls.model_validate_json(_extract_json_payload(text))\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pydantic\\main.py\", line 656, in model_validate_json\n    return cls.__pydantic_validator__.validate_json(json_data, strict=strict, context=context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\npydantic_core._pydantic_core.ValidationError: 1 validation error for GeneralReportPayload\n  Invalid JSON: EOF while parsing an object at line 255 column 5 [type=json_invalid, input_value='{\\n  \"recommendation\": \"...pivot triggers.\"\\n    }', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.10/v/json_invalid\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\writer\\agent.py\", line 193, in run\n    out, _meta = await generate_structured(\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\core\\inference\\structured.py\", line 150, in generate_structured\n    raise InferenceSchemaError(\ncore.inference.exceptions.InferenceSchemaError: Schema validation failed after 2 repairs\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\tools\\run_week8_e2e.py\", line 523, in _execute_run\n    await run_pipeline(session_id, run[\"brief\"])\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\orchestrator.py\", line 1063, in run_pipeline\n    report = await writer.run(\n             ^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\agents\\writer\\agent.py\", line 217, in run\n    raise WriterSchemaValidationError(\nagents.writer.agent.WriterSchemaValidationError: GeneralReportPayload validation failed at (root)\n"
+      "error": null
     }
   ]
 }

@@ -37,6 +37,35 @@ growth_strategy:
     optional:
       - value_chain
       - two_by_two
+  # W14/D1: close the W8 Run B writer-truncation carry-forward.
+  #
+  # Diagnosis (static + DB telemetry, no diagnose run spent):
+  # - Past writer call on the W8 demo session
+  #   (bcb54507-31fc-4069-8c0d-585d075b0d07) used
+  #   anthropic/claude-sonnet-4-5 and emitted exactly 8174
+  #   completion_tokens — Sonnet 4.5's default 8192-token ceiling.
+  # - growth_strategy carried no model_overrides, so the writer ran
+  #   on the layered default (Sonnet 4.5) with no max_tokens lift.
+  # - The Porter's Five Forces block (5 forces × rationale +
+  #   key_drivers + evidence_citations) reliably overflows that
+  #   ceiling on top of the base memo sections.
+  # - The Anthropic extended-output beta header was tried in W7 and
+  #   rejected by the API (litellm_client._extra_headers_for still
+  #   returns {} as a no-op for that reason). So a max_tokens > 8192
+  #   on Sonnet won't be honoured.
+  #
+  # Path A fix (proven W7 pattern — same shape as the m_and_a_diligence
+  # override below): swap the writer to gpt-4o, which doesn't hit the
+  # 8192 ceiling, with an explicit max_tokens floor of 16000 so the
+  # extended structured output has headroom for the framework block on
+  # top of base sections. Critic/analyst stay on the layered default
+  # for growth — only the writer's payload size is the bottleneck on
+  # this mode. If we see truncation drift to those tasks later, we'll
+  # add the same overrides as M&A did in iterate-4.
+  model_overrides:
+    writer:
+      model: openai/gpt-4o
+      max_tokens: 16000
 
 # Phase 2 / Week 7 / Day 2 — first built-in mode shipping with the
 # richer schema fields (display_name, description, reasoning_slots,

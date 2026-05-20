@@ -56,7 +56,7 @@ Combined LLM cost across all 4 generations: **$0.00** — template rendering is 
 | Numbered citation chips (`1 claim_...`) | ✅ | ✅ | both |
 | Footer (`Every claim verified`) | ✅ | ✅ | both |
 
-Mode-aware dispatch is working as designed: the M&A 1-pager omits Porter's, the growth 1-pager omits valuation. The growth Porter's row falls back to "Porter's Five Forces not produced for this engagement." because the source payload's `frameworks.porters_five_forces` block is missing — that's the W8 Run B writer-truncation carry-forward documented in [docs/eval/week8_frameworks.md](week8_frameworks.md), not a renderer defect.
+Mode-aware dispatch is working as designed: the M&A 1-pager omits Porter's, the growth 1-pager omits valuation. The growth Porter's row falls back to "Porter's Five Forces not produced for this engagement." because the source payload's `frameworks.porters_five_forces` block is missing. **W14/D1 update:** the W8 Run B writer-truncation carry-forward is now closed (growth_strategy writer ships on gpt-4o + max_tokens=16000), but Porter's content still falls back because a separate schema-enforcement bug surfaced behind the truncation fix — gpt-4o emits `frameworks: null` legitimately since `GeneralReportPayload.frameworks` is `Optional`. Path B (growth-specific Pydantic subclass with non-nullable Porter's, or two-pass framework writer) bounded and deferred to Phase 4 in [week8_frameworks.md](week8_frameworks.md). Renderer behaves correctly in both states.
 
 ## Headline assertions
 
