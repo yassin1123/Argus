@@ -30,9 +30,12 @@ from pydantic import BaseModel, Field
 
 from auth.dependencies import get_current_user
 from auth.permissions import can_read
+from core.review.feedback import ReviewFeedback, SectionPointer
 from core.review.service import (
+    ResolvePointerResult,
     ReviewTransitionResult,
     get_review_state,
+    resolve_section_pointer,
     transition_review,
 )
 from core.review.state_machine import ReviewAction
@@ -59,10 +62,23 @@ class SubmitForReviewBody(BaseModel):
 
 
 class RequestChangesBody(BaseModel):
-    """``feedback`` is required — request_changes without explanation
-    is hostile to the consultant. Surface a clear 400 if missing."""
+    """W15/D3: structured feedback shape.
 
-    feedback: str = Field(..., min_length=1, max_length=4000)
+    ``overall_note`` is required — request_changes without an
+    explanation is hostile to the consultant. ``section_pointers``
+    is optional but, when provided, each pointer must reference a
+    section_path that resolves against the live writer payload
+    (service-layer rejects invalid paths with a 400).
+
+    Legacy callers that POST ``{"feedback": "..."}`` are tolerated:
+    the service's ``_serialise_feedback`` upgrades plain strings
+    into the structured shape on the way to the DB. New callers
+    should use the structured fields.
+    """
+
+    overall_note: str = Field(..., min_length=1, max_length=4000)
+    section_pointers: list[SectionPointer] = Field(default_factory=list)
+    severity: str = Field(default="major", pattern=r"^(minor|major|blocking)$")
 
     model_config = {"extra": "ignore"}
 
@@ -102,8 +118,21 @@ async def _require_read(session_id: str, user: dict) -> None:
 
 def _result_or_raise(result: ReviewTransitionResult) -> dict[str, Any]:
     """Map a ReviewTransitionResult into the API's success body, or
-    raise the appropriate HTTPException on failure."""
+    raise the appropriate HTTPException on failure.
+
+    When the failure carries ``blocking_pointer_paths`` (W15/D3
+    resubmit gate), the exception body is structured so the
+    workspace UI can render a clickable list of paths.
+    """
     if not result.ok:
+        if result.blocking_pointer_paths:
+            raise HTTPException(
+                status_code=result.status_code,
+                detail={
+                    "reason": result.reason,
+                    "blocking_pointer_paths": result.blocking_pointer_paths,
+                },
+            )
         raise HTTPException(status_code=result.status_code, detail=result.reason)
     return {
         "session_id": result.session_id,
@@ -192,8 +221,15 @@ async def request_changes_endpoint(
     body: RequestChangesBody,
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Request changes on an in-review engagement. Same
-    authorisation gate as approve. ``feedback`` is required."""
+    """Request changes on an in-review engagement. Same authorisation
+    gate as approve. The body is the structured ``ReviewFeedback``
+    shape — overall note + optional section_pointers + severity.
+
+    Each pointer's ``section_path`` is validated against the live
+    writer payload before persistence; invalid paths surface as
+    400. Major / blocking pointers gate the consultant's subsequent
+    resubmit (the resubmit endpoint returns 409 with the unresolved
+    paths in the response body)."""
     await _require_read(session_id, user)
 
     try:
@@ -201,11 +237,58 @@ async def request_changes_endpoint(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"invalid session id: {e}") from e
 
+    structured = ReviewFeedback(
+        overall_note=body.overall_note,
+        section_pointers=body.section_pointers,
+        severity=body.severity,  # type: ignore[arg-type]
+    )
+
     result = await transition_review(
         sid, ReviewAction.REQUEST_CHANGES, UUID(user["user_id"]),
-        feedback=body.feedback,
+        structured_feedback=structured,
     )
     return _result_or_raise(result)
+
+
+class ResolvePointerBody(BaseModel):
+    section_path: str = Field(..., min_length=1, max_length=200)
+
+    model_config = {"extra": "ignore"}
+
+
+@router.post("/{session_id}/review/feedback/{review_record_id}/resolve-pointer")
+async def resolve_pointer_endpoint(
+    session_id: str,
+    review_record_id: str,
+    body: ResolvePointerBody,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Mark a single section pointer on a request_changes record
+    resolved. Idempotent (a second resolve is a no-op).
+
+    Auth: any firm member who can read the session — the consultant
+    addressing feedback is typically the author; a teammate may
+    flag a pointer resolved on their behalf. Cross-firm callers
+    see 404 via :func:`_require_read`.
+    """
+    await _require_read(session_id, user)
+
+    try:
+        sid = UUID(session_id)
+        rid = UUID(review_record_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"invalid id: {e}") from e
+
+    result: ResolvePointerResult = await resolve_section_pointer(
+        sid, rid, UUID(user["user_id"]), body.section_path,
+    )
+    if not result.ok:
+        raise HTTPException(status_code=result.status_code, detail=result.reason)
+    return {
+        "review_record_id": result.review_record_id,
+        "section_path": result.section_path,
+        "changed": result.changed,
+    }
 
 
 @router.post("/{session_id}/review/mark-delivered")

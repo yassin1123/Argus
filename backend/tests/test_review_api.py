@@ -175,19 +175,26 @@ def test_request_changes_records_feedback() -> None:
              review_api, "transition_review",
              new=mock.AsyncMock(return_value=canned),
          ) as m:
-        # Empty feedback is rejected at the body-validation layer.
-        r0 = client.post(f"/api/sessions/{sid}/review/request-changes", json={"feedback": ""})
-        assert r0.status_code == 422, "empty feedback should fail Pydantic validation"
+        # Empty overall_note is rejected at the body-validation layer.
+        r0 = client.post(
+            f"/api/sessions/{sid}/review/request-changes",
+            json={"overall_note": ""},
+        )
+        assert r0.status_code == 422, "empty overall_note should fail Pydantic validation"
 
         r = client.post(
             f"/api/sessions/{sid}/review/request-changes",
-            json={"feedback": "Tighten the valuation triple — base case feels light."},
+            json={"overall_note": "Tighten the valuation triple — base case feels light."},
         )
     assert r.status_code == 200, r.text
     assert r.json()["to_state"] == "changes_requested"
-    # Feedback was forwarded.
+    # W15/D3: the structured ReviewFeedback is forwarded via the
+    # ``structured_feedback`` kwarg; the legacy ``feedback`` kwarg
+    # is now reserved for the older plain-text path.
     call = m.await_args
-    assert "valuation" in call.kwargs.get("feedback", "")
+    structured = call.kwargs.get("structured_feedback")
+    assert structured is not None
+    assert "valuation" in structured.overall_note
 
 
 # ---------------------------------------------------------------------------
@@ -233,7 +240,7 @@ def test_full_cycle_submit_request_resubmit_approve() -> None:
         # 2. Request changes.
         r2 = client.post(
             f"/api/sessions/{sid}/review/request-changes",
-            json={"feedback": "minor fixes"},
+            json={"overall_note": "minor fixes"},
         )
         assert r2.json()["to_state"] == "changes_requested"
         # 3. Resubmit — the same /submit endpoint dispatches to RESUBMIT
@@ -416,7 +423,7 @@ def test_cross_firm_review_action_returns_404() -> None:
         r2 = client.post(f"/api/sessions/{sid}/review/approve", json={})
         r3 = client.post(
             f"/api/sessions/{sid}/review/request-changes",
-            json={"feedback": "x"},
+            json={"overall_note": "x"},
         )
         r4 = client.post(f"/api/sessions/{sid}/review/reopen", json={})
         r5 = client.get(f"/api/sessions/{sid}/review")

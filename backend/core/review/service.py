@@ -42,6 +42,13 @@ from uuid import UUID
 from db.connection import acquire
 
 from .authorization import AuthorizationResult, authorize_action
+from .feedback import (
+    FeedbackValidationError,
+    ReviewFeedback,
+    is_resubmit_blocked,
+    mark_pointer_resolved,
+    validate_against_payload,
+)
 from .locking import is_locked
 from .state_machine import (
     ReviewAction,
@@ -76,6 +83,10 @@ class ReviewTransitionResult:
     artifacts_marked_stale: int = 0
     status_code: int = 200
     reason: str = ""
+    # W15/D3: when a resubmit is gated by unresolved blocking pointers
+    # from the latest request_changes round, the API surfaces the
+    # offending paths so the consultant knows what to address.
+    blocking_pointer_paths: list[str] | None = None
 
 
 # Reasons for the standard error paths. Strings kept short + 403-safe
@@ -131,6 +142,36 @@ async def _load_actor_membership(firm_id: UUID, actor_id: UUID) -> dict[str, Any
     return dict(row) if row else None
 
 
+async def _load_payload_for_validation(session_id: UUID) -> dict[str, Any]:
+    """Pull the latest writer ``consulting_payload`` for the session
+    so :func:`feedback.validate_against_payload` can resolve every
+    pointer's ``section_path``. Returns an empty dict when no
+    report row exists yet — the validator then rejects any non-root
+    pointer cleanly.
+    """
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT recommendation, confidence_level, summary, key_reasons, risks,
+                   counterarguments, next_steps, sources, caveats, consulting_payload
+              FROM reports WHERE session_id = $1::uuid
+            """,
+            session_id,
+        )
+    if not row:
+        return {}
+    out: dict[str, Any] = {k: row[k] for k in row.keys() if k != "consulting_payload"}
+    cp = row["consulting_payload"]
+    if isinstance(cp, str):
+        try:
+            cp = json.loads(cp)
+        except Exception:
+            cp = {}
+    if isinstance(cp, dict):
+        out.update(cp)
+    return out
+
+
 async def _firm_id_for_session(session_id: UUID) -> UUID | None:
     async with acquire() as conn:
         row = await conn.fetchrow(
@@ -144,6 +185,65 @@ async def _firm_id_for_session(session_id: UUID) -> UUID | None:
 # ---------------------------------------------------------------------------
 
 
+def _serialise_feedback(feedback: Any) -> str | None:
+    """Coerce the caller's feedback argument into a JSON string ready
+    for the ``review_records.feedback::jsonb`` column.
+
+    Three accepted shapes:
+      - ``None`` → SQL NULL.
+      - :class:`ReviewFeedback` instance → ``.model_dump()`` JSON.
+      - plain string → wrap as ``{"overall_note": <s>, "section_pointers":
+        [], "severity": "major"}`` so the read-path always sees the
+        structured shape (matches the W15/D3 migration backfill).
+      - dict → JSON-dump as-is (caller responsibility to match shape).
+    """
+    if feedback is None:
+        return None
+    if isinstance(feedback, ReviewFeedback):
+        return feedback.model_dump_json()
+    if isinstance(feedback, dict):
+        return json.dumps(feedback)
+    if isinstance(feedback, str):
+        return json.dumps({
+            "overall_note": feedback,
+            "section_pointers": [],
+            "severity": "major",
+        })
+    raise TypeError(
+        f"unsupported feedback type for review_records.feedback: "
+        f"{type(feedback).__name__}"
+    )
+
+
+async def _request_changes_feedback_history(
+    session_id: UUID,
+) -> list[dict[str, Any]]:
+    """Pull the feedback payloads from every ``request_changes`` row
+    on a session, oldest → newest. Used by the resubmit gate
+    + the GET-review enrichment."""
+    async with acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT feedback
+              FROM review_records
+             WHERE session_id = $1::uuid
+               AND action = 'request_changes'
+             ORDER BY created_at ASC
+            """,
+            session_id,
+        )
+    out: list[dict[str, Any]] = []
+    for r in rows:
+        fb = r["feedback"]
+        if isinstance(fb, str):
+            try:
+                fb = json.loads(fb)
+            except Exception:
+                fb = {"overall_note": fb, "section_pointers": [], "severity": "major"}
+        out.append(fb or {})
+    return out
+
+
 async def _persist_transition(
     *,
     session_id: UUID,
@@ -153,7 +253,7 @@ async def _persist_transition(
     from_state: ReviewState,
     to_state: ReviewState,
     reviewer_id: UUID | None,
-    feedback: str | None,
+    feedback: Any | None,
 ) -> dict[str, Any]:
     """Single-transaction write covering:
 
@@ -197,7 +297,10 @@ async def _persist_transition(
                 *params,
             )
 
-            # 2. Insert review_records.
+            # 2. Insert review_records. ``feedback`` is now JSONB
+            # post-migration 037 — accept dict/structured payloads as
+            # well as raw strings (the legacy plain-text path).
+            feedback_json = _serialise_feedback(feedback)
             rr = await conn.fetchrow(
                 """
                 INSERT INTO review_records (
@@ -205,13 +308,13 @@ async def _persist_transition(
                     actor_id, reviewer_id, feedback
                 ) VALUES (
                     $1::uuid, $2::uuid, $3, $4, $5,
-                    $6::uuid, $7::uuid, $8
+                    $6::uuid, $7::uuid, $8::jsonb
                 )
                 RETURNING id, created_at
                 """,
                 session_id, firm_id,
                 from_state.value, to_state.value, action.value,
-                actor_id, reviewer_id, feedback,
+                actor_id, reviewer_id, feedback_json,
             )
 
             # 3. Append audit_events. Every transition logs — no
@@ -282,7 +385,8 @@ async def transition_review(
     actor_id: UUID,
     *,
     reviewer_id: UUID | None = None,
-    feedback: str | None = None,
+    feedback: Any | None = None,
+    structured_feedback: ReviewFeedback | None = None,
 ) -> ReviewTransitionResult:
     """End-to-end transition handler.
 
@@ -358,6 +462,47 @@ async def transition_review(
     to_state = transition.to_state
     assert to_state is not None  # apply_transition contract
 
+    # 2b. W15/D3 — when the action is request_changes with a
+    # structured payload, validate every pointer's section_path
+    # against the live consulting_payload before persisting. A
+    # pointer at a non-existent path is rejected at the boundary
+    # so the consultant doesn't navigate to a dead address.
+    if (
+        action_enum == ReviewAction.REQUEST_CHANGES
+        and structured_feedback is not None
+        and structured_feedback.section_pointers
+    ):
+        payload_for_validation = await _load_payload_for_validation(session_id)
+        try:
+            validate_against_payload(structured_feedback, payload_for_validation)
+        except FeedbackValidationError as e:
+            return ReviewTransitionResult(
+                ok=False, session_id=str(session_id),
+                from_state=from_state.value, to_state=None,
+                action=action_enum.value, actor_id=str(actor_id),
+                status_code=400, reason=str(e),
+            )
+
+    # 2c. W15/D3 — resubmit gate. Resubmission isn't allowed while
+    # major/blocking pointers from the latest request_changes round
+    # are unresolved. Minor pointers are advisory; they don't gate.
+    if action_enum == ReviewAction.RESUBMIT:
+        history = await _request_changes_feedback_history(session_id)
+        blocked, paths = is_resubmit_blocked(history)
+        if blocked:
+            return ReviewTransitionResult(
+                ok=False, session_id=str(session_id),
+                from_state=from_state.value, to_state=None,
+                action=action_enum.value, actor_id=str(actor_id),
+                status_code=409,
+                reason=(
+                    "resubmit is blocked while major/blocking section pointers "
+                    "from the latest request_changes round are unresolved: "
+                    + ", ".join(paths)
+                ),
+                blocking_pointer_paths=paths,
+            )
+
     # 3. Authorisation. AUTO_REVERT is a special case — system-only.
     # The locking-layer caller has already established the
     # legitimate edit-detection trigger; we trust the call site and
@@ -377,7 +522,10 @@ async def transition_review(
                 status_code=403, reason=auth.reason,
             )
 
-    # 4. Persist — single transaction.
+    # 4. Persist — single transaction. structured_feedback wins over
+    # the plain-text feedback arg so callers that pass both get the
+    # structured shape; legacy callers keep working.
+    feedback_to_persist: Any = structured_feedback if structured_feedback is not None else feedback
     rr = await _persist_transition(
         session_id=session_id,
         firm_id=firm_id,
@@ -386,7 +534,7 @@ async def transition_review(
         from_state=from_state,
         to_state=to_state,
         reviewer_id=reviewer_id,
-        feedback=feedback,
+        feedback=feedback_to_persist,
     )
 
     # 5. Auto-revert side effect: flag the artifacts stale.
@@ -447,6 +595,24 @@ async def get_review_state(session_id: UUID) -> dict[str, Any] | None:
             """,
             session_id,
         )
+    decoded_history: list[dict[str, Any]] = []
+    for h in history:
+        fb = h["feedback"]
+        if isinstance(fb, str):
+            try:
+                fb = json.loads(fb)
+            except Exception:
+                pass
+        decoded_history.append({
+            "id": str(h["id"]),
+            "from_state": h["from_state"],
+            "to_state": h["to_state"],
+            "action": h["action"],
+            "actor_id": str(h["actor_id"]),
+            "reviewer_id": str(h["reviewer_id"]) if h["reviewer_id"] else None,
+            "feedback": fb,
+            "created_at": h["created_at"].isoformat(),
+        })
     return {
         "session_id": str(sess["id"]),
         "review_state": sess["review_state"],
@@ -455,20 +621,106 @@ async def get_review_state(session_id: UUID) -> dict[str, Any] | None:
         "approved_at": sess["approved_at"].isoformat() if sess["approved_at"] else None,
         "submitted_at": sess["submitted_at"].isoformat() if sess["submitted_at"] else None,
         "submitted_by": str(sess["submitted_by"]) if sess["submitted_by"] else None,
-        "history": [
-            {
-                "id": str(h["id"]),
-                "from_state": h["from_state"],
-                "to_state": h["to_state"],
-                "action": h["action"],
-                "actor_id": str(h["actor_id"]),
-                "reviewer_id": str(h["reviewer_id"]) if h["reviewer_id"] else None,
-                "feedback": h["feedback"],
-                "created_at": h["created_at"].isoformat(),
-            }
-            for h in history
-        ],
+        "history": decoded_history,
     }
+
+
+# ---------------------------------------------------------------------------
+# Resolve-pointer flow (W15/D3)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class ResolvePointerResult:
+    """Return shape from :func:`resolve_section_pointer`."""
+
+    ok: bool
+    review_record_id: str
+    section_path: str
+    changed: bool = False
+    status_code: int = 200
+    reason: str = ""
+
+
+async def resolve_section_pointer(
+    session_id: UUID,
+    review_record_id: UUID,
+    actor_id: UUID,
+    section_path: str,
+) -> ResolvePointerResult:
+    """Mark a single section pointer as resolved on a specific
+    request_changes review_record. Idempotent (a second resolve is a
+    no-op with ``changed=False``).
+
+    Auth: any firm member who can read the session can resolve a
+    pointer — the consultant addressing feedback is typically the
+    author, but a teammate sharing the engagement should be able to
+    flag pointers resolved on their behalf. Authorization is
+    enforced upstream at the API layer via ``can_read``.
+    """
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT id, session_id, action, feedback
+              FROM review_records
+             WHERE id = $1::uuid
+            """,
+            review_record_id,
+        )
+        if not row or str(row["session_id"]) != str(session_id):
+            return ResolvePointerResult(
+                ok=False, review_record_id=str(review_record_id),
+                section_path=section_path,
+                status_code=404, reason="review_record not found on this session",
+            )
+        if row["action"] != "request_changes":
+            return ResolvePointerResult(
+                ok=False, review_record_id=str(review_record_id),
+                section_path=section_path,
+                status_code=409,
+                reason="pointers can only be resolved on a request_changes record",
+            )
+
+        fb = row["feedback"]
+        if isinstance(fb, str):
+            try:
+                fb = json.loads(fb)
+            except Exception:
+                fb = {}
+        if not isinstance(fb, dict):
+            fb = {}
+        new_fb, changed = mark_pointer_resolved(
+            fb, section_path, resolved_by=str(actor_id),
+        )
+        if changed:
+            await conn.execute(
+                """
+                UPDATE review_records
+                   SET feedback = $2::jsonb
+                 WHERE id = $1::uuid
+                """,
+                review_record_id, json.dumps(new_fb),
+            )
+            # Audit the resolution so the workspace timeline shows it.
+            await conn.execute(
+                """
+                INSERT INTO audit_events (
+                    actor_user_id, action, resource_type, resource_id, payload
+                ) VALUES ($1::uuid, 'review.resolve_pointer', 'session', $2, $3::jsonb)
+                """,
+                actor_id,
+                str(session_id),
+                json.dumps({
+                    "review_record_id": str(review_record_id),
+                    "section_path": section_path,
+                }),
+            )
+    return ResolvePointerResult(
+        ok=True,
+        review_record_id=str(review_record_id),
+        section_path=section_path,
+        changed=changed,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -508,8 +760,10 @@ async def auto_revert_if_locked(
 
 
 __all__ = [
+    "ResolvePointerResult",
     "ReviewTransitionResult",
     "auto_revert_if_locked",
     "get_review_state",
+    "resolve_section_pointer",
     "transition_review",
 ]
