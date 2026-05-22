@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { createExport, downloadUrl } from "@/lib/api/sessionExports";
+import { getReview } from "@/lib/api/review";
+import type { ReviewState } from "@/lib/api/review";
 import type { SessionDetail } from "@/lib/types";
 
+import ReviewStatusBadge from "@/components/Review/ReviewStatusBadge";
 import TeamPanel from "./TeamPanel";
 
 function ChevronLeft() {
@@ -50,6 +53,17 @@ export default function WorkspaceTopBar({
   const [exporting, setExporting] = useState<null | string>(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
+
+  // W15/D4: surface the engagement's review_state in the header.
+  // Best-effort — older sessions or API failures default to ``draft``.
+  const [reviewState, setReviewState] = useState<ReviewState | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    getReview(session.id)
+      .then((r) => { if (mounted) setReviewState(r.review_state); })
+      .catch(() => { if (mounted) setReviewState("draft"); });
+    return () => { mounted = false; };
+  }, [session.id]);
 
   type ExportTarget =
     | { artifact_type: "one_pager"; format: "html" }
@@ -141,6 +155,7 @@ export default function WorkspaceTopBar({
         <span className={`rounded-sm border px-1.5 py-0.5 text-[10px] uppercase tracking-wide ${statusToneClass(session.status)}`}>
           {session.status}
         </span>
+        <ReviewStatusBadge state={reviewState} />
         {isViewer ? (
           <span className="rounded-sm border border-argus-border-subtle bg-elevated px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-argus-tertiary" title="You have read-only access on this engagement">
             Viewer
