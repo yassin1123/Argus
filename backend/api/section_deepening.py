@@ -23,6 +23,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from auth.dependencies import get_current_user
 from auth.permissions import can_read, can_write
+from core.review.service import auto_revert_if_locked
 from core.section_deepening import (
     DeepeningNotAcceptableError,
     DeepeningNotFoundError,
@@ -144,7 +145,14 @@ async def deepen_endpoint(
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Kick off a section-deepening run. Returns immediately with the
-    ``deepening_id``; poll the GET endpoint for status."""
+    ``deepening_id``; poll the GET endpoint for status.
+
+    W15/D2 lock-on-approval: if the engagement is currently in a
+    locked review state (approved / delivered), the auto-revert
+    helper flips it back to ``draft`` first (soft revert — the
+    edit proceeds; artifacts get flagged stale; consultant sees
+    the revert in the response payload). Per W15/D2 hard rule we
+    don't hard-block the edit."""
     await _require_write(session_id, user)
     try:
         request = DeepeningRequest(
@@ -157,18 +165,31 @@ async def deepen_endpoint(
 
     triggered_by = UUID(user["user_id"])
 
+    revert = await auto_revert_if_locked(
+        UUID(session_id), triggered_by,
+        edit_label=f"section deepening triggered on {body.section_path!r}",
+    )
+
     # FastAPI BackgroundTasks runs after the response is sent.
     # ``deepen_section`` does its own persistence (creates the
     # queued row, transitions through running, finalises with
     # complete/failed) so the GET endpoint sees a row immediately
     # once the background task lands its first INSERT.
     background_tasks.add_task(_run_in_background, request, triggered_by)
-    return {
+    response: dict[str, Any] = {
         "status": "queued",
         "section_path": body.section_path,
         "depth_directive": body.depth_directive,
         "session_id": session_id,
     }
+    if revert and revert.ok:
+        response["review_auto_reverted"] = True
+        response["review_revert_message"] = (
+            "This engagement was approved; editing has reverted it to "
+            "draft. The full bundle will need re-review before delivery."
+        )
+        response["artifacts_marked_stale"] = revert.artifacts_marked_stale
+    return response
 
 
 async def _run_in_background(request: DeepeningRequest, triggered_by: UUID) -> None:
@@ -221,14 +242,29 @@ async def accept_deepening_endpoint(
     """Accept a completed deepening: splice the deepened section
     into the live report payload, snapshot the pre-accept state on
     the deepening row, and write a ``section_deepening.accepted``
-    audit event. Idempotent — a second accept is a no-op."""
+    audit event. Idempotent — a second accept is a no-op.
+
+    W15/D2 lock-on-approval: accepting a deepening on a locked
+    engagement (approved / delivered) auto-reverts the engagement
+    to draft + flags the existing artifact bundle stale. The
+    accept then proceeds against the unlocked session."""
     await _require_write(session_id, user)
+
+    revert = await auto_revert_if_locked(
+        UUID(session_id),
+        UUID(user["user_id"]),
+        edit_label=f"section deepening {deepening_id} accepted",
+    )
     try:
-        return await accept_deepening(
+        out = await accept_deepening(
             UUID(session_id),
             UUID(deepening_id),
             UUID(user["user_id"]),
         )
+        if revert and revert.ok:
+            out["review_auto_reverted"] = True
+            out["artifacts_marked_stale"] = revert.artifacts_marked_stale
+        return out
     except DeepeningNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except DeepeningNotAcceptableError as e:
