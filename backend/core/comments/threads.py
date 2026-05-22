@@ -1,0 +1,364 @@
+"""Thread assembly — Phase 4 / Week 16 / Day 2.
+
+The Day 1 service writes individual comment rows; this module pulls
+them back as threads (root + ordered replies) for the workspace
+read path. Orphan detection runs here too — we hydrate the live
+session payload once per call and flag any text_range comment
+whose quote has drifted (per W16/D1 :mod:`orphan`).
+
+Thread ordering: root comments are returned in ascending
+``created_at`` order (oldest first); replies within a thread the
+same. That's the chronological-feed shape the workspace UI
+expects, and it matches how Slack / Linear / Notion render
+threaded comments.
+
+Filtering: callers can scope by anchor (anchor_type or
+anchor_type + anchor_ref), or by resolved status. Filters compose
+— ``anchor_type=section, resolved=false`` returns only unresolved
+section-anchored threads.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+from dataclasses import dataclass, field
+from typing import Any
+from uuid import UUID
+
+from db.connection import acquire
+
+from .anchors import AnchorType
+from .orphan import is_text_range_orphaned
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Public types
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CommentThread:
+    """Workspace-facing thread shape.
+
+    ``root`` is the root comment row (dict); ``replies`` are the
+    chronological replies. ``resolved`` mirrors ``root['resolved']``
+    so the UI doesn't have to peek into the root. ``orphaned`` is
+    True when the root anchor is a text_range whose quote has
+    drifted out of the live payload — only set for text_range
+    anchors per W16/D1 hard rule.
+    """
+
+    root: dict[str, Any]
+    replies: list[dict[str, Any]] = field(default_factory=list)
+    resolved: bool = False
+    orphaned: bool = False
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "root": self.root,
+            "replies": self.replies,
+            "resolved": self.resolved,
+            "orphaned": self.orphaned,
+        }
+
+
+# ---------------------------------------------------------------------------
+# Internal helpers
+# ---------------------------------------------------------------------------
+
+
+def _decode_row(row: Any) -> dict[str, Any]:
+    """Coerce an asyncpg Record into a JSON-safe dict. JSONB columns
+    arrive as strings under the default codec; we decode them here so
+    the API layer can ship them straight through ``json.dumps`` and so
+    the orphan detector reads structured anchor_ref data."""
+    d = dict(row)
+    for key in ("anchor_ref", "mentioned_user_ids"):
+        v = d.get(key)
+        if isinstance(v, str):
+            try:
+                d[key] = json.loads(v)
+            except Exception:
+                d[key] = None
+    # Stringify UUIDs + timestamps for clean JSON.
+    for key in (
+        "id", "session_id", "firm_id", "parent_comment_id", "author_id",
+        "resolved_by",
+    ):
+        v = d.get(key)
+        if v is not None and not isinstance(v, str):
+            d[key] = str(v)
+    for key in ("created_at", "updated_at", "edited_at", "deleted_at",
+                "resolved_at"):
+        v = d.get(key)
+        if v is not None and hasattr(v, "isoformat"):
+            d[key] = v.isoformat()
+    return d
+
+
+async def _load_session_payload_for_orphan(session_id: UUID) -> dict[str, Any]:
+    """Hydrate the merged reports + consulting_payload shape used by
+    the orphan detector. Empty dict if no report — orphan returns False
+    on missing anchor_ref / payload so a session with no report yet
+    won't mass-flag every text_range comment."""
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT key_reasons, risks, counterarguments, next_steps, sources,
+                   caveats, summary, consulting_payload
+              FROM reports WHERE session_id = $1::uuid
+            """,
+            session_id,
+        )
+    if not row:
+        return {}
+    out: dict[str, Any] = {}
+    for k in row.keys():
+        if k == "consulting_payload":
+            continue
+        v = row[k]
+        if isinstance(v, str) and k in (
+            "key_reasons", "risks", "counterarguments", "next_steps", "sources",
+        ):
+            try:
+                v = json.loads(v)
+                if isinstance(v, str):
+                    try:
+                        v_inner = json.loads(v)
+                        if isinstance(v_inner, (list, dict)):
+                            v = v_inner
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+        out[k] = v
+    cp = row["consulting_payload"]
+    if isinstance(cp, str):
+        try:
+            cp = json.loads(cp)
+        except Exception:
+            cp = {}
+    if isinstance(cp, dict):
+        out.update(cp)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+
+async def get_threads_for_session(
+    session_id: UUID,
+    *,
+    anchor_type: str | AnchorType | None = None,
+    resolved: bool | None = None,
+) -> list[CommentThread]:
+    """Return every live comment thread for a session, optionally
+    filtered. Soft-deleted rows are excluded.
+
+    Filters: ``anchor_type`` matches the root comment's anchor_type;
+    ``resolved`` matches the root comment's resolved flag (True for
+    closed-only, False for open-only, None for all).
+    """
+    if isinstance(anchor_type, AnchorType):
+        anchor_type_filter: str | None = anchor_type.value
+    else:
+        anchor_type_filter = anchor_type
+
+    where = ["session_id = $1::uuid", "deleted_at IS NULL"]
+    args: list[Any] = [session_id]
+    if anchor_type_filter is not None:
+        args.append(anchor_type_filter)
+        where.append(f"anchor_type = ${len(args)}")
+
+    sql = f"""
+        SELECT id, session_id, firm_id, parent_comment_id, anchor_type,
+               anchor_ref, body, mentioned_user_ids, author_id,
+               resolved, resolved_by, resolved_at,
+               created_at, updated_at, edited_at, deleted_at
+          FROM comments
+         WHERE {' AND '.join(where)}
+         ORDER BY created_at ASC, id ASC
+    """
+
+    async with acquire() as conn:
+        rows = await conn.fetch(sql, *args)
+
+    roots: dict[str, dict[str, Any]] = {}
+    replies_by_root: dict[str, list[dict[str, Any]]] = {}
+    for r in rows:
+        row = _decode_row(r)
+        if row.get("parent_comment_id"):
+            replies_by_root.setdefault(row["parent_comment_id"], []).append(row)
+        else:
+            roots[row["id"]] = row
+
+    if resolved is not None:
+        roots = {
+            cid: r for cid, r in roots.items()
+            if bool(r.get("resolved")) is bool(resolved)
+        }
+
+    if not roots:
+        return []
+
+    # Hydrate payload once per call for orphan detection — only
+    # needed when at least one text_range root is present.
+    needs_payload = any(
+        r.get("anchor_type") == AnchorType.TEXT_RANGE.value for r in roots.values()
+    )
+    payload = await _load_session_payload_for_orphan(session_id) if needs_payload else {}
+
+    threads: list[CommentThread] = []
+    for root in roots.values():
+        rid = root["id"]
+        replies = replies_by_root.get(rid, [])
+        orphaned = (
+            is_text_range_orphaned(root, payload)
+            if root.get("anchor_type") == AnchorType.TEXT_RANGE.value
+            else False
+        )
+        threads.append(CommentThread(
+            root=root,
+            replies=replies,
+            resolved=bool(root.get("resolved")),
+            orphaned=orphaned,
+        ))
+    threads.sort(key=lambda t: t.root.get("created_at") or "")
+    return threads
+
+
+async def get_threads_for_anchor(
+    session_id: UUID,
+    anchor_type: str | AnchorType,
+    anchor_ref: dict[str, Any] | None = None,
+) -> list[CommentThread]:
+    """Return threads whose root matches a specific anchor.
+
+    For ``section`` / ``claim`` / ``artifact`` / ``text_range`` you
+    typically pass a key (``section_path``, ``claim_id``,
+    ``artifact_id``, ``section_path``) inside ``anchor_ref`` to
+    narrow further. The match is done in Python over the JSONB so
+    callers can pass partial refs (e.g. ``{"section_path":
+    "synergy_estimate"}`` matches every text_range or section
+    comment anchored to that path, regardless of other fields).
+
+    ``engagement`` anchors ignore ``anchor_ref`` per the W16/D1
+    schema convention.
+    """
+    type_value = (
+        anchor_type.value if isinstance(anchor_type, AnchorType) else str(anchor_type)
+    )
+    all_threads = await get_threads_for_session(session_id, anchor_type=type_value)
+
+    if not anchor_ref or type_value == AnchorType.ENGAGEMENT.value:
+        return all_threads
+
+    def _matches(root: dict[str, Any]) -> bool:
+        ref = root.get("anchor_ref") or {}
+        if not isinstance(ref, dict):
+            return False
+        for key, want in anchor_ref.items():
+            if ref.get(key) != want:
+                return False
+        return True
+
+    return [t for t in all_threads if _matches(t.root)]
+
+
+# ---------------------------------------------------------------------------
+# Count helpers (badge surfaces)
+# ---------------------------------------------------------------------------
+
+
+async def count_threads_by_anchor(
+    session_id: UUID,
+) -> dict[str, dict[str, int]]:
+    """Counts of root threads grouped by anchor_type + a per-section
+    breakdown. Powers the workspace section badges ("3 comments on
+    synergy_estimate, 1 unresolved").
+
+    Returns::
+
+        {
+          "by_anchor_type": {"section": 4, "claim": 2, ...},
+          "by_section_path": {"synergy_estimate": 3, "risks[0]": 1},
+          "unresolved_total": 5,
+          "total": 8,
+        }
+    """
+    async with acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT anchor_type, anchor_ref, resolved
+              FROM comments
+             WHERE session_id = $1::uuid
+               AND parent_comment_id IS NULL
+               AND deleted_at IS NULL
+            """,
+            session_id,
+        )
+
+    by_anchor: dict[str, int] = {}
+    by_section: dict[str, int] = {}
+    unresolved = 0
+    total = 0
+    for r in rows:
+        total += 1
+        at = str(r["anchor_type"])
+        by_anchor[at] = by_anchor.get(at, 0) + 1
+        if not r["resolved"]:
+            unresolved += 1
+        ref = r["anchor_ref"]
+        if isinstance(ref, str):
+            try:
+                ref = json.loads(ref)
+            except Exception:
+                ref = None
+        if isinstance(ref, dict):
+            sp = ref.get("section_path")
+            if isinstance(sp, str) and sp:
+                by_section[sp] = by_section.get(sp, 0) + 1
+
+    return {
+        "by_anchor_type": by_anchor,
+        "by_section_path": by_section,
+        "unresolved_total": unresolved,
+        "total": total,
+    }
+
+
+async def count_unresolved_for_session(session_id: UUID) -> dict[str, int]:
+    """Two-number summary used by the review endpoint's
+    ``comments`` block — ``{unresolved, total}``. Cheap (single
+    aggregate query, no JOIN, no JSONB unpack)."""
+    async with acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT
+              COUNT(*) FILTER (WHERE resolved = FALSE) AS unresolved,
+              COUNT(*) AS total
+              FROM comments
+             WHERE session_id = $1::uuid
+               AND parent_comment_id IS NULL
+               AND deleted_at IS NULL
+            """,
+            session_id,
+        )
+    return {
+        "unresolved": int(row["unresolved"] or 0),
+        "total": int(row["total"] or 0),
+    }
+
+
+__all__ = [
+    "CommentThread",
+    "count_threads_by_anchor",
+    "count_unresolved_for_session",
+    "get_threads_for_anchor",
+    "get_threads_for_session",
+]

@@ -339,7 +339,11 @@ async def get_review_endpoint(
     session_id: str,
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
-    """Current review state + the full transition history."""
+    """Current review state + the full transition history + an
+    advisory ``comments`` block (W16/D2): ``{unresolved, total}``
+    so a reviewer sees the open-comment count before approving.
+    Advisory only — the W15 approval gate doesn't consult it; the
+    partner decides whether unresolved threads should block."""
     await _require_read(session_id, user)
 
     try:
@@ -350,4 +354,13 @@ async def get_review_endpoint(
     state = await get_review_state(sid)
     if state is None:
         raise HTTPException(status_code=404, detail="Session not found")
+
+    # Best-effort comment count. Never block the review read on a
+    # comment-table issue (it's advisory metadata, not load-bearing).
+    try:
+        from core.comments.threads import count_unresolved_for_session
+        state["comments"] = await count_unresolved_for_session(sid)
+    except Exception as exc:  # noqa: BLE001
+        logger.debug("comment count skipped on review read: %s", exc)
+        state["comments"] = {"unresolved": 0, "total": 0}
     return state
