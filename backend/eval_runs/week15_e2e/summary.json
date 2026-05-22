@@ -1,0 +1,411 @@
+{
+  "generated_at": "2026-05-22T22:01:14Z",
+  "wall_seconds": 11.052,
+  "firm_slug": "meridian-advisory",
+  "session_id": "2a99d0ed-3827-41da-b5f4-2568e1d13897",
+  "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+  "n_steps": 10,
+  "n_review_records": 8,
+  "n_audit_rows": 9,
+  "headline": {
+    "all_10_steps_pass": true,
+    "step_pass_count": 10,
+    "self_approval_blocked": true,
+    "unauthorized_member_blocked": true,
+    "resubmit_gating_enforced": true,
+    "lock_on_approval_auto_revert": true,
+    "artifacts_flagged_stale": 14,
+    "review_records_sequence_complete": true,
+    "expected_action_sequence": [
+      "submit_for_review",
+      "request_changes",
+      "resubmit",
+      "approve",
+      "auto_revert",
+      "submit_for_review",
+      "approve",
+      "mark_delivered"
+    ],
+    "observed_action_sequence": [
+      "submit_for_review",
+      "request_changes",
+      "resubmit",
+      "approve",
+      "auto_revert",
+      "submit_for_review",
+      "approve",
+      "mark_delivered"
+    ],
+    "audit_covers_every_transition": true,
+    "audit_missing_for_record_ids": [],
+    "review_records_count": 8,
+    "audit_rows_count": 9,
+    "extra_audit_rows_count": 1,
+    "approvals_count": 2,
+    "every_approval_reviewer_ne_author": true,
+    "headline_pass": true
+  },
+  "headline_pass": true,
+  "steps": [
+    {
+      "step": 1,
+      "label": "consultant.submit (assigns partner)",
+      "actor": "consultant",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "draft",
+      "to_state": "in_review",
+      "reason": "",
+      "extra": {}
+    },
+    {
+      "step": 2,
+      "label": "consultant.approve_own (self-approval denied)",
+      "actor": "consultant",
+      "ok": true,
+      "status_code": 403,
+      "from_state": "in_review",
+      "to_state": null,
+      "reason": "action 'approve' requires either firm admin role or an explicit reviewer assignment matching the actor.",
+      "extra": {}
+    },
+    {
+      "step": 3,
+      "label": "analyst.approve (unauthorized member)",
+      "actor": "analyst",
+      "ok": true,
+      "status_code": 403,
+      "from_state": "in_review",
+      "to_state": null,
+      "reason": "action 'approve' requires either firm admin role or an explicit reviewer assignment matching the actor.",
+      "extra": {}
+    },
+    {
+      "step": 4,
+      "label": "partner.request_changes (1 major + 1 minor)",
+      "actor": "partner",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "in_review",
+      "to_state": "changes_requested",
+      "reason": "",
+      "extra": {
+        "review_record_id": "95b220e0-fa06-4c94-a7c2-f5588c2d7179"
+      }
+    },
+    {
+      "step": 5,
+      "label": "consultant.resubmit_early (blocked)",
+      "actor": "consultant",
+      "ok": true,
+      "status_code": 409,
+      "from_state": "changes_requested",
+      "to_state": null,
+      "reason": "resubmit is blocked while major/blocking section pointers from the latest request_changes round are unresolved: synergy_estimate",
+      "extra": {
+        "blocking_pointer_paths": [
+          "synergy_estimate"
+        ]
+      }
+    },
+    {
+      "step": 6,
+      "label": "consultant.resolve_major + resubmit",
+      "actor": "consultant",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "changes_requested",
+      "to_state": "in_review",
+      "reason": "",
+      "extra": {
+        "pointer_resolved": true,
+        "pointer_changed": true
+      }
+    },
+    {
+      "step": 7,
+      "label": "partner.approve (reviewer != author)",
+      "actor": "partner",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "in_review",
+      "to_state": "approved",
+      "reason": "",
+      "extra": {
+        "approved_by": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "author": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "reviewer_ne_author": true
+      }
+    },
+    {
+      "step": 8,
+      "label": "consultant.edit_after_approve (auto-revert)",
+      "actor": "consultant",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "approved",
+      "to_state": "draft",
+      "reason": "",
+      "extra": {
+        "ready_artifacts_before": 14,
+        "artifacts_marked_stale": 14
+      }
+    },
+    {
+      "step": 9,
+      "label": "consultant.resubmit + partner.approve (round 2)",
+      "actor": "consultant+partner",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "draft",
+      "to_state": "approved",
+      "reason": "",
+      "extra": {
+        "resubmit_to_state": "in_review",
+        "approve_to_state": "approved"
+      }
+    },
+    {
+      "step": 10,
+      "label": "consultant.mark_delivered",
+      "actor": "consultant",
+      "ok": true,
+      "status_code": 200,
+      "from_state": "approved",
+      "to_state": "delivered",
+      "reason": "",
+      "extra": {}
+    }
+  ],
+  "review_records": [
+    {
+      "id": "68d69ade-7eae-4878-839f-ddd50fa5e51d",
+      "from_state": "draft",
+      "to_state": "in_review",
+      "action": "submit_for_review",
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "feedback": null,
+      "created_at": "2026-05-22T22:01:10.430817+00:00"
+    },
+    {
+      "id": "95b220e0-fa06-4c94-a7c2-f5588c2d7179",
+      "from_state": "in_review",
+      "to_state": "changes_requested",
+      "action": "request_changes",
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "reviewer_id": null,
+      "feedback": {
+        "severity": "major",
+        "overall_note": "Tighten the synergy basis (it's the load-bearing assumption); the risks section is OK but could use one more entry.",
+        "section_pointers": [
+          {
+            "note": "Magnitude needs explicit sourcing per the W14 carve-out playbook.",
+            "resolved": true,
+            "severity": "major",
+            "resolved_at": "2026-05-22T22:01:11.655657+00:00",
+            "resolved_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+            "section_path": "synergy_estimate"
+          },
+          {
+            "note": "Add a driver-shortage risk for completeness.",
+            "resolved": false,
+            "severity": "minor",
+            "resolved_at": null,
+            "resolved_by": null,
+            "section_path": "risks"
+          }
+        ]
+      },
+      "created_at": "2026-05-22T22:01:11.218419+00:00"
+    },
+    {
+      "id": "b8d0e9cf-9398-4a34-b5ed-50d0912fc062",
+      "from_state": "changes_requested",
+      "to_state": "in_review",
+      "action": "resubmit",
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "reviewer_id": null,
+      "feedback": null,
+      "created_at": "2026-05-22T22:01:12.011501+00:00"
+    },
+    {
+      "id": "9ba8aaca-3a47-4142-bd80-e4f71775aba1",
+      "from_state": "in_review",
+      "to_state": "approved",
+      "action": "approve",
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "reviewer_id": null,
+      "feedback": null,
+      "created_at": "2026-05-22T22:01:12.366621+00:00"
+    },
+    {
+      "id": "1dd29afc-abe8-4bc1-b579-c87f0dbab5b6",
+      "from_state": "approved",
+      "to_state": "draft",
+      "action": "auto_revert",
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "reviewer_id": null,
+      "feedback": {
+        "severity": "major",
+        "overall_note": "W15/D5 e2e: consultant edited approved engagement",
+        "section_pointers": []
+      },
+      "created_at": "2026-05-22T22:01:12.918442+00:00"
+    },
+    {
+      "id": "1c976350-0f4c-414c-a8f0-653c900ebd40",
+      "from_state": "draft",
+      "to_state": "in_review",
+      "action": "submit_for_review",
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "feedback": null,
+      "created_at": "2026-05-22T22:01:13.369825+00:00"
+    },
+    {
+      "id": "635884e6-f0a0-4208-b2b0-ba86a270151d",
+      "from_state": "in_review",
+      "to_state": "approved",
+      "action": "approve",
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "reviewer_id": null,
+      "feedback": null,
+      "created_at": "2026-05-22T22:01:13.710635+00:00"
+    },
+    {
+      "id": "a5d78fe8-9717-4a55-ae59-56f6e9523e7b",
+      "from_state": "approved",
+      "to_state": "delivered",
+      "action": "mark_delivered",
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "reviewer_id": null,
+      "feedback": null,
+      "created_at": "2026-05-22T22:01:14.041748+00:00"
+    }
+  ],
+  "audit_rows": [
+    {
+      "id": "504",
+      "action": "review.submit_for_review",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "payload": {
+        "action": "submit_for_review",
+        "to_state": "in_review",
+        "from_state": "draft",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "68d69ade-7eae-4878-839f-ddd50fa5e51d"
+      },
+      "created_at": "2026-05-22T22:01:10.430817+00:00"
+    },
+    {
+      "id": "505",
+      "action": "review.request_changes",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "payload": {
+        "action": "request_changes",
+        "to_state": "changes_requested",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": true,
+        "review_record_id": "95b220e0-fa06-4c94-a7c2-f5588c2d7179"
+      },
+      "created_at": "2026-05-22T22:01:11.218419+00:00"
+    },
+    {
+      "id": "506",
+      "action": "review.resolve_pointer",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "payload": {
+        "section_path": "synergy_estimate",
+        "review_record_id": "95b220e0-fa06-4c94-a7c2-f5588c2d7179"
+      },
+      "created_at": "2026-05-22T22:01:11.713192+00:00"
+    },
+    {
+      "id": "507",
+      "action": "review.resubmit",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "payload": {
+        "action": "resubmit",
+        "to_state": "in_review",
+        "from_state": "changes_requested",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "b8d0e9cf-9398-4a34-b5ed-50d0912fc062"
+      },
+      "created_at": "2026-05-22T22:01:12.011501+00:00"
+    },
+    {
+      "id": "508",
+      "action": "review.approve",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "payload": {
+        "action": "approve",
+        "to_state": "approved",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "9ba8aaca-3a47-4142-bd80-e4f71775aba1"
+      },
+      "created_at": "2026-05-22T22:01:12.366621+00:00"
+    },
+    {
+      "id": "509",
+      "action": "review.auto_revert",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "payload": {
+        "action": "auto_revert",
+        "to_state": "draft",
+        "from_state": "approved",
+        "reviewer_id": null,
+        "feedback_present": true,
+        "review_record_id": "1dd29afc-abe8-4bc1-b579-c87f0dbab5b6"
+      },
+      "created_at": "2026-05-22T22:01:12.918442+00:00"
+    },
+    {
+      "id": "510",
+      "action": "review.submit_for_review",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "payload": {
+        "action": "submit_for_review",
+        "to_state": "in_review",
+        "from_state": "draft",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "1c976350-0f4c-414c-a8f0-653c900ebd40"
+      },
+      "created_at": "2026-05-22T22:01:13.369825+00:00"
+    },
+    {
+      "id": "511",
+      "action": "review.approve",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "payload": {
+        "action": "approve",
+        "to_state": "approved",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "635884e6-f0a0-4208-b2b0-ba86a270151d"
+      },
+      "created_at": "2026-05-22T22:01:13.710635+00:00"
+    },
+    {
+      "id": "512",
+      "action": "review.mark_delivered",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "payload": {
+        "action": "mark_delivered",
+        "to_state": "delivered",
+        "from_state": "approved",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "a5d78fe8-9717-4a55-ae59-56f6e9523e7b"
+      },
+      "created_at": "2026-05-22T22:01:14.041748+00:00"
+    }
+  ]
+}
