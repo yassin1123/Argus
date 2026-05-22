@@ -12,6 +12,15 @@ Public surface:
 """
 
 from .authorization import AuthorizationResult, authorize_action
+from .feedback import (
+    FeedbackValidationError,
+    ReviewFeedback,
+    SectionPointer,
+    Severity,
+    is_resubmit_blocked,
+    mark_pointer_resolved,
+    validate_against_payload,
+)
 from .locking import is_locked, should_auto_revert_on_edit
 from .state_machine import (
     ReviewAction,
@@ -25,14 +34,21 @@ from .state_machine import (
 
 __all__ = [
     "AuthorizationResult",
+    "FeedbackValidationError",
     "ReviewAction",
+    "ReviewFeedback",
     "ReviewState",
+    "SectionPointer",
+    "Severity",
     "TransitionResult",
     "apply_transition",
     "authorize_action",
     "can_transition",
     "is_locked",
+    "is_resubmit_blocked",
     "legal_actions",
+    "mark_pointer_resolved",
     "next_state",
     "should_auto_revert_on_edit",
+    "validate_against_payload",
 ]
