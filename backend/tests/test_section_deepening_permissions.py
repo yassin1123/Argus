@@ -38,8 +38,13 @@ def _build_app(user_id: str | None = None) -> tuple[FastAPI, TestClient]:
 def test_member_can_deepen_returns_queued() -> None:
     sid = str(uuid4())
     app, client = _build_app()
+    # W15/D2 added an ``auto_revert_if_locked`` call before the
+    # background-task dispatch — mock it to return None (no revert
+    # needed) so the existing permission test stays focused on the
+    # auth path, not the new lock-check path.
     with mock.patch.object(sd_module, "can_read", new=mock.AsyncMock(return_value=True)), \
-         mock.patch.object(sd_module, "can_write", new=mock.AsyncMock(return_value=True)):
+         mock.patch.object(sd_module, "can_write", new=mock.AsyncMock(return_value=True)), \
+         mock.patch.object(sd_module, "auto_revert_if_locked", new=mock.AsyncMock(return_value=None)):
         r = client.post(
             f"/api/sessions/{sid}/deepen",
             json={"section_path": "summary", "depth_directive": "Tighten."},
@@ -48,6 +53,9 @@ def test_member_can_deepen_returns_queued() -> None:
     body = r.json()
     assert body["status"] == "queued"
     assert body["section_path"] == "summary"
+    # When no revert fired, the response stays at the W9/D4 shape — no
+    # review_auto_reverted flag.
+    assert "review_auto_reverted" not in body
 
 
 def test_non_member_gets_404_not_403() -> None:
