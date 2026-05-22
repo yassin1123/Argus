@@ -108,12 +108,20 @@ export function CitationMarker({
   nliResults,
   verifying = false,
   onSelect,
+  claimId,
+  onCommentOnClaim,
 }: {
   n: number;
   ev?: EvidenceObjectRow | null;
   nliResults?: NliResult[];
   verifying?: boolean;
   onSelect?: (ev: EvidenceObjectRow) => void;
+  /** W16/D3: when supplied, the popover footer surfaces a
+   *  "Comment on this claim" action that calls
+   *  ``onCommentOnClaim(claimId)``. The host opens the comment
+   *  panel scoped to ``claim:<claimId>``. */
+  claimId?: string;
+  onCommentOnClaim?: (claimId: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLSpanElement | null>(null);
@@ -168,6 +176,8 @@ export function CitationMarker({
             nliResults?.find((r) => r.chunk_id === ev.id)?.score ?? null
           }
           onSelect={onSelect}
+          claimId={claimId}
+          onCommentOnClaim={onCommentOnClaim}
         />
       ) : null}
     </span>
@@ -180,12 +190,16 @@ function CitationPopover({
   nli,
   nliScore,
   onSelect,
+  claimId,
+  onCommentOnClaim,
 }: {
   ev: EvidenceObjectRow;
   tier: TrustTier;
   nli: NliState;
   nliScore: number | null;
   onSelect?: (ev: EvidenceObjectRow) => void;
+  claimId?: string;
+  onCommentOnClaim?: (claimId: string) => void;
 }) {
   const location = formatChunkLocation(ev);
   const firmLib = firmLibraryBreadcrumb(ev);
@@ -270,24 +284,36 @@ function CitationPopover({
           {ev.source_type || "source"} ·{" "}
           <span className="font-mono tabular-nums">conf {ev.confidence ?? "—"}</span>
         </span>
-        {ev.source_url ? (
-          <a
-            href={ev.source_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-argus-accent hover:underline"
-          >
-            Open source ↗
-          </a>
-        ) : onSelect ? (
-          <button
-            type="button"
-            onClick={() => onSelect(ev)}
-            className="font-medium text-argus-accent hover:underline"
-          >
-            Jump to source →
-          </button>
-        ) : null}
+        <span className="flex items-center gap-3">
+          {claimId && onCommentOnClaim ? (
+            <button
+              type="button"
+              data-testid={`citation-comment-on-claim-${claimId}`}
+              onClick={() => onCommentOnClaim(claimId)}
+              className="font-medium text-argus-accent hover:underline"
+            >
+              💬 Comment on this claim
+            </button>
+          ) : null}
+          {ev.source_url ? (
+            <a
+              href={ev.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-argus-accent hover:underline"
+            >
+              Open source ↗
+            </a>
+          ) : onSelect ? (
+            <button
+              type="button"
+              onClick={() => onSelect(ev)}
+              className="font-medium text-argus-accent hover:underline"
+            >
+              Jump to source →
+            </button>
+          ) : null}
+        </span>
       </span>
     </span>
   );

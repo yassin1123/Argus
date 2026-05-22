@@ -23,6 +23,8 @@
 
 import { Fragment } from "react";
 
+import ClaimCommentAffordance from "../Comments/ClaimCommentAffordance";
+
 export type JsonValue =
   | string
   | number
@@ -162,11 +164,24 @@ function SchemaValue({ value, depth }: { value: JsonValue; depth: number }) {
             <tbody>
               {value.map((row, i) => (
                 <tr key={i} className="border-b border-argus-border-subtle last:border-0">
-                  {cols.map((c) => (
-                    <td key={c} className="px-2 py-1 align-top text-argus-primary">
-                      <SchemaValue value={row[c] ?? null} depth={depth + 1} />
-                    </td>
-                  ))}
+                  {cols.map((c) => {
+                    // W16/D3: claim_id columns get an inline
+                    // "Comment on this claim" affordance next to the
+                    // value so the reader can drop a thread without
+                    // leaving the row.
+                    const isClaimColumn = c === "claim_id" || c === "claim_ids";
+                    const cellValue = row[c] ?? null;
+                    return (
+                      <td key={c} className="px-2 py-1 align-top text-argus-primary">
+                        <SchemaValue value={cellValue} depth={depth + 1} />
+                        {isClaimColumn && typeof cellValue === "string" && cellValue ? (
+                          <span className="ml-1">
+                            <ClaimCommentAffordance claimId={cellValue} compact />
+                          </span>
+                        ) : null}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

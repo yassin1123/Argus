@@ -38,6 +38,18 @@ export interface DeepeningHook {
   onDeepen: (sectionPath: string) => void;
 }
 
+/** W16/D3: section-level comment hook. ``unresolvedBySection`` +
+ * ``totalBySection`` drive the badge; ``onOpen`` opens the comment
+ * thread panel; ``canComment`` hides the affordance for non-members.
+ * Optional — when absent the memo renders without the comment
+ * affordance (used by previews / tests). */
+export interface CommentsHook {
+  unresolvedBySection: Record<string, number>;
+  totalBySection: Record<string, number>;
+  canComment: boolean;
+  onOpen: (sectionPath: string) => void;
+}
+
 export interface MemoRendererProps {
   /** The writer's structured payload — any WriterReportBase subclass dump. */
   payload: Record<string, JsonValue>;
@@ -46,24 +58,41 @@ export interface MemoRendererProps {
   /** When supplied, each deepenable section gets a hover-state
    * "Deepen" affordance that calls ``onDeepen(path)``. */
   deepening?: DeepeningHook;
+  /** W16/D3: when supplied, each section gets a comment affordance +
+   * unresolved badge wired to the host's comments controller. */
+  comments?: CommentsHook;
 }
 
 /** Wrap a rendered section in :class:`SectionWrapper` iff the host
- * supplied a deepening hook AND the section path is deepenable
- * (``isDeepenable`` excludes the recommendation per W9/D2 hard rule).
+ * supplied a deepening OR comments hook AND the section path is
+ * eligible (``isDeepenable`` excludes the recommendation per W9/D2
+ * hard rule; the comment affordance has no such carve-out — every
+ * section can be commented on).
  */
 function maybeWrap(
   sectionPath: string,
   deepening: DeepeningHook | undefined,
+  comments: CommentsHook | undefined,
   content: JSX.Element | null,
 ): JSX.Element | null {
   if (!content) return content;
-  if (!deepening || !isDeepenable(sectionPath)) return content;
+  const hasDeepen = !!deepening && isDeepenable(sectionPath);
+  const hasComments = !!comments;
+  if (!hasDeepen && !hasComments) return content;
+  const commentsProp = comments
+    ? {
+        unresolvedCount: comments.unresolvedBySection[sectionPath] ?? 0,
+        totalCount: comments.totalBySection[sectionPath] ?? 0,
+        canComment: comments.canComment,
+        onOpen: comments.onOpen,
+      }
+    : undefined;
   return (
     <SectionWrapper
       sectionPath={sectionPath}
-      inFlight={deepening.inFlight}
-      onDeepen={deepening.onDeepen}
+      inFlight={hasDeepen ? deepening!.inFlight : false}
+      onDeepen={hasDeepen ? deepening!.onDeepen : () => {}}
+      comments={commentsProp}
     >
       {content}
     </SectionWrapper>
@@ -132,7 +161,7 @@ function orderedKeys(payload: Record<string, JsonValue>, modeName: string): stri
   return known;
 }
 
-export default function MemoRenderer({ payload, modeName, deepening }: MemoRendererProps) {
+export default function MemoRenderer({ payload, modeName, deepening, comments }: MemoRendererProps) {
   const isMandA = modeName === "m_and_a_diligence";
   const ordered = orderedKeys(payload, modeName);
 
@@ -157,7 +186,7 @@ export default function MemoRenderer({ payload, modeName, deepening }: MemoRende
         if (v === undefined) return null;
         return (
           <div key={`gen-${k}`}>
-            {maybeWrap(k, deepening, (
+            {maybeWrap(k, deepening, comments, (
               <SchemaDrivenSection title={k} value={v} />
             ))}
           </div>
@@ -170,17 +199,17 @@ export default function MemoRenderer({ payload, modeName, deepening }: MemoRende
       {isMandA ? (
         <>
           {payload.synergy_estimate && typeof payload.synergy_estimate === "object" && !Array.isArray(payload.synergy_estimate)
-            ? maybeWrap("synergy_estimate", deepening, (
+            ? maybeWrap("synergy_estimate", deepening, comments, (
                 <SynergyBreakdown data={payload.synergy_estimate as never} />
               ))
             : null}
           {payload.valuation_range && typeof payload.valuation_range === "object" && !Array.isArray(payload.valuation_range)
-            ? maybeWrap("valuation_range", deepening, (
+            ? maybeWrap("valuation_range", deepening, comments, (
                 <ValuationRangeTable data={payload.valuation_range as never} />
               ))
             : null}
           {payload.integration_plan && typeof payload.integration_plan === "object" && !Array.isArray(payload.integration_plan)
-            ? maybeWrap("integration_plan", deepening, (
+            ? maybeWrap("integration_plan", deepening, comments, (
                 <IntegrationTimeline data={payload.integration_plan as never} />
               ))
             : null}
