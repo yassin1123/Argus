@@ -26,6 +26,16 @@ Public surface:
 """
 
 from .coverage import CoverageEntry, CoverageMap, section_coverage
+from .explicit_tasks import (
+    ExplicitTask,
+    TaskResult,
+    complete_task,
+    create_task,
+    list_open_tasks_for_user,
+    list_tasks_for_session,
+)
+from .my_work import MyWork, UnifiedTask, get_my_work
+from .tasks import DerivedTask, derive_tasks_for_user
 from .membership import (
     EngagementMember,
     MembershipResult,
@@ -52,20 +62,31 @@ __all__ = [
     "AssignmentResult",
     "CoverageEntry",
     "CoverageMap",
+    "DerivedTask",
     "EngagementMember",
     "EngagementRole",
+    "ExplicitTask",
     "MembershipResult",
+    "MyWork",
     "SectionAssignment",
     "SectionStatus",
     "TRACKABLE_SECTION_PATHS",
+    "TaskResult",
+    "UnifiedTask",
     "assign_member",
     "assign_section",
     "change_member_role",
+    "complete_task",
+    "create_task",
+    "derive_tasks_for_user",
     "ensure_creator_is_lead",
     "get_lead",
+    "get_my_work",
     "get_sections_owned_by",
     "list_members",
+    "list_open_tasks_for_user",
     "list_section_assignments",
+    "list_tasks_for_session",
     "remove_member",
     "section_coverage",
     "set_section_status",
