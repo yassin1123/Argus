@@ -1,9 +1,13 @@
 """Engagement-level permission resolver.
 
-Three roles, three capabilities:
-  - lead    → read + write + admin (add/remove members, change roles, delete)
-  - member  → read + write (run pipeline, edit, export, upload sources)
-  - viewer  → read-only (export allowed, no edits, no run)
+Roles + capabilities (W2 vocabulary extended in W17/D1):
+  - lead         → read + write + admin (add/remove members, change roles, delete)
+  - contributor  → read + write (W17 replacement for the legacy "member")
+  - reviewer     → read + write (W15 reviewer; review-action gates layer on top)
+  - observer     → read-only (W17 replacement for the legacy "viewer")
+  - member       → legacy alias for contributor (pre-W17 rows; migration 040
+                    rewrote stored rows so this only matters for in-flight code)
+  - viewer       → legacy alias for observer
 
 Firm-wide users with role='admin' bypass all engagement checks.
 Engagements with no membership rows + metadata.demo=true are public read for
@@ -16,12 +20,18 @@ from typing import Literal
 
 from db.connection import acquire
 
-EngagementRole = Literal["lead", "member", "viewer"]
+EngagementRole = Literal["lead", "contributor", "reviewer", "observer",
+                          "member", "viewer"]
 Capability = Literal["read", "write", "admin"]
 
 
 _CAPABILITY_FOR_ROLE: dict[str, set[str]] = {
-    "lead":   {"read", "write", "admin"},
+    "lead":        {"read", "write", "admin"},
+    "contributor": {"read", "write"},
+    "reviewer":    {"read", "write"},
+    "observer":    {"read"},
+    # Legacy aliases — migration 040 rewrote stored rows, but
+    # in-flight code that snapshotted older rows may still use these.
     "member": {"read", "write"},
     "viewer": {"read"},
 }
