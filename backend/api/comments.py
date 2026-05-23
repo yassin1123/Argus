@@ -52,8 +52,10 @@ from core.comments.service import (
     unresolve_thread,
 )
 from core.comments.threads import (
+    bulk_resolve_section,
     count_threads_by_anchor,
     get_threads_for_session,
+    get_threads_grouped_for_overview,
 )
 from db.connection import acquire
 
@@ -454,10 +456,18 @@ async def list_threads_endpoint(
     session_id: str,
     anchor_type: str | None = Query(default=None, max_length=32),
     resolved: bool | None = Query(default=None),
+    author_id: str | None = Query(default=None, max_length=36),
+    mentioning: str | None = Query(
+        default=None, max_length=36,
+        description="Filter to threads mentioning this user_id "
+                    "(in the root or any reply).",
+    ),
     user: dict = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Every live thread on a session, optionally filtered by
-    ``anchor_type`` and/or ``resolved`` status."""
+    ``anchor_type``, ``resolved`` status, ``author_id``, or
+    ``mentioning`` (the W16/D4 filter for the overview / mentions UI).
+    """
     await _require_read_session(session_id, user)
     try:
         sid = UUID(session_id)
@@ -471,13 +481,79 @@ async def list_threads_endpoint(
             raise HTTPException(status_code=400, detail=f"invalid anchor_type: {e}") from e
 
     threads = await get_threads_for_session(
-        sid, anchor_type=anchor_type, resolved=resolved,
+        sid,
+        anchor_type=anchor_type,
+        resolved=resolved,
+        author_id=author_id,
+        mentioning_user_id=mentioning,
     )
     return {
         "session_id": session_id,
         "threads": [t.to_dict() for t in threads],
         "total": len(threads),
     }
+
+
+@router.get("/sessions/{session_id}/comments/overview")
+async def comments_overview_endpoint(
+    session_id: str,
+    resolved: bool | None = Query(default=None),
+    author_id: str | None = Query(default=None, max_length=36),
+    mentioning: str | None = Query(default=None, max_length=36),
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """W16/D4 engagement-level overview — threads grouped by anchor
+    (section → claim → artifact → text_range → engagement) with
+    per-group resolved/unresolved counts. Powers the workspace
+    "Discussion" tab."""
+    await _require_read_session(session_id, user)
+    try:
+        sid = UUID(session_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"invalid session id: {e}") from e
+    return await get_threads_grouped_for_overview(
+        sid,
+        resolved=resolved,
+        author_id=author_id,
+        mentioning_user_id=mentioning,
+    )
+
+
+class ResolveSectionBody(BaseModel):
+    section_path: str = Field(..., min_length=1, max_length=200)
+
+    model_config = {"extra": "ignore"}
+
+
+@router.post("/sessions/{session_id}/comments/resolve-section")
+async def resolve_section_endpoint(
+    session_id: str,
+    body: ResolveSectionBody,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Mark every unresolved root thread anchored to
+    ``section_path`` resolved. One DB round-trip flips the rows;
+    a per-thread ``comment.resolved`` audit event is emitted for
+    each so the bulk action is fully traceable
+    (W16/D4 hard rule)."""
+    await _require_read_session(session_id, user)
+    try:
+        sid = UUID(session_id)
+        aid = UUID(user["user_id"])
+    except (ValueError, KeyError, TypeError) as e:
+        raise HTTPException(status_code=400, detail=f"invalid id: {e}") from e
+
+    result = await bulk_resolve_section(sid, body.section_path, aid)
+
+    for cid in result["resolved_comment_ids"]:
+        await _audit(
+            action="comment.resolved",
+            user=user,
+            comment_id=cid,
+            session_id=session_id,
+            extra={"bulk": True, "section_path": body.section_path},
+        )
+    return result
 
 
 @router.get("/sessions/{session_id}/comments/count")
