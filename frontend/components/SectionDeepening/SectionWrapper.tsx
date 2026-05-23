@@ -26,6 +26,8 @@
 import { ReactNode, useState } from "react";
 
 import SectionCommentAffordance from "../Comments/SectionCommentAffordance";
+import SectionOwnershipOverlay from "../Collaboration/SectionOwnershipOverlay";
+import type { SectionStatus } from "@/lib/api/collaboration";
 
 export interface SectionWrapperProps {
   sectionPath: string;
@@ -42,6 +44,17 @@ export interface SectionWrapperProps {
     canComment: boolean;
     onOpen: (sectionPath: string) => void;
   };
+  /** W17/D4 ownership surface — owner avatar + status badge. */
+  ownership?: {
+    owner: { user_id: string; full_name?: string; email?: string } | null;
+    status: SectionStatus;
+    canManage: boolean;
+    canChangeStatus: boolean;
+    memberOptions: Array<{ user_id: string; full_name?: string; email?: string }>;
+    onAssign: (sectionPath: string, userId: string) => void | Promise<void>;
+    onChangeStatus: (sectionPath: string, status: SectionStatus) => void | Promise<void>;
+    onUnassign?: (sectionPath: string) => void | Promise<void>;
+  };
   children: ReactNode;
 }
 
@@ -50,6 +63,7 @@ export default function SectionWrapper({
   inFlight,
   onDeepen,
   comments,
+  ownership,
   children,
 }: SectionWrapperProps) {
   const [hovering, setHovering] = useState(false);
@@ -70,6 +84,23 @@ export default function SectionWrapper({
     >
       {children}
       <div className="absolute right-2 top-2 flex items-center gap-2">
+        {/* W17/D4 ownership overlay sits LEFT of the comment
+            affordance — owner + status are the smaller, lower-
+            priority signal; the comment affordance dominates when
+            unresolved threads exist. */}
+        {ownership && (
+          <SectionOwnershipOverlay
+            sectionPath={sectionPath}
+            owner={ownership.owner}
+            status={ownership.status}
+            canManage={ownership.canManage}
+            canChangeStatus={ownership.canChangeStatus}
+            memberOptions={ownership.memberOptions}
+            onAssign={ownership.onAssign}
+            onChangeStatus={ownership.onChangeStatus}
+            onUnassign={ownership.onUnassign}
+          />
+        )}
         {showCommentAffordance && comments && (
           <SectionCommentAffordance
             sectionPath={sectionPath}
