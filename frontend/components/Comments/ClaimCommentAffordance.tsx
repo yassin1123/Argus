@@ -1,6 +1,6 @@
 "use client";
 
-import { claimAnchor, useComments } from "./CommentsController";
+import { claimAnchor, useCommentsOptional } from "./CommentsController";
 
 interface Props {
   claimId: string;
@@ -28,15 +28,10 @@ export default function ClaimCommentAffordance({
 }: Props) {
   // Defensive: hosted under :class:`CommentsController` but the
   // memo-renderer surface MAY be used in deepening previews / tests
-  // outside the controller, in which case useComments would throw.
-  // We swallow that and render nothing rather than crash the section.
-  let ctx;
-  try {
-    ctx = useComments();
-  } catch {
-    return null;
-  }
-  if (!visible) return null;
+  // outside the controller. ``useCommentsOptional`` returns null in
+  // that case so we render nothing rather than crashing the section.
+  const ctx = useCommentsOptional();
+  if (!ctx || !visible) return null;
 
   // Claim counts aren't broken out per-claim by the W16/D2 count
   // endpoint (it groups by section_path, not by claim_id). So we
@@ -45,7 +40,7 @@ export default function ClaimCommentAffordance({
   return (
     <button
       type="button"
-      onClick={() => ctx!.openThread(claimAnchor(claimId))}
+      onClick={() => ctx.openThread(claimAnchor(claimId))}
       data-testid={`claim-comment-${claimId}`}
       title={`Comment on claim ${claimId}`}
       style={{

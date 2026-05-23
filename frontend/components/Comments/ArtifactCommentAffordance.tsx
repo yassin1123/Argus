@@ -1,6 +1,6 @@
 "use client";
 
-import { artifactAnchor, useComments } from "./CommentsController";
+import { artifactAnchor, useCommentsOptional } from "./CommentsController";
 
 interface Props {
   artifactId: string;
@@ -29,13 +29,8 @@ export default function ArtifactCommentAffordance({
   unresolvedCount = 0,
   visible = true,
 }: Props) {
-  let ctx;
-  try {
-    ctx = useComments();
-  } catch {
-    return null;
-  }
-  if (!visible) return null;
+  const ctx = useCommentsOptional();
+  if (!ctx || !visible) return null;
 
   const anchor = artifactAnchor(artifactId);
   if (label) anchor.label = label;
@@ -43,7 +38,7 @@ export default function ArtifactCommentAffordance({
   return (
     <button
       type="button"
-      onClick={() => ctx!.openThread(anchor)}
+      onClick={() => ctx.openThread(anchor)}
       data-testid={`artifact-comment-${artifactId}`}
       title={
         unresolvedCount > 0

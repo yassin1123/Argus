@@ -43,6 +43,17 @@ export function useComments(): CommentsContextValue {
   return ctx;
 }
 
+/**
+ * Like :func:`useComments` but returns ``null`` instead of throwing
+ * when the consumer is mounted outside :class:`CommentsController`.
+ * Useful for affordances (claim / artifact buttons) that need to
+ * render cleanly in standalone previews / tests where the controller
+ * isn't wired up.
+ */
+export function useCommentsOptional(): CommentsContextValue | null {
+  return useContext(CommentsContext);
+}
+
 interface Props {
   sessionId: string;
   currentUserId: string;
