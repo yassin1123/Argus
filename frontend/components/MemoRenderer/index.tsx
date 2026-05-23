@@ -50,6 +50,29 @@ export interface CommentsHook {
   onOpen: (sectionPath: string) => void;
 }
 
+/** W17/D4: section-ownership hook. Optional — when absent the memo
+ * renders without owner avatar / status badge. Mirrors the comments
+ * hook shape so MemoRenderer threads it through identically. */
+export interface OwnershipHook {
+  /** section_path → assignment row (or null when unassigned). */
+  bySection: Record<string, {
+    user_id: string | null;
+    status: import("@/lib/api/collaboration").SectionStatus;
+  }>;
+  /** Engagement members for the assign-owner picker. */
+  memberOptions: Array<{ user_id: string; full_name?: string; email?: string }>;
+  /** Whether the current user can re-assign owners (lead/admin). */
+  canManage: boolean;
+  /** Per-section: can the current user change status? Owner/lead/admin. */
+  canChangeStatusFor: (sectionPath: string) => boolean;
+  onAssign: (sectionPath: string, userId: string) => void | Promise<void>;
+  onChangeStatus: (
+    sectionPath: string,
+    status: import("@/lib/api/collaboration").SectionStatus,
+  ) => void | Promise<void>;
+  onUnassign?: (sectionPath: string) => void | Promise<void>;
+}
+
 export interface MemoRendererProps {
   /** The writer's structured payload — any WriterReportBase subclass dump. */
   payload: Record<string, JsonValue>;
@@ -61,6 +84,9 @@ export interface MemoRendererProps {
   /** W16/D3: when supplied, each section gets a comment affordance +
    * unresolved badge wired to the host's comments controller. */
   comments?: CommentsHook;
+  /** W17/D4: when supplied, each section gets an owner avatar +
+   * status badge in the top-right corner. */
+  ownership?: OwnershipHook;
 }
 
 /** Wrap a rendered section in :class:`SectionWrapper` iff the host
@@ -73,12 +99,14 @@ function maybeWrap(
   sectionPath: string,
   deepening: DeepeningHook | undefined,
   comments: CommentsHook | undefined,
+  ownership: OwnershipHook | undefined,
   content: JSX.Element | null,
 ): JSX.Element | null {
   if (!content) return content;
   const hasDeepen = !!deepening && isDeepenable(sectionPath);
   const hasComments = !!comments;
-  if (!hasDeepen && !hasComments) return content;
+  const hasOwnership = !!ownership;
+  if (!hasDeepen && !hasComments && !hasOwnership) return content;
   const commentsProp = comments
     ? {
         unresolvedCount: comments.unresolvedBySection[sectionPath] ?? 0,
@@ -87,12 +115,38 @@ function maybeWrap(
         onOpen: comments.onOpen,
       }
     : undefined;
+  const ownershipProp = ownership
+    ? (() => {
+        const assignment = ownership.bySection[sectionPath];
+        const ownerId = assignment?.user_id ?? null;
+        const ownerOption = ownerId
+          ? ownership.memberOptions.find((m) => m.user_id === ownerId)
+          : null;
+        return {
+          owner: ownerId
+            ? {
+                user_id: ownerId,
+                full_name: ownerOption?.full_name,
+                email: ownerOption?.email,
+              }
+            : null,
+          status: assignment?.status ?? ("not_started" as const),
+          canManage: ownership.canManage,
+          canChangeStatus: ownership.canChangeStatusFor(sectionPath),
+          memberOptions: ownership.memberOptions,
+          onAssign: ownership.onAssign,
+          onChangeStatus: ownership.onChangeStatus,
+          onUnassign: ownership.onUnassign,
+        };
+      })()
+    : undefined;
   return (
     <SectionWrapper
       sectionPath={sectionPath}
       inFlight={hasDeepen ? deepening!.inFlight : false}
       onDeepen={hasDeepen ? deepening!.onDeepen : () => {}}
       comments={commentsProp}
+      ownership={ownershipProp}
     >
       {content}
     </SectionWrapper>
@@ -161,7 +215,13 @@ function orderedKeys(payload: Record<string, JsonValue>, modeName: string): stri
   return known;
 }
 
-export default function MemoRenderer({ payload, modeName, deepening, comments }: MemoRendererProps) {
+export default function MemoRenderer({
+  payload,
+  modeName,
+  deepening,
+  comments,
+  ownership,
+}: MemoRendererProps) {
   const isMandA = modeName === "m_and_a_diligence";
   const ordered = orderedKeys(payload, modeName);
 
@@ -186,7 +246,7 @@ export default function MemoRenderer({ payload, modeName, deepening, comments }:
         if (v === undefined) return null;
         return (
           <div key={`gen-${k}`}>
-            {maybeWrap(k, deepening, comments, (
+            {maybeWrap(k, deepening, comments, ownership, (
               <SchemaDrivenSection title={k} value={v} />
             ))}
           </div>
@@ -199,17 +259,17 @@ export default function MemoRenderer({ payload, modeName, deepening, comments }:
       {isMandA ? (
         <>
           {payload.synergy_estimate && typeof payload.synergy_estimate === "object" && !Array.isArray(payload.synergy_estimate)
-            ? maybeWrap("synergy_estimate", deepening, comments, (
+            ? maybeWrap("synergy_estimate", deepening, comments, ownership, (
                 <SynergyBreakdown data={payload.synergy_estimate as never} />
               ))
             : null}
           {payload.valuation_range && typeof payload.valuation_range === "object" && !Array.isArray(payload.valuation_range)
-            ? maybeWrap("valuation_range", deepening, comments, (
+            ? maybeWrap("valuation_range", deepening, comments, ownership, (
                 <ValuationRangeTable data={payload.valuation_range as never} />
               ))
             : null}
           {payload.integration_plan && typeof payload.integration_plan === "object" && !Array.isArray(payload.integration_plan)
-            ? maybeWrap("integration_plan", deepening, comments, (
+            ? maybeWrap("integration_plan", deepening, comments, ownership, (
                 <IntegrationTimeline data={payload.integration_plan as never} />
               ))
             : null}

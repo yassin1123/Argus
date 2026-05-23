@@ -40,6 +40,7 @@ from pydantic import BaseModel, Field
 
 from auth.dependencies import get_current_user
 from auth.permissions import can_read
+from core.collaboration.coverage import section_coverage
 from core.collaboration.explicit_tasks import (
     complete_task,
     create_task,
@@ -49,8 +50,18 @@ from core.collaboration.membership import (
     _active_lead_id,
     _is_firm_admin,
     _load_session_firm,
+    assign_member,
+    change_member_role,
+    list_members,
+    remove_member,
 )
 from core.collaboration.my_work import get_my_work
+from core.collaboration.section_assignments import (
+    assign_section,
+    list_section_assignments,
+    set_section_status,
+    unassign_section,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +77,35 @@ class CreateTaskBody(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
     assigned_to: str | None = Field(default=None, max_length=36)
     section_path: str | None = Field(default=None, max_length=200)
+
+    model_config = {"extra": "ignore"}
+
+
+class AssignMemberBody(BaseModel):
+    """W17/D1 surface — used by both POST (assign) and PATCH (change
+    role). Re-using one body shape keeps the API symmetrical."""
+
+    user_id: str = Field(..., max_length=36)
+    role: str = Field(..., min_length=1, max_length=32)
+
+    model_config = {"extra": "ignore"}
+
+
+class ChangeRoleBody(BaseModel):
+    role: str = Field(..., min_length=1, max_length=32)
+
+    model_config = {"extra": "ignore"}
+
+
+class AssignSectionBody(BaseModel):
+    section_path: str = Field(..., min_length=1, max_length=200)
+    assigned_to: str = Field(..., max_length=36)
+
+    model_config = {"extra": "ignore"}
+
+
+class SectionStatusBody(BaseModel):
+    status: str = Field(..., min_length=1, max_length=32)
 
     model_config = {"extra": "ignore"}
 
@@ -207,6 +247,200 @@ async def list_tasks_endpoint(
         "tasks": [t.to_dict() for t in tasks],
         "total": len(tasks),
     }
+
+
+# ---------------------------------------------------------------------------
+# W17/D1 — engagement membership (member CRUD via W17 service)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/sessions/{session_id}/members")
+async def list_engagement_members_endpoint(
+    session_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Active members for an engagement (W17 vocabulary). Ordered
+    lead-first."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    members = await list_members(sid)
+    return {
+        "session_id": session_id,
+        "members": [m.to_dict() for m in members],
+        "total": len(members),
+    }
+
+
+@router.post("/sessions/{session_id}/members", status_code=201)
+async def assign_engagement_member_endpoint(
+    session_id: str,
+    body: AssignMemberBody,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Add a member to an engagement. Service enforces the W17/D1
+    invariants — one lead, must be a firm member, etc."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    actor = _parse_uuid(user["user_id"], "user_id")
+    target = _parse_uuid(body.user_id, "user_id")
+
+    result = await assign_member(
+        session_id=sid, user_id=target, role=body.role, assigned_by=actor,
+    )
+    if not result.ok:
+        raise HTTPException(
+            status_code=result.status_code,
+            detail={"reason": result.reason, **result.extra}
+                if result.extra else result.reason,
+        )
+    assert result.member is not None
+    return result.member.to_dict()
+
+
+@router.patch("/sessions/{session_id}/members/{user_id}")
+async def change_engagement_member_role_endpoint(
+    session_id: str,
+    user_id: str,
+    body: ChangeRoleBody,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Change a member's role. Service enforces lead-uniqueness +
+    "can't demote the only lead" + reviewer-alignment with W15."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    actor = _parse_uuid(user["user_id"], "user_id")
+    target = _parse_uuid(user_id, "user_id")
+
+    result = await change_member_role(
+        session_id=sid, user_id=target, new_role=body.role, actor_id=actor,
+    )
+    if not result.ok:
+        raise HTTPException(
+            status_code=result.status_code,
+            detail={"reason": result.reason, **result.extra}
+                if result.extra else result.reason,
+        )
+    assert result.member is not None
+    return result.member.to_dict()
+
+
+@router.delete("/sessions/{session_id}/members/{user_id}")
+async def remove_engagement_member_endpoint(
+    session_id: str,
+    user_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Soft-remove a member. Rejects lead removal without a
+    replacement lead (409)."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    actor = _parse_uuid(user["user_id"], "user_id")
+    target = _parse_uuid(user_id, "user_id")
+
+    result = await remove_member(session_id=sid, user_id=target, actor_id=actor)
+    if not result.ok:
+        raise HTTPException(status_code=result.status_code, detail=result.reason)
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# W17/D2 — section ownership + work status
+# ---------------------------------------------------------------------------
+
+
+@router.get("/sessions/{session_id}/sections/coverage")
+async def section_coverage_endpoint(
+    session_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Coverage map: every trackable section in the live payload with
+    owner + status. Powers the W17/D4 CoverageIndicator + section
+    ownership overlay."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    cov = await section_coverage(sid)
+    return cov.to_dict()
+
+
+@router.get("/sessions/{session_id}/sections/assignments")
+async def list_section_assignments_endpoint(
+    session_id: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    rows = await list_section_assignments(sid)
+    return {
+        "session_id": session_id,
+        "assignments": [r.to_dict() for r in rows],
+        "total": len(rows),
+    }
+
+
+@router.post("/sessions/{session_id}/sections/assign", status_code=201)
+async def assign_section_endpoint(
+    session_id: str,
+    body: AssignSectionBody,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Assign (or re-assign) a section to a member. Lead/admin only;
+    service validates section_path + assignee is engagement member."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    actor = _parse_uuid(user["user_id"], "user_id")
+    assignee = _parse_uuid(body.assigned_to, "assigned_to")
+
+    result = await assign_section(
+        session_id=sid, section_path=body.section_path,
+        assigned_to=assignee, assigned_by=actor,
+    )
+    if not result.ok:
+        raise HTTPException(status_code=result.status_code, detail=result.reason)
+    assert result.assignment is not None
+    return result.assignment.to_dict()
+
+
+@router.patch("/sessions/{session_id}/sections/{section_path:path}/status")
+async def set_section_status_endpoint(
+    session_id: str,
+    section_path: str,
+    body: SectionStatusBody,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Change a section's work status. Owner / lead / firm admin only
+    per W17/D2."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    actor = _parse_uuid(user["user_id"], "user_id")
+
+    result = await set_section_status(
+        session_id=sid, section_path=section_path,
+        status=body.status, actor_id=actor,
+    )
+    if not result.ok:
+        raise HTTPException(status_code=result.status_code, detail=result.reason)
+    assert result.assignment is not None
+    return result.assignment.to_dict()
+
+
+@router.delete("/sessions/{session_id}/sections/{section_path:path}")
+async def unassign_section_endpoint(
+    session_id: str,
+    section_path: str,
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Remove the owner from a section. Lead/admin only."""
+    await _require_read(session_id, user)
+    sid = _parse_uuid(session_id, "session id")
+    actor = _parse_uuid(user["user_id"], "user_id")
+
+    result = await unassign_section(
+        session_id=sid, section_path=section_path, actor_id=actor,
+    )
+    if not result.ok:
+        raise HTTPException(status_code=result.status_code, detail=result.reason)
+    assert result.assignment is not None
+    return result.assignment.to_dict()
 
 
 __all__ = ["router"]
