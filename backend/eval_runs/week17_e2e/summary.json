@@ -1,0 +1,1367 @@
+{
+  "generated_at": "2026-05-23T01:46:58Z",
+  "wall_seconds": 15.432,
+  "firm_slug": "meridian-advisory",
+  "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+  "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+  "users": {
+    "consultant_lead": {
+      "id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "email": "marcus.thorne@meridian.invalid"
+    },
+    "partner_reviewer": {
+      "id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "email": "helena.voss@meridian.invalid"
+    },
+    "analyst_contrib": {
+      "id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "email": "priya.shah@meridian.invalid"
+    }
+  },
+  "n_steps": 11,
+  "n_audit_rows": 44,
+  "headline": {
+    "exactly_one_lead": true,
+    "lead_is_consultant": true,
+    "all_three_users_on_engagement": true,
+    "reviewer_role_aligned_with_review_assigned_to": true,
+    "section_status_transitions_landed_done": true,
+    "coverage_map_accurate_initial": true,
+    "lead_my_work_includes_owned_section_and_mention": true,
+    "analyst_my_work_includes_change_request": true,
+    "cross_ref_change_request_section_correct": true,
+    "cross_ref_mention_present": true,
+    "audit_covers_all_collaboration_classes": true,
+    "audit_action_prefixes_present": {
+      "engagement.": true,
+      "section.": true,
+      "review.": true,
+      "comment.": true
+    },
+    "audit_total_rows": 44,
+    "section_status_distinct_from_review_state": true,
+    "ready_to_submit_surfaced_before_resubmit": true,
+    "final_review_state_approved": true,
+    "headline_pass": true
+  },
+  "headline_pass": true,
+  "steps": [
+    {
+      "step": 1,
+      "label": "lead.assign_analyst_contributor",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "role": "contributor"
+      }
+    },
+    {
+      "step": 2,
+      "label": "lead.assign_partner_reviewer (+W15 alignment)",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "review_assigned_to": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "alignment_fired": true
+      }
+    },
+    {
+      "step": 3,
+      "label": "lead.distribute_sections (synergy=analyst, valuation=lead)",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "synergy_owner": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "valuation_owner": "120e3041-964a-4e34-8261-24f6b151a34f"
+      }
+    },
+    {
+      "step": 4,
+      "label": "coverage_map_after_assign",
+      "actor": "system",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "assigned": 2,
+        "unassigned": 9,
+        "ready_to_submit": false
+      }
+    },
+    {
+      "step": 5,
+      "label": "analyst.synergy.in_progress->needs_review",
+      "actor": "analyst",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "status": "needs_review"
+      }
+    },
+    {
+      "step": 6,
+      "label": "analyst.comment_on_valuation+mention_lead",
+      "actor": "analyst",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "4423d038-640a-468f-9d26-712556454965",
+        "mentioned": [
+          "120e3041-964a-4e34-8261-24f6b151a34f"
+        ]
+      }
+    },
+    {
+      "step": 7,
+      "label": "lead.my_work includes owned_section + mention",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "task_types": [
+          "mention",
+          "section_incomplete"
+        ],
+        "n_tasks": 2
+      }
+    },
+    {
+      "step": 8,
+      "label": "lead.submit + partner.request_changes (blocking on synergy)",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "submit_state": "in_review",
+        "request_state": "changes_requested",
+        "review_record_id": "cbba90ce-1d1d-4cfe-9bc0-26b08cb1cd8b"
+      }
+    },
+    {
+      "step": 9,
+      "label": "analyst.my_work includes change_request derived task",
+      "actor": "analyst",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "n_tasks": 2,
+        "types": [
+          "change_request",
+          "section_incomplete"
+        ]
+      }
+    },
+    {
+      "step": 10,
+      "label": "cleanup + resolve_pointer + resubmit + approve",
+      "actor": "lead+partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "resubmit_state": "in_review",
+        "approve_state": "approved",
+        "ready_to_submit": true
+      }
+    },
+    {
+      "step": 11,
+      "label": "final_state_assertions",
+      "actor": "system",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "final_review_state": "approved",
+        "ready_to_submit_surfaced": true,
+        "n_members": 3
+      }
+    }
+  ],
+  "captures": {
+    "w15_alignment_fired": true,
+    "coverage_after_initial_assign": {
+      "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "entries": [
+        {
+          "section_path": "counterarguments",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "deal_structure_implications",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "financial_profile",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "integration_plan",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "key_reasons",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "next_steps",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "risks",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "summary",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "synergy_estimate",
+          "assigned": true,
+          "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "not_started",
+          "assignment_id": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+          "updated_at": "2026-05-23T01:46:48.796581+00:00"
+        },
+        {
+          "section_path": "target_overview",
+          "assigned": false,
+          "assigned_to": null,
+          "assigned_by": null,
+          "status": "not_started",
+          "assignment_id": null,
+          "updated_at": null
+        },
+        {
+          "section_path": "valuation_range",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "not_started",
+          "assignment_id": "6e7a161f-0fb7-4589-96ce-c310555efe79",
+          "updated_at": "2026-05-23T01:46:49.190796+00:00"
+        }
+      ],
+      "unassigned_count": 9,
+      "by_status": {
+        "not_started": 11,
+        "in_progress": 0,
+        "needs_review": 0,
+        "done": 0
+      },
+      "ready_to_submit": false
+    },
+    "lead_work_after_step6": {
+      "user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "scope": "all",
+      "tasks": [
+        {
+          "source": "derived",
+          "task_type": "section_incomplete",
+          "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+          "section_path": "valuation_range",
+          "source_ref": "6e7a161f-0fb7-4589-96ce-c310555efe79",
+          "summary": "Finish section: valuation_range (status: not_started)",
+          "priority": "medium",
+          "created_at": "2026-05-23T01:46:49.190796+00:00",
+          "extra": {
+            "current_status": "not_started",
+            "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+          }
+        },
+        {
+          "source": "derived",
+          "task_type": "mention",
+          "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+          "section_path": "valuation_range",
+          "source_ref": "4423d038-640a-468f-9d26-712556454965",
+          "summary": "You were @-mentioned: @marcus.thorne - the range floor feels light vs. the comparables.",
+          "priority": "medium",
+          "created_at": "2026-05-23T01:46:49.883250+00:00",
+          "extra": {
+            "anchor_type": "section",
+            "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+          }
+        }
+      ],
+      "by_engagement": {
+        "99f56801-bd31-40d4-9984-425ac9f2cf7a": {
+          "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+          "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+          "tasks": [
+            {
+              "source": "derived",
+              "task_type": "section_incomplete",
+              "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+              "section_path": "valuation_range",
+              "source_ref": "6e7a161f-0fb7-4589-96ce-c310555efe79",
+              "summary": "Finish section: valuation_range (status: not_started)",
+              "priority": "medium",
+              "created_at": "2026-05-23T01:46:49.190796+00:00",
+              "extra": {
+                "current_status": "not_started",
+                "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+              }
+            },
+            {
+              "source": "derived",
+              "task_type": "mention",
+              "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+              "section_path": "valuation_range",
+              "source_ref": "4423d038-640a-468f-9d26-712556454965",
+              "summary": "You were @-mentioned: @marcus.thorne - the range floor feels light vs. the comparables.",
+              "priority": "medium",
+              "created_at": "2026-05-23T01:46:49.883250+00:00",
+              "extra": {
+                "anchor_type": "section",
+                "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+              }
+            }
+          ],
+          "counts": {
+            "high": 0,
+            "medium": 2,
+            "low": 0,
+            "total": 2
+          }
+        }
+      },
+      "totals": {
+        "high": 0,
+        "medium": 2,
+        "low": 0
+      }
+    },
+    "change_request_record_id": "cbba90ce-1d1d-4cfe-9bc0-26b08cb1cd8b",
+    "analyst_work_after_change_request": {
+      "user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "scope": "all",
+      "tasks": [
+        {
+          "source": "derived",
+          "task_type": "change_request",
+          "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+          "section_path": "synergy_estimate",
+          "source_ref": "cbba90ce-1d1d-4cfe-9bc0-26b08cb1cd8b",
+          "summary": "Address change request on synergy_estimate (blocking) \u2014 Source the cross-sell uplift.",
+          "priority": "high",
+          "created_at": "2026-05-23T01:46:51.058280+00:00",
+          "extra": {
+            "severity": "blocking",
+            "section_assignment_id": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+            "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+          }
+        },
+        {
+          "source": "derived",
+          "task_type": "section_incomplete",
+          "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+          "section_path": "synergy_estimate",
+          "source_ref": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+          "summary": "Finish section: synergy_estimate (status: needs_review)",
+          "priority": "medium",
+          "created_at": "2026-05-23T01:46:48.796581+00:00",
+          "extra": {
+            "current_status": "needs_review",
+            "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+          }
+        }
+      ],
+      "by_engagement": {
+        "99f56801-bd31-40d4-9984-425ac9f2cf7a": {
+          "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+          "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+          "tasks": [
+            {
+              "source": "derived",
+              "task_type": "change_request",
+              "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+              "section_path": "synergy_estimate",
+              "source_ref": "cbba90ce-1d1d-4cfe-9bc0-26b08cb1cd8b",
+              "summary": "Address change request on synergy_estimate (blocking) \u2014 Source the cross-sell uplift.",
+              "priority": "high",
+              "created_at": "2026-05-23T01:46:51.058280+00:00",
+              "extra": {
+                "severity": "blocking",
+                "section_assignment_id": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+                "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+              }
+            },
+            {
+              "source": "derived",
+              "task_type": "section_incomplete",
+              "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+              "section_path": "synergy_estimate",
+              "source_ref": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+              "summary": "Finish section: synergy_estimate (status: needs_review)",
+              "priority": "medium",
+              "created_at": "2026-05-23T01:46:48.796581+00:00",
+              "extra": {
+                "current_status": "needs_review",
+                "engagement_title": "Kestrel Logistics \u2014 M&A diligence"
+              }
+            }
+          ],
+          "counts": {
+            "high": 1,
+            "medium": 1,
+            "low": 0,
+            "total": 2
+          }
+        }
+      },
+      "totals": {
+        "high": 1,
+        "medium": 1,
+        "low": 0
+      }
+    },
+    "coverage_pre_resubmit": {
+      "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "entries": [
+        {
+          "section_path": "counterarguments",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "15fc9eb6-07ab-44c0-82e8-bc0e77177716",
+          "updated_at": "2026-05-23T01:46:52.307481+00:00"
+        },
+        {
+          "section_path": "deal_structure_implications",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "1192fbda-e333-48b8-b69b-367389cefcd5",
+          "updated_at": "2026-05-23T01:46:52.845667+00:00"
+        },
+        {
+          "section_path": "financial_profile",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "c3ef3ca0-dddc-431c-98e3-53115c2f70a4",
+          "updated_at": "2026-05-23T01:46:53.391089+00:00"
+        },
+        {
+          "section_path": "integration_plan",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "f1ced6b2-1d51-40cc-acf6-2c5d8df5c884",
+          "updated_at": "2026-05-23T01:46:53.927422+00:00"
+        },
+        {
+          "section_path": "key_reasons",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "9ffd96e9-06c7-486b-b86b-6c010b2280ce",
+          "updated_at": "2026-05-23T01:46:54.470795+00:00"
+        },
+        {
+          "section_path": "next_steps",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "985c1452-8a61-485c-acfd-1127f1d0ed03",
+          "updated_at": "2026-05-23T01:46:55.010780+00:00"
+        },
+        {
+          "section_path": "risks",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "368c2f25-2361-456e-b99f-a225f6d27fcc",
+          "updated_at": "2026-05-23T01:46:55.553540+00:00"
+        },
+        {
+          "section_path": "summary",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "b1011024-a709-4e47-aea8-9f24ef6bd96e",
+          "updated_at": "2026-05-23T01:46:56.097525+00:00"
+        },
+        {
+          "section_path": "synergy_estimate",
+          "assigned": true,
+          "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+          "updated_at": "2026-05-23T01:46:51.554827+00:00"
+        },
+        {
+          "section_path": "target_overview",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "1abb09b2-6f21-4475-95a1-a94ae34e41ad",
+          "updated_at": "2026-05-23T01:46:56.645515+00:00"
+        },
+        {
+          "section_path": "valuation_range",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "6e7a161f-0fb7-4589-96ce-c310555efe79",
+          "updated_at": "2026-05-23T01:46:51.709457+00:00"
+        }
+      ],
+      "unassigned_count": 0,
+      "by_status": {
+        "not_started": 0,
+        "in_progress": 0,
+        "needs_review": 0,
+        "done": 11
+      },
+      "ready_to_submit": true
+    },
+    "ready_to_submit_surfaced": true,
+    "final_review_state": "approved",
+    "final_members": [
+      {
+        "id": "2ba48e8e-0c70-4dc6-89a4-31a9501af5cf",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+        "user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "role": "lead",
+        "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "assigned_at": "2026-05-23T01:46:43.176382+00:00",
+        "removed_at": null
+      },
+      {
+        "id": "de075dd4-e649-47ed-9959-eb4c1723b3a8",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+        "user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "role": "reviewer",
+        "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "assigned_at": "2026-05-23T01:46:48.259823+00:00",
+        "removed_at": null
+      },
+      {
+        "id": "18f74db7-3869-4918-804b-afc7a9310e1e",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+        "user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "role": "contributor",
+        "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "assigned_at": "2026-05-23T01:46:47.913957+00:00",
+        "removed_at": null
+      }
+    ],
+    "coverage_final": {
+      "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "entries": [
+        {
+          "section_path": "counterarguments",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "15fc9eb6-07ab-44c0-82e8-bc0e77177716",
+          "updated_at": "2026-05-23T01:46:52.307481+00:00"
+        },
+        {
+          "section_path": "deal_structure_implications",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "1192fbda-e333-48b8-b69b-367389cefcd5",
+          "updated_at": "2026-05-23T01:46:52.845667+00:00"
+        },
+        {
+          "section_path": "financial_profile",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "c3ef3ca0-dddc-431c-98e3-53115c2f70a4",
+          "updated_at": "2026-05-23T01:46:53.391089+00:00"
+        },
+        {
+          "section_path": "integration_plan",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "f1ced6b2-1d51-40cc-acf6-2c5d8df5c884",
+          "updated_at": "2026-05-23T01:46:53.927422+00:00"
+        },
+        {
+          "section_path": "key_reasons",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "9ffd96e9-06c7-486b-b86b-6c010b2280ce",
+          "updated_at": "2026-05-23T01:46:54.470795+00:00"
+        },
+        {
+          "section_path": "next_steps",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "985c1452-8a61-485c-acfd-1127f1d0ed03",
+          "updated_at": "2026-05-23T01:46:55.010780+00:00"
+        },
+        {
+          "section_path": "risks",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "368c2f25-2361-456e-b99f-a225f6d27fcc",
+          "updated_at": "2026-05-23T01:46:55.553540+00:00"
+        },
+        {
+          "section_path": "summary",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "b1011024-a709-4e47-aea8-9f24ef6bd96e",
+          "updated_at": "2026-05-23T01:46:56.097525+00:00"
+        },
+        {
+          "section_path": "synergy_estimate",
+          "assigned": true,
+          "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "a1fc3c12-9d66-4217-a97d-73b1b56df10d",
+          "updated_at": "2026-05-23T01:46:51.554827+00:00"
+        },
+        {
+          "section_path": "target_overview",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "1abb09b2-6f21-4475-95a1-a94ae34e41ad",
+          "updated_at": "2026-05-23T01:46:56.645515+00:00"
+        },
+        {
+          "section_path": "valuation_range",
+          "assigned": true,
+          "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "assigned_by": "120e3041-964a-4e34-8261-24f6b151a34f",
+          "status": "done",
+          "assignment_id": "6e7a161f-0fb7-4589-96ce-c310555efe79",
+          "updated_at": "2026-05-23T01:46:51.709457+00:00"
+        }
+      ],
+      "unassigned_count": 0,
+      "by_status": {
+        "not_started": 0,
+        "in_progress": 0,
+        "needs_review": 0,
+        "done": 11
+      },
+      "ready_to_submit": true
+    }
+  },
+  "audit_rows": [
+    {
+      "id": 1079,
+      "action": "review.submit_for_review",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "submit_for_review",
+        "to_state": "in_review",
+        "from_state": "draft",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "a7a2cc7c-6294-4d6c-a1d7-4715a830b773"
+      },
+      "created_at": "2026-05-23T01:44:19.593832+00:00"
+    },
+    {
+      "id": 1080,
+      "action": "review.request_changes",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "request_changes",
+        "to_state": "changes_requested",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": true,
+        "review_record_id": "1f8d35cd-8b2f-45d3-b4e4-c8309d6b4381"
+      },
+      "created_at": "2026-05-23T01:44:19.961971+00:00"
+    },
+    {
+      "id": 1101,
+      "action": "review.resolve_pointer",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "section_path": "synergy_estimate",
+        "review_record_id": "1f8d35cd-8b2f-45d3-b4e4-c8309d6b4381"
+      },
+      "created_at": "2026-05-23T01:44:25.709436+00:00"
+    },
+    {
+      "id": 1102,
+      "action": "review.resubmit",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "resubmit",
+        "to_state": "in_review",
+        "from_state": "changes_requested",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "2ee41405-b4dc-48bd-864b-21a5ac378130"
+      },
+      "created_at": "2026-05-23T01:44:25.993031+00:00"
+    },
+    {
+      "id": 1103,
+      "action": "review.approve",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "approve",
+        "to_state": "approved",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "c1d1ba2e-fb38-4983-9ef7-a2eb12ab3a9d"
+      },
+      "created_at": "2026-05-23T01:44:26.335311+00:00"
+    },
+    {
+      "id": 1111,
+      "action": "review.submit_for_review",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "submit_for_review",
+        "to_state": "in_review",
+        "from_state": "draft",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "1d9adb5d-7092-4aa3-8a1d-243aa56b5aab"
+      },
+      "created_at": "2026-05-23T01:45:11.791188+00:00"
+    },
+    {
+      "id": 1112,
+      "action": "review.request_changes",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "request_changes",
+        "to_state": "changes_requested",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": true,
+        "review_record_id": "6b2abc27-8b4a-4282-968d-6718687ee271"
+      },
+      "created_at": "2026-05-23T01:45:12.179581+00:00"
+    },
+    {
+      "id": 1133,
+      "action": "review.resolve_pointer",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "section_path": "synergy_estimate",
+        "review_record_id": "6b2abc27-8b4a-4282-968d-6718687ee271"
+      },
+      "created_at": "2026-05-23T01:45:18.062203+00:00"
+    },
+    {
+      "id": 1134,
+      "action": "review.resubmit",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "resubmit",
+        "to_state": "in_review",
+        "from_state": "changes_requested",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "413e0c1d-8cd4-4483-83d4-83e809a81b26"
+      },
+      "created_at": "2026-05-23T01:45:18.349752+00:00"
+    },
+    {
+      "id": 1135,
+      "action": "review.approve",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "approve",
+        "to_state": "approved",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "1e96068e-ef7a-4ff5-ae7e-477984b98d0f"
+      },
+      "created_at": "2026-05-23T01:45:18.679703+00:00"
+    },
+    {
+      "id": 1136,
+      "action": "engagement.member_assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "engagement",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "role": "contributor",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "target_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "review_assigned_to_updated": false
+      },
+      "created_at": "2026-05-23T01:46:47.967024+00:00"
+    },
+    {
+      "id": 1137,
+      "action": "engagement.member_assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "engagement",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "role": "reviewer",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "target_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "review_assigned_to_updated": true
+      },
+      "created_at": "2026-05-23T01:46:48.410447+00:00"
+    },
+    {
+      "id": 1138,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "section_path": "synergy_estimate"
+      },
+      "created_at": "2026-05-23T01:46:48.846114+00:00"
+    },
+    {
+      "id": 1139,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "valuation_range"
+      },
+      "created_at": "2026-05-23T01:46:49.241675+00:00"
+    },
+    {
+      "id": 1140,
+      "action": "section.status_changed",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "in_progress",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "section_path": "synergy_estimate"
+      },
+      "created_at": "2026-05-23T01:46:49.489881+00:00"
+    },
+    {
+      "id": 1141,
+      "action": "section.status_changed",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "needs_review",
+        "old_status": "in_progress",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "section_path": "synergy_estimate"
+      },
+      "created_at": "2026-05-23T01:46:49.636228+00:00"
+    },
+    {
+      "id": 1142,
+      "action": "section.needs_review",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "section_path": "synergy_estimate"
+      },
+      "created_at": "2026-05-23T01:46:49.684890+00:00"
+    },
+    {
+      "id": 1143,
+      "action": "comment.created",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resource_type": "comment",
+      "resource_id": "4423d038-640a-468f-9d26-712556454965",
+      "payload": {
+        "anchor_ref": {
+          "section_path": "valuation_range"
+        },
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "anchor_type": "section",
+        "mention_count": 1
+      },
+      "created_at": "2026-05-23T01:46:49.933870+00:00"
+    },
+    {
+      "id": 1144,
+      "action": "comment.mention",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resource_type": "comment",
+      "resource_id": "4423d038-640a-468f-9d26-712556454965",
+      "payload": {
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "mentioned_user_id": "120e3041-964a-4e34-8261-24f6b151a34f"
+      },
+      "created_at": "2026-05-23T01:46:49.984554+00:00"
+    },
+    {
+      "id": 1145,
+      "action": "review.submit_for_review",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "submit_for_review",
+        "to_state": "in_review",
+        "from_state": "draft",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "e52ff9d7-1f48-4997-a8cf-6ba53a26999b"
+      },
+      "created_at": "2026-05-23T01:46:50.667507+00:00"
+    },
+    {
+      "id": 1146,
+      "action": "review.request_changes",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "request_changes",
+        "to_state": "changes_requested",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": true,
+        "review_record_id": "cbba90ce-1d1d-4cfe-9bc0-26b08cb1cd8b"
+      },
+      "created_at": "2026-05-23T01:46:51.058280+00:00"
+    },
+    {
+      "id": 1147,
+      "action": "section.status_changed",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "needs_review",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+        "section_path": "synergy_estimate"
+      },
+      "created_at": "2026-05-23T01:46:51.609776+00:00"
+    },
+    {
+      "id": 1148,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "valuation_range"
+      },
+      "created_at": "2026-05-23T01:46:51.765177+00:00"
+    },
+    {
+      "id": 1149,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "counterarguments"
+      },
+      "created_at": "2026-05-23T01:46:52.206019+00:00"
+    },
+    {
+      "id": 1150,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "counterarguments"
+      },
+      "created_at": "2026-05-23T01:46:52.355945+00:00"
+    },
+    {
+      "id": 1151,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "deal_structure_implications"
+      },
+      "created_at": "2026-05-23T01:46:52.745467+00:00"
+    },
+    {
+      "id": 1152,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "deal_structure_implications"
+      },
+      "created_at": "2026-05-23T01:46:52.900579+00:00"
+    },
+    {
+      "id": 1153,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "financial_profile"
+      },
+      "created_at": "2026-05-23T01:46:53.290061+00:00"
+    },
+    {
+      "id": 1154,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "financial_profile"
+      },
+      "created_at": "2026-05-23T01:46:53.442052+00:00"
+    },
+    {
+      "id": 1155,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "integration_plan"
+      },
+      "created_at": "2026-05-23T01:46:53.826211+00:00"
+    },
+    {
+      "id": 1156,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "integration_plan"
+      },
+      "created_at": "2026-05-23T01:46:53.977467+00:00"
+    },
+    {
+      "id": 1157,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "key_reasons"
+      },
+      "created_at": "2026-05-23T01:46:54.369166+00:00"
+    },
+    {
+      "id": 1158,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "key_reasons"
+      },
+      "created_at": "2026-05-23T01:46:54.522568+00:00"
+    },
+    {
+      "id": 1159,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "next_steps"
+      },
+      "created_at": "2026-05-23T01:46:54.912274+00:00"
+    },
+    {
+      "id": 1160,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "next_steps"
+      },
+      "created_at": "2026-05-23T01:46:55.061470+00:00"
+    },
+    {
+      "id": 1161,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "risks"
+      },
+      "created_at": "2026-05-23T01:46:55.452585+00:00"
+    },
+    {
+      "id": 1162,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "risks"
+      },
+      "created_at": "2026-05-23T01:46:55.606974+00:00"
+    },
+    {
+      "id": 1163,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "summary"
+      },
+      "created_at": "2026-05-23T01:46:55.999505+00:00"
+    },
+    {
+      "id": 1164,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "summary"
+      },
+      "created_at": "2026-05-23T01:46:56.151452+00:00"
+    },
+    {
+      "id": 1165,
+      "action": "section.assigned",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "target_overview"
+      },
+      "created_at": "2026-05-23T01:46:56.547111+00:00"
+    },
+    {
+      "id": 1166,
+      "action": "section.status_changed",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "section_assignment",
+      "resource_id": null,
+      "payload": {
+        "new_status": "done",
+        "old_status": "not_started",
+        "session_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+        "assigned_to": "120e3041-964a-4e34-8261-24f6b151a34f",
+        "section_path": "target_overview"
+      },
+      "created_at": "2026-05-23T01:46:56.697403+00:00"
+    },
+    {
+      "id": 1167,
+      "action": "review.resolve_pointer",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "section_path": "synergy_estimate",
+        "review_record_id": "cbba90ce-1d1d-4cfe-9bc0-26b08cb1cd8b"
+      },
+      "created_at": "2026-05-23T01:46:56.941681+00:00"
+    },
+    {
+      "id": 1168,
+      "action": "review.resubmit",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "resubmit",
+        "to_state": "in_review",
+        "from_state": "changes_requested",
+        "reviewer_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+        "feedback_present": false,
+        "review_record_id": "48cbdcf4-3cb9-4fba-9c93-a9cecbd6a341"
+      },
+      "created_at": "2026-05-23T01:46:57.237478+00:00"
+    },
+    {
+      "id": 1169,
+      "action": "review.approve",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resource_type": "session",
+      "resource_id": "99f56801-bd31-40d4-9984-425ac9f2cf7a",
+      "payload": {
+        "action": "approve",
+        "to_state": "approved",
+        "from_state": "in_review",
+        "reviewer_id": null,
+        "feedback_present": false,
+        "review_record_id": "734ade94-f6f5-4daa-a21a-500cb8418d12"
+      },
+      "created_at": "2026-05-23T01:46:57.577218+00:00"
+    }
+  ]
+}
