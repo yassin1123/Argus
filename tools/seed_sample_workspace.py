@@ -344,7 +344,7 @@ async def _restore_engagement(
             await conn.execute(
                 """
                 INSERT INTO engagement_memberships (engagement_id, user_id, role, added_by)
-                VALUES ($1::uuid, $2::uuid, 'member', $3::uuid)
+                VALUES ($1::uuid, $2::uuid, 'contributor', $3::uuid)
                 ON CONFLICT (engagement_id, user_id) DO NOTHING
                 """,
                 session_id, tid, owner_id or tid,

@@ -22,7 +22,12 @@ router = APIRouter()
 
 class AddMemberBody(BaseModel):
     email: str = Field(min_length=3, max_length=200)
-    role: Literal["lead", "member", "viewer"] = "member"
+    # W17/D1: accept both the new vocabulary (contributor/reviewer/observer)
+    # and the legacy aliases (member/viewer) so old callers keep working.
+    # Migration 040 maps stored rows to the new vocab; the W17/D3 API will
+    # tighten this Literal once callers are upgraded.
+    role: Literal["lead", "contributor", "reviewer", "observer",
+                   "member", "viewer"] = "contributor"
 
 
 @router.get("/{engagement_id}/members")
