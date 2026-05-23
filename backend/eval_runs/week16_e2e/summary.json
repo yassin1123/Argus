@@ -1,0 +1,430 @@
+{
+  "generated_at": "2026-05-23T00:15:58Z",
+  "wall_seconds": 7.261,
+  "firm_slug": "meridian-advisory",
+  "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+  "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+  "users": {
+    "consultant": {
+      "id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "email": "marcus.thorne@meridian.invalid"
+    },
+    "partner": {
+      "id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "email": "helena.voss@meridian.invalid"
+    },
+    "analyst": {
+      "id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "email": "priya.shah@meridian.invalid"
+    }
+  },
+  "n_steps": 10,
+  "n_comments": 6,
+  "n_audit_rows": 7,
+  "headline": {
+    "all_threads_assemble_correctly": true,
+    "mention_partner_resolved": true,
+    "mention_analyst_resolved": true,
+    "non_member_mentions_ignored": true,
+    "claim_anchor_correct": true,
+    "artifact_anchor_correct": true,
+    "review_unresolved_count_accurate": true,
+    "text_range_orphan_detected_after_deepening": true,
+    "section_claim_artifact_anchors_survive_deepening": true,
+    "approval_not_blocked_by_unresolved": true,
+    "audit_covers_state_changes": true,
+    "audit_action_types": [
+      "comment.created",
+      "comment.replied",
+      "comment.resolved"
+    ],
+    "audit_rows_count": 7,
+    "comments_total": 6,
+    "comments_roots": 4,
+    "comments_replies": 2,
+    "headline_pass": true
+  },
+  "headline_pass": true,
+  "steps": [
+    {
+      "step": 1,
+      "label": "consultant.section_comment+mention_partner",
+      "actor": "consultant",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+        "mentioned": [
+          "29eb2773-0524-480c-9be3-4ed27a9ba46b"
+        ]
+      }
+    },
+    {
+      "step": 2,
+      "label": "consultant.text_range_comment_for_orphan_check",
+      "actor": "consultant",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "e449b532-9b32-4af9-bcd3-9471322d23b7",
+        "quoted_text": "PRE_DEEPEN_MARKER_W16D5 \u2014 Cross-sell uplift modelled on FY24 pilot conversion ra"
+      }
+    },
+    {
+      "step": 3,
+      "label": "partner.reply+mention_analyst",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "6956297b-dde2-449b-9d23-0021fc4fb7b0",
+        "mentioned": [
+          "e291f4c3-375f-4ab4-850c-a35bda778e8e"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "label": "analyst.reply",
+      "actor": "analyst",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "62950c5a-6f1f-460d-82f3-d4c9c1be6a66"
+      }
+    },
+    {
+      "step": 5,
+      "label": "consultant.claim_comment",
+      "actor": "consultant",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "b498fc2a-db7e-4d76-8c0b-e60b832f3c14",
+        "claim_id": "claim_revenue_1",
+        "anchor_ref": {
+          "claim_id": "claim_revenue_1"
+        }
+      }
+    },
+    {
+      "step": 6,
+      "label": "consultant.artifact_comment",
+      "actor": "consultant",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "b1914b87-ef33-4db9-9be2-0d20557e575e",
+        "anchor_ref": {
+          "artifact_id": "214e64e1-ae12-4270-b6a4-012d32216c0c"
+        }
+      }
+    },
+    {
+      "step": 7,
+      "label": "consultant.submit_for_review (+ unresolved count)",
+      "actor": "consultant",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "pre_unresolved": 4,
+        "review_state_comments": {
+          "unresolved": 4,
+          "total": 4
+        },
+        "review_state": "in_review"
+      }
+    },
+    {
+      "step": 8,
+      "label": "partner.resolve_section_thread",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+        "post_resolve_unresolved": 3
+      }
+    },
+    {
+      "step": 9,
+      "label": "simulate_section_deepening + orphan check",
+      "actor": "system",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "orphaned_count": 1,
+        "text_range_count": 1,
+        "surviving_anchor_count": 3
+      }
+    },
+    {
+      "step": 10,
+      "label": "partner.approve (advisory unresolved shown not blocking)",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "pre_approve_unresolved": 3,
+        "review_state": "approved"
+      }
+    }
+  ],
+  "captures": {
+    "section_root_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+    "text_range_id": "e449b532-9b32-4af9-bcd3-9471322d23b7",
+    "claim_id": "b498fc2a-db7e-4d76-8c0b-e60b832f3c14",
+    "claim_anchor_ref_claim_id": "claim_revenue_1",
+    "artifact_id": "214e64e1-ae12-4270-b6a4-012d32216c0c",
+    "artifact_comment_id": "b1914b87-ef33-4db9-9be2-0d20557e575e",
+    "pre_deepen_review_unresolved": 4,
+    "orphaned_text_range": [
+      {
+        "id": "e449b532-9b32-4af9-bcd3-9471322d23b7",
+        "orphaned": true,
+        "quoted_text": "PRE_DEEPEN_MARKER_W16D5 \u2014 Cross-sell uplift modelled on FY24 pilot conversion rates."
+      }
+    ],
+    "surviving_anchors": [
+      {
+        "id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+        "anchor_type": "section",
+        "orphaned_by_design": false
+      },
+      {
+        "id": "b498fc2a-db7e-4d76-8c0b-e60b832f3c14",
+        "anchor_type": "claim",
+        "orphaned_by_design": false
+      },
+      {
+        "id": "b1914b87-ef33-4db9-9be2-0d20557e575e",
+        "anchor_type": "artifact",
+        "orphaned_by_design": false
+      }
+    ],
+    "deepen_outcome": {
+      "changed": true,
+      "section_path": "synergy_estimate"
+    },
+    "post_approve_unresolved": 3,
+    "final_review_state": "approved"
+  },
+  "comments": [
+    {
+      "id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+      "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "parent_comment_id": null,
+      "anchor_type": "section",
+      "anchor_ref": {
+        "section_path": "synergy_estimate"
+      },
+      "body": "Tighten the synergy basis, @helena.voss. @ghost.user is not on the team \u2014 should not resolve.",
+      "mentioned_user_ids": [
+        "29eb2773-0524-480c-9be3-4ed27a9ba46b"
+      ],
+      "author_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resolved": true,
+      "resolved_by": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resolved_at": "2026-05-23T00:15:57.767145+00:00",
+      "created_at": "2026-05-23T00:15:55.872034+00:00",
+      "updated_at": "2026-05-23T00:15:57.767145+00:00",
+      "edited_at": null,
+      "deleted_at": null
+    },
+    {
+      "id": "e449b532-9b32-4af9-bcd3-9471322d23b7",
+      "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "parent_comment_id": null,
+      "anchor_type": "text_range",
+      "anchor_ref": {
+        "end": 60,
+        "start": 0,
+        "quoted_text": "PRE_DEEPEN_MARKER_W16D5 \u2014 Cross-sell uplift modelled on FY24 pilot conversion rates.",
+        "section_path": "synergy_estimate"
+      },
+      "body": "Source on this specific number? (quote: \"PRE_DEEPEN_MARKER_W16D5 \u2014 Cross-sell upl\")",
+      "mentioned_user_ids": [],
+      "author_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resolved": false,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_at": "2026-05-23T00:15:56.171719+00:00",
+      "updated_at": "2026-05-23T00:15:56.171719+00:00",
+      "edited_at": null,
+      "deleted_at": null
+    },
+    {
+      "id": "6956297b-dde2-449b-9d23-0021fc4fb7b0",
+      "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "parent_comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+      "anchor_type": "section",
+      "anchor_ref": {
+        "section_path": "synergy_estimate"
+      },
+      "body": "Looping in @priya.shah to double-check the numerator.",
+      "mentioned_user_ids": [
+        "e291f4c3-375f-4ab4-850c-a35bda778e8e"
+      ],
+      "author_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "resolved": false,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_at": "2026-05-23T00:15:56.323653+00:00",
+      "updated_at": "2026-05-23T00:15:56.323653+00:00",
+      "edited_at": null,
+      "deleted_at": null
+    },
+    {
+      "id": "62950c5a-6f1f-460d-82f3-d4c9c1be6a66",
+      "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "parent_comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+      "anchor_type": "section",
+      "anchor_ref": {
+        "section_path": "synergy_estimate"
+      },
+      "body": "Pulled the latest CRM pipeline; will share figures by EOD.",
+      "mentioned_user_ids": [],
+      "author_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "resolved": false,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_at": "2026-05-23T00:15:56.481098+00:00",
+      "updated_at": "2026-05-23T00:15:56.481098+00:00",
+      "edited_at": null,
+      "deleted_at": null
+    },
+    {
+      "id": "b498fc2a-db7e-4d76-8c0b-e60b832f3c14",
+      "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "parent_comment_id": null,
+      "anchor_type": "claim",
+      "anchor_ref": {
+        "claim_id": "claim_revenue_1"
+      },
+      "body": "What's the source for claim_revenue_1? Needs another citation pair.",
+      "mentioned_user_ids": [],
+      "author_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resolved": false,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_at": "2026-05-23T00:15:56.788658+00:00",
+      "updated_at": "2026-05-23T00:15:56.788658+00:00",
+      "edited_at": null,
+      "deleted_at": null
+    },
+    {
+      "id": "b1914b87-ef33-4db9-9be2-0d20557e575e",
+      "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "parent_comment_id": null,
+      "anchor_type": "artifact",
+      "anchor_ref": {
+        "artifact_id": "214e64e1-ae12-4270-b6a4-012d32216c0c"
+      },
+      "body": "Rework the valuation slide once the synergy revision lands.",
+      "mentioned_user_ids": [],
+      "author_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "resolved": false,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_at": "2026-05-23T00:15:57.083320+00:00",
+      "updated_at": "2026-05-23T00:15:57.083320+00:00",
+      "edited_at": null,
+      "deleted_at": null
+    }
+  ],
+  "audit_rows": [
+    {
+      "id": 854,
+      "action": "comment.created",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+      "payload": {
+        "anchor_ref": {
+          "section_path": "synergy_estimate"
+        },
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+        "anchor_type": "section",
+        "mention_count": 1
+      },
+      "created_at": "2026-05-23T00:15:55.927927+00:00"
+    },
+    {
+      "id": 855,
+      "action": "comment.created",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "comment_id": "e449b532-9b32-4af9-bcd3-9471322d23b7",
+      "payload": {
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+        "anchor_type": "text_range"
+      },
+      "created_at": "2026-05-23T00:15:56.224675+00:00"
+    },
+    {
+      "id": 856,
+      "action": "comment.replied",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "comment_id": "6956297b-dde2-449b-9d23-0021fc4fb7b0",
+      "payload": {
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+        "mention_count": 1,
+        "parent_comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306"
+      },
+      "created_at": "2026-05-23T00:15:56.378289+00:00"
+    },
+    {
+      "id": 857,
+      "action": "comment.replied",
+      "actor_user_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "comment_id": "62950c5a-6f1f-460d-82f3-d4c9c1be6a66",
+      "payload": {
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+        "parent_comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306"
+      },
+      "created_at": "2026-05-23T00:15:56.535671+00:00"
+    },
+    {
+      "id": 858,
+      "action": "comment.created",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "comment_id": "b498fc2a-db7e-4d76-8c0b-e60b832f3c14",
+      "payload": {
+        "anchor_ref": {
+          "claim_id": "claim_revenue_1"
+        },
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+        "anchor_type": "claim"
+      },
+      "created_at": "2026-05-23T00:15:56.839428+00:00"
+    },
+    {
+      "id": 859,
+      "action": "comment.created",
+      "actor_user_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "comment_id": "b1914b87-ef33-4db9-9be2-0d20557e575e",
+      "payload": {
+        "anchor_ref": {
+          "artifact_id": "214e64e1-ae12-4270-b6a4-012d32216c0c"
+        },
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab",
+        "anchor_type": "artifact"
+      },
+      "created_at": "2026-05-23T00:15:57.134757+00:00"
+    },
+    {
+      "id": 861,
+      "action": "comment.resolved",
+      "actor_user_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "comment_id": "3ad8d365-1912-40e0-9193-892c0c90d306",
+      "payload": {
+        "session_id": "77c5bce9-41e0-488b-902f-03e495d287ab"
+      },
+      "created_at": "2026-05-23T00:15:57.867303+00:00"
+    }
+  ]
+}
