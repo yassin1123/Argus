@@ -11,7 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 load_dotenv()
 
 from api import auth as auth_router
-from api import admin, artifacts, chat, comments, engagements, evaluations, exports, firm_library, firm_modes, inputs, reports, review, section_deepening, session_exports, sessions, sources, workspace
+from api import admin, artifacts, chat, comments, engagements, evaluations, exports, firm_library, firm_modes, inputs, reports, review, section_deepening, session_exports, sessions, sources, users, workspace
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
@@ -81,6 +81,7 @@ app.include_router(review.router, prefix="/api/sessions", tags=["review"], depen
 # Comments router declares its own path prefixes (``/sessions/{id}/comments`` AND
 # ``/comments/{id}/...``), so it mounts at ``/api`` rather than a single sub-tree.
 app.include_router(comments.router, prefix="/api", tags=["comments"], dependencies=PROTECTED)
+app.include_router(users.router, prefix="/api/users", tags=["users"], dependencies=PROTECTED)
 app.include_router(session_exports.router, prefix="/api/sessions", tags=["session-exports"], dependencies=PROTECTED)
 app.include_router(engagements.router, prefix="/api/engagements", tags=["engagements"], dependencies=PROTECTED)
 app.include_router(workspace.router, prefix="/api/workspaces", tags=["workspaces"], dependencies=PROTECTED)

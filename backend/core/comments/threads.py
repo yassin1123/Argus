@@ -156,13 +156,18 @@ async def get_threads_for_session(
     *,
     anchor_type: str | AnchorType | None = None,
     resolved: bool | None = None,
+    author_id: UUID | str | None = None,
+    mentioning_user_id: UUID | str | None = None,
 ) -> list[CommentThread]:
     """Return every live comment thread for a session, optionally
     filtered. Soft-deleted rows are excluded.
 
     Filters: ``anchor_type`` matches the root comment's anchor_type;
     ``resolved`` matches the root comment's resolved flag (True for
-    closed-only, False for open-only, None for all).
+    closed-only, False for open-only, None for all); ``author_id``
+    matches root author; ``mentioning_user_id`` filters to threads
+    whose root OR any reply mentions the user via @-slug
+    (the JSONB containment query backed by the W16/D4 GIN index).
     """
     if isinstance(anchor_type, AnchorType):
         anchor_type_filter: str | None = anchor_type.value
@@ -174,6 +179,9 @@ async def get_threads_for_session(
     if anchor_type_filter is not None:
         args.append(anchor_type_filter)
         where.append(f"anchor_type = ${len(args)}")
+    if author_id is not None:
+        args.append(str(author_id))
+        where.append(f"author_id = ${len(args)}::uuid")
 
     sql = f"""
         SELECT id, session_id, firm_id, parent_comment_id, anchor_type,
@@ -202,6 +210,27 @@ async def get_threads_for_session(
             cid: r for cid, r in roots.items()
             if bool(r.get("resolved")) is bool(resolved)
         }
+
+    if mentioning_user_id is not None:
+        target = str(mentioning_user_id)
+
+        def _mentions_target(row: dict[str, Any]) -> bool:
+            ids = row.get("mentioned_user_ids") or []
+            if not isinstance(ids, list):
+                return False
+            return target in (str(x) for x in ids)
+
+        kept: dict[str, dict[str, Any]] = {}
+        for rid, root in roots.items():
+            if _mentions_target(root):
+                kept[rid] = root
+                continue
+            # Reply-side match: keep the thread if any reply
+            # mentions the user.
+            replies = replies_by_root.get(rid, [])
+            if any(_mentions_target(rp) for rp in replies):
+                kept[rid] = root
+        roots = kept
 
     if not roots:
         return []
@@ -332,6 +361,186 @@ async def count_threads_by_anchor(
     }
 
 
+# ---------------------------------------------------------------------------
+# W16/D4 — grouped overview, bulk resolve, cross-engagement mentions
+# ---------------------------------------------------------------------------
+
+
+_OVERVIEW_GROUP_ORDER = ["section", "claim", "artifact", "text_range", "engagement"]
+
+
+def _anchor_group_key(root: dict[str, Any]) -> tuple[str, str]:
+    """Build a stable (group_key, group_label) for the overview
+    grouping. Threads anchored to the same section_path / claim_id /
+    artifact_id collapse into one group; engagement-anchored threads
+    share the "engagement" bucket."""
+    at = str(root.get("anchor_type") or "")
+    ref = root.get("anchor_ref") if isinstance(root.get("anchor_ref"), dict) else {}
+    ref = ref or {}
+    if at == "section":
+        sp = str(ref.get("section_path") or "")
+        return (f"section:{sp}", f"Section: {sp}" if sp else "Section: ?")
+    if at == "claim":
+        cid = str(ref.get("claim_id") or "")
+        return (f"claim:{cid}", f"Claim: {cid}" if cid else "Claim: ?")
+    if at == "artifact":
+        aid = str(ref.get("artifact_id") or "")
+        short = aid[:8] if aid else "?"
+        return (f"artifact:{aid}", f"Artifact: {short}")
+    if at == "text_range":
+        sp = str(ref.get("section_path") or "")
+        return (f"text_range:{sp}", f"Text range — {sp}" if sp else "Text range")
+    return ("engagement", "General")
+
+
+async def get_threads_grouped_for_overview(
+    session_id: UUID,
+    *,
+    resolved: bool | None = None,
+    author_id: UUID | str | None = None,
+    mentioning_user_id: UUID | str | None = None,
+) -> dict[str, Any]:
+    """W16/D4 engagement-level overview shape: threads grouped by
+    anchor with metadata for the workspace "Discussion" tab.
+
+    Returns::
+
+        {
+          "groups": [
+            {"key": "section:synergy_estimate",
+             "label": "Section: synergy_estimate",
+             "anchor_type": "section",
+             "anchor_ref": {"section_path": "synergy_estimate"},
+             "threads": [<CommentThread>, …],
+             "unresolved": 2, "total": 3},
+            …
+          ],
+          "unresolved_total": 5,
+          "total": 8,
+        }
+
+    Group order: section → claim → artifact → text_range → engagement.
+    Within a group, threads are in chronological-asc order (same as
+    :func:`get_threads_for_session`).
+    """
+    threads = await get_threads_for_session(
+        session_id,
+        resolved=resolved,
+        author_id=author_id,
+        mentioning_user_id=mentioning_user_id,
+    )
+
+    grouped: dict[str, dict[str, Any]] = {}
+    for t in threads:
+        key, label = _anchor_group_key(t.root)
+        bucket = grouped.setdefault(key, {
+            "key": key,
+            "label": label,
+            "anchor_type": t.root.get("anchor_type"),
+            "anchor_ref": t.root.get("anchor_ref"),
+            "threads": [],
+            "unresolved": 0,
+            "total": 0,
+        })
+        bucket["threads"].append(t.to_dict())
+        bucket["total"] += 1
+        if not t.resolved:
+            bucket["unresolved"] += 1
+
+    def _sort_key(g: dict[str, Any]) -> tuple[int, str]:
+        at = str(g.get("anchor_type") or "engagement")
+        rank = _OVERVIEW_GROUP_ORDER.index(at) if at in _OVERVIEW_GROUP_ORDER else 99
+        return (rank, str(g.get("label") or ""))
+
+    ordered = sorted(grouped.values(), key=_sort_key)
+    return {
+        "groups": ordered,
+        "unresolved_total": sum(g["unresolved"] for g in ordered),
+        "total": sum(g["total"] for g in ordered),
+    }
+
+
+async def bulk_resolve_section(
+    session_id: UUID,
+    section_path: str,
+    actor_id: UUID,
+) -> dict[str, Any]:
+    """Mark every unresolved root comment anchored to ``section_path``
+    resolved in one DB round-trip. Returns the list of root comment
+    IDs that flipped so the API layer can emit a per-thread audit
+    event (per W16/D4 hard rule: bulk resolve does NOT skip audit).
+    Already-resolved or soft-deleted threads are left untouched.
+    """
+    async with acquire() as conn:
+        rows = await conn.fetch(
+            """
+            UPDATE comments
+               SET resolved = TRUE,
+                   resolved_by = $2::uuid,
+                   resolved_at = NOW(),
+                   updated_at = NOW()
+             WHERE session_id = $1::uuid
+               AND parent_comment_id IS NULL
+               AND deleted_at IS NULL
+               AND resolved = FALSE
+               AND anchor_type = 'section'
+               AND anchor_ref ->> 'section_path' = $3
+            RETURNING id
+            """,
+            session_id, actor_id, section_path,
+        )
+    resolved_ids = [str(r["id"]) for r in rows]
+    return {
+        "section_path": section_path,
+        "resolved_count": len(resolved_ids),
+        "resolved_comment_ids": resolved_ids,
+    }
+
+
+async def list_mentions_for_user(
+    user_id: UUID,
+    *,
+    firm_id: UUID | None = None,
+    unresolved_only: bool = False,
+    limit: int = 200,
+) -> list[dict[str, Any]]:
+    """Cross-engagement "my mentions" — every live thread root OR
+    reply that @-mentions the given user, optionally constrained to
+    a single firm (the API layer always passes the requester's
+    firm_id so cross-firm leakage is impossible per W16/D4 hard rule).
+    """
+    where = [
+        "deleted_at IS NULL",
+        "mentioned_user_ids @> $1::jsonb",
+    ]
+    args: list[Any] = [json.dumps([str(user_id)])]
+    if firm_id is not None:
+        args.append(str(firm_id))
+        where.append(f"firm_id = ${len(args)}::uuid")
+    if unresolved_only:
+        # Apply on the ROOT only; replies inherit resolution state
+        # from their root in the API layer.
+        where.append(
+            "(parent_comment_id IS NOT NULL OR resolved = FALSE)"
+        )
+    args.append(int(limit))
+    limit_token = f"${len(args)}"
+
+    sql = f"""
+        SELECT id, session_id, firm_id, parent_comment_id, anchor_type,
+               anchor_ref, body, mentioned_user_ids, author_id,
+               resolved, resolved_by, resolved_at,
+               created_at, updated_at, edited_at, deleted_at
+          FROM comments
+         WHERE {' AND '.join(where)}
+         ORDER BY created_at DESC, id DESC
+         LIMIT {limit_token}
+    """
+    async with acquire() as conn:
+        rows = await conn.fetch(sql, *args)
+    return [_decode_row(r) for r in rows]
+
+
 async def count_unresolved_for_session(session_id: UUID) -> dict[str, int]:
     """Two-number summary used by the review endpoint's
     ``comments`` block — ``{unresolved, total}``. Cheap (single
@@ -357,7 +566,10 @@ async def count_unresolved_for_session(session_id: UUID) -> dict[str, int]:
 
 __all__ = [
     "CommentThread",
+    "bulk_resolve_section",
     "count_threads_by_anchor",
+    "get_threads_grouped_for_overview",
+    "list_mentions_for_user",
     "count_unresolved_for_session",
     "get_threads_for_anchor",
     "get_threads_for_session",

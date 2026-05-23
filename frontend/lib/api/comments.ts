@@ -94,11 +94,18 @@ async function ensureOk(r: Response, label: string): Promise<void> {
 
 export async function listThreads(
   sessionId: string,
-  opts: { anchor_type?: AnchorType; resolved?: boolean } = {},
+  opts: {
+    anchor_type?: AnchorType;
+    resolved?: boolean;
+    author_id?: string;
+    mentioning?: string;
+  } = {},
 ): Promise<ThreadsResponse> {
   const qs = new URLSearchParams();
   if (opts.anchor_type) qs.set("anchor_type", opts.anchor_type);
   if (opts.resolved !== undefined) qs.set("resolved", String(opts.resolved));
+  if (opts.author_id) qs.set("author_id", opts.author_id);
+  if (opts.mentioning) qs.set("mentioning", opts.mentioning);
   const suffix = qs.toString();
   const r = await apiFetch(
     `/api/sessions/${sessionId}/comments${suffix ? `?${suffix}` : ""}`,
@@ -106,6 +113,81 @@ export async function listThreads(
   );
   await ensureOk(r, "listThreads");
   return (await r.json()) as ThreadsResponse;
+}
+
+// ---------------------------------------------------------------------------
+// W16/D4 — grouped overview, bulk resolve, cross-engagement mentions
+// ---------------------------------------------------------------------------
+
+export interface OverviewGroup {
+  key: string;
+  label: string;
+  anchor_type: AnchorType;
+  anchor_ref: AnchorRef;
+  threads: CommentThread[];
+  unresolved: number;
+  total: number;
+}
+
+export interface OverviewResponse {
+  groups: OverviewGroup[];
+  unresolved_total: number;
+  total: number;
+}
+
+export async function getOverview(
+  sessionId: string,
+  opts: { resolved?: boolean; author_id?: string; mentioning?: string } = {},
+): Promise<OverviewResponse> {
+  const qs = new URLSearchParams();
+  if (opts.resolved !== undefined) qs.set("resolved", String(opts.resolved));
+  if (opts.author_id) qs.set("author_id", opts.author_id);
+  if (opts.mentioning) qs.set("mentioning", opts.mentioning);
+  const suffix = qs.toString();
+  const r = await apiFetch(
+    `/api/sessions/${sessionId}/comments/overview${suffix ? `?${suffix}` : ""}`,
+    { method: "GET" },
+  );
+  await ensureOk(r, "getOverview");
+  return (await r.json()) as OverviewResponse;
+}
+
+export async function resolveSection(
+  sessionId: string,
+  sectionPath: string,
+): Promise<{ section_path: string; resolved_count: number; resolved_comment_ids: string[] }> {
+  const r = await apiFetch(
+    `/api/sessions/${sessionId}/comments/resolve-section`,
+    {
+      method: "POST",
+      body: JSON.stringify({ section_path: sectionPath }),
+    },
+  );
+  await ensureOk(r, "resolveSection");
+  return r.json();
+}
+
+export interface MentionsResponse {
+  user_id: string;
+  firm_id: string;
+  mentions: CommentRow[];
+  total: number;
+}
+
+export async function listMyMentions(
+  userId: string,
+  opts: { unresolved_only?: boolean; limit?: number } = {},
+): Promise<MentionsResponse> {
+  const qs = new URLSearchParams();
+  if (opts.unresolved_only) qs.set("unresolved_only", "true");
+  if (opts.limit) qs.set("limit", String(opts.limit));
+  const suffix = qs.toString();
+  const r = await apiFetch(
+    `/api/users/${userId}/mentions${suffix ? `?${suffix}` : ""}`,
+    { method: "GET" },
+  );
+  await ensureOk(r, "listMyMentions");
+  return (await r.json()) as MentionsResponse;
 }
 
 export async function getCounts(sessionId: string): Promise<CountsResponse> {

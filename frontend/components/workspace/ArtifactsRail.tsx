@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { createArtifact, exportArtifactDocx, listArtifacts } from "@/lib/api";
 import type { Artifact, ArtifactStatus, ArtifactType, SessionDetail } from "@/lib/types";
 
+import ArtifactCommentAffordance from "../Comments/ArtifactCommentAffordance";
+
 type Tab = "memos" | "decks" | "models" | "charts";
 
 const STATUS_TONE: Record<ArtifactStatus, string> = {
@@ -179,9 +181,19 @@ export default function ArtifactsRail({
                     {a.type}
                   </span>
                 </div>
-                <span className={`rounded-sm border px-1.5 py-0.5 text-[9px] uppercase tracking-wide ${STATUS_TONE[a.status]}`}>
-                  {a.status}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  {/* W16/D4: artifact-level comment affordance.
+                      Renders nothing when the workspace shell hasn't
+                      mounted the CommentsController, so existing
+                      previews keep working. */}
+                  <ArtifactCommentAffordance
+                    artifactId={a.id}
+                    label={`${a.type}: ${a.title}`}
+                  />
+                  <span className={`rounded-sm border px-1.5 py-0.5 text-[9px] uppercase tracking-wide ${STATUS_TONE[a.status]}`}>
+                    {a.status}
+                  </span>
+                </div>
               </div>
               <button
                 type="button"
