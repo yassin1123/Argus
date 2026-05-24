@@ -11,7 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 load_dotenv()
 
 from api import auth as auth_router
-from api import admin, artifacts, chat, collaboration, comments, engagements, evaluations, exports, firm_library, firm_modes, inputs, reports, review, section_deepening, session_exports, sessions, sources, users, workspace
+from api import admin, artifacts, chat, collaboration, comments, engagements, evaluations, exports, firm_library, firm_modes, inputs, notification_preferences, reports, review, section_deepening, session_exports, sessions, sources, users, workspace
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
@@ -86,6 +86,9 @@ app.include_router(users.router, prefix="/api/users", tags=["users"], dependenci
 # (``/me/work``, ``/sessions/{id}/work``, ``/sessions/{id}/tasks``,
 # ``/tasks/{id}/complete``) so it mounts at ``/api``.
 app.include_router(collaboration.router, prefix="/api", tags=["collaboration"], dependencies=PROTECTED)
+# W18/D3 — notification preferences. Mounted at /api so the router's
+# own ``/me/notification-preferences`` paths surface unchanged.
+app.include_router(notification_preferences.router, prefix="/api", tags=["notifications"], dependencies=PROTECTED)
 app.include_router(session_exports.router, prefix="/api/sessions", tags=["session-exports"], dependencies=PROTECTED)
 app.include_router(engagements.router, prefix="/api/engagements", tags=["engagements"], dependencies=PROTECTED)
 app.include_router(workspace.router, prefix="/api/workspaces", tags=["workspaces"], dependencies=PROTECTED)
