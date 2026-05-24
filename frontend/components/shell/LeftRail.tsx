@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { getCurrentUser, logout, type AuthUser } from "@/lib/api";
+import NotificationNavItem from "../Notifications/NotificationNavItem";
 
 type NavItem = {
   href: string;
@@ -110,6 +111,21 @@ export default function LeftRail() {
       <nav className="flex flex-1 flex-col items-center gap-1">
         {NAV.map((item) => {
           const active = item.match(pathname);
+          // The Notifications entry overlays a polled unread-count
+          // badge — same href + match logic, just a different
+          // wrapper component (see NotificationNavItem).
+          if (item.href === "/notifications") {
+            return (
+              <NotificationNavItem
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                active={active}
+              >
+                {item.icon}
+              </NotificationNavItem>
+            );
+          }
           return (
             <Link
               key={item.href}

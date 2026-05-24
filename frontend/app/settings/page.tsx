@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import NotificationPreferences from "@/components/Notifications/NotificationPreferences";
 import { useToast } from "@/components/ui/Toast";
 import { getCurrentUser, logout, type AuthUser } from "@/lib/api";
 
@@ -148,6 +149,10 @@ export default function SettingsPage() {
         <p className="text-[13px] text-argus-tertiary">
           Snowflake · S&amp;P Capital IQ · SharePoint · Slack · Linear · Custom API. None connected.
         </p>
+      </section>
+
+      <section className="mt-6">
+        <NotificationPreferences />
       </section>
     </main>
   );
