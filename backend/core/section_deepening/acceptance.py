@@ -302,6 +302,27 @@ async def accept_deepening(
         },
     )
 
+    # W19/D1: append a SECTION_DEEPENING version to the formal
+    # history. Best-effort — versioning failures never roll back a
+    # committed deepening accept. The W9 inline
+    # ``pre_accept_payload_snapshot`` above is left in place
+    # (it's still the W9 read path for "what did this deepening
+    # change"); the versioning table is the cross-feature unified
+    # history that the W19 reader UI walks.
+    try:
+        from core.versioning.service import create_version
+        from core.versioning.types import ChangeType
+        await create_version(
+            session_id, new_payload, ChangeType.SECTION_DEEPENING,
+            created_by=accepted_by,
+            change_summary=f"Deepened {section_path}",
+        )
+    except Exception as exc:  # noqa: BLE001
+        import logging
+        logging.getLogger(__name__).warning(
+            "section_deepening.accept: create_version failed (non-fatal): %s", exc,
+        )
+
     return {
         "deepening_id": str(deepening_id),
         "status": "accepted",
