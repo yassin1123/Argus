@@ -81,6 +81,16 @@ def render_summary(
         return f"{actor} requested changes on {eng}{sev_part}"
     if t is NotificationType.REVIEW_APPROVED:
         return f"{actor} approved {eng}"
+    if t is NotificationType.VERSION_RESTORED:
+        target = context.get("restored_version_number")
+        reverted = context.get("reverted_from_approved")
+        target_part = f" v{target}" if target else ""
+        revert_part = (
+            " (the approved state was reverted to draft)" if reverted else ""
+        )
+        return (
+            f"{actor} restored a prior version{target_part} of {eng}{revert_part}"
+        )
     # Unknown type — surface a safe fallback rather than crash.
     return f"{actor} triggered {str(t)} on {eng}"
 

@@ -35,6 +35,7 @@ from .wiring import (
     notify_section_assigned,
     notify_section_needs_review,
     notify_task_assigned,
+    notify_version_restored,
 )
 
 __all__ = [
@@ -54,6 +55,7 @@ __all__ = [
     "notify_section_assigned",
     "notify_section_needs_review",
     "notify_task_assigned",
+    "notify_version_restored",
     "render_summary",
     "resolve_recipients",
 ]

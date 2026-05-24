@@ -37,6 +37,9 @@ DEFAULT_PREFERENCES: dict[NotificationType, tuple[bool, bool]] = {
     NotificationType.SECTION_NEEDS_REVIEW: (True, False),
     NotificationType.COMMENT_REPLY:        (True, False),
     NotificationType.TASK_ASSIGNED:        (True, False),
+    # W19/D2 — restoring a prior version is a significant action
+    # (discards the approved state when applicable). Both channels.
+    NotificationType.VERSION_RESTORED:     (True, True),
 }
 
 

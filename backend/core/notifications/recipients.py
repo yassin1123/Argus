@@ -137,6 +137,14 @@ async def resolve_recipients(event: "NotificationEvent") -> list[UUID]:
         reviewer = sess.get("review_assigned_to")
         return [reviewer] if reviewer else []
 
+    if t is NotificationType.VERSION_RESTORED:
+        # Target the engagement lead — they own the engagement state
+        # and need to know it just changed underneath them.
+        if event.session_id is None:
+            return []
+        lead = await _engagement_lead(event.session_id)
+        return [lead] if lead else []
+
     if t in (NotificationType.CHANGES_REQUESTED, NotificationType.REVIEW_APPROVED):
         # The submitter (denormalised on sessions.submitted_by from
         # W15/D2) + the engagement lead. Both want to know.

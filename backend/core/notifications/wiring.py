@@ -306,6 +306,37 @@ async def notify_section_needs_review(
     return await _safe_dispatch("notify_section_needs_review", [event])
 
 
+async def notify_version_restored(
+    *,
+    session_id: UUID,
+    firm_id: UUID,
+    actor_id: UUID,
+    restored_version_number: int,
+    new_version_number: int,
+    reverted_from_approved: bool,
+) -> list[Notification]:
+    """W19/D2: notify the engagement lead that a prior version was
+    restored. The recipient resolver returns the lead; actor
+    exclusion means a lead restoring their own engagement won't
+    notify themselves."""
+    title = await _load_engagement_title(session_id)
+    event = NotificationEvent(
+        notification_type=NotificationType.VERSION_RESTORED,
+        session_id=session_id, firm_id=firm_id, actor_id=actor_id,
+        source_ref={
+            "restored_version_number": restored_version_number,
+            "new_version_number": new_version_number,
+        },
+        dedup_key=f"version_restored:{session_id}:{new_version_number}",
+        context={
+            "engagement_title": title,
+            "restored_version_number": restored_version_number,
+            "reverted_from_approved": reverted_from_approved,
+        },
+    )
+    return await _safe_dispatch("notify_version_restored", [event])
+
+
 async def notify_task_assigned(
     *,
     session_id: UUID,
@@ -338,4 +369,5 @@ __all__ = [
     "notify_section_assigned",
     "notify_section_needs_review",
     "notify_task_assigned",
+    "notify_version_restored",
 ]
