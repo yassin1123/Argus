@@ -57,14 +57,38 @@ async def _safe_dispatch(
     fn: str, events: list[NotificationEvent],
 ) -> list[Notification]:
     """Wrapper that swallows + logs every dispatcher exception so the
-    core action's caller never sees one. Per W18/D2 hard rule."""
+    core action's caller never sees one. Per W18/D2 hard rule.
+
+    W18/D3: after the dispatcher persists the notification rows
+    (with email_status='pending' for users whose pref enabled
+    email), kick off inline email delivery for the new IDs. The
+    delivery worker is also exception-safe; failures flip rows to
+    'failed' rather than propagating."""
     try:
         if len(events) == 1:
-            return await dispatch(events[0])
-        return await dispatch_batch(events)
+            created = await dispatch(events[0])
+        else:
+            created = await dispatch_batch(events)
     except Exception as exc:  # noqa: BLE001
         logger.warning("notification wiring %s failed: %s", fn, exc)
         return []
+
+    # Inline email delivery for any rows that landed in 'pending'.
+    if created:
+        try:
+            pending_ids = [n.id for n in created if n.email_status == "pending"]
+            if pending_ids:
+                # Local import — keep the wiring module's import
+                # cost low and avoid a circular at module load.
+                from .email.delivery import deliver_for_ids
+                await deliver_for_ids(pending_ids)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(
+                "notification wiring %s: inline email delivery failed: %s",
+                fn, exc,
+            )
+
+    return created
 
 
 # ---------------------------------------------------------------------------
