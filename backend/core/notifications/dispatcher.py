@@ -52,7 +52,15 @@ class NotificationEvent:
     """Request shape for the dispatcher. ``context`` is the open-
     ended bag carried through to recipient resolution + summary
     rendering — per-type fields the dispatcher would otherwise have
-    to fetch."""
+    to fetch.
+
+    ``dedup_key`` (W18/D2): when supplied, dispatch_batch uses this
+    string as the cross-event collapse key INSTEAD of the
+    (session_id, source_ref) tuple. Wiring callers that know two
+    events should collapse for one triggering object pass the same
+    dedup_key on both events (e.g., a reply that mentions a
+    participant — MENTION and COMMENT_REPLY share dedup_key=
+    comment_id; MENTION wins on priority)."""
 
     notification_type: NotificationType
     session_id: UUID | None
@@ -60,6 +68,7 @@ class NotificationEvent:
     actor_id: UUID
     source_ref: dict[str, Any] = field(default_factory=dict)
     context: dict[str, Any] = field(default_factory=dict)
+    dedup_key: str | None = None
 
 
 @dataclass
@@ -283,13 +292,21 @@ async def dispatch_batch(
         per_event.append((event, recips))
 
     # Pick winning (event, recipient) by priority within a
-    # (recipient, session_id, source_key) bucket.
-    winners: dict[tuple[str, str, str], tuple[NotificationEvent, UUID]] = {}
+    # bucket keyed by either dedup_key (when callers supply one) or
+    # the (session_id, source_key) tuple. The dedup_key path is the
+    # W18/D2 wiring contract: callers pass the same key on related
+    # events for one triggering object so MENTION beats COMMENT_REPLY
+    # on the same comment_id without the dispatcher having to infer
+    # the relationship from source_ref shapes.
+    winners: dict[tuple[str, str], tuple[NotificationEvent, UUID]] = {}
     for event, recips in per_event:
-        src_key = _source_key(event.source_ref)
-        sid_key = str(event.session_id) if event.session_id else ""
+        if event.dedup_key:
+            bucket_key = event.dedup_key
+        else:
+            sid_key = str(event.session_id) if event.session_id else ""
+            bucket_key = f"{sid_key}::{_source_key(event.source_ref)}"
         for r in recips:
-            key = (str(r), sid_key, src_key)
+            key = (str(r), bucket_key)
             existing = winners.get(key)
             if (existing is None
                     or priority_of(event.notification_type)

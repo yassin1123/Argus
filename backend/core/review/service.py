@@ -545,6 +545,25 @@ async def transition_review(
             feedback or "edit attempted on approved engagement; reverted to draft",
         )
 
+    # W18/D2: notification dispatch for the actions with a real
+    # surface (submit_for_review / request_changes / approve). The
+    # wiring helper swallows + logs exceptions per W18/D2 hard rule:
+    # a flaky notification path must never roll back a committed
+    # review transition.
+    from core.notifications.wiring import notify_review_transition
+    feedback_dict: dict[str, Any] | None = None
+    if structured_feedback is not None:
+        feedback_dict = {
+            "severity": structured_feedback.severity,
+            "overall_note": structured_feedback.overall_note,
+        }
+    await notify_review_transition(
+        session_id=session_id, firm_id=firm_id, actor_id=actor_id,
+        action=action_enum.value,
+        review_record_id=str(rr["id"]),
+        feedback=feedback_dict,
+    )
+
     return ReviewTransitionResult(
         ok=True,
         session_id=str(session_id),

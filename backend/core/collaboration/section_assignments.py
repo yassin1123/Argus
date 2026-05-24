@@ -274,6 +274,14 @@ async def assign_section(
         section_path=section_path,
         extra={"assigned_to": str(assigned_to), "status": assignment.status},
     )
+
+    # W18/D2: notify the assignee (best-effort).
+    from core.notifications.wiring import notify_section_assigned
+    await notify_section_assigned(
+        session_id=session_id, firm_id=firm_id, actor_id=assigned_by,
+        section_path=section_path, assigned_user_id=assigned_to,
+    )
+
     return AssignmentResult(ok=True, assignment=assignment)
 
 
@@ -341,6 +349,16 @@ async def set_section_status(
             session_id=session_id,
             section_path=section_path,
             extra={"assigned_to": owner_id},
+        )
+        # W18/D2: notify the engagement lead (best-effort). The
+        # recipient resolver pulls the active lead; actor exclusion
+        # kicks in if the lead IS the owner who flipped the status.
+        from core.notifications.wiring import notify_section_needs_review
+        await notify_section_needs_review(
+            session_id=session_id,
+            firm_id=UUID(str(existing.firm_id)) if not isinstance(existing.firm_id, UUID)
+                    else existing.firm_id,
+            actor_id=actor_id, section_path=section_path,
         )
 
     return AssignmentResult(ok=True, assignment=assignment)

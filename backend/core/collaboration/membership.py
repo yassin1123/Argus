@@ -341,6 +341,13 @@ async def assign_member(
                "review_assigned_to_updated": aligned},
     )
 
+    # W18/D2: notify the new member (best-effort).
+    from core.notifications.wiring import notify_engagement_member_assigned
+    await notify_engagement_member_assigned(
+        session_id=session_id, firm_id=firm_id, actor_id=assigned_by,
+        assigned_user_id=user_id, role=role_enum.value,
+    )
+
     return MembershipResult(
         ok=True, member=member,
         extra={"review_assigned_to_updated": aligned},

@@ -164,6 +164,16 @@ async def create_task(
         extra={"title": task.title, "assigned_to": task.assigned_to,
                "section_path": task.section_path},
     )
+
+    # W18/D2: notify the assignee when one is set (best-effort).
+    if assigned_to is not None:
+        from core.notifications.wiring import notify_task_assigned
+        await notify_task_assigned(
+            session_id=session_id, firm_id=firm_id, actor_id=created_by,
+            task_id=task.id, task_title=task.title,
+            assigned_user_id=assigned_to,
+        )
+
     return TaskResult(ok=True, task=task)
 
 
