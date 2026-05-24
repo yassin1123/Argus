@@ -47,6 +47,11 @@ interface Props {
   onClose: () => void;
   /** Fires after every mutation so the parent can refresh badges. */
   onMutated?: () => void;
+  /** W18/D4 deep-link target. When supplied, after threads load the
+   *  panel scrolls the matching ``data-testid="thread-{id}"``
+   *  element into view + adds a temporary highlight. Used by the
+   *  notification feed to jump straight to a specific comment. */
+  initialCommentId?: string;
 }
 
 /**
@@ -71,6 +76,7 @@ export default function ThreadPanel({
   lockedBanner = null,
   onClose,
   onMutated,
+  initialCommentId,
 }: Props) {
   const [threads, setThreads] = useState<CommentThread[] | null>(null);
   const [composeBody, setComposeBody] = useState("");
@@ -111,6 +117,27 @@ export default function ThreadPanel({
     setError(null);
     void refresh();
   }, [anchor, refresh]);
+
+  // W18/D4: scroll the deep-link target into view once threads have
+  // loaded. We try root + reply by data-testid prefix so a mention
+  // on a reply still resolves to a scroll target.
+  useEffect(() => {
+    if (!initialCommentId || threads === null || threads.length === 0) return;
+    if (typeof document === "undefined") return;
+    const sel = `[data-testid="thread-${initialCommentId}"], [data-testid="comment-${initialCommentId}"]`;
+    const el = document.querySelector(sel) as HTMLElement | null;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Brief highlight so the user can see where the click landed.
+    const prev = el.style.outline;
+    el.style.outline = "2px solid #2563eb";
+    el.style.outlineOffset = "2px";
+    const timer = window.setTimeout(() => {
+      el.style.outline = prev;
+      el.style.outlineOffset = "";
+    }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [initialCommentId, threads]);
 
   if (!anchor) return null;
 
