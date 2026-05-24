@@ -629,6 +629,25 @@ async def save_report(
             json.dumps(rg),
             json.dumps(cs),
         )
+
+    # W19/D1: ensure a v1 payload version exists for this session
+    # after every save_report write. Best-effort — versioning failures
+    # never roll back the writer-pipeline persist. ``ensure_initial_version``
+    # is a no-op when v1 already exists (the common case after W19/D1's
+    # backfill or on the second save_report call), so the cost is one
+    # SELECT per call for established sessions.
+    if row:
+        try:
+            from core.versioning.service import ensure_initial_version
+            from uuid import UUID as _UUID
+            await ensure_initial_version(
+                _UUID(str(session_id)) if not isinstance(session_id, _UUID) else session_id,
+            )
+        except Exception as exc:  # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning(
+                "save_report: ensure_initial_version failed (non-fatal): %s", exc,
+            )
     return str(row["id"]) if row else None
 
 

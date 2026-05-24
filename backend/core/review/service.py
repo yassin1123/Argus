@@ -545,6 +545,32 @@ async def transition_review(
             feedback or "edit attempted on approved engagement; reverted to draft",
         )
 
+        # W19/D1: append a REVIEW_REVERT version so the unified
+        # history surfaces the moment approval was lost. The payload
+        # itself is unchanged by auto-revert (W15 doesn't touch
+        # ``reports.consulting_payload``), but the version row marks
+        # the boundary + carries the new ``review_state_at_version``
+        # = 'draft' so the history reader can render "approval lost"
+        # cleanly. Best-effort — versioning failures never roll back
+        # the revert.
+        try:
+            from core.versioning.service import (
+                _load_live_payload_for_session,
+                create_version,
+            )
+            from core.versioning.types import ChangeType
+            live_payload = await _load_live_payload_for_session(session_id)
+            await create_version(
+                session_id, live_payload, ChangeType.REVIEW_REVERT,
+                created_by=actor_id,
+                change_summary=str(feedback or "Auto-revert: edit attempted post-approval"),
+            )
+        except Exception as exc:  # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning(
+                "auto_revert: create_version failed (non-fatal): %s", exc,
+            )
+
     # W18/D2: notification dispatch for the actions with a real
     # surface (submit_for_review / request_changes / approve). The
     # wiring helper swallows + logs exceptions per W18/D2 hard rule:
