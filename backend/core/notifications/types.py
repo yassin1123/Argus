@@ -29,6 +29,8 @@ class NotificationType(str, Enum):
     REVIEW_REQUESTED = "review_requested"
     CHANGES_REQUESTED = "changes_requested"
     REVIEW_APPROVED = "review_approved"
+    # W19 — version history
+    VERSION_RESTORED = "version_restored"
 
 
 # Higher number = higher priority. Used by ``dispatch_batch`` to pick
@@ -39,6 +41,7 @@ TYPE_PRIORITY: dict[NotificationType, int] = {
     NotificationType.CHANGES_REQUESTED:     90,  # partner action gating delivery
     NotificationType.REVIEW_REQUESTED:      85,  # reviewer's queue
     NotificationType.REVIEW_APPROVED:       80,
+    NotificationType.VERSION_RESTORED:      75,  # discards approved state — load-bearing
     NotificationType.SECTION_NEEDS_REVIEW:  70,
     NotificationType.ENGAGEMENT_ASSIGNED:   60,
     NotificationType.SECTION_ASSIGNED:      50,
