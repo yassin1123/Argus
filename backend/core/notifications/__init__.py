@@ -22,10 +22,20 @@ from .dispatcher import (
     NotificationEvent,
     dispatch,
     dispatch_batch,
+    mark_read,
 )
 from .recipients import resolve_recipients
 from .summaries import render_summary
 from .types import NotificationType, TYPE_PRIORITY
+from .wiring import (
+    notify_comment_created,
+    notify_comment_replied,
+    notify_engagement_member_assigned,
+    notify_review_transition,
+    notify_section_assigned,
+    notify_section_needs_review,
+    notify_task_assigned,
+)
 
 __all__ = [
     "DEFAULT_PREFERENCES",
@@ -36,6 +46,14 @@ __all__ = [
     "default_preference",
     "dispatch",
     "dispatch_batch",
+    "mark_read",
+    "notify_comment_created",
+    "notify_comment_replied",
+    "notify_engagement_member_assigned",
+    "notify_review_transition",
+    "notify_section_assigned",
+    "notify_section_needs_review",
+    "notify_task_assigned",
     "render_summary",
     "resolve_recipients",
 ]

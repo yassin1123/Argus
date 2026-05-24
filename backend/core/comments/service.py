@@ -259,7 +259,21 @@ async def create_comment(
             _serialise_mentions(mentioned_user_ids),
             author_id,
         )
-    return CommentResult(ok=True, comment_id=str(row["id"]), row=_row_to_dict(row))
+    row_dict = _row_to_dict(row)
+
+    # W18/D2: dispatch notifications for any @-mentions. Best-effort
+    # — :func:`notify_comment_created` swallows + logs exceptions so
+    # a flaky notification path never rolls back a committed comment.
+    from core.notifications.wiring import notify_comment_created
+    await notify_comment_created(
+        session_id=session_id, firm_id=firm_id, author_id=author_id,
+        comment_id=str(row["id"]),
+        body=body,
+        anchor_ref=anchor_ref or {},
+        mentioned_user_ids=row_dict.get("mentioned_user_ids") or [],
+    )
+
+    return CommentResult(ok=True, comment_id=str(row["id"]), row=row_dict)
 
 
 # ---------------------------------------------------------------------------
@@ -322,7 +336,27 @@ async def reply_to_comment(
             _serialise_mentions(mentioned_user_ids),
             author_id,
         )
-    return CommentResult(ok=True, comment_id=str(row["id"]), row=_row_to_dict(row))
+    row_dict = _row_to_dict(row)
+
+    # W18/D2: dispatch both COMMENT_REPLY (for thread participants)
+    # AND MENTION (for any @-tagged users in the reply). dispatch_batch
+    # collapses to one notification per recipient via dedup_key —
+    # MENTION wins on priority when a participant is also mentioned.
+    from core.notifications.wiring import notify_comment_replied
+    await notify_comment_replied(
+        session_id=parent["session_id"] if isinstance(parent["session_id"], UUID)
+                    else UUID(str(parent["session_id"])),
+        firm_id=parent["firm_id"] if isinstance(parent["firm_id"], UUID)
+                 else UUID(str(parent["firm_id"])),
+        author_id=author_id,
+        comment_id=str(row["id"]),
+        root_comment_id=str(root["id"]),
+        body=body,
+        anchor_ref=root.get("anchor_ref") or {},
+        mentioned_user_ids=row_dict.get("mentioned_user_ids") or [],
+    )
+
+    return CommentResult(ok=True, comment_id=str(row["id"]), row=row_dict)
 
 
 # ---------------------------------------------------------------------------
