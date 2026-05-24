@@ -8,7 +8,7 @@ export default function NotificationsPage() {
       </h1>
       <p className="mt-1 text-[13px] text-argus-tertiary">
         Mentions, review actions, section assignments, and tasks across every
-        engagement you're on. Click a row to jump to the source.
+        engagement you&apos;re on. Click a row to jump to the source.
       </p>
       <div className="mt-6">
         <NotificationFeed />
