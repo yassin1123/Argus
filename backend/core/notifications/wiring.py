@@ -185,11 +185,15 @@ async def notify_comment_replied(
 # ---------------------------------------------------------------------------
 
 
-# Map ReviewAction.value → NotificationType. Actions that don't have
-# a notification surface (resubmit, reopen, mark_delivered) are
-# absent from the map; the wiring helper no-ops cleanly on them.
+# Map ReviewAction.value → NotificationType. Actions that don't
+# have a notification surface (reopen, mark_delivered, auto_revert)
+# are absent from the map; the wiring helper no-ops cleanly on
+# them. ``resubmit`` is treated as a fresh REVIEW_REQUESTED
+# because the reviewer needs to know the work is back in their
+# queue — same surface as the initial submission.
 _REVIEW_NOTIFICATION: dict[str, NotificationType] = {
     "submit_for_review": NotificationType.REVIEW_REQUESTED,
+    "resubmit":          NotificationType.REVIEW_REQUESTED,
     "request_changes":   NotificationType.CHANGES_REQUESTED,
     "approve":           NotificationType.REVIEW_APPROVED,
 }

@@ -1,0 +1,325 @@
+{
+  "generated_at": "2026-05-24T01:26:04Z",
+  "wall_seconds": 13.265,
+  "firm_slug": "meridian-advisory",
+  "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+  "engagement_title": "Kestrel Logistics \u2014 M&A diligence",
+  "users": {
+    "consultant_lead": {
+      "id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "email": "marcus.thorne@meridian.invalid"
+    },
+    "partner_reviewer": {
+      "id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "email": "helena.voss@meridian.invalid"
+    },
+    "analyst_contrib": {
+      "id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "email": "priya.shah@meridian.invalid"
+    }
+  },
+  "n_steps": 8,
+  "n_notifications": 9,
+  "n_captured_emails": 6,
+  "headline": {
+    "all_steps_pass": true,
+    "actor_never_notified_for_own_action": true,
+    "dedup_one_notification_per_recipient_per_event": true,
+    "dedup_winner_is_mention_over_comment_reply": true,
+    "analyst_section_assigned_email_skipped": true,
+    "partner_mention_email_captured": true,
+    "captured_emails_have_branding_and_deeplink": true,
+    "email_status_matches_preference": true,
+    "preference_violations": [],
+    "every_notification_has_deeplink_target": true,
+    "partner_review_requested_count": 2,
+    "consultant_changes_requested_count": 1,
+    "consultant_review_approved_count": 1,
+    "review_chain_complete": true,
+    "notification_count_by_user": {
+      "lead": 4,
+      "partner": 3,
+      "analyst": 2
+    },
+    "captured_email_count": 6,
+    "headline_pass": true
+  },
+  "headline_pass": true,
+  "steps": [
+    {
+      "step": 1,
+      "label": "lead.assign_section.synergy=analyst",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "assignment_id": "1b2f18db-7976-48dc-b646-e5880f17e48f"
+      }
+    },
+    {
+      "step": 2,
+      "label": "lead.section_comment+mention_partner",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "c48f783b-beab-4f17-a507-ed8011f1de78"
+      }
+    },
+    {
+      "step": 3,
+      "label": "analyst.reply (no mention)",
+      "actor": "analyst",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "6ee6ef0b-6d5f-4c95-88be-1bec57ebe655"
+      }
+    },
+    {
+      "step": 4,
+      "label": "partner.reply+mention_analyst (DEDUP CASE)",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "comment_id": "2c7a3537-7217-467c-b0d6-e1ff67b28f2a"
+      }
+    },
+    {
+      "step": 5,
+      "label": "lead.submit_for_review",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "to_state": "in_review",
+        "review_record_id": "46b636bd-302d-46fb-b3e2-a871946afb77"
+      }
+    },
+    {
+      "step": 6,
+      "label": "partner.request_changes",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "review_record_id": "cb27e106-0867-49e7-b1d5-010dcd4d0cb6"
+      }
+    },
+    {
+      "step": 7,
+      "label": "lead.resubmit (after resolving pointer)",
+      "actor": "lead",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "to_state": "in_review"
+      }
+    },
+    {
+      "step": 8,
+      "label": "partner.approve",
+      "actor": "partner",
+      "ok": true,
+      "reason": "",
+      "extra": {
+        "to_state": "approved"
+      }
+    }
+  ],
+  "captures": {
+    "root_comment_id": "c48f783b-beab-4f17-a507-ed8011f1de78",
+    "dedup_comment_id": "2c7a3537-7217-467c-b0d6-e1ff67b28f2a",
+    "change_request_id": "cb27e106-0867-49e7-b1d5-010dcd4d0cb6"
+  },
+  "notifications": [
+    {
+      "id": "157f3ba1-8a85-4cc7-9ef1-a62c2932ea79",
+      "recipient_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "section_assigned",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "section_path": "synergy_estimate"
+      },
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "summary": "Marcus Thorne assigned you synergy_estimate on Kestrel Logistics \u2014 M&A diligence",
+      "read": false,
+      "created_at": "2026-05-24T01:25:59.893844+00:00",
+      "email_status": "skipped"
+    },
+    {
+      "id": "b3b871e6-18f6-4633-a240-cc02c344847d",
+      "recipient_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "mention",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "comment_id": "c48f783b-beab-4f17-a507-ed8011f1de78"
+      },
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "summary": "Marcus Thorne mentioned you in a comment on Kestrel Logistics \u2014 M&A diligence \u00b7 synergy_estimate: \u201c@helena.voss the synergy basis looks light - second pair of eyes?\u201d",
+      "read": false,
+      "created_at": "2026-05-24T01:26:00.305909+00:00",
+      "email_status": "sent"
+    },
+    {
+      "id": "7e029784-185d-4449-bf89-86a9b2e77893",
+      "recipient_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "comment_reply",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "comment_id": "6ee6ef0b-6d5f-4c95-88be-1bec57ebe655",
+        "root_comment_id": "c48f783b-beab-4f17-a507-ed8011f1de78"
+      },
+      "actor_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "summary": "Priya Shah replied on a thread you're in \u2014 Kestrel Logistics \u2014 M&A diligence \u00b7 synergy_estimate: \u201cPulling FY24 conversion rates now.\u201d",
+      "read": false,
+      "created_at": "2026-05-24T01:26:00.769357+00:00",
+      "email_status": "skipped"
+    },
+    {
+      "id": "1418d560-8509-4bf0-8541-9229d6188367",
+      "recipient_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "comment_reply",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "comment_id": "2c7a3537-7217-467c-b0d6-e1ff67b28f2a",
+        "root_comment_id": "c48f783b-beab-4f17-a507-ed8011f1de78"
+      },
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "summary": "Helena Voss replied on a thread you're in \u2014 Kestrel Logistics \u2014 M&A diligence \u00b7 synergy_estimate: \u201c@priya.shah can you confirm the pipeline assumption?\u201d",
+      "read": false,
+      "created_at": "2026-05-24T01:26:01.136270+00:00",
+      "email_status": "skipped"
+    },
+    {
+      "id": "742275d4-ebea-40e0-8e18-e155ddcdcfcf",
+      "recipient_id": "e291f4c3-375f-4ab4-850c-a35bda778e8e",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "mention",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "comment_id": "2c7a3537-7217-467c-b0d6-e1ff67b28f2a"
+      },
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "summary": "Helena Voss mentioned you in a comment on Kestrel Logistics \u2014 M&A diligence \u00b7 synergy_estimate: \u201c@priya.shah can you confirm the pipeline assumption?\u201d",
+      "read": false,
+      "created_at": "2026-05-24T01:26:01.235926+00:00",
+      "email_status": "sent"
+    },
+    {
+      "id": "a8aa73f3-1889-45db-95aa-2897c439bcc5",
+      "recipient_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "review_requested",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "review_record_id": "46b636bd-302d-46fb-b3e2-a871946afb77"
+      },
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "summary": "Marcus Thorne submitted Kestrel Logistics \u2014 M&A diligence for your review",
+      "read": false,
+      "created_at": "2026-05-24T01:26:01.955477+00:00",
+      "email_status": "sent"
+    },
+    {
+      "id": "63e21629-bca3-4c09-99ca-d8627f042fb1",
+      "recipient_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "changes_requested",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "review_record_id": "cb27e106-0867-49e7-b1d5-010dcd4d0cb6"
+      },
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "summary": "Helena Voss requested changes on Kestrel Logistics \u2014 M&A diligence [blocking]",
+      "read": false,
+      "created_at": "2026-05-24T01:26:02.781676+00:00",
+      "email_status": "sent"
+    },
+    {
+      "id": "57092cf0-05a1-408a-add4-791f332754ee",
+      "recipient_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "review_requested",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "review_record_id": "7ebb9ac4-e39e-42a3-b1bf-e6044b085d66"
+      },
+      "actor_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "summary": "Marcus Thorne submitted Kestrel Logistics \u2014 M&A diligence for your review",
+      "read": false,
+      "created_at": "2026-05-24T01:26:03.695564+00:00",
+      "email_status": "sent"
+    },
+    {
+      "id": "66ff3c8a-2b4d-4abf-9a90-657f8dc84b73",
+      "recipient_id": "120e3041-964a-4e34-8261-24f6b151a34f",
+      "firm_id": "95b3d3bb-07dd-46fb-b53d-b390cac37ea2",
+      "notification_type": "review_approved",
+      "session_id": "37936b57-b661-43fd-8875-d0909c40bb0b",
+      "source_ref": {
+        "review_record_id": "8c244576-05b2-402c-9eef-2f86732f8ce4"
+      },
+      "actor_id": "29eb2773-0524-480c-9be3-4ed27a9ba46b",
+      "summary": "Helena Voss approved Kestrel Logistics \u2014 M&A diligence",
+      "read": false,
+      "created_at": "2026-05-24T01:26:04.457047+00:00",
+      "email_status": "sent"
+    }
+  ],
+  "captured_emails": [
+    {
+      "to_email": "helena.voss@meridian.invalid",
+      "subject": "You were mentioned on Argus",
+      "html_body": "<!doctype html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>You were mentioned on Argus</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Inter, system-ui, sans-s...",
+      "text_body": "Marcus Thorne mentioned you in a comment on Kestrel Logistics \u2014 M&A diligence \u00b7 synergy_estimate: \u201c@helena.voss the synergy basis looks light - second pair of eyes?\u201d\n\nView in Argus: https://argus.exam",
+      "notification_id": "b3b871e6-18f6-4633-a240-cc02c344847d",
+      "notification_type": "mention"
+    },
+    {
+      "to_email": "priya.shah@meridian.invalid",
+      "subject": "You were mentioned on Argus",
+      "html_body": "<!doctype html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>You were mentioned on Argus</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Inter, system-ui, sans-s...",
+      "text_body": "Helena Voss mentioned you in a comment on Kestrel Logistics \u2014 M&A diligence \u00b7 synergy_estimate: \u201c@priya.shah can you confirm the pipeline assumption?\u201d\n\nView in Argus: https://argus.example.com/session",
+      "notification_id": "742275d4-ebea-40e0-8e18-e155ddcdcfcf",
+      "notification_type": "mention"
+    },
+    {
+      "to_email": "helena.voss@meridian.invalid",
+      "subject": "An engagement needs your review",
+      "html_body": "<!doctype html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>An engagement needs your review</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Inter, system-ui, sa...",
+      "text_body": "Marcus Thorne submitted Kestrel Logistics \u2014 M&A diligence for your review\n\nView in Argus: https://argus.example.com/sessions/37936b57-b661-43fd-8875-d0909c40bb0b\n\n---\nMeridian Advisory \u00b7 Confidential\n",
+      "notification_id": "a8aa73f3-1889-45db-95aa-2897c439bcc5",
+      "notification_type": "review_requested"
+    },
+    {
+      "to_email": "marcus.thorne@meridian.invalid",
+      "subject": "Changes requested on your engagement",
+      "html_body": "<!doctype html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>Changes requested on your engagement</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Inter, system-u...",
+      "text_body": "Helena Voss requested changes on Kestrel Logistics \u2014 M&A diligence [blocking]\n\nView in Argus: https://argus.example.com/sessions/37936b57-b661-43fd-8875-d0909c40bb0b\n\n---\nMeridian Advisory \u00b7 Confident",
+      "notification_id": "63e21629-bca3-4c09-99ca-d8627f042fb1",
+      "notification_type": "changes_requested"
+    },
+    {
+      "to_email": "helena.voss@meridian.invalid",
+      "subject": "An engagement needs your review",
+      "html_body": "<!doctype html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>An engagement needs your review</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Inter, system-ui, sa...",
+      "text_body": "Marcus Thorne submitted Kestrel Logistics \u2014 M&A diligence for your review\n\nView in Argus: https://argus.example.com/sessions/37936b57-b661-43fd-8875-d0909c40bb0b\n\n---\nMeridian Advisory \u00b7 Confidential\n",
+      "notification_id": "57092cf0-05a1-408a-add4-791f332754ee",
+      "notification_type": "review_requested"
+    },
+    {
+      "to_email": "marcus.thorne@meridian.invalid",
+      "subject": "Your engagement was approved",
+      "html_body": "<!doctype html>\n<html lang=\"en\"><head>\n<meta charset=\"utf-8\">\n<title>Your engagement was approved</title>\n</head>\n<body style=\"margin:0;padding:0;background:#f5f5f5;font-family:Inter, system-ui, sans-...",
+      "text_body": "Helena Voss approved Kestrel Logistics \u2014 M&A diligence\n\nView in Argus: https://argus.example.com/sessions/37936b57-b661-43fd-8875-d0909c40bb0b\n\n---\nMeridian Advisory \u00b7 Confidential\nYou can change whic",
+      "notification_id": "66ff3c8a-2b4d-4abf-9a90-657f8dc84b73",
+      "notification_type": "review_approved"
+    }
+  ]
+}
