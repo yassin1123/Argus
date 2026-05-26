@@ -28,10 +28,22 @@ from __future__ import annotations
 
 from core.nli.deberta_client import NLIResult
 from core.nli.lexical_overlap import LexicalSignal
+from core.nli.threshold_config import (
+    ThresholdConfig,
+    default_threshold_config,
+)
 
 # ---------------------------------------------------------------------------
-# Tuning constants (locked for Day 3 — do not touch without evidence)
+# Default tuning constants (W2/D3 baseline).
 # ---------------------------------------------------------------------------
+#
+# Phase 5 / Week 21 / Day 3 moved these into
+# :class:`ThresholdConfig` so the calibration harness can sweep
+# them against the cached raw scores. The module-level constants
+# below are retained as the documented default values; behaviour
+# changes only when a tuned ``ThresholdConfig`` is passed in
+# explicitly (e.g. by the orchestrator after
+# :func:`load_threshold_config()` populates one from the YAML).
 
 # DeBERTa entailment is only "high confidence" when the cross-encoder is
 # fairly sure. Below this it's a soft signal that doesn't fully ratify the
@@ -70,6 +82,7 @@ def aggregate(
     llm_verdict: str,
     deberta: NLIResult,
     lexical: LexicalSignal,
+    config: ThresholdConfig | None = None,
 ) -> tuple[str, str]:
     """Combine the three signals into ``(ensemble_verdict, reason)``.
 
@@ -110,6 +123,11 @@ def aggregate(
         tightening). The split is preserved on the row so Day 4
         regression can analyse the two populations separately.
     """
+    cfg = config or default_threshold_config()
+    high_conf = float(cfg.deberta_high_conf)
+    drift_below = float(cfg.numeric_drift_below)
+    band = float(cfg.borderline_band)
+
     verdict = (llm_verdict or "").strip().lower()
     label = (deberta.label or "").strip().lower()
     conf = float(deberta.confidence or 0.0)
@@ -150,7 +168,7 @@ def aggregate(
         return "contradicted", f"DeBERTa contradicts ({conf:.2f}): {detail}"
 
     if label == "neutral":
-        if num_score >= _NUMERIC_DRIFT_BELOW:
+        if num_score >= drift_below:
             return "weak", "DeBERTa neutral; LLM may have anchored on gist"
         return (
             "weak",
@@ -158,24 +176,55 @@ def aggregate(
         )
 
     if label == "entailment":
-        if conf >= _DEBERTA_HIGH_CONF and num_score >= _NUMERIC_DRIFT_BELOW:
+        # W21/D3 conservative-default principle: if the DeBERTa
+        # confidence is within ``[high_conf - band, high_conf)`` AND
+        # numeric overlap is borderline (between drift_below and
+        # drift_below + band), downgrade what would otherwise be a
+        # supported_low to "weak". Uncertainty resolves toward
+        # review, never toward trust. band=0.0 (the default) is a
+        # no-op so pre-W21/D3 behaviour is preserved.
+        in_conf_band = (high_conf - band) <= conf < high_conf
+        # A perfect numeric overlap (1.0) is never borderline — it
+        # means "no numerics in the claim" or "every claim numeric
+        # matched the chunk." We only treat scores meaningfully
+        # below 1.0 as borderline.
+        in_num_band = (
+            drift_below <= num_score < (drift_below + band)
+            and num_score < 1.0
+        )
+        if band > 0 and (in_conf_band or in_num_band):
+            reason_parts = []
+            if in_conf_band:
+                reason_parts.append(
+                    f"DeBERTa conf {conf:.2f} in borderline band "
+                    f"[{high_conf - band:.2f}, {high_conf:.2f})"
+                )
+            if in_num_band:
+                reason_parts.append(
+                    f"numeric overlap {num_score:.2f} borderline"
+                )
+            return (
+                "weak",
+                "conservative downgrade: " + " + ".join(reason_parts),
+            )
+        if conf >= high_conf and num_score >= drift_below:
             return "supported_high", "all signals agree"
-        if conf >= _DEBERTA_HIGH_CONF and num_score < _NUMERIC_DRIFT_BELOW:
+        if conf >= high_conf and num_score < drift_below:
             return (
                 "supported_low",
                 f"numeric drift: missing {_missing_join(num_missing)}",
             )
-        if conf < _DEBERTA_HIGH_CONF and num_score >= _NUMERIC_DRIFT_BELOW:
+        if conf < high_conf and num_score >= drift_below:
             return (
                 "supported_low",
                 f"DeBERTa low-confidence entailment ({conf:.2f})",
             )
-        # conf < 0.7 AND numeric drift — both soft signals fire, downgrade.
+        # conf < high_conf AND numeric drift — both soft signals fire, downgrade.
         return "weak", "DeBERTa weak entailment + numeric drift"
 
     # Unknown DeBERTa label (e.g. "unknown" sentinel from a worker timeout)
     # — treat the same as neutral to avoid silently passing.
-    if num_score >= _NUMERIC_DRIFT_BELOW:
+    if num_score >= drift_below:
         return "weak", f"DeBERTa label {deberta.label!r} unrecognised; LLM may have anchored on gist"
     return (
         "weak",

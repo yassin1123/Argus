@@ -347,10 +347,14 @@ class RealEnsembleVerifier:
 # ---------------------------------------------------------------------------
 
 
-def _aggregate_raw(raw: RawScores) -> tuple[str, str]:
+def _aggregate_raw(
+    raw: RawScores,
+    config: "ThresholdConfig | None" = None,
+) -> tuple[str, str]:
     """Feed raw scores through the REAL aggregator. We synthesise
     the small NLIResult / LexicalSignal shapes the aggregator
-    expects."""
+    expects. When ``config`` is None the aggregator uses the W2/D3
+    defaults; the W21/D3 tuning harness passes a swept config."""
     from core.nli.aggregator import aggregate
     from core.nli.deberta_client import NLIResult
     from core.nli.lexical_overlap import LexicalSignal
@@ -366,7 +370,11 @@ def _aggregate_raw(raw: RawScores) -> tuple[str, str]:
         entity_overlap_score=raw.lexical_entity_score,
         entity_missing=list(raw.lexical_entity_missing),
     )
-    return aggregate(raw.llm_verdict, nli, lex)
+    return aggregate(raw.llm_verdict, nli, lex, config=config)
+
+
+# Re-export for tune.py / callers that want to pass a config.
+from core.nli.threshold_config import ThresholdConfig  # noqa: E402
 
 
 def _classify_error(
@@ -392,6 +400,7 @@ def run_calibration(
     raw_scores_path: Path | None = None,
     use_cache: bool = False,
     max_pairs: int | None = None,
+    threshold_config: "ThresholdConfig | None" = None,
 ) -> list[ScoredPair]:
     """Run the verifier across every golden-set pair, capture raw
     scores, run the aggregator, classify each result against
@@ -405,20 +414,50 @@ def run_calibration(
     Otherwise the runner calls ``verifier.score`` on each pair
     and writes the raw scores out to ``raw_scores_path``.
     """
-    gs = golden_set if golden_set is not None else load_golden_set()
-    entries = list(gs)
-    if max_pairs:
-        entries = entries[: int(max_pairs)]
-
+    # When replaying from cache and no golden_set override is
+    # given, build the entries directly from the cached rows. This
+    # is the Day 3 tuner's path — we don't want to require the
+    # 60-pair synthetic set to be in scope every time we sweep
+    # thresholds against a fixture-sized cache.
     cache: dict[str, dict[str, Any]] = {}
+    cached_payload: dict[str, Any] = {}
     if use_cache and raw_scores_path and raw_scores_path.exists():
         try:
-            payload = json.loads(raw_scores_path.read_text(encoding="utf-8"))
-            cache = {row["id"]: row["raw"] for row in payload.get("scored_pairs", [])}
+            cached_payload = json.loads(
+                raw_scores_path.read_text(encoding="utf-8")
+            )
+            cache = {
+                row["id"]: row["raw"]
+                for row in cached_payload.get("scored_pairs", [])
+            }
             logger.info("calibration: loaded %d cached scores", len(cache))
         except Exception as e:  # noqa: BLE001
             logger.warning("cache load failed; rescoring: %s", e)
             cache = {}
+
+    if golden_set is not None:
+        entries = list(golden_set)
+    elif use_cache and cache:
+        # Reconstruct lightweight GoldenEntry-shaped objects from
+        # the cached rows so the loop below doesn't need a separate
+        # codepath. We only need the fields _aggregate_raw + the
+        # ScoredPair constructor consume.
+        from eval.golden_set import GoldenEntry as _GE
+        entries = [
+            _GE(
+                id=row["id"], claim=row["claim"], evidence=row["evidence"],
+                evidence_source="synthetic",  # for type validation only
+                ground_truth=row["ground_truth"],
+                label_rationale="(from cache)",
+                category=row["category"],
+                adversarial=bool(row.get("adversarial", False)),
+            )
+            for row in cached_payload.get("scored_pairs", [])
+        ]
+    else:
+        entries = list(load_golden_set())
+    if max_pairs:
+        entries = entries[: int(max_pairs)]
 
     if verifier is None and not cache:
         verifier = HeuristicVerifier()
@@ -430,7 +469,9 @@ def run_calibration(
         else:
             assert verifier is not None
             raw = verifier.score(e.claim, e.evidence)
-        ensemble_verdict, reason = _aggregate_raw(raw)
+        ensemble_verdict, reason = _aggregate_raw(
+            raw, config=threshold_config,
+        )
         collapsed = collapse_verdict(ensemble_verdict)
         correct = collapsed == e.ground_truth
         results.append(ScoredPair(
