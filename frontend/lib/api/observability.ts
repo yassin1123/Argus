@@ -55,6 +55,17 @@ export interface DashboardFailureRow {
   error_message: string | null;
 }
 
+export interface VerificationQualityBlock {
+  measured: boolean;
+  fp_rate_on_supported: number | null;
+  recall_on_insufficient: number | null;
+  accuracy: number | null;
+  red_team_catch_rate: number | null;
+  red_team_escapes: number | null;
+  verifier_source: string | null;
+  as_of: string | null;
+}
+
 export interface DashboardData {
   hours: number;
   from: string;
@@ -63,6 +74,7 @@ export interface DashboardData {
   volume: VolumeBlock;
   artifacts_generated: number;
   verification: VerificationBlock;
+  verification_quality?: VerificationQualityBlock;
   cost: CostBlock;
   recent_failures: DashboardFailureRow[];
 }

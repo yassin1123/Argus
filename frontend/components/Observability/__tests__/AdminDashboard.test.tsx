@@ -66,6 +66,16 @@ function makeData(overrides: Partial<DashboardData> = {}): DashboardData {
         error_message: "WriterSchemaValidationError: missing valuation_range.method",
       },
     ],
+    verification_quality: {
+      measured: true,
+      fp_rate_on_supported: 0.6,
+      recall_on_insufficient: 0.933,
+      accuracy: 0.317,
+      red_team_catch_rate: 0.971,
+      red_team_escapes: 1,
+      verifier_source: "heuristic_no_keys",
+      as_of: "2026-05-26T22:00:00+00:00",
+    },
     ...overrides,
   };
 }
@@ -105,6 +115,16 @@ describe("AdminDashboard", () => {
     expect(failures).toHaveTextContent("research_gathered");
     expect(failures).toHaveTextContent("$0.0410 burned");
     expect(failures).toHaveTextContent("WriterSchemaValidationError");
+  });
+
+  it("renders the verification-quality panel (W21 trust metrics)", () => {
+    render(<AdminDashboard initialData={makeData()} />);
+    const q = screen.getByTestId("verification-quality-block");
+    expect(q).toBeInTheDocument();
+    expect(screen.getByTestId("quality-fp-rate")).toHaveTextContent("60.0%");
+    expect(screen.getByTestId("quality-recall")).toHaveTextContent("93.3%");
+    expect(screen.getByTestId("quality-red-team")).toHaveTextContent("97.1%");
+    expect(q).toHaveTextContent("heuristic_no_keys");
   });
 
   it("shows the no-failures empty state when none in window", () => {
