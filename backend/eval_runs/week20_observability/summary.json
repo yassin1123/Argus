@@ -1,0 +1,147 @@
+{
+  "engagements": [
+    {
+      "session_id": "868c40b9-2d07-4fac-b071-c4f8e655101b",
+      "firm_id": "5c1bfc8d-2979-40c1-920f-815c43730f01",
+      "mode": "m_and_a",
+      "status": "complete",
+      "engagement_cost_total": 0.4505
+    },
+    {
+      "session_id": "37e362be-f5c1-4d25-a292-4f3344f08f3e",
+      "firm_id": "5c1bfc8d-2979-40c1-920f-815c43730f01",
+      "mode": "growth_strategy",
+      "status": "complete",
+      "engagement_cost_total": 0.4505
+    },
+    {
+      "session_id": "1ebe31e1-92b1-4dd3-b38e-b58ece98808a",
+      "firm_id": "5c1bfc8d-2979-40c1-920f-815c43730f01",
+      "mode": "m_and_a",
+      "status": "complete",
+      "engagement_cost_total": 0.4505
+    },
+    {
+      "session_id": "618e71f6-c07a-4cb7-b45d-3c912c53c2a6",
+      "firm_id": "4f860fa6-c10d-4763-8e23-f530678801a9",
+      "mode": "m_and_a",
+      "status": "complete",
+      "engagement_cost_total": 0.4505
+    },
+    {
+      "session_id": "dd333ab2-b9d8-452b-9e39-7279fe395fc6",
+      "firm_id": "5c1bfc8d-2979-40c1-920f-815c43730f01",
+      "mode": "m_and_a",
+      "status": "failed",
+      "engagement_cost_total": 0.2275
+    }
+  ],
+  "assertions": {
+    "all_traces_assembled": true,
+    "timeline_lens": [
+      7,
+      7,
+      7,
+      7,
+      4
+    ],
+    "min_timeline_len": 4,
+    "cost_ledger_sums_match": true,
+    "cost_match_detail": [
+      {
+        "sid": "868c40b9...",
+        "ledger_total": 0.4505,
+        "reported_total": 0.4505,
+        "matches": true
+      },
+      {
+        "sid": "37e362be...",
+        "ledger_total": 0.4505,
+        "reported_total": 0.4505,
+        "matches": true
+      },
+      {
+        "sid": "1ebe31e1...",
+        "ledger_total": 0.4505,
+        "reported_total": 0.4505,
+        "matches": true
+      },
+      {
+        "sid": "618e71f6...",
+        "ledger_total": 0.4505,
+        "reported_total": 0.4505,
+        "matches": true
+      },
+      {
+        "sid": "dd333ab2...",
+        "ledger_total": 0.2275,
+        "reported_total": 0.2275,
+        "matches": true
+      }
+    ],
+    "metrics_engagements_by_mode": {
+      "m_and_a": 4,
+      "growth_strategy": 1
+    },
+    "metrics_llm_calls_by_provider": {
+      "anthropic": 18,
+      "openai": 13
+    },
+    "metrics_verdict_distribution": {
+      "supported_high": 72,
+      "supported_low": 24,
+      "weak": 8,
+      "contradicted": 4
+    },
+    "metrics_total_engagements": 5,
+    "metrics_match_expected_engagement_count": true,
+    "failure_diagnosable": true,
+    "failed_stage": "research_gathered",
+    "failed_error_kind": "schema_validation_failed",
+    "failed_cost_burned": 0.2275,
+    "no_prose_in_logs": true,
+    "no_prose_in_metrics": true,
+    "no_prose_in_cost_ledger": true,
+    "no_prose_in_traces": true,
+    "redaction_sentinel_in_logs": true,
+    "firm_scoping_cost": {
+      "firm_a_ledger": 1.579,
+      "firm_a_expected": 1.579,
+      "firm_b_ledger": 0.4505,
+      "firm_b_expected": 0.4505,
+      "no_cross_firm_leak": true
+    },
+    "firm_scoping_traces_disjoint": true,
+    "headline_pass": true
+  },
+  "verification_distribution_pct": {
+    "supported_pct": 88.89,
+    "partial_pct": 7.41,
+    "insufficient_pct": 3.7,
+    "total": 108
+  },
+  "prometheus_excerpt": [
+    "# HELP artifact_generated counter",
+    "# TYPE artifact_generated counter",
+    "artifact_generated_total 4.0",
+    "# HELP engagement_completed counter",
+    "# TYPE engagement_completed counter",
+    "engagement_completed_total 4.0",
+    "# HELP engagement_failed counter",
+    "# TYPE engagement_failed counter",
+    "engagement_failed_total 1.0",
+    "# HELP engagement_started counter",
+    "# TYPE engagement_started counter",
+    "engagement_started_total 5.0",
+    "# HELP llm_call counter",
+    "# TYPE llm_call counter",
+    "llm_call_total 31.0",
+    "# HELP retrieval_hits counter",
+    "# TYPE retrieval_hits counter",
+    "retrieval_hits_total 168.0",
+    "# HELP verification_verdict counter",
+    "# TYPE verification_verdict counter",
+    "verification_verdict_total 108.0"
+  ],
+  "total_cost_across_all_engagements": 2.0295
+}

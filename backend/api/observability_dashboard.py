@@ -1,0 +1,185 @@
+"""Admin observability dashboard API — Phase 5 / Week 20 / Day 5.
+
+One endpoint that returns the at-a-glance system-health view by
+joining the four W20 components: metrics (D2), cost ledger (D3),
+trace assembler (D4), structured logs (D1, indirectly via metrics).
+
+Firm-scoping rule matches the rest of W20: firm_admins see only
+their own firm; system-admins see cross-firm. The endpoint never
+recomputes anything — it reads from the layers we already built
++ assembles one response shape the React dashboard renders.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from auth.dependencies import get_current_user
+from core.observability.cost_rollups import cost_by_model, firm_cost
+from core.observability.metrics import query_window
+from core.observability.trace_view import recent_traces
+from db.connection import acquire
+
+
+router = APIRouter()
+
+
+def _is_system_admin(user: dict) -> bool:
+    return user.get("role") == "admin"
+
+
+def _is_firm_admin(user: dict) -> bool:
+    return user.get("default_firm_role") == "admin"
+
+
+def _scope_firm_id(user: dict, requested: str | None) -> str | None:
+    """Same gate as the W20/D2 metrics + W20/D3 cost endpoints —
+    firm-admin forced to their default firm regardless of any
+    ``?firm_id`` query-param override."""
+    if _is_system_admin(user):
+        return requested or None
+    return user.get("default_firm_id")
+
+
+async def _verification_distribution(
+    firm_id: str | None, from_ts: datetime, to_ts: datetime,
+) -> dict[str, Any]:
+    """Roll up the verification.verdict counter into the quality
+    signal Week 21 will tune NLI thresholds against."""
+    rows = await query_window(
+        "verification.verdict",
+        from_ts=from_ts, to_ts=to_ts,
+        firm_id=firm_id, group_by="outcome",
+    )
+    dist = {str(r["group"]): int(r["sum"]) for r in rows if r["group"]}
+    total = sum(dist.values())
+    # Supported = supported_high + supported_low; partial = weak;
+    # insufficient = contradicted + unknown. Mirrors how the verifier
+    # buckets verdicts in claim_state.
+    supported = dist.get("supported_high", 0) + dist.get("supported_low", 0)
+    partial = dist.get("weak", 0)
+    insufficient = dist.get("contradicted", 0) + dist.get("unknown", 0)
+    return {
+        "verdicts": dist,
+        "total": total,
+        "supported_pct": (supported / total * 100.0) if total else 0.0,
+        "partial_pct": (partial / total * 100.0) if total else 0.0,
+        "insufficient_pct": (insufficient / total * 100.0) if total else 0.0,
+    }
+
+
+async def _engagement_volume(
+    firm_id: str | None, from_ts: datetime, to_ts: datetime,
+) -> dict[str, Any]:
+    """Engagement counts + by-mode + success rate over the window."""
+    started_rows = await query_window(
+        "engagement.started", from_ts=from_ts, to_ts=to_ts,
+        firm_id=firm_id, group_by="mode",
+    )
+    completed_rows = await query_window(
+        "engagement.completed", from_ts=from_ts, to_ts=to_ts,
+        firm_id=firm_id, group_by="mode",
+    )
+    failed_rows = await query_window(
+        "engagement.failed", from_ts=from_ts, to_ts=to_ts,
+        firm_id=firm_id, group_by="mode",
+    )
+    started = int(sum(r["sum"] for r in started_rows))
+    completed = int(sum(r["sum"] for r in completed_rows))
+    failed = int(sum(r["sum"] for r in failed_rows))
+    finished = completed + failed
+    return {
+        "started": started,
+        "completed": completed,
+        "failed": failed,
+        "in_flight": max(0, started - finished),
+        "success_rate_pct": (completed / finished * 100.0) if finished else 0.0,
+        "by_mode": {
+            str(r["group"]): {
+                "count": int(r["sum"]),
+            }
+            for r in started_rows if r["group"]
+        },
+    }
+
+
+async def _artifact_count(
+    firm_id: str | None, from_ts: datetime, to_ts: datetime,
+) -> int:
+    rows = await query_window(
+        "artifact.generated", from_ts=from_ts, to_ts=to_ts,
+        firm_id=firm_id, group_by=None,
+    )
+    return int(rows[0]["sum"]) if rows else 0
+
+
+@router.get("/observability/dashboard")
+async def get_dashboard(
+    hours: int = Query(24, ge=1, le=720),
+    firm_id: str | None = Query(
+        None, description="(system-admin only) scope to one firm",
+    ),
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """System-health snapshot. Returns the bundle the React
+    dashboard renders: volume, success rate, cost trend, verdict
+    distribution, recent failures.
+    """
+    if not (_is_system_admin(user) or _is_firm_admin(user)):
+        raise HTTPException(status_code=403, detail="Admin role required")
+
+    scoped_firm = _scope_firm_id(user, firm_id)
+    now = datetime.now(tz=timezone.utc)
+    from_ts = now - timedelta(hours=int(hours))
+
+    volume = await _engagement_volume(scoped_firm, from_ts, now)
+    verdicts = await _verification_distribution(scoped_firm, from_ts, now)
+    artifacts = await _artifact_count(scoped_firm, from_ts, now)
+
+    # Cost: firm rollup for the scoped firm; cross-firm by-model
+    # for system admins. firm_cost handles the firm_id=None case
+    # by returning an empty FirmCost, so we branch on the scope.
+    cost_panel: dict[str, Any]
+    if scoped_firm is not None:
+        fc = await firm_cost(scoped_firm, from_ts=from_ts, to_ts=now)
+        cost_panel = {
+            "scope": "firm",
+            "firm_id": scoped_firm,
+            "total_usd": fc.total_usd,
+            "call_count": fc.call_count,
+            "engagement_count": fc.engagement_count,
+            "by_model": [r.to_dict() for r in fc.by_model],
+        }
+    else:
+        rows = await cost_by_model(from_ts=from_ts, to_ts=now)
+        cost_panel = {
+            "scope": "system",
+            "firm_id": None,
+            "total_usd": float(sum(r["total_usd"] for r in rows)),
+            "by_model": rows,
+        }
+
+    # Recent failures with cost burned + failed_stage so an operator
+    # can click straight into the W20/D4 trace.
+    failures = await recent_traces(
+        status="failed", firm_id=scoped_firm,
+        hours=int(hours), limit=10,
+    )
+
+    return {
+        "hours": int(hours),
+        "from": from_ts.isoformat(),
+        "to": now.isoformat(),
+        "firm_scoped_to": scoped_firm,
+        "volume": volume,
+        "artifacts_generated": artifacts,
+        "verification": verdicts,
+        "cost": cost_panel,
+        "recent_failures": failures,
+    }
+
+
+__all__ = ["router"]
