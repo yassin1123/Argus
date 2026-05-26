@@ -1,0 +1,1193 @@
+{
+  "config_used": {
+    "deberta_high_conf": 0.7,
+    "numeric_drift_below": 0.95,
+    "borderline_band": 0.0,
+    "id": "w21_d3_tuned",
+    "rationale": "W21/D3 tuning over-flagged genuinely-supported claims at 100.0%; per the spec hard rule keeping the W2/D3 defaults. The bottleneck is upstream signal quality, not thresholds -- see over_flagging panel + tuned.json failure cases.",
+    "source": "w21_d3_tune"
+  },
+  "numeric_probe_enabled": true,
+  "summary": {
+    "total": 34,
+    "caught": 33,
+    "escapes": 1,
+    "catch_rate": 0.9705882352941176,
+    "per_exploit_type": {
+      "magnitude_mismatch": {
+        "total": 4,
+        "caught": 4,
+        "escapes": [],
+        "catch_rate": 1.0
+      },
+      "misattribution": {
+        "total": 4,
+        "caught": 3,
+        "escapes": [
+          "rt_007"
+        ],
+        "catch_rate": 0.75
+      },
+      "temporal_drift": {
+        "total": 4,
+        "caught": 4,
+        "escapes": [],
+        "catch_rate": 1.0
+      },
+      "overclaim": {
+        "total": 4,
+        "caught": 4,
+        "escapes": [],
+        "catch_rate": 1.0
+      },
+      "fabricated_specific": {
+        "total": 7,
+        "caught": 7,
+        "escapes": [],
+        "catch_rate": 1.0
+      },
+      "plausible_but_absent": {
+        "total": 3,
+        "caught": 3,
+        "escapes": [],
+        "catch_rate": 1.0
+      },
+      "negation_flip": {
+        "total": 4,
+        "caught": 4,
+        "escapes": [],
+        "catch_rate": 1.0
+      },
+      "cherry_pick": {
+        "total": 4,
+        "caught": 4,
+        "escapes": [],
+        "catch_rate": 1.0
+      }
+    },
+    "escape_details": [
+      {
+        "id": "rt_007",
+        "exploit_type": "misattribution",
+        "claim_head": "The board chair endorsed the cost-out programme at the AGM.",
+        "evidence_head": "The CEO's AGM speech endorsed the cost-out programme. The chair's opening remarks focused on board renewal.",
+        "expected_verdict": "insufficient",
+        "pre_probe_verdict": "supported_high",
+        "final_verdict": "supported_high",
+        "probe_triggered": false,
+        "probe_reason": "probe clean: numeric overlap 1.00",
+        "raw_llm_verdict": "supported",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.8,
+        "raw_lexical_numeric_score": 1.0,
+        "rationale": "Endorsement happened; wrong person attributed.",
+        "prescribed_mitigation": "Out-of-scope for threshold tuning \u2014 the LLM judge needs to attend to speaker / source attribution. Documented limitation; Week 22 prompt-tightening + an entity-attribution check would close it. NOT a threshold problem."
+      }
+    ],
+    "probe_contribution": {
+      "catch_rate_with_probe": 0.9705882352941176,
+      "catch_rate_without_probe": 0.9705882352941176,
+      "additional_catches_from_probe": 0
+    }
+  },
+  "all_results": [
+    {
+      "id": "rt_001",
+      "exploit_type": "magnitude_mismatch",
+      "claim": "Revenue grew 25% in FY2023.",
+      "evidence": "Revenue increased from \u00a340m to \u00a346m in FY2023 \u2014 a 15% rise.",
+      "expected_verdict": "partial",
+      "rationale": "Both say 'revenue grew' \u2014 the LLM may anchor on gist.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "25%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_002",
+      "exploit_type": "magnitude_mismatch",
+      "claim": "EBITDA margin expanded 400 basis points.",
+      "evidence": "EBITDA margin expanded 120 basis points to 14.2%.",
+      "expected_verdict": "partial",
+      "rationale": "Direction supported, magnitude overstated by 3x.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "400"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_003",
+      "exploit_type": "magnitude_mismatch",
+      "claim": "Customer churn fell to 8% in FY2023.",
+      "evidence": "Customer churn improved to 12% in FY2023, down from 14%.",
+      "expected_verdict": "partial",
+      "rationale": "Improvement direction right; absolute level wrong.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "8%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_004",
+      "exploit_type": "magnitude_mismatch",
+      "claim": "Free cash flow doubled YoY to \u00a380m.",
+      "evidence": "Free cash flow rose 35% to \u00a342m in FY2023.",
+      "expected_verdict": "partial",
+      "rationale": "Both 'rose' but doubled (100%) vs 35%; \u00a380m vs \u00a342m.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a380m"
+        ],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "YoY"
+        ]
+      }
+    },
+    {
+      "id": "rt_005",
+      "exploit_type": "misattribution",
+      "claim": "The CFO said FY2024 EBITDA will be \u00a314m.",
+      "evidence": "On the Q4 earnings call, CEO J. Walters guided FY2024 EBITDA to \u00a312-14m. The CFO declined to comment on forward guidance.",
+      "expected_verdict": "insufficient",
+      "rationale": "Right number, right call \u2014 wrong speaker.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a314m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_006",
+      "exploit_type": "misattribution",
+      "claim": "PwC identified the loan-loss provision as a key audit matter.",
+      "evidence": "PwC's FY2023 opinion identified inventory valuation as a key audit matter. Loan-loss provisioning was reviewed by internal audit, not the external auditor.",
+      "expected_verdict": "insufficient",
+      "rationale": "Right auditor, right topic class \u2014 wrong issue attributed.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_007",
+      "exploit_type": "misattribution",
+      "claim": "The board chair endorsed the cost-out programme at the AGM.",
+      "evidence": "The CEO's AGM speech endorsed the cost-out programme. The chair's opening remarks focused on board renewal.",
+      "expected_verdict": "insufficient",
+      "rationale": "Endorsement happened; wrong person attributed.",
+      "pre_probe_verdict": "supported_high",
+      "pre_probe_collapsed": "supported",
+      "final_verdict": "supported_high",
+      "final_collapsed": "supported",
+      "probe_triggered": false,
+      "probe_reason": "probe clean: numeric overlap 1.00",
+      "caught": false,
+      "escape": true,
+      "raw": {
+        "llm_verdict": "supported",
+        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_008",
+      "exploit_type": "misattribution",
+      "claim": "Moody's downgraded TargetCo to Baa3 in October 2023.",
+      "evidence": "S&P downgraded TargetCo to BBB- in October 2023, citing weaker interest coverage. Moody's rating was unchanged at Baa2.",
+      "expected_verdict": "insufficient",
+      "rationale": "Right action, right month \u2014 wrong rating agency.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_009",
+      "exploit_type": "temporal_drift",
+      "claim": "Revenue grew 12% in FY2023.",
+      "evidence": "Revenue grew 12% in FY2022, from \u00a340m to \u00a344.8m. FY2023 results have not yet been disclosed.",
+      "expected_verdict": "insufficient",
+      "rationale": "Right growth rate, right company \u2014 wrong fiscal year.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      }
+    },
+    {
+      "id": "rt_010",
+      "exploit_type": "temporal_drift",
+      "claim": "Q3 FY2024 net debt stood at \u00a335m.",
+      "evidence": "Q3 FY2023 net debt stood at \u00a335m, down from \u00a342m in the prior quarter. Q3 FY2024 results are due in November.",
+      "expected_verdict": "insufficient",
+      "rationale": "Identical number, wrong period.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "Q3 FY2024"
+        ]
+      }
+    },
+    {
+      "id": "rt_011",
+      "exploit_type": "temporal_drift",
+      "claim": "The Q4 FY2024 share buyback was completed in March 2024.",
+      "evidence": "The Q4 FY2023 share buyback completed in March 2024 (after the fiscal year end). Q4 FY2024 buyback plans have not been announced.",
+      "expected_verdict": "insufficient",
+      "rationale": "March 2024 date matches; the year-attribution is wrong.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_012",
+      "exploit_type": "temporal_drift",
+      "claim": "The reorganisation was completed in FY2024.",
+      "evidence": "The reorganisation was completed in Q1 FY2023, well ahead of the original FY2024 timeline.",
+      "expected_verdict": "contradicted",
+      "rationale": "Ahead-of-plan completion: claim's year is contradicted.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_013",
+      "exploit_type": "overclaim",
+      "claim": "TargetCo dominates the UK mid-market segment.",
+      "evidence": "TargetCo holds a 14% share of the UK mid-market segment, the largest single share but well below 'dominant' positioning.",
+      "expected_verdict": "partial",
+      "rationale": "Largest share != dominant; the LLM may treat them as synonymous.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_014",
+      "exploit_type": "overclaim",
+      "claim": "The product launch was a runaway success.",
+      "evidence": "Q3 sales of the new product exceeded plan by 8%, contributing \u00a31.4m of revenue.",
+      "expected_verdict": "partial",
+      "rationale": "8% beat is not 'runaway success'.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_015",
+      "exploit_type": "overclaim",
+      "claim": "Operating leverage is fully realised at this scale.",
+      "evidence": "FY2023 operating leverage of 1.3x indicates meaningful but not fully realised scale benefits.",
+      "expected_verdict": "partial",
+      "rationale": "'Meaningful' is being inflated to 'fully realised'.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_016",
+      "exploit_type": "overclaim",
+      "claim": "Customer satisfaction is best-in-class across the sector.",
+      "evidence": "TargetCo ranked 3rd of 12 on customer satisfaction in the trade survey, an improvement from 7th in the prior year.",
+      "expected_verdict": "partial",
+      "rationale": "3rd is not best-in-class.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_017",
+      "exploit_type": "fabricated_specific",
+      "claim": "TargetCo's gross margin improved by exactly 247 basis points.",
+      "evidence": "Gross margin expanded materially in FY2023 driven by the pricing programme and lower input costs.",
+      "expected_verdict": "insufficient",
+      "rationale": "247 bps is fabricated; evidence is qualitative only.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "247"
+        ],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "TargetCo"
+        ]
+      }
+    },
+    {
+      "id": "rt_018",
+      "exploit_type": "fabricated_specific",
+      "claim": "The acquisition will deliver \u00a33.7m of cost synergies by year three.",
+      "evidence": "Management cited 'meaningful cost synergies' from the acquisition, with timing dependent on integration milestones.",
+      "expected_verdict": "insufficient",
+      "rationale": "\u00a33.7m + year three are both fabricated specifics.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a33.7m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_019",
+      "exploit_type": "fabricated_specific",
+      "claim": "The CEO holds 8.4% of outstanding shares.",
+      "evidence": "The CEO is a meaningful shareholder; the company's beneficial-ownership filings disclose senior-executive holdings annually.",
+      "expected_verdict": "insufficient",
+      "rationale": "8.4% is fabricated; evidence is generic.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "8.4%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_020",
+      "exploit_type": "fabricated_specific",
+      "claim": "Net working capital was 18.2 days at FY2023 year-end.",
+      "evidence": "Working-capital efficiency improved through FY2023 reflecting the new collections process.",
+      "expected_verdict": "insufficient",
+      "rationale": "18.2 days is a fabricated precise figure.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "18.2"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_021",
+      "exploit_type": "fabricated_specific",
+      "claim": "Engineering headcount stood at 247 at FY2023 year-end.",
+      "evidence": "Engineering team grew through FY2023 driven by the platform rebuild.",
+      "expected_verdict": "insufficient",
+      "rationale": "247 is fabricated; evidence states only the direction.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "247"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_022",
+      "exploit_type": "plausible_but_absent",
+      "claim": "TargetCo has positive net cash of \u00a312m.",
+      "evidence": "Treasury commentary at the FY2023 results discussed capital allocation priorities including ongoing debt repayment, dividend policy, and selective bolt-on M&A.",
+      "expected_verdict": "insufficient",
+      "rationale": "Capital position is the natural topic; evidence simply doesn't address it.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a312m"
+        ],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "TargetCo"
+        ]
+      }
+    },
+    {
+      "id": "rt_023",
+      "exploit_type": "plausible_but_absent",
+      "claim": "The company's effective tax rate is 19%.",
+      "evidence": "Tax expense for FY2023 reflected the standard UK corporate rate with adjustments for R&D tax credits and prior-year items.",
+      "expected_verdict": "insufficient",
+      "rationale": "Tax discussed; no rate stated.",
+      "pre_probe_verdict": "unsupported",
+      "pre_probe_collapsed": "insufficient",
+      "final_verdict": "unsupported",
+      "final_collapsed": "insufficient",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "19%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_024",
+      "exploit_type": "plausible_but_absent",
+      "claim": "Cash conversion was 85% in FY2023.",
+      "evidence": "Cash conversion remained strong in FY2023 supported by working-capital discipline and a benign capex year.",
+      "expected_verdict": "insufficient",
+      "rationale": "'Strong' is not 85% \u2014 the figure is absent.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "85%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_025",
+      "exploit_type": "negation_flip",
+      "claim": "The company plans to expand into Germany in FY2024.",
+      "evidence": "The company has no plans to enter Germany in FY2024, with European expansion focused on the Nordics.",
+      "expected_verdict": "contradicted",
+      "rationale": "Negation easy to miss in a long sentence.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_026",
+      "exploit_type": "negation_flip",
+      "claim": "The board approved the dividend increase.",
+      "evidence": "The board considered but did not approve the proposed dividend increase at its March meeting, citing capital-allocation flexibility.",
+      "expected_verdict": "contradicted",
+      "rationale": "'Did not approve' embedded in approval-context sentence.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_027",
+      "exploit_type": "negation_flip",
+      "claim": "The new ERP rollout is on schedule.",
+      "evidence": "The new ERP rollout has slipped by two quarters; the revised go-live is now Q2 FY2025.",
+      "expected_verdict": "contradicted",
+      "rationale": "Slip vs on-schedule.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_028",
+      "exploit_type": "negation_flip",
+      "claim": "Audit findings were free of material weaknesses.",
+      "evidence": "The FY2023 audit identified a material weakness in revenue-recognition controls, since remediated.",
+      "expected_verdict": "contradicted",
+      "rationale": "Material weakness present; 'since remediated' may distract the judge.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_029",
+      "exploit_type": "cherry_pick",
+      "claim": "Quarterly revenue growth accelerated through FY2023.",
+      "evidence": "Quarterly YoY revenue growth was Q1: 18%, Q2: 14%, Q3: 11%, Q4: 16%.",
+      "expected_verdict": "partial",
+      "rationale": "Q4 accelerated vs Q3; over the year, the trend was deceleration with a Q4 bump.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      }
+    },
+    {
+      "id": "rt_030",
+      "exploit_type": "cherry_pick",
+      "claim": "Customer satisfaction improved across every product line.",
+      "evidence": "NPS improved in four of the six product lines in FY2023; the two lagging lines saw modest declines that are being addressed.",
+      "expected_verdict": "partial",
+      "rationale": "Four of six is not 'every'.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_031",
+      "exploit_type": "cherry_pick",
+      "claim": "Gross margin expanded across all regions in FY2023.",
+      "evidence": "FY2023 gross margin expanded in the UK and DACH; APAC and the Americas saw modest contraction.",
+      "expected_verdict": "partial",
+      "rationale": "Two regions up, two down \u2014 the claim asserts uniformity that isn't there.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      }
+    },
+    {
+      "id": "rt_032",
+      "exploit_type": "cherry_pick",
+      "claim": "Every senior leader had a positive scorecard in FY2023.",
+      "evidence": "5 of 8 senior leaders received scorecards above plan in FY2023; the other 3 had mixed outcomes attributed to one-off factors.",
+      "expected_verdict": "partial",
+      "rationale": "5 of 8 != every.",
+      "pre_probe_verdict": "weak",
+      "pre_probe_collapsed": "partial",
+      "final_verdict": "weak",
+      "final_collapsed": "partial",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_033",
+      "exploit_type": "fabricated_specific",
+      "claim": "The CFO guided to a 14.5% FY2024 EBITDA margin.",
+      "evidence": "On the Q4 earnings call, the CFO reiterated commitment to ongoing margin discipline but did not provide a specific FY2024 margin guidance.",
+      "expected_verdict": "insufficient",
+      "rationale": "Real speaker, real topic, fabricated specific number.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "14.5%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    },
+    {
+      "id": "rt_034",
+      "exploit_type": "fabricated_specific",
+      "claim": "PwC's report cited a 22% probability of going-concern impairment.",
+      "evidence": "PwC's FY2023 going-concern review concluded no material uncertainty exists, citing strong liquidity headroom and covenant compliance.",
+      "expected_verdict": "insufficient",
+      "rationale": "Real source (PwC), real topic (going-concern), invented quant figure.",
+      "pre_probe_verdict": "contradicted",
+      "pre_probe_collapsed": "contradicted",
+      "final_verdict": "contradicted",
+      "final_collapsed": "contradicted",
+      "probe_triggered": false,
+      "probe_reason": "probe skipped: not a supported verdict",
+      "caught": true,
+      "escape": false,
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "22%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      }
+    }
+  ]
+}
