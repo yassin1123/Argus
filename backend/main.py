@@ -11,7 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 load_dotenv()
 
 from api import auth as auth_router
-from api import admin, artifacts, chat, collaboration, comments, cost as cost_router, engagements, evaluations, exports, firm_library, firm_modes, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, reports, review, section_deepening, session_exports, sessions, sources, users, versioning as versioning_router, workspace
+from api import admin, artifacts, chat, collaboration, comments, cost as cost_router, engagements, evaluations, exports, firm_library, firm_modes, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, reports, review, section_deepening, session_exports, sessions, sources, trace as trace_router, users, versioning as versioning_router, workspace
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
@@ -118,6 +118,9 @@ app.include_router(metrics_router.router, prefix="/api/admin", tags=["admin", "m
 # W20/D3 cost API — engagement view on /api/sessions; firm + system-wide on /api/admin.
 app.include_router(cost_router.session_router, prefix="/api/sessions", tags=["cost"], dependencies=PROTECTED)
 app.include_router(cost_router.router, prefix="/api/admin", tags=["admin", "cost"], dependencies=PROTECTED)
+# W20/D4 trace API — engagement view on /api/sessions; recent on /api/admin.
+app.include_router(trace_router.session_router, prefix="/api/sessions", tags=["trace"], dependencies=PROTECTED)
+app.include_router(trace_router.router, prefix="/api/admin", tags=["admin", "trace"], dependencies=PROTECTED)
 
 
 @app.get("/api/health")
