@@ -1,0 +1,130 @@
+{
+  "total_pairs": 60,
+  "false_positive_count": 3,
+  "fault_distribution": {
+    "evidence_fault": 1,
+    "deberta_fault": 1,
+    "lexical_false_friend": 1
+  },
+  "fp_diagnoses": [
+    {
+      "id": "gs_019",
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "supported_high",
+      "primary_fault": "evidence_fault",
+      "secondary_faults": [],
+      "rationale": "every component scored consistent with the chunk (LLM=supported, deberta=entailment, lex=1.0) yet the ground truth is insufficient \u2014 the chunk is topically related but doesn't establish the specific assertion. Retrieval / evidence-selection is the fix target, not the verifier signals themselves.",
+      "components": {
+        "llm_verdict": "supported",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "lexical_numeric_score": 1.0
+      },
+      "claim_head": "The price increase in Q2 drove the margin expansion.",
+      "evidence_head": "Gross margin in Q2 FY2023 was 38.4%, up from 36.2% in Q1 FY2023. The company implemented a price increase across the core SKU portfolio effe"
+    },
+    {
+      "id": "gs_024",
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "supported_high",
+      "primary_fault": "deberta_fault",
+      "secondary_faults": [
+        "llm_entailment_fault"
+      ],
+      "rationale": "ground truth is contradicted but DeBERTa labelled 'entailment' at conf 0.80. The cross-encoder should have flagged contradiction; this is a model-reliability question, not a threshold one.",
+      "components": {
+        "llm_verdict": "supported",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "lexical_numeric_score": 1.0
+      },
+      "claim_head": "Customer churn caused the FY2023 revenue growth.",
+      "evidence_head": "Customer churn improved from 14% in FY2022 to 11% in FY2023; stronger retention was a meaningful contributor to FY2023 revenue growth."
+    },
+    {
+      "id": "gs_028",
+      "ground_truth": "partial",
+      "ensemble_verdict": "supported_high",
+      "primary_fault": "lexical_false_friend",
+      "secondary_faults": [
+        "llm_entailment_fault"
+      ],
+      "rationale": "ground truth is partial (claim asserts more than the evidence supports) but lex=1.0 \u2014 the lexical signal doesn't catch semantic / conjunctive overclaims. LLM judge prompt-tightening is the secondary fix; lexical signal cannot be tuned to fix this class.",
+      "components": {
+        "llm_verdict": "supported",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "lexical_numeric_score": 1.0
+      },
+      "claim_head": "TargetCo outperformed its global peer set on both revenue growth and margin in FY2023.",
+      "evidence_head": "FY2023 revenue growth at TargetCo (12%) exceeded the global peer-set median (5%). Margin performance was broadly in line with the peer media"
+    }
+  ],
+  "evidence_audit": {
+    "signal_fault_count": 2,
+    "evidence_fault_count": 1,
+    "evidence_fault_fraction": 0.3333,
+    "evidence_fault_samples": [
+      {
+        "id": "gs_019",
+        "claim_head": "The price increase in Q2 drove the margin expansion.",
+        "evidence_head": "Gross margin in Q2 FY2023 was 38.4%, up from 36.2% in Q1 FY2023. The company implemented a price increase across the core SKU portfolio effe",
+        "ground_truth": "insufficient"
+      }
+    ],
+    "interpretation": "signal_fault"
+  },
+  "component_reliability": [
+    {
+      "component": "llm",
+      "samples": 60,
+      "correct": 44,
+      "incorrect": 16,
+      "silent": 0,
+      "reliability": 0.7333
+    },
+    {
+      "component": "deberta",
+      "samples": 24,
+      "correct": 19,
+      "incorrect": 5,
+      "silent": 36,
+      "reliability": 0.7917
+    },
+    {
+      "component": "lexical",
+      "samples": 60,
+      "correct": 26,
+      "incorrect": 34,
+      "silent": 0,
+      "reliability": 0.4333
+    }
+  ],
+  "component_agreement": {
+    "all_three_agree_supported": 5,
+    "all_three_agree_not_supported": 14,
+    "disagreement_cases": 41,
+    "minority_correctly_called_when_disagree": {
+      "lexical": 11,
+      "deberta": 1
+    }
+  },
+  "highest_leverage_target": {
+    "target": "multi_front",
+    "rationale": "FPs split across multiple fault types with no dominant one (top fault = Evidence fault (wrong/insufficient chunk) at 33%). This is a harder, multi-front problem; the week's expectations adjust + each fault type gets its own incremental fix in Days 3-5.",
+    "fault_distribution": {
+      "evidence_fault": 1,
+      "deberta_fault": 1,
+      "lexical_false_friend": 1
+    }
+  },
+  "config_used": {
+    "deberta_high_conf": 0.7,
+    "numeric_drift_below": 0.95,
+    "borderline_band": 0.0,
+    "id": "default_w2d3",
+    "rationale": "Pre-W21/D3 defaults. The aggregator constants as locked in Phase 1 / Week 2 / Day 3 before any calibration data existed.",
+    "source": "code_default"
+  },
+  "raw_scores_path": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\eval\\calibration\\raw_scores.json"
+}
