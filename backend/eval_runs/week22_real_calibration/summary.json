@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-05-26T19:51:07.555465+00:00",
+  "verifier_source": "skipped_no_real_labels",
+  "real_pair_count": 0,
+  "real_metrics": null,
+  "synthetic_baseline": {
+    "verifier_source_at_baseline": "heuristic_no_keys",
+    "fp_rate_on_supported": 0.6,
+    "recall_on_insufficient": 0.9333
+  },
+  "scoping": {
+    "verdict": "labeling_pending",
+    "rationale": "No labelled real claims found in real_runs/. The spec's explicit fallback applies: the week proceeds on the synthetic worst-case (the W21 60% FP) as the safer default. Yassin runs tools/extract_claims_for_labeling.py + tools/label_claims.py to seed the batch when the 30-60 min commitment is available, then re-runs this script and the verdict re-classifies.",
+    "real_fp_rate_on_supported": null,
+    "real_recall_on_insufficient": null,
+    "synthetic_fp_rate_on_supported": 0.6,
+    "synthetic_recall_on_insufficient": 0.9333,
+    "real_pair_count": 0,
+    "drives_w22_days_2_to_5": "Days 2-5 follow the FULL FIX path (the W21 synthetic 60% FP is the working number until real labels exist)."
+  },
+  "comparison": {
+    "real_vs_synthetic_fp_delta": null,
+    "real_vs_synthetic_recall_delta": null,
+    "synthetic_was_worst_case": null
+  },
+  "next_steps_for_labelling": [
+    "python tools/extract_claims_for_labeling.py --source eval_runs --per-verdict 12 --limit 200 --out backend/eval/golden_set/real_runs/_worksheet.json",
+    "python tools/label_claims.py --in backend/eval/golden_set/real_runs/_worksheet.json --out backend/eval/golden_set/real_runs/labelled_<date>.yaml",
+    "python -m eval.calibration.run_real_calibration  # re-run; the verdict reclassifies"
+  ]
+}
