@@ -1,0 +1,8 @@
+deberta_high_conf: 0.7
+numeric_drift_below: 0.95
+borderline_band: 0.0
+id: w21_d3_tuned
+rationale: W21/D3 tuning over-flagged genuinely-supported claims at 100.0%; per the
+  spec hard rule keeping the W2/D3 defaults. The bottleneck is upstream signal quality,
+  not thresholds -- see over_flagging panel + tuned.json failure cases.
+source: w21_d3_tune
