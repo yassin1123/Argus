@@ -1,0 +1,1742 @@
+{
+  "verifier_source": "heuristic_no_keys",
+  "pair_count": 60,
+  "scored_pairs": [
+    {
+      "id": "gs_001",
+      "claim": "TargetCo's revenue grew 12% in FY2023.",
+      "evidence": "Per the FY2023 annual report, TargetCo reported revenue of \u00a350.4m, up 12% year-over-year from \u00a345.0m in FY2022.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_002",
+      "claim": "EBITDA margin expanded to 18% in FY2023.",
+      "evidence": "FY2023 reported EBITDA was \u00a39.1m on revenue of \u00a350.4m, yielding an 18.06% EBITDA margin, up from 15.2% in FY2022.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_003",
+      "claim": "Operating cash flow exceeded \u00a340m in FY2023.",
+      "evidence": "Cash generated from operations in FY2023 was \u00a342.3m, the highest since the FY2019 reorganisation.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a340m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_004",
+      "claim": "Revenue grew by 20% in FY2023.",
+      "evidence": "Revenue increased from \u00a345m to \u00a350.4m in FY2023, a 12% rise year-over-year.",
+      "category": "numeric_claim",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "20%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_005",
+      "claim": "Free cash flow doubled to over \u00a380m in FY2023.",
+      "evidence": "Free cash flow in FY2023 was \u00a342.3m, up from \u00a330.1m in FY2022 \u2014 a 40% increase.",
+      "category": "numeric_claim",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a380m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_006",
+      "claim": "Headcount grew 50% in FY2023.",
+      "evidence": "Headcount as at year-end FY2023 stood at 1,140, compared with 950 in FY2022.",
+      "category": "numeric_claim",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "50%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_007",
+      "claim": "TargetCo's revenue grew 12% in FY2023.",
+      "evidence": "TargetCo's FY2023 results presentation emphasised the company's expanded distribution footprint and new product launches.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "12%"
+        ],
+        "lexical_entity_score": 0.5,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_008",
+      "claim": "Capex was \u00a315m in FY2023.",
+      "evidence": "The CFO commentary noted that capex priorities in FY2023 centred on the new distribution centre and ERP rollout.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a315m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_009",
+      "claim": "Net debt declined to \u00a38m at FY2023 year-end.",
+      "evidence": "Management commented that the deleveraging programme remained on track through FY2023, with continued debt repayment quarter on quarter.",
+      "category": "numeric_claim",
+      "adversarial": true,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a38m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_010",
+      "claim": "Revenue grew 12% in FY2023.",
+      "evidence": "Revenue declined 8% in FY2023, from \u00a350m to \u00a346m, driven by the loss of a key customer contract.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "12%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_011",
+      "claim": "EBITDA margin expanded in FY2023.",
+      "evidence": "EBITDA margin compressed by 220 basis points to 12.8% in FY2023, the lowest level in five years.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_012",
+      "claim": "Operating cash flow exceeded \u00a340m in FY2023.",
+      "evidence": "Operating cash flow in FY2023 was \u00a318m, sharply lower than the \u00a340m guidance issued at the start of the year.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_013",
+      "claim": "The price increase in Q2 drove the margin expansion.",
+      "evidence": "Management attributed the 220 bps gross-margin improvement in Q2 to the April price rise on the flagship product line, which more than offset the input-cost inflation seen in H1.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_014",
+      "claim": "The loss of the Acme contract caused the revenue decline.",
+      "evidence": "The \u00a36m revenue shortfall in H2 was driven by the non-renewal of the Acme master services agreement in October, which had contributed \u00a38m of run-rate revenue.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_015",
+      "claim": "Supply chain delays drove the Q3 working-capital build.",
+      "evidence": "Inventory increased \u00a34m sequentially in Q3 as the company deliberately ordered ahead of expected port congestion at Felixstowe, a precaution that proved necessary as lead times extended through October.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_016",
+      "claim": "The pricing action alone drove the FY2023 margin expansion.",
+      "evidence": "Margin expansion in FY2023 reflected the combined impact of the H1 price rise, the cost-out programme completed in Q2, and lower freight rates from May onwards.",
+      "category": "causal_claim",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_017",
+      "claim": "Customer churn explains the revenue miss.",
+      "evidence": "The revenue shortfall in FY2023 stemmed from a combination of lower new-logo wins (-\u00a33m vs plan), modest customer churn (-\u00a31m), and a delayed product launch (-\u00a32m).",
+      "category": "causal_claim",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_018",
+      "claim": "The reorganisation drove the productivity improvement.",
+      "evidence": "Productivity improvements in FY2023 followed both the Q1 reorganisation and the rollout of the new field-service scheduling system in March; management estimates the two contributions as roughly equal.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_019",
+      "claim": "The price increase in Q2 drove the margin expansion.",
+      "evidence": "Gross margin in Q2 FY2023 was 38.4%, up from 36.2% in Q1 FY2023. The company implemented a price increase across the core SKU portfolio effective 1 April.",
+      "category": "causal_claim",
+      "adversarial": true,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "supported_high",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "all signals agree",
+      "raw": {
+        "llm_verdict": "supported",
+        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_positive"
+    },
+    {
+      "id": "gs_020",
+      "claim": "The new CRM caused the sales-cycle compression.",
+      "evidence": "The new CRM went live in June. Average sales-cycle length fell from 112 days in H1 to 89 days in H2.",
+      "category": "causal_claim",
+      "adversarial": true,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_021",
+      "claim": "ESG investment drove the win-rate improvement.",
+      "evidence": "The company increased ESG-related investment by \u00a33m in FY2023 and saw win-rates improve from 22% to 28% over the same period.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "ESG"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_022",
+      "claim": "The reorganisation caused the productivity decline.",
+      "evidence": "Following the Q1 reorganisation, output per FTE improved 14% sequentially in Q2 and a further 6% in Q3 \u2014 the strongest two-quarter run in the company's history.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_023",
+      "claim": "The price cut drove the margin expansion.",
+      "evidence": "The Q3 price cut directly compressed gross margin by 180 bps in the quarter, partly offsetting the cost-out savings the company had achieved earlier in the year.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_024",
+      "claim": "Customer churn caused the FY2023 revenue growth.",
+      "evidence": "Customer churn improved from 14% in FY2022 to 11% in FY2023; stronger retention was a meaningful contributor to FY2023 revenue growth.",
+      "category": "causal_claim",
+      "adversarial": true,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "supported_high",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "all signals agree",
+      "raw": {
+        "llm_verdict": "supported",
+        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_positive"
+    },
+    {
+      "id": "gs_025",
+      "claim": "TargetCo outperformed its UK peer set on revenue growth in FY2023.",
+      "evidence": "FY2023 revenue growth at TargetCo was 12%, versus a UK peer-set median of 4% (the peer set comprised the seven publicly listed comparables in the same sub-sector).",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "supported_high",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "all signals agree",
+      "raw": {
+        "llm_verdict": "supported",
+        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.6666666666666666,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_026",
+      "claim": "TargetCo's gross margin is above the industry median.",
+      "evidence": "TargetCo's FY2023 gross margin of 38.4% compares favourably with the industry median of 32.1% reported in the trade association's annual benchmark.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_027",
+      "claim": "TargetCo's customer concentration is lower than CompetitorA's.",
+      "evidence": "Top-10 customer concentration was 28% at TargetCo (FY2023) vs 47% at CompetitorA per CompetitorA's 2023 10-K filing.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_028",
+      "claim": "TargetCo outperformed its global peer set on both revenue growth and margin in FY2023.",
+      "evidence": "FY2023 revenue growth at TargetCo (12%) exceeded the global peer-set median (5%). Margin performance was broadly in line with the peer median.",
+      "category": "comparative",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "supported_high",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "all signals agree",
+      "raw": {
+        "llm_verdict": "supported",
+        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.5,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      },
+      "correct": false,
+      "error_kind": "false_positive"
+    },
+    {
+      "id": "gs_029",
+      "claim": "TargetCo leads the sector on customer satisfaction and price.",
+      "evidence": "Customer-satisfaction scores ranked TargetCo #1 of 12 in the trade survey. Average selling price was the third-lowest in the same survey.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_030",
+      "claim": "TargetCo outperformed its peers across every operating metric.",
+      "evidence": "Across the five tracked operating metrics, TargetCo led on three (revenue growth, gross margin, sales-cycle length) and lagged on two (working-capital intensity, capex-to-revenue).",
+      "category": "comparative",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_031",
+      "claim": "TargetCo outperformed its peer set on revenue growth.",
+      "evidence": "TargetCo grew revenue 12% in FY2023, ahead of its own internal FY2023 plan of 8%.",
+      "category": "comparative",
+      "adversarial": true,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_032",
+      "claim": "TargetCo's gross margin is above the industry median.",
+      "evidence": "TargetCo's FY2023 gross margin was 38.4%, up from 36.2% in FY2022 and 33.8% in FY2021 \u2014 the company's third consecutive year of margin expansion.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_033",
+      "claim": "TargetCo leads its peer set on retention.",
+      "evidence": "TargetCo's customer-retention rate of 89% in FY2023 was the highest in the company's history.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_034",
+      "claim": "TargetCo's revenue growth exceeded the peer median in FY2023.",
+      "evidence": "FY2023 revenue growth at TargetCo (4%) was below the peer-set median (9%); the company underperformed its competitive set on the topline.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.5,
+        "lexical_entity_missing": [
+          "FY2023"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_035",
+      "claim": "TargetCo's customer concentration is lower than the industry average.",
+      "evidence": "Top-10 customer concentration at TargetCo (47%) was meaningfully higher than the sector median of 28% in FY2023.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_036",
+      "claim": "TargetCo's working capital intensity is best-in-class.",
+      "evidence": "Working capital as a percentage of revenue at TargetCo (24%) was the highest in the comparable peer set; only one peer was more capital-intensive on a like-for-like basis.",
+      "category": "comparative",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_037",
+      "claim": "The CEO said FY2024 EBITDA guidance is \u00a312-14m.",
+      "evidence": "Speaking on the Q4 FY2023 earnings call, CEO J. Walters guided FY2024 EBITDA to a range of \u00a312-14m, with the midpoint subject to the timing of the new product launch.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_038",
+      "claim": "The auditor flagged the inventory valuation as a key audit matter.",
+      "evidence": "PwC's FY2023 audit opinion identified inventory valuation as a key audit matter, citing the increased proportion of slow-moving stock following the Q3 product transition.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_039",
+      "claim": "The board approved the \u00a320m share buyback in March 2024.",
+      "evidence": "On 14 March 2024 the board approved a \u00a320m share buyback programme, to be executed over the subsequent 12 months.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "supported_high",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "all signals agree",
+      "raw": {
+        "llm_verdict": "supported",
+        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_040",
+      "claim": "The CEO and CFO both confirmed FY2024 guidance on the Q4 call.",
+      "evidence": "On the Q4 FY2023 earnings call, CEO J. Walters reiterated FY2024 EBITDA guidance of \u00a312-14m. The CFO took questions on working capital but did not address forward guidance directly.",
+      "category": "attribution",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_041",
+      "claim": "The auditor and the audit committee both raised concerns about inventory.",
+      "evidence": "PwC's FY2023 opinion identified inventory valuation as a KAM. The audit committee chair's report in the annual report discussed cyber-security investment but did not refer to inventory.",
+      "category": "attribution",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_042",
+      "claim": "The board and management both endorsed the M&A strategy at the AGM.",
+      "evidence": "Chairman opening remarks at the AGM included a clear endorsement of the inorganic-growth strategy. The CEO's AGM speech focused on operational priorities; the strategy was not addressed.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_043",
+      "claim": "The CEO said FY2024 EBITDA guidance is \u00a312-14m.",
+      "evidence": "On the Q4 FY2023 earnings call, management reiterated their constructive outlook on the FY2024 operating environment and the expected benefits from the cost-out programme.",
+      "category": "attribution",
+      "adversarial": true,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a312"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_044",
+      "claim": "The CFO confirmed the dividend would be maintained.",
+      "evidence": "Dividend policy was discussed on the Q4 earnings call by management. The Q3 release had previously affirmed the company's commitment to a progressive dividend.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "CFO"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_045",
+      "claim": "The board approved the \u00a320m share buyback in March 2024.",
+      "evidence": "The Chairman's annual statement, dated April 2024, referred to capital-return mechanisms being kept under active review given the strong FY2023 cash generation.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.5,
+        "lexical_numeric_missing": [
+          "\u00a320m"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_046",
+      "claim": "The CEO guided FY2024 EBITDA above \u00a314m.",
+      "evidence": "On the Q4 call, the CEO guided FY2024 EBITDA to \u00a310-12m, down from the prior consensus range of \u00a312-14m.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a314m"
+        ],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2024 EBITDA"
+        ]
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_047",
+      "claim": "The auditor issued an unqualified opinion in FY2023.",
+      "evidence": "PwC issued a qualified opinion on the FY2023 financial statements, with the qualification relating to the recoverability of receivables from a specific customer that entered administration in Q4.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_048",
+      "claim": "The board rejected the proposed share buyback.",
+      "evidence": "The board approved the proposed \u00a320m share buyback programme at its March 2024 meeting; execution commenced in April.",
+      "category": "attribution",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_049",
+      "claim": "Management expects FY2024 EBITDA growth of 15%.",
+      "evidence": "FY2024 guidance, issued with the Q4 FY2023 results, projects EBITDA of \u00a312-14m vs FY2023 actual of \u00a310.4m \u2014 a midpoint growth rate of 15.4%.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: entailment but numeric drift",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.8,
+        "deberta_softmax": [
+          0.05,
+          0.8,
+          0.15
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "15%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_050",
+      "claim": "The company expects to be net-debt-free by FY2025.",
+      "evidence": "Treasury commentary at the FY2023 results stated the company expects to reach a net-cash position during FY2025 on the current deleveraging trajectory.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2025"
+        ]
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_051",
+      "claim": "Capex is expected to rise to \u00a320m in FY2024.",
+      "evidence": "FY2024 capex is guided to \u00a320m, up from \u00a315m in FY2023, principally reflecting the new manufacturing-line investment.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "supported",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2024"
+        ]
+      },
+      "correct": false,
+      "error_kind": "false_negative"
+    },
+    {
+      "id": "gs_052",
+      "claim": "Management expects FY2024 EBITDA and revenue growth above 15%.",
+      "evidence": "FY2024 EBITDA is guided to grow ~15% to \u00a312m. Revenue growth guidance is 7-9%, materially below the EBITDA growth rate.",
+      "category": "forecast",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_053",
+      "claim": "The company expects to be both net-debt-free and dividend-paying by FY2025.",
+      "evidence": "Net cash position is expected during FY2025. Dividend reinstatement is described as 'subject to ongoing capital allocation review' and is not part of the FY2024-25 plan.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_054",
+      "claim": "FY2024 capex will rise materially and free cash flow will improve.",
+      "evidence": "Capex is guided to \u00a320m in FY2024 (+33%). Free cash flow guidance was not disclosed; the CFO referenced 'capex-led pressure on FCF in the near term'.",
+      "category": "forecast",
+      "adversarial": true,
+      "ground_truth": "partial",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_055",
+      "claim": "Management expects FY2024 EBITDA growth of 15%.",
+      "evidence": "Management commentary at the FY2023 results highlighted a broadly positive outlook for FY2024, with cost discipline and pricing maintained as key levers.",
+      "category": "forecast",
+      "adversarial": true,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "15%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": true,
+      "error_kind": null
+    },
+    {
+      "id": "gs_056",
+      "claim": "The company expects FY2024 revenue of \u00a356m.",
+      "evidence": "FY2024 guidance was issued with the FY2023 results and centred on margin and capital-return metrics. Revenue guidance was not disclosed.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
+      "raw": {
+        "llm_verdict": "contradicted",
+        "llm_rationale": "heuristic: deberta contradiction",
+        "deberta_label": "contradiction",
+        "deberta_confidence": 0.7,
+        "deberta_softmax": [
+          0.7,
+          0.1,
+          0.2
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "\u00a356m"
+        ],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2024"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_057",
+      "claim": "The company expects capex to fall in FY2024.",
+      "evidence": "Capital allocation priorities for FY2024 were discussed at the FY2023 results presentation, with a focus on the new manufacturing line and digital infrastructure.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "insufficient",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_058",
+      "claim": "Management expects FY2024 EBITDA growth of 15%.",
+      "evidence": "FY2024 EBITDA is guided to \u00a38-9m vs FY2023 actual of \u00a310.4m \u2014 implying a 15-23% decline, materially below the consensus growth expectation.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
+      "raw": {
+        "llm_verdict": "unsupported",
+        "llm_rationale": "heuristic: neutral + numeric drift",
+        "deberta_label": "neutral",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.15,
+          0.3,
+          0.55
+        ],
+        "lexical_numeric_score": 0.0,
+        "lexical_numeric_missing": [
+          "15%"
+        ],
+        "lexical_entity_score": 1.0,
+        "lexical_entity_missing": []
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_059",
+      "claim": "The company expects net debt to fall in FY2024.",
+      "evidence": "Net debt is expected to rise to \u00a345m at FY2024 year-end (from \u00a338m at FY2023 year-end) reflecting the planned step-up in capex and the bolt-on acquisition completed in Q1 FY2024.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2024"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    },
+    {
+      "id": "gs_060",
+      "claim": "Capex is expected to fall in FY2024.",
+      "evidence": "FY2024 capex is guided to \u00a320m, up from \u00a315m in FY2023 \u2014 a 33% increase principally reflecting the new manufacturing-line investment.",
+      "category": "forecast",
+      "adversarial": false,
+      "ground_truth": "contradicted",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
+      "raw": {
+        "llm_verdict": "weak",
+        "llm_rationale": "heuristic: fallthrough",
+        "deberta_label": "entailment",
+        "deberta_confidence": 0.55,
+        "deberta_softmax": [
+          0.1,
+          0.55,
+          0.35
+        ],
+        "lexical_numeric_score": 1.0,
+        "lexical_numeric_missing": [],
+        "lexical_entity_score": 0.0,
+        "lexical_entity_missing": [
+          "FY2024"
+        ]
+      },
+      "correct": false,
+      "error_kind": "other_disagreement"
+    }
+  ]
+}
