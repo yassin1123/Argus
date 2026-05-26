@@ -90,6 +90,10 @@ def load_real_run_entries(
         list(root.glob("*.yaml")) + list(root.glob("*.yml"))
         + list(root.glob("*.json"))
     )
+    # Skip work-in-progress worksheets (underscore-prefixed by
+    # convention from tools/extract_claims_for_labeling.py). They
+    # are pre-labelling and would crash the loader.
+    files = [p for p in files if not p.name.startswith("_")]
     for path in files:
         rows = _try_yaml_load(path)
         for row in rows:

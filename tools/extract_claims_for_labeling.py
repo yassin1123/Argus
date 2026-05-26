@@ -155,23 +155,121 @@ async def _fetch_pairs(
     return out
 
 
+def _extract_from_eval_runs(
+    eval_runs_dir: Path, limit: int,
+) -> list[dict[str, Any]]:
+    """Offline extractor — reads committed ``backend/eval_runs/**/*.json``
+    files and pulls (claim, evidence) pairs from their ``captured``
+    blocks. The Phase 1/2 eval runs (week3, week4, phase1_exit, etc.)
+    each saved the full ``claim_rows`` + ``evidence`` lookup, so we
+    have real engagement claims + the verifier's actual verdict
+    without needing Postgres.
+
+    Used when ``--source eval_runs`` is passed instead of ``--firm-slug``.
+    The Day 1 spec asks for ~50 real pairs; this hits that target
+    by walking the cached runs from before W22.
+    """
+    out: list[dict[str, Any]] = []
+    files = []
+    for sub in sorted(eval_runs_dir.iterdir()):
+        if not sub.is_dir():
+            continue
+        # Skip W22's own output dirs.
+        if sub.name.startswith("week22"):
+            continue
+        for f in sorted(sub.glob("*.json")):
+            files.append(f)
+    next_id = 1
+    for f in files:
+        if len(out) >= limit:
+            break
+        try:
+            doc = json.loads(f.read_text(encoding="utf-8"))
+        except Exception:
+            continue
+        captured = doc.get("captured") if isinstance(doc, dict) else None
+        if not isinstance(captured, dict):
+            continue
+        claim_rows = captured.get("claim_rows") or []
+        evidence_list = captured.get("evidence") or []
+        if not claim_rows or not evidence_list:
+            continue
+        # Build a quick index of evidence objects by id; their
+        # ``quote`` is the chunk text we'll pair with the claim.
+        ev_idx: dict[str, dict[str, Any]] = {}
+        for ev in evidence_list:
+            if isinstance(ev, dict) and ev.get("id"):
+                ev_idx[str(ev["id"])] = ev
+        session_id = doc.get("session_id") or captured.get("session_id")
+        for claim in claim_rows:
+            if len(out) >= limit:
+                break
+            if not isinstance(claim, dict):
+                continue
+            claim_text = claim.get("claim_text") or ""
+            ev_ids = claim.get("evidence_object_ids") or []
+            if not claim_text or not ev_ids:
+                continue
+            ev_id = ev_ids[0]
+            ev = ev_idx.get(str(ev_id))
+            if not ev:
+                continue
+            evidence_text = ev.get("quote") or ev.get("text") or ""
+            # The committed eval_runs slim evidence to metadata only
+            # (url + title + source_type). We still emit the row so
+            # the operator sees the claim + can do a DB lookup of
+            # the chunk text via the recorded evidence_object_id. The
+            # row is flagged so label_claims.py knows to skip / defer.
+            chunk_text_present = bool(evidence_text)
+            verdict = (
+                claim.get("ensemble_verdict")
+                or claim.get("verifier_verdict")
+            )
+            out.append({
+                "id": f"wks_{next_id:04d}",
+                "session_id": str(session_id) if session_id else None,
+                "claim_id": str(claim.get("claim_id") or ""),
+                "claim": claim_text,
+                "evidence": evidence_text,
+                "verifier_verdict": verdict,
+                "evidence_source_type": ev.get("source_type"),
+                "evidence_source_url": ev.get("source_url"),
+                "evidence_source_title": ev.get("source_title"),
+                "evidence_object_id": str(ev.get("id") or ""),
+                "source_eval_run": str(f.relative_to(eval_runs_dir.parent)),
+                "chunk_text_present": chunk_text_present,
+                "label": None,
+                "label_rationale": None,
+                "category": None,
+            })
+            next_id += 1
+    return out
+
+
 async def _main_async(args: argparse.Namespace) -> int:
-    os.environ.setdefault(
-        "DATABASE_URL",
-        "postgresql://postgres:postgres@localhost:5432/argus",
-    )
-    from db.connection import close_db, init_db
     from datetime import datetime, timezone
 
-    await init_db()
-    try:
-        rows = await _fetch_pairs(
-            firm_slug=args.firm_slug,
-            session_id=args.session_id,
-            limit=args.limit,
+    # Offline path — no DB required. Walks committed eval_runs files.
+    if args.source == "eval_runs":
+        rows = _extract_from_eval_runs(
+            Path(args.eval_runs_dir), args.limit,
         )
-    finally:
-        await close_db()
+    else:
+        os.environ.setdefault(
+            "DATABASE_URL",
+            "postgresql://postgres:postgres@localhost:5432/argus",
+        )
+        from db.connection import close_db, init_db
+
+        await init_db()
+        try:
+            rows = await _fetch_pairs(
+                firm_slug=args.firm_slug,
+                session_id=args.session_id,
+                limit=args.limit,
+            )
+        finally:
+            await close_db()
 
     if args.per_verdict and args.per_verdict > 0:
         rows = _stratify(rows, args.per_verdict)
@@ -190,19 +288,35 @@ async def _main_async(args: argparse.Namespace) -> int:
         "rows": rows,
     }
     out_path.write_text(json.dumps(worksheet, indent=2))
-    print(f"wrote {len(rows)} rows → {out_path}")
+    print(f"wrote {len(rows)} rows -> {out_path}")
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
+        "--source", choices=["db", "eval_runs"], default="db",
+        help=(
+            "Where to pull claim-evidence pairs from. 'db' queries "
+            "evidence_objects (requires Postgres). 'eval_runs' walks "
+            "the committed backend/eval_runs/**/*.json files and "
+            "extracts captured.claim_rows + captured.evidence — no DB "
+            "required. The W22/D1 workflow uses 'eval_runs' to seed "
+            "Yassin's first labelling batch."
+        ),
+    )
+    ap.add_argument(
         "--firm-slug",
-        help="Restrict to one firm's engagements (matches firms.slug).",
+        help="(db source) Restrict to one firm's engagements.",
     )
     ap.add_argument(
         "--session-id",
-        help="Restrict to one session (UUID). Overrides --firm-slug.",
+        help="(db source) Restrict to one session (UUID).",
+    )
+    ap.add_argument(
+        "--eval-runs-dir",
+        default="backend/eval_runs",
+        help="(eval_runs source) Directory of committed eval runs.",
     )
     ap.add_argument(
         "--limit", type=int, default=400,
@@ -217,8 +331,8 @@ def main(argv: list[str] | None = None) -> int:
         help="Output JSON worksheet path.",
     )
     args = ap.parse_args(argv)
-    if not args.firm_slug and not args.session_id:
-        ap.error("Pass --firm-slug or --session-id.")
+    if args.source == "db" and not args.firm_slug and not args.session_id:
+        ap.error("--source=db needs --firm-slug or --session-id.")
     return asyncio.run(_main_async(args))
 
 
