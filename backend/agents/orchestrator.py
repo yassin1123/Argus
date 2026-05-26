@@ -13,6 +13,19 @@ from agents.verifier import VerifierAgent
 from agents.writer import WriterAgent
 from core.claim_linkage import validate_writer_claim_linkage
 from core.claim_support import build_claim_support
+from core.observability.logging import emit_event
+from core.observability.metrics import (
+    increment as _metric_increment,
+    observe as _metric_observe,
+    record_error as _metric_record_error,
+    record_stage_latency as _metric_record_stage,
+)
+from core.observability.trace import (
+    bind_trace_context,
+    get_trace_context,
+    new_run_id,
+    new_trace_id,
+)
 from core.contradiction_policy import (
     apply_confidence_cap,
     build_contradiction_caveat,
@@ -238,9 +251,35 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             e,
         )
 
+    # W20/D1: bind a run-scoped trace + run_id so every downstream
+    # log line emitted from this coroutine and its children carries
+    # the same correlation IDs. Inherits the API request's trace_id
+    # if one was already seeded by the middleware; mints one when
+    # the pipeline is invoked from a Celery worker or CLI.
+    _ctx_now = get_trace_context()
+    pipeline_trace_id = _ctx_now.trace_id or new_trace_id()
+    pipeline_run_id = new_run_id()
+    pipeline_t0 = time.perf_counter()
+    from core.observability.trace import set_trace_context, TraceContext as _TC, _trace_ctx as _tc_var
+    _tc_token = set_trace_context(_TC(
+        trace_id=pipeline_trace_id,
+        run_id=pipeline_run_id,
+        session_id=session_id,
+        firm_id=firm_id,
+    ))
+
     try:
         await update_session_status(session_id, "processing")
         await _pipeline_trace(session_id, "pipeline_start", "status=processing")
+        emit_event(
+            "pipeline.start",
+            report_mode=report_mode,
+            resolved_mode=getattr(resolved_mode, "name", None) if resolved_mode else None,
+        )
+        await _metric_increment(
+            "engagement.started",
+            {"firm_id": firm_id, "mode": report_mode},
+        )
 
         intake_block = ""
         if sess:
@@ -264,6 +303,13 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         await update_pipeline_state(session_id, "plan_ready")
         n_tasks = len(plan.get("tasks") or []) if isinstance(plan, dict) else 0
         await _pipeline_trace(session_id, "plan_ready", f"tasks={n_tasks}")
+        _planner_ms = (time.perf_counter() - pipeline_t0) * 1000.0
+        emit_event(
+            "planner.complete",
+            duration_ms=_planner_ms,
+            task_count=n_tasks,
+        )
+        await _metric_record_stage("planner", _planner_ms, mode=report_mode)
 
         research_orch = ResearchOrchestrator()
         research = await _timed_agent(
@@ -309,6 +355,31 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             "research_gathered",
             f"evidence_objects={len(evidence_objects)}",
         )
+        # W20/D1 structured event — group evidence by source type so
+        # the log carries a histogram (sec_filing / transcripts /
+        # companies_house / news / firm_library / ...) without ever
+        # logging chunk text. Counts only.
+        _src_hist: dict[str, int] = {}
+        for _eo in evidence_objects or []:
+            _src = "unknown"
+            if isinstance(_eo, dict):
+                _src = str(_eo.get("source_type") or _eo.get("source") or "unknown")
+            _src_hist[_src] = _src_hist.get(_src, 0) + 1
+        _retrieval_ms = (time.perf_counter() - pipeline_t0) * 1000.0
+        emit_event(
+            "retrieval.complete",
+            duration_ms=_retrieval_ms,
+            evidence_count=len(evidence_objects),
+            evidence_by_source=_src_hist,
+            followup_query_count=research_followup_queries,
+        )
+        await _metric_record_stage("retrieval", _retrieval_ms, mode=report_mode)
+        for _src, _n in _src_hist.items():
+            await _metric_increment(
+                "retrieval.hits",
+                {"source_type": _src, "mode": report_mode},
+                value=_n,
+            )
         branch_ids = branch_ids_from_evidence_claims(evidence_objects)
         # W6/D4: prefer the firm-resolved mode; fall back to flat YAML
         # only when resolution failed (rare â€” see top-of-pipeline).
@@ -376,6 +447,17 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             ),
         )
         await update_pipeline_state(session_id, "analysis_v1_done")
+        _claims_v1 = 0
+        if isinstance(analysis, dict):
+            _claims_v1 = len(analysis.get("claims") or [])
+        _analyst_ms = (time.perf_counter() - pipeline_t0) * 1000.0
+        emit_event(
+            "analyst.complete",
+            duration_ms=_analyst_ms,
+            claim_count=_claims_v1,
+            pass_label="v1",
+        )
+        await _metric_record_stage("analyst", _analyst_ms, mode=report_mode)
 
         critic = CriticAgent()
         critique = await _timed_agent(
@@ -980,6 +1062,29 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
                 insufficient = True
 
         await update_pipeline_state(session_id, "verification_done")
+        # W20/D1: verdict histogram on the verifier output — IDs +
+        # counts only, no claim text.
+        _verdict_hist: dict[str, int] = {}
+        if isinstance(verification, dict):
+            for _a in verification.get("assessments") or []:
+                if isinstance(_a, dict):
+                    _v = str(_a.get("verdict") or "unknown")
+                    _verdict_hist[_v] = _verdict_hist.get(_v, 0) + 1
+        _verifier_ms = (time.perf_counter() - pipeline_t0) * 1000.0
+        emit_event(
+            "verifier.complete",
+            duration_ms=_verifier_ms,
+            verdict_distribution=_verdict_hist,
+            assessments_total=sum(_verdict_hist.values()),
+            insufficient=bool(insufficient),
+        )
+        await _metric_record_stage("verifier", _verifier_ms, mode=report_mode)
+        for _verdict, _n in _verdict_hist.items():
+            await _metric_increment(
+                "verification.verdict",
+                {"outcome": _verdict, "mode": report_mode},
+                value=_n,
+            )
         if insufficient:
             await update_pipeline_state(session_id, "evidence_insufficient")
             gap_report = {
@@ -1143,6 +1248,22 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             "writer",
             json.dumps(critique, ensure_ascii=False)[:8000],
             raw_writer,
+        )
+        # W20/D1: writer completion event — payload byte size as a
+        # cheap proxy for token usage; the real per-LLM-call cost
+        # tracking lands in W22 observability. No memo prose ever
+        # leaves this scope.
+        _writer_ms = (time.perf_counter() - pipeline_t0) * 1000.0
+        emit_event(
+            "writer.complete",
+            duration_ms=_writer_ms,
+            report_mode=report_mode,
+            payload_bytes=len(raw_writer),
+        )
+        await _metric_record_stage("writer", _writer_ms, mode=report_mode)
+        await _metric_observe(
+            "writer.payload_bytes", float(len(raw_writer)),
+            {"mode": report_mode},
         )
 
         # W7/iterate: post-writer mode-specific advisory checks. The
@@ -1321,6 +1442,37 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             "complete",
             f"unsupported_claims={unsupported_n} contradiction_severity={contra_sev}",
         )
+        # W20/D1: artifacts.generated + pipeline.complete bookends
+        # so a grep on the trace_id terminates on a known event.
+        emit_event(
+            "artifacts.generated",
+            duration_ms=(time.perf_counter() - pipeline_t0) * 1000.0,
+            artifact_count=1,
+            artifact_kinds=["memo"],
+        )
+        await _metric_increment(
+            "artifact.generated",
+            {
+                "artifact_type": "memo", "format": "payload",
+                "outcome": "ok", "mode": report_mode,
+            },
+        )
+        _pipeline_ms = (time.perf_counter() - pipeline_t0) * 1000.0
+        emit_event(
+            "pipeline.complete",
+            duration_ms=_pipeline_ms,
+            unsupported_claims=unsupported_n,
+            contradiction_severity=contra_sev,
+            evidence_count=len(evidence_objects),
+        )
+        await _metric_increment(
+            "engagement.completed",
+            {"firm_id": firm_id, "mode": report_mode, "outcome": "ok"},
+        )
+        await _metric_observe(
+            "pipeline.duration_ms", _pipeline_ms,
+            {"mode": report_mode, "outcome": "ok"},
+        )
         return report
     except Exception as e:
         logger.exception("Pipeline failed for session %s: %s", session_id, e)
@@ -1328,6 +1480,25 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
             await _pipeline_trace(session_id, "failed", str(e)[:400])
         except Exception:
             logger.exception("Could not append pipeline trace for %s", session_id)
+        emit_event(
+            "pipeline.failed",
+            level=logging.ERROR,
+            duration_ms=(time.perf_counter() - pipeline_t0) * 1000.0,
+            error=f"{type(e).__name__}: {e}",
+        )
+        try:
+            await _metric_increment(
+                "engagement.failed",
+                {
+                    "firm_id": firm_id, "mode": report_mode,
+                    "error_type": type(e).__name__,
+                },
+            )
+            await _metric_record_error(
+                "pipeline", type(e).__name__, mode=report_mode,
+            )
+        except Exception:  # noqa: BLE001
+            pass
         # W7/D5 iterate: when the writer's structured-output exhaustion
         # is the root cause, persist the raw failed LLM body on session
         # metadata. The operator can read it back without re-running
@@ -1357,3 +1528,11 @@ async def run_pipeline(session_id: str, query: str) -> WriterReportPayload | Non
         except Exception:
             logger.exception("Could not persist failed pipeline_state for %s", session_id)
         raise
+    finally:
+        # W20/D1: pop the pipeline-scoped trace context regardless
+        # of success / failure. Best-effort reset so a torn-down
+        # contextvars store at process exit doesn't crash here.
+        try:
+            _tc_var.reset(_tc_token)
+        except Exception:  # noqa: BLE001
+            pass
