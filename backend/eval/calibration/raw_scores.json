@@ -1,5 +1,5 @@
 {
-  "verifier_source": "cached",
+  "verifier_source": "heuristic_no_keys",
   "pair_count": 60,
   "scored_pairs": [
     {

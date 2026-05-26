@@ -480,8 +480,15 @@ def run_calibration(
             error_kind=_classify_error(collapsed, e.ground_truth),
         ))
 
-    # Always persist when raw_scores_path is given. Day 3 reads this.
-    if raw_scores_path is not None:
+    # Persist when raw_scores_path is given AND we actually ran a
+    # fresh verifier. The W22/D4 fix: when use_cache=True we're
+    # REPLAYING the cache (e.g. tune() sweeping thresholds), so
+    # overwriting the file just relabels the source from
+    # "heuristic_no_keys" to "cached" without changing any data.
+    # Skip the write on cache replays so the verifier_source label
+    # stays accurate for the next reader (W21/D5 regression suite
+    # + W22/D3 test_new_raw_scores_captured both depend on it).
+    if raw_scores_path is not None and not use_cache:
         raw_scores_path.parent.mkdir(parents=True, exist_ok=True)
         payload = {
             "verifier_source": (

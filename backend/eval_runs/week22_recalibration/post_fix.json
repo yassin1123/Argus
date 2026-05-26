@@ -1,23 +1,7 @@
 {
-  "tuning_source": "cached_raw_scores",
-  "llm_calls_during_tuning": 0,
-  "raw_scores_path": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\eval\\calibration\\raw_scores.json",
-  "candidates_evaluated": 125,
-  "baseline_config": {
-    "deberta_high_conf": 0.7,
-    "numeric_drift_below": 0.95,
-    "borderline_band": 0.0,
-    "id": "default_w2d3",
-    "rationale": "Pre-W21/D3 defaults. The aggregator constants as locked in Phase 1 / Week 2 / Day 3 before any calibration data existed.",
-    "source": "code_default"
-  },
-  "baseline_metrics_headline": {
-    "accuracy": 0.4166666666666667,
-    "fp_rate_on_supported": 0.4375,
-    "recall_on_insufficient": 0.9333333333333333,
-    "recall_on_supported": 0.6
-  },
-  "tuned_config": {
+  "generated_at": "2026-05-26T23:25:59.259247+00:00",
+  "verifier_source": "heuristic_no_keys",
+  "config_used": {
     "deberta_high_conf": 0.7,
     "numeric_drift_below": 0.95,
     "borderline_band": 0.0,
@@ -25,13 +9,13 @@
     "rationale": "W21/D3 tuning over-flagged genuinely-supported claims at 86.7%; per the spec hard rule keeping the W2/D3 defaults. The bottleneck is upstream signal quality, not thresholds -- see over_flagging panel + tuned.json failure cases.",
     "source": "w21_d3_tune"
   },
-  "tuned_metrics_headline": {
+  "headline": {
     "accuracy": 0.4166666666666667,
     "fp_rate_on_supported": 0.4375,
     "recall_on_insufficient": 0.9333333333333333,
-    "recall_on_supported": 0.6
+    "adversarial_accuracy": 0.3333333333333333
   },
-  "tuned_metrics_full": {
+  "metrics": {
     "pair_count": 60,
     "correct": 25,
     "accuracy": 0.4166666666666667,
@@ -125,11 +109,6 @@
     "insufficient_total": 15,
     "adversarial_accuracy": 0.3333333333333333,
     "adversarial_count": 18
-  },
-  "delta_vs_baseline": {
-    "fp_rate_on_supported_delta": 0.0,
-    "recall_on_insufficient_delta": 0.0,
-    "accuracy_delta": 0.0
   },
   "over_flagging": {
     "supported_review_fraction": 0.4,
@@ -670,6 +649,5 @@
         "raw_lexical_numeric_score": 0.0
       }
     ]
-  },
-  "persisted_config_path": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\config\\verification_thresholds.yaml"
+  }
 }

@@ -1,0 +1,97 @@
+{
+  "generated_at": "2026-05-26T23:25:59.353529+00:00",
+  "verifier_source": "heuristic_no_keys",
+  "w21_baseline": {
+    "verifier_source": "heuristic_no_keys",
+    "accuracy": 0.3167,
+    "fp_rate_on_supported": 0.6,
+    "recall_on_insufficient": 0.9333,
+    "supported_predictions": 5,
+    "fp_count_on_supported": 3,
+    "supported_review_fraction": 0.8667,
+    "over_flag_status": "fail",
+    "red_team_catch_rate": 0.9706,
+    "red_team_escapes": 1,
+    "red_team_escape_ids": [
+      "rt_007"
+    ]
+  },
+  "w22_post_fix": {
+    "accuracy": 0.4166666666666667,
+    "fp_rate_on_supported": 0.4375,
+    "recall_on_insufficient": 0.9333333333333333,
+    "adversarial_accuracy": 0.3333333333333333,
+    "supported_predictions": 16,
+    "fp_count_on_supported": 7,
+    "supported_review_fraction": 0.4,
+    "over_flag_status": "warn",
+    "red_team_catch_rate": 0.9411764705882353,
+    "red_team_escapes": 2,
+    "red_team_escape_ids": [
+      "rt_007",
+      "rt_012"
+    ]
+  },
+  "deltas": {
+    "fp_rate_on_supported_pp": -16.25,
+    "recall_on_insufficient_pp": 0.0,
+    "accuracy_pp": 10.0,
+    "supported_review_fraction_pp": -46.67,
+    "red_team_catch_rate_pp": -2.94
+  },
+  "red_team_per_exploit": {
+    "magnitude_mismatch": {
+      "catch_rate": 1.0,
+      "caught": 4,
+      "total": 4
+    },
+    "misattribution": {
+      "catch_rate": 0.75,
+      "caught": 3,
+      "total": 4
+    },
+    "temporal_drift": {
+      "catch_rate": 0.75,
+      "caught": 3,
+      "total": 4
+    },
+    "overclaim": {
+      "catch_rate": 1.0,
+      "caught": 4,
+      "total": 4
+    },
+    "fabricated_specific": {
+      "catch_rate": 1.0,
+      "caught": 7,
+      "total": 7
+    },
+    "plausible_but_absent": {
+      "catch_rate": 1.0,
+      "caught": 3,
+      "total": 3
+    },
+    "negation_flip": {
+      "catch_rate": 1.0,
+      "caught": 4,
+      "total": 4
+    },
+    "cherry_pick": {
+      "catch_rate": 1.0,
+      "caught": 4,
+      "total": 4
+    }
+  },
+  "pilot_readiness": {
+    "verdict": "human_review_required",
+    "headline": "ai_assisted_with_human_review_required",
+    "rationale": "FP-rate-on-supported=43.75% is meaningfully better than the W21 60% baseline but is above the 10% fully-verified bar. Pilot proceeds with the verifier framed as 'AI-assisted verification with human review required on flagged claims' \u2014 the honest positioning the W22/D4 spec calls out as the middle outcome. Red-team holds at 94.1%; over-flag status 'warn'.",
+    "fp_rate_post_fix": 0.4375,
+    "over_flag_status": "warn",
+    "red_team_catch_rate": 0.9411764705882353,
+    "next_steps": [
+      "Pilot copy + UI: rename 'verified' to 'AI-verified, human-reviewable'. Every supported claim carries a review-recommended affordance.",
+      "Real-ensemble baseline + re-run is the next quality lever; budget ~$2-3.",
+      "Track FP rate in production via the W21/D5 dashboard panel \u2014 set an alert at 50% (HUMAN_REVIEW_FP_CEILING)."
+    ]
+  }
+}
