@@ -11,7 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 load_dotenv()
 
 from api import auth as auth_router
-from api import admin, artifacts, chat, collaboration, comments, engagements, evaluations, exports, firm_library, firm_modes, inputs, notification_preferences, notifications as notifications_router, reports, review, section_deepening, session_exports, sessions, sources, users, versioning as versioning_router, workspace
+from api import admin, artifacts, chat, collaboration, comments, engagements, evaluations, exports, firm_library, firm_modes, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, reports, review, section_deepening, session_exports, sessions, sources, users, versioning as versioning_router, workspace
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
@@ -114,6 +114,7 @@ app.include_router(firm_modes.router, prefix="/api/firms/{firm_id}/modes", tags=
 app.include_router(artifacts.router, prefix="/api/artifacts", tags=["artifacts"], dependencies=PROTECTED)
 app.include_router(exports.router, prefix="/api/exports", tags=["exports"], dependencies=PROTECTED)
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"], dependencies=PROTECTED)
+app.include_router(metrics_router.router, prefix="/api/admin", tags=["admin", "metrics"], dependencies=PROTECTED)
 
 
 @app.get("/api/health")

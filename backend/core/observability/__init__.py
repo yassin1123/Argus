@@ -29,6 +29,14 @@ from .logging import (
     redact,
     structured_logger,
 )
+from .metrics import (
+    increment,
+    observe,
+    query_window,
+    record_error,
+    record_stage_latency,
+    render_prometheus,
+)
 from .trace import (
     TraceContext,
     bind_trace_context,
@@ -44,9 +52,15 @@ __all__ = [
     "bind_trace_context",
     "emit_event",
     "get_trace_context",
+    "increment",
     "new_run_id",
     "new_trace_id",
+    "observe",
+    "query_window",
+    "record_error",
+    "record_stage_latency",
     "redact",
+    "render_prometheus",
     "set_trace_context",
     "structured_logger",
 ]

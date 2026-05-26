@@ -171,3 +171,38 @@ async def record_llm_call(
             )
     except Exception as e:  # noqa: BLE001
         logger.debug("llm_calls insert skipped: %s", e)
+
+    # W20/D2 metrics: counter + latency + token-count histogram,
+    # labelled by provider / model / agent so the dashboard can
+    # break down spend + speed by every dimension. Best-effort:
+    # the inner ``increment`` / ``observe`` already swallow DB
+    # failures, but we also catch the import / coercion path so
+    # an observability bug never bubbles into the LLM call path.
+    try:
+        from core.observability.metrics import (
+            increment as _mi, observe as _mo,
+        )
+        provider = _provider_for(model)
+        labels = {
+            "provider": provider,
+            "model": model,
+            "agent": task_kind or "unknown",
+            "outcome": "ok" if success else "error",
+        }
+        await _mi("llm.call", labels)
+        if latency_ms:
+            await _mo("llm.latency_ms", float(latency_ms), labels)
+        if prompt_tokens:
+            await _mo(
+                "llm.tokens",
+                float(prompt_tokens),
+                {**labels, "kind": "prompt"},
+            )
+        if completion_tokens:
+            await _mo(
+                "llm.tokens",
+                float(completion_tokens),
+                {**labels, "kind": "completion"},
+            )
+    except Exception as e:  # noqa: BLE001
+        logger.debug("llm metric emit skipped: %s", e)
