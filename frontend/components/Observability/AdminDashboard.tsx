@@ -191,6 +191,77 @@ export default function AdminDashboard({
         )}
       </section>
 
+      {/* Verification QUALITY — W21 trust panel */}
+      {data.verification_quality && (
+        <section className="argus-dashboard__section">
+          <h3>Verification quality</h3>
+          <div
+            className="argus-dashboard__quality"
+            data-testid="verification-quality-block"
+          >
+            {data.verification_quality.measured ? (
+              <>
+                <div>
+                  <span className="argus-dashboard__quality-label">
+                    FP rate on supported
+                  </span>
+                  <strong
+                    className={
+                      (data.verification_quality.fp_rate_on_supported ?? 0) > 0.1
+                        ? "argus-dashboard__quality-value argus-dashboard__quality-value--alert"
+                        : "argus-dashboard__quality-value"
+                    }
+                    data-testid="quality-fp-rate"
+                  >
+                    {data.verification_quality.fp_rate_on_supported !== null
+                      ? `${(data.verification_quality.fp_rate_on_supported * 100).toFixed(1)}%`
+                      : "—"}
+                  </strong>
+                </div>
+                <div>
+                  <span className="argus-dashboard__quality-label">
+                    Recall on insufficient
+                  </span>
+                  <strong
+                    className="argus-dashboard__quality-value"
+                    data-testid="quality-recall"
+                  >
+                    {data.verification_quality.recall_on_insufficient !== null
+                      ? `${(data.verification_quality.recall_on_insufficient * 100).toFixed(1)}%`
+                      : "—"}
+                  </strong>
+                </div>
+                <div>
+                  <span className="argus-dashboard__quality-label">
+                    Red-team catch rate
+                  </span>
+                  <strong
+                    className="argus-dashboard__quality-value"
+                    data-testid="quality-red-team"
+                  >
+                    {data.verification_quality.red_team_catch_rate !== null
+                      ? `${(data.verification_quality.red_team_catch_rate * 100).toFixed(1)}%`
+                      : "—"}
+                  </strong>
+                  {data.verification_quality.red_team_escapes !== null && (
+                    <span className="argus-dashboard__quality-side">
+                      ({data.verification_quality.red_team_escapes} escapes)
+                    </span>
+                  )}
+                </div>
+                <div className="argus-dashboard__quality-meta">
+                  Source: {data.verification_quality.verifier_source || "—"}
+                </div>
+              </>
+            ) : (
+              <span className="argus-dashboard__empty">
+                Quality not yet measured. Run the W21/D2 calibration.
+              </span>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Verification (the W21 quality signal) */}
       <section className="argus-dashboard__section">
         <h3>Verification verdict distribution</h3>

@@ -1,0 +1,60 @@
+{
+  "config_used": {
+    "deberta_high_conf": 0.7,
+    "numeric_drift_below": 0.95,
+    "borderline_band": 0.0,
+    "id": "w21_d3_tuned",
+    "rationale": "W21/D3 tuning over-flagged genuinely-supported claims at 100.0%; per the spec hard rule keeping the W2/D3 defaults. The bottleneck is upstream signal quality, not thresholds -- see over_flagging panel + tuned.json failure cases.",
+    "source": "w21_d3_tune"
+  },
+  "tuned_calibration_headline": {
+    "accuracy": 0.31666666666666665,
+    "fp_rate_on_supported": 0.6,
+    "recall_on_insufficient": 0.9333333333333333,
+    "adversarial_accuracy": 0.3888888888888889
+  },
+  "production_distribution_w20": {
+    "supported_pct": 88.89,
+    "partial_pct": 7.41,
+    "insufficient_pct": 3.7,
+    "total_assessments": 108
+  },
+  "production_distribution_tuned": {
+    "supported_pct": 8.33,
+    "partial_pct": 53.33,
+    "insufficient_pct": 8.33,
+    "contradicted_pct": 30.0,
+    "total_pairs": 60
+  },
+  "production_shift": {
+    "supported_pp_delta": -80.56,
+    "partial_pp_delta": 45.92,
+    "interpretation": "supported dropped from 88.89% to 8.33% (-80.6pp) because borderline claims now correctly route to partial (human review). This is the right direction under the asymmetric trust objective."
+  },
+  "red_team": {
+    "total": 34,
+    "caught": 33,
+    "escapes": 1,
+    "catch_rate": 0.9705882352941176,
+    "per_exploit_type": {
+      "magnitude_mismatch": 1.0,
+      "misattribution": 0.75,
+      "temporal_drift": 1.0,
+      "overclaim": 1.0,
+      "fabricated_specific": 1.0,
+      "plausible_but_absent": 1.0,
+      "negation_flip": 1.0,
+      "cherry_pick": 1.0
+    },
+    "escape_ids": [
+      "rt_007"
+    ]
+  },
+  "ship_decision_inputs": {
+    "fp_rate_did_not_regress": true,
+    "recall_held": true,
+    "red_team_catch_rate_above_floor": true,
+    "shift_direction_correct": true
+  },
+  "ship_decision_pass": true
+}

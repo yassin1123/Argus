@@ -4,6 +4,12 @@ One endpoint that returns the at-a-glance system-health view by
 joining the four W20 components: metrics (D2), cost ledger (D3),
 trace assembler (D4), structured logs (D1, indirectly via metrics).
 
+W21/D5 extends the response with the verification-quality
+panel: FP-rate-on-supported + recall-on-insufficient (from the
+committed W21/D2 baseline.json) + red-team catch rate (from the
+W21/D4 escapes.json). The trust number is now monitored on the
+dashboard, not just measured once.
+
 Firm-scoping rule matches the rest of W20: firm_admins see only
 their own firm; system-admins see cross-firm. The endpoint never
 recomputes anything — it reads from the layers we already built
@@ -12,7 +18,10 @@ recomputes anything — it reads from the layers we already built
 
 from __future__ import annotations
 
+import json
+import logging
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,6 +31,57 @@ from core.observability.cost_rollups import cost_by_model, firm_cost
 from core.observability.metrics import query_window
 from core.observability.trace_view import recent_traces
 from db.connection import acquire
+
+logger = logging.getLogger(__name__)
+
+# Paths to the committed quality reports. The dashboard reads
+# them at request time so a re-run of the W21/D2 calibration or
+# W21/D4 red-team updates the dashboard automatically.
+_BACKEND = Path(__file__).resolve().parents[1]
+_QUALITY_BASELINE_PATH = (
+    _BACKEND / "eval_runs" / "week21_calibration" / "baseline.json"
+)
+_RED_TEAM_PATH = (
+    _BACKEND / "eval_runs" / "week21_red_team" / "escapes.json"
+)
+
+
+def _load_quality_panel() -> dict[str, Any]:
+    """Read the W21/D2 baseline + W21/D4 escapes JSON into the
+    quality panel shape the dashboard renders. Both files are
+    optional — when missing, the panel is marked unmeasured."""
+    panel: dict[str, Any] = {
+        "measured": False,
+        "fp_rate_on_supported": None,
+        "recall_on_insufficient": None,
+        "accuracy": None,
+        "red_team_catch_rate": None,
+        "red_team_escapes": None,
+        "verifier_source": None,
+        "as_of": None,
+    }
+    try:
+        if _QUALITY_BASELINE_PATH.exists():
+            doc = json.loads(_QUALITY_BASELINE_PATH.read_text())
+            h = doc.get("headline") or {}
+            panel["fp_rate_on_supported"] = h.get("fp_rate_on_supported")
+            panel["recall_on_insufficient"] = h.get("recall_on_insufficient")
+            panel["accuracy"] = h.get("accuracy")
+            panel["verifier_source"] = doc.get("verifier_source")
+            panel["as_of"] = doc.get("generated_at")
+            panel["measured"] = True
+    except Exception as e:  # noqa: BLE001
+        logger.debug("dashboard: baseline.json read skipped: %s", e)
+    try:
+        if _RED_TEAM_PATH.exists():
+            rt = json.loads(_RED_TEAM_PATH.read_text())
+            s = rt.get("summary") or {}
+            panel["red_team_catch_rate"] = s.get("catch_rate")
+            panel["red_team_escapes"] = s.get("escapes")
+            panel["measured"] = True
+    except Exception as e:  # noqa: BLE001
+        logger.debug("dashboard: escapes.json read skipped: %s", e)
+    return panel
 
 
 router = APIRouter()
@@ -169,6 +229,11 @@ async def get_dashboard(
         hours=int(hours), limit=10,
     )
 
+    # W21/D5: the verification-quality panel. System-wide signal
+    # — the same numbers everyone sees regardless of firm scope,
+    # because the calibration was run against a shared golden set.
+    quality = _load_quality_panel()
+
     return {
         "hours": int(hours),
         "from": from_ts.isoformat(),
@@ -177,6 +242,7 @@ async def get_dashboard(
         "volume": volume,
         "artifacts_generated": artifacts,
         "verification": verdicts,
+        "verification_quality": quality,
         "cost": cost_panel,
         "recent_failures": failures,
     }
