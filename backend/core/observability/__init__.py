@@ -23,6 +23,15 @@ HTTP context, e.g. by a Celery worker). One engagement run's full
 lifecycle is reconstructable by ``grep trace_id=<id>``.
 """
 
+from .cost import record_cost
+from .cost_rollups import (
+    EngagementCost,
+    FirmCost,
+    cost_by_model,
+    engagement_cost,
+    firm_cost,
+    session_cost_total,
+)
 from .logging import (
     REDACTED_FIELD_NAMES,
     emit_event,
@@ -47,20 +56,27 @@ from .trace import (
 )
 
 __all__ = [
+    "EngagementCost",
+    "FirmCost",
     "REDACTED_FIELD_NAMES",
     "TraceContext",
     "bind_trace_context",
+    "cost_by_model",
     "emit_event",
+    "engagement_cost",
+    "firm_cost",
     "get_trace_context",
     "increment",
     "new_run_id",
     "new_trace_id",
     "observe",
     "query_window",
+    "record_cost",
     "record_error",
     "record_stage_latency",
     "redact",
     "render_prometheus",
+    "session_cost_total",
     "set_trace_context",
     "structured_logger",
 ]

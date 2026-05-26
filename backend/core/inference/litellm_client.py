@@ -206,3 +206,24 @@ async def record_llm_call(
             )
     except Exception as e:  # noqa: BLE001
         logger.debug("llm metric emit skipped: %s", e)
+
+    # W20/D3 cost ledger — persist the cost_usd value with full
+    # attribution. Reuses the same cost number record_llm_call
+    # received from estimate_cost(); no recomputation. Best-effort
+    # but logs failures loudly (cost data matters).
+    if success and usd_cost and float(usd_cost) > 0:
+        try:
+            from core.observability.cost import record_cost
+            await record_cost(
+                trace_id=None,
+                session_id=session_id,
+                firm_id=None,  # resolved via session_id lookup
+                agent=task_kind or "unknown",
+                provider=_provider_for(model),
+                model=model,
+                prompt_tokens=int(prompt_tokens or 0),
+                completion_tokens=int(completion_tokens or 0),
+                cost_usd=float(usd_cost),
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.warning("cost ledger emit failed: %s", e)
