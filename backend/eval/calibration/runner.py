@@ -199,26 +199,27 @@ def _heuristic_llm_verdict(
     claim: str, evidence: str, deberta_label: str, deberta_conf: float,
     lexical_num: float, lexical_ent: float,
 ) -> tuple[str, str]:
-    """Deterministic substitute for the LLM judge. Synthesises a
-    verdict that's at least plausible: contradiction → contradicted,
-    strong entailment + lexical OK → supported, weak entailment →
-    weak, low overlap → unsupported.
+    """Deterministic substitute for the LLM judge.
 
-    This is the most "fake" part of the heuristic baseline; the
-    Day 3 work will replace it with cached real-LLM verdicts the
-    first time the calibration runs against real API keys.
+    W22/D3: Switched from a gist-based fallthrough table to the
+    structured reason-then-verdict heuristic. The new logic
+    decomposes the claim into parts (conjunctions, magnitudes,
+    causal verbs, universal quantifiers) and demands a supporting
+    span per part. The DeBERTa hard-veto on contradiction is
+    preserved because the heuristic-DeBERTa substitute is the
+    source-of-truth for direction reversal in the no-keys path.
     """
     if deberta_label == "contradiction":
         return "contradicted", "heuristic: deberta contradiction"
-    if deberta_label == "entailment" and deberta_conf >= 0.7 and lexical_num >= 0.95:
-        return "supported", "heuristic: strong entailment + numeric match"
-    if deberta_label == "entailment" and lexical_num < 0.7:
-        return "weak", "heuristic: entailment but numeric drift"
-    if deberta_label == "neutral" and lexical_num >= 0.95:
-        return "weak", "heuristic: neutral with no numeric drift"
-    if deberta_label == "neutral":
-        return "unsupported", "heuristic: neutral + numeric drift"
-    return "weak", "heuristic: fallthrough"
+
+    # Reason-then-verdict path — mirrors the production LLM prompt
+    # the real_ensemble path uses (see core.nli.reason_then_verdict).
+    from core.nli.reason_then_verdict import heuristic_reason_then_verdict
+    judgment = heuristic_reason_then_verdict(claim, evidence)
+    return (
+        judgment.verdict,
+        f"reason-then-verdict: {judgment.rationale}"[:240],
+    )
 
 
 class HeuristicVerifier:
@@ -282,19 +283,14 @@ class RealEnsembleVerifier:
         from core.inference.litellm_client import chat_complete
         from core.nli.deberta_client import score_pairs
         from core.nli.lexical_overlap import score_overlap
+        from core.nli.reason_then_verdict import REASON_THEN_VERDICT_SYSTEM
 
         # ---- LLM judge ----
-        # A claim-level prompt that mirrors the verifier's verdict
-        # space (supported | weak | unsupported | contradicted).
-        system = (
-            "You evaluate a CLAIM against a piece of EVIDENCE and return one "
-            "verdict from {supported, weak, unsupported, contradicted}. "
-            "supported: evidence directly establishes the claim. "
-            "weak: evidence supports the gist but key specifics drift. "
-            "unsupported: evidence is topical but does not address the claim. "
-            "contradicted: evidence states the opposite. "
-            "Return ONLY valid JSON: {\"verdict\": \"...\", \"rationale\": \"...\"}"
-        )
+        # W22/D3: structured reason-then-verdict prompt. The model
+        # decomposes the claim, quotes a supporting span per part,
+        # then emits the verdict. Reduces "looks related → supported"
+        # errors across three of the five W22/D2 fault categories.
+        system = REASON_THEN_VERDICT_SYSTEM
         user = f"CLAIM:\n{claim}\n\nEVIDENCE:\n{evidence}"
         import asyncio
         import json as _json

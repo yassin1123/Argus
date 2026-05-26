@@ -9,12 +9,12 @@
       "category": "numeric_claim",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -27,8 +27,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_002",
@@ -42,7 +42,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 18%",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -102,7 +102,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: entailment but numeric drift",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 20%",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -132,7 +132,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: entailment but numeric drift",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: \u00a380m",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -162,7 +162,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: entailment but numeric drift",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 50%",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -192,7 +192,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: entailment but numeric drift",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 12%",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -224,7 +224,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: entailment but numeric drift",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: \u00a315m",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -249,12 +249,12 @@
       "category": "numeric_claim",
       "adversarial": true,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "unsupported",
-      "ensemble_verdict_collapsed": "insufficient",
-      "reason": "LLM unsupported (sticky)",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
       "raw": {
-        "llm_verdict": "unsupported",
-        "llm_rationale": "heuristic: neutral + numeric drift",
+        "llm_verdict": "weak",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: \u00a38m",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -269,8 +269,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_010",
@@ -365,12 +365,12 @@
       "category": "causal_claim",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -421,12 +421,12 @@
       "category": "causal_claim",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -505,12 +505,12 @@
       "category": "causal_claim",
       "adversarial": false,
       "ground_truth": "partial",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -523,8 +523,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_019",
@@ -533,12 +533,12 @@
       "category": "causal_claim",
       "adversarial": true,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "supported_high",
-      "ensemble_verdict_collapsed": "supported",
-      "reason": "all signals agree",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "supported",
-        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "entailment",
         "deberta_confidence": 0.8,
         "deberta_softmax": [
@@ -551,8 +551,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "false_positive"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_020",
@@ -589,12 +589,12 @@
       "category": "causal_claim",
       "adversarial": false,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -609,8 +609,8 @@
           "ESG"
         ]
       },
-      "correct": false,
-      "error_kind": "other_disagreement"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_022",
@@ -619,12 +619,12 @@
       "category": "causal_claim",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -675,12 +675,12 @@
       "category": "causal_claim",
       "adversarial": true,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "supported_high",
-      "ensemble_verdict_collapsed": "supported",
-      "reason": "all signals agree",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "supported",
-        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: causal verb present in claim without causal language in evidence",
         "deberta_label": "entailment",
         "deberta_confidence": 0.8,
         "deberta_softmax": [
@@ -694,7 +694,7 @@
         "lexical_entity_missing": []
       },
       "correct": false,
-      "error_kind": "false_positive"
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_025",
@@ -708,7 +708,7 @@
       "reason": "all signals agree",
       "raw": {
         "llm_verdict": "supported",
-        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.8,
         "deberta_softmax": [
@@ -733,12 +733,12 @@
       "category": "comparative",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -751,8 +751,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_027",
@@ -761,12 +761,12 @@
       "category": "comparative",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -779,8 +779,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_028",
@@ -794,7 +794,7 @@
       "reason": "all signals agree",
       "raw": {
         "llm_verdict": "supported",
-        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "llm_rationale": "reason-then-verdict: supporting span found | supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.8,
         "deberta_softmax": [
@@ -819,12 +819,12 @@
       "category": "comparative",
       "adversarial": false,
       "ground_truth": "partial",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -837,8 +837,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "false_positive"
     },
     {
       "id": "gs_030",
@@ -875,12 +875,12 @@
       "category": "comparative",
       "adversarial": true,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: low token overlap 0.33",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -893,8 +893,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "other_disagreement"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_032",
@@ -903,12 +903,12 @@
       "category": "comparative",
       "adversarial": false,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -922,7 +922,7 @@
         "lexical_entity_missing": []
       },
       "correct": false,
-      "error_kind": "other_disagreement"
+      "error_kind": "false_positive"
     },
     {
       "id": "gs_033",
@@ -961,10 +961,10 @@
       "ground_truth": "contradicted",
       "ensemble_verdict": "weak",
       "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "reason": "DeBERTa neutral; LLM may have anchored on gist",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -989,12 +989,12 @@
       "category": "comparative",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1008,7 +1008,7 @@
         "lexical_entity_missing": []
       },
       "correct": false,
-      "error_kind": "other_disagreement"
+      "error_kind": "false_positive"
     },
     {
       "id": "gs_036",
@@ -1045,12 +1045,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1063,8 +1063,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_038",
@@ -1073,12 +1073,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1091,8 +1091,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_039",
@@ -1106,7 +1106,7 @@
       "reason": "all signals agree",
       "raw": {
         "llm_verdict": "supported",
-        "llm_rationale": "heuristic: strong entailment + numeric match",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.8,
         "deberta_softmax": [
@@ -1185,12 +1185,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "partial",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: low token overlap 0.29",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1203,8 +1203,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_043",
@@ -1213,12 +1213,12 @@
       "category": "attribution",
       "adversarial": true,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "unsupported",
-      "ensemble_verdict_collapsed": "insufficient",
-      "reason": "LLM unsupported (sticky)",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
       "raw": {
-        "llm_verdict": "unsupported",
-        "llm_rationale": "heuristic: neutral + numeric drift",
+        "llm_verdict": "weak",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: \u00a312, 14m",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1233,8 +1233,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_044",
@@ -1243,12 +1243,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: low token overlap 0.20",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1263,8 +1263,8 @@
           "CFO"
         ]
       },
-      "correct": false,
-      "error_kind": "other_disagreement"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_045",
@@ -1273,12 +1273,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "unsupported",
-      "ensemble_verdict_collapsed": "insufficient",
-      "reason": "LLM unsupported (sticky)",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
       "raw": {
-        "llm_verdict": "unsupported",
-        "llm_rationale": "heuristic: neutral + numeric drift",
+        "llm_verdict": "weak",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: \u00a320m",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1293,8 +1293,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_046",
@@ -1335,12 +1335,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1354,7 +1354,7 @@
         "lexical_entity_missing": []
       },
       "correct": false,
-      "error_kind": "other_disagreement"
+      "error_kind": "false_positive"
     },
     {
       "id": "gs_048",
@@ -1363,12 +1363,12 @@
       "category": "attribution",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "contradicted",
+      "ensemble_verdict_collapsed": "contradicted",
+      "reason": "LLM contradicted (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "contradicted",
+        "llm_rationale": "reason-then-verdict: contradicted by evidence",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1381,8 +1381,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "other_disagreement"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_049",
@@ -1396,7 +1396,7 @@
       "reason": "LLM weak (sticky)",
       "raw": {
         "llm_verdict": "weak",
-        "llm_rationale": "heuristic: entailment but numeric drift",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 15%",
         "deberta_label": "entailment",
         "deberta_confidence": 0.8,
         "deberta_softmax": [
@@ -1421,12 +1421,12 @@
       "category": "forecast",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1441,8 +1441,8 @@
           "FY2025"
         ]
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_051",
@@ -1451,12 +1451,12 @@
       "category": "forecast",
       "adversarial": false,
       "ground_truth": "supported",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1471,8 +1471,8 @@
           "FY2024"
         ]
       },
-      "correct": false,
-      "error_kind": "false_negative"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_052",
@@ -1483,10 +1483,10 @@
       "ground_truth": "partial",
       "ensemble_verdict": "weak",
       "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "reason": "DeBERTa neutral; LLM may have anchored on gist",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1565,12 +1565,12 @@
       "category": "forecast",
       "adversarial": true,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "unsupported",
-      "ensemble_verdict_collapsed": "insufficient",
-      "reason": "LLM unsupported (sticky)",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
       "raw": {
-        "llm_verdict": "unsupported",
-        "llm_rationale": "heuristic: neutral + numeric drift",
+        "llm_verdict": "weak",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 15%",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1585,8 +1585,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": true,
-      "error_kind": null
+      "correct": false,
+      "error_kind": "other_disagreement"
     },
     {
       "id": "gs_056",
@@ -1627,12 +1627,12 @@
       "category": "forecast",
       "adversarial": false,
       "ground_truth": "insufficient",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "unsupported",
+      "ensemble_verdict_collapsed": "insufficient",
+      "reason": "LLM unsupported (sticky)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: neutral with no numeric drift",
+        "llm_verdict": "unsupported",
+        "llm_rationale": "reason-then-verdict: low token overlap 0.20",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1645,8 +1645,8 @@
         "lexical_entity_score": 1.0,
         "lexical_entity_missing": []
       },
-      "correct": false,
-      "error_kind": "other_disagreement"
+      "correct": true,
+      "error_kind": null
     },
     {
       "id": "gs_058",
@@ -1655,12 +1655,12 @@
       "category": "forecast",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "unsupported",
-      "ensemble_verdict_collapsed": "insufficient",
-      "reason": "LLM unsupported (sticky)",
+      "ensemble_verdict": "weak",
+      "ensemble_verdict_collapsed": "partial",
+      "reason": "LLM weak (sticky)",
       "raw": {
-        "llm_verdict": "unsupported",
-        "llm_rationale": "heuristic: neutral + numeric drift",
+        "llm_verdict": "weak",
+        "llm_rationale": "reason-then-verdict: missing number(s) in evidence: 15%",
         "deberta_label": "neutral",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1685,12 +1685,12 @@
       "category": "forecast",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1706,7 +1706,7 @@
         ]
       },
       "correct": false,
-      "error_kind": "other_disagreement"
+      "error_kind": "false_positive"
     },
     {
       "id": "gs_060",
@@ -1715,12 +1715,12 @@
       "category": "forecast",
       "adversarial": false,
       "ground_truth": "contradicted",
-      "ensemble_verdict": "weak",
-      "ensemble_verdict_collapsed": "partial",
-      "reason": "LLM weak (sticky)",
+      "ensemble_verdict": "supported_low",
+      "ensemble_verdict_collapsed": "supported",
+      "reason": "DeBERTa low-confidence entailment (0.55)",
       "raw": {
-        "llm_verdict": "weak",
-        "llm_rationale": "heuristic: fallthrough",
+        "llm_verdict": "supported",
+        "llm_rationale": "reason-then-verdict: supporting span found",
         "deberta_label": "entailment",
         "deberta_confidence": 0.55,
         "deberta_softmax": [
@@ -1736,7 +1736,7 @@
         ]
       },
       "correct": false,
-      "error_kind": "other_disagreement"
+      "error_kind": "false_positive"
     }
   ]
 }
