@@ -20,8 +20,11 @@ from core.provider_family import assert_cross_family
 from db.connection import close_db, init_db
 
 from core.logging_config import configure_json_logging
+from core.observability.logging import configure_event_logging
+from core.observability.middleware import trace_middleware
 
 configure_json_logging()
+configure_event_logging()
 
 # Cross-family verification wedge: the analyst (synthesis) and verifier (judge)
 # must resolve to different provider families (see backend/core/provider_family.py).
@@ -66,6 +69,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Phase 5 / W20 D1: seed trace_id + emit request.start/.complete.
+# Installed BEFORE audit so audit rows are written inside the same
+# trace's contextvar scope (the orchestrator + DB layer will read
+# from it automatically across await boundaries).
+app.middleware("http")(trace_middleware)
 # Phase 10: append-only audit log on every API call.
 app.middleware("http")(audit_middleware)
 
