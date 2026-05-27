@@ -456,6 +456,12 @@ def run_calibration(
         entries = entries[: int(max_pairs)]
 
     if verifier is None and not cache:
+        # W23/D4: in strict mode (pilot/production) the heuristic
+        # substitute is FORBIDDEN. The W22 bug — silent fallback
+        # that produced two weeks of wrong calibration numbers —
+        # is the bug class this guard makes impossible.
+        from core.config import assert_real_verifier_required
+        assert_real_verifier_required()
         verifier = HeuristicVerifier()
 
     results: list[ScoredPair] = []

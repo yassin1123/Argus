@@ -11,7 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 load_dotenv()
 
 from api import auth as auth_router
-from api import admin, artifacts, audit_export as audit_export_router, chat, collaboration, comments, cost as cost_router, engagements, evaluations, exports, firm_library, firm_modes, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, observability_dashboard as dashboard_router, reports, retention as retention_router, review, section_deepening, session_exports, sessions, sources, trace as trace_router, users, versioning as versioning_router, workspace
+from api import admin, artifacts, audit_export as audit_export_router, chat, collaboration, comments, cost as cost_router, engagements, evaluations, exports, firm_library, firm_modes, health as health_router, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, observability_dashboard as dashboard_router, reports, retention as retention_router, review, section_deepening, session_exports, sessions, sources, trace as trace_router, users, versioning as versioning_router, workspace
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
@@ -22,9 +22,17 @@ from db.connection import close_db, init_db
 from core.logging_config import configure_json_logging
 from core.observability.logging import configure_event_logging
 from core.observability.middleware import trace_middleware
+from core.config import get_mode, validate_at_boot
 
 configure_json_logging()
 configure_event_logging()
+
+# W23/D4: validate config at boot. In strict mode (pilot /
+# production) the report's `degraded` flag drives the
+# orchestrator's refuse-to-run decision; in test mode the
+# heuristic substitute is allowed but the health endpoint
+# surfaces the mode so an operator can't mistake it for pilot.
+_BOOT_CONFIG = validate_at_boot()
 
 # Cross-family verification wedge: the analyst (synthesis) and verifier (judge)
 # must resolve to different provider families (see backend/core/provider_family.py).
@@ -128,6 +136,8 @@ app.include_router(retention_router.session_router, prefix="/api/sessions", tags
 app.include_router(retention_router.router, prefix="/api/admin", tags=["admin", "retention"], dependencies=PROTECTED)
 # W23/D3 audit export — firm-scoped, content-free CSV / NDJSON.
 app.include_router(audit_export_router.router, prefix="/api/admin", tags=["admin", "audit-export"], dependencies=PROTECTED)
+# W23/D4 health — public; surfaces boot-time config status.
+app.include_router(health_router.router, tags=["health"])
 
 
 @app.get("/api/health")
