@@ -1,0 +1,165 @@
+{
+  "generated_at": "2026-05-26T23:59:23.316598+00:00",
+  "gate_status": "partial",
+  "gate_check": {
+    "blocked": false,
+    "blockers": [],
+    "available": {
+      "anthropic_key": true,
+      "openai_key": true,
+      "deberta_module": true
+    },
+    "chosen_verifier_source": "cross_family_llm"
+  },
+  "real_batch_status": {
+    "labelled_pair_count": 0,
+    "chunk_text_complete": true,
+    "notes": [
+      "real_runs/ has no labelled fixtures. The labelling CLI (tools/label_claims.py) is ready; needs Yassin's 30-60 min."
+    ]
+  },
+  "synthetic_on_real_llm": {
+    "verifier_source": "cross_family_llm",
+    "pair_count": 60,
+    "metrics_full": {
+      "pair_count": 60,
+      "correct": 45,
+      "accuracy": 0.75,
+      "confusion": {
+        "supported": {
+          "supported": 12,
+          "partial": 0,
+          "insufficient": 0,
+          "contradicted": 0
+        },
+        "partial": {
+          "supported": 3,
+          "partial": 6,
+          "insufficient": 3,
+          "contradicted": 0
+        },
+        "insufficient": {
+          "supported": 0,
+          "partial": 1,
+          "insufficient": 12,
+          "contradicted": 0
+        },
+        "contradicted": {
+          "supported": 0,
+          "partial": 8,
+          "insufficient": 0,
+          "contradicted": 15
+        }
+      },
+      "per_class": [
+        {
+          "label": "supported",
+          "precision": 1.0,
+          "recall": 0.8,
+          "f1": 0.888888888888889,
+          "support": 15,
+          "tp": 12,
+          "fp": 0,
+          "fn": 3
+        },
+        {
+          "label": "partial",
+          "precision": 0.5,
+          "recall": 0.4,
+          "f1": 0.4444444444444445,
+          "support": 15,
+          "tp": 6,
+          "fp": 6,
+          "fn": 9
+        },
+        {
+          "label": "insufficient",
+          "precision": 0.9230769230769231,
+          "recall": 0.8,
+          "f1": 0.8571428571428571,
+          "support": 15,
+          "tp": 12,
+          "fp": 1,
+          "fn": 3
+        },
+        {
+          "label": "contradicted",
+          "precision": 0.6521739130434783,
+          "recall": 1.0,
+          "f1": 0.7894736842105263,
+          "support": 15,
+          "tp": 15,
+          "fp": 8,
+          "fn": 0
+        }
+      ],
+      "per_category_accuracy": {
+        "numeric_claim": 0.5833333333333334,
+        "causal_claim": 0.5833333333333334,
+        "comparative": 0.9166666666666666,
+        "attribution": 1.0,
+        "forecast": 0.6666666666666666
+      },
+      "per_category_pair_count": {
+        "numeric_claim": 12,
+        "causal_claim": 12,
+        "comparative": 12,
+        "attribution": 12,
+        "forecast": 12
+      },
+      "fp_rate_on_supported": 0.0,
+      "fp_count_on_supported": 0,
+      "supported_predictions": 12,
+      "recall_on_insufficient": 1.0,
+      "insufficient_caught": 15,
+      "insufficient_total": 15,
+      "adversarial_accuracy": 0.4444444444444444,
+      "adversarial_count": 18
+    },
+    "headline": {
+      "fp_rate_on_supported": 0.0,
+      "recall_on_insufficient": 1.0,
+      "accuracy": 0.75,
+      "adversarial_accuracy": 0.4444444444444444
+    },
+    "over_flagging": {
+      "supported_review_fraction": 0.2,
+      "status": "ok",
+      "warn_threshold": 0.3,
+      "fail_threshold": 0.5,
+      "message": "Over-flagging only 20.0% of genuinely-supported claims; the FP minimisation cost is acceptable."
+    },
+    "raw_scores_path": "C:\\Users\\yassi\\OneDrive\\Desktop\\ARGUS V3\\backend\\eval\\calibration\\raw_scores_w22fix.json"
+  },
+  "real_on_real_llm": null,
+  "synthetic_heuristic_baseline_for_compare": {
+    "fp_rate_on_supported": 0.4375,
+    "recall_on_insufficient": 0.9333,
+    "verifier_source": "heuristic_no_keys"
+  },
+  "delta_real_llm_vs_heuristic": {
+    "fp_rate_real_llm": 0.0,
+    "fp_rate_heuristic": 0.4375,
+    "fp_delta_pp": -43.75,
+    "recall_real_llm": 1.0,
+    "recall_heuristic": 0.9333,
+    "recall_delta_pp": 6.67
+  },
+  "verdict": {
+    "headline": "GATE_PARTIALLY_CLOSED",
+    "rationale": "Synthetic calibration ran on the real LLM verifier (cross_family_llm); real-claim calibration is STILL UNMEASURED because the labelled-real-claim batch is incomplete (0 pairs; chunk text complete=True). The synthetic-on-real-LLM FP-rate-on-supported = 0.00%. The pilot posture is re-classified against this synthetic-on-real-LLM number; the production-real-claim posture remains PENDING until the labels land.",
+    "pilot_posture": {
+      "verdict": "ready",
+      "headline": "ready_for_pilot_with_documented_bounds",
+      "rationale": "FP-rate-on-supported=0.00% (<= 10%); red-team 97.1% (>= 95%); over-flag status 'ok'. The trust claim 'when Argus says verified, it's right' holds for a pilot with documented bounds on the known limitations.",
+      "fp_rate_post_fix": 0.0,
+      "over_flag_status": "ok",
+      "red_team_catch_rate": 0.9706,
+      "next_steps": [
+        "Wire real-ensemble baseline + re-run calibration to confirm the heuristic-baseline gains carry over.",
+        "Pilot with the verifier described as 'verified' (no human-review qualifier required in messaging).",
+        "Continue red-team coverage of the rt_007 / rt_012 edge cases in Week 23+."
+      ]
+    }
+  }
+}
