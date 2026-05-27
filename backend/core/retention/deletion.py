@@ -199,19 +199,25 @@ async def purge_engagement(
         # --- delete rows in topological order ---
         async with conn.transaction():
             for table in _PURGE_TABLES:
+                # Each DELETE runs in its own SAVEPOINT so an
+                # exception (e.g. table missing on a partial schema)
+                # rolls back ONLY that statement — the outer
+                # transaction continues. Without this, asyncpg
+                # aborts the whole tx on the first failure and the
+                # audit-row INSERT below never lands.
                 try:
-                    result = await conn.execute(
-                        f"DELETE FROM {table} WHERE session_id = $1::uuid",
-                        sid,
-                    )
-                    # asyncpg returns "DELETE <n>"; parse the count.
-                    n = 0
-                    try:
-                        n = int(result.split()[-1])
-                    except (ValueError, IndexError):
+                    async with conn.transaction():
+                        result = await conn.execute(
+                            f"DELETE FROM {table} WHERE session_id = $1::uuid",
+                            sid,
+                        )
                         n = 0
-                    if n > 0:
-                        report.rows_deleted[table] = n
+                        try:
+                            n = int(result.split()[-1])
+                        except (ValueError, IndexError):
+                            n = 0
+                        if n > 0:
+                            report.rows_deleted[table] = n
                 except Exception as e:  # noqa: BLE001
                     # A missing table is fine (new install, optional
                     # surface). Other errors are noted + we move on

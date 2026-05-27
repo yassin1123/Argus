@@ -123,7 +123,7 @@ _FIRM_SCOPED_TABLES = [
     (
         "sessions", "sessions",
         "firm_id = $1::uuid",
-        "id, firm_id, title, status, pipeline_state, "
+        "id, firm_id, title, query, status, pipeline_state, "
         "report_mode, created_at, updated_at, "
         "created_by_user_id, metadata",
     ),
@@ -141,8 +141,8 @@ _FIRM_SCOPED_TABLES = [
     (
         "comments", "comments",
         "session_id IN (SELECT id FROM sessions WHERE firm_id = $1::uuid)",
-        "id, session_id, author_id, body, anchor_type, anchor_ref, "
-        "parent_comment_id, resolved_at, resolved_by, "
+        "id, session_id, firm_id, author_id, body, anchor_type, "
+        "anchor_ref, parent_comment_id, resolved_at, resolved_by, "
         "created_at, deleted_at",
     ),
     (
@@ -251,10 +251,15 @@ async def backup_firm(firm_id: str | UUID) -> BackupArchive:
         # membership; we still export their identity here so
         # the restore can re-link without depending on a
         # global users dump.
+        # password_hash is bcrypt — already an opaque blob, never
+        # plaintext. Including it lets a restore re-seat the user
+        # without forcing a password reset; omitting it would make
+        # the restore a no-op for the users table whenever the
+        # target DB is fresh.
         user_rows = await conn.fetch(
             """
-            SELECT u.id, u.email, u.full_name, u.role,
-                   u.default_firm_id, u.created_at
+            SELECT u.id, u.email, u.password_hash, u.full_name,
+                   u.role, u.default_firm_id, u.created_at
               FROM users u
               JOIN firm_memberships m ON m.user_id = u.id
              WHERE m.firm_id = $1::uuid
@@ -300,12 +305,12 @@ _RESTORE_ORDER = [
      ["id", "slug", "name", "retention_days",
       "monthly_budget_usd", "session_cost_ceiling_usd"]),
     ("users", "users",
-     ["id", "email", "full_name", "role", "default_firm_id",
-      "created_at"]),
+     ["id", "email", "password_hash", "full_name", "role",
+      "default_firm_id", "created_at"]),
     ("firm_memberships", "firm_memberships",
      ["id", "firm_id", "user_id", "role", "added_at"]),
     ("sessions", "sessions",
-     ["id", "firm_id", "title", "status", "pipeline_state",
+     ["id", "firm_id", "title", "query", "status", "pipeline_state",
       "report_mode", "created_at", "updated_at",
       "created_by_user_id", "metadata"]),
     ("reports", "reports",
@@ -314,9 +319,9 @@ _RESTORE_ORDER = [
      ["id", "session_id", "claim", "quote", "source_type",
       "source_url", "source_title", "source_score", "created_at"]),
     ("comments", "comments",
-     ["id", "session_id", "author_id", "body", "anchor_type",
-      "anchor_ref", "parent_comment_id", "resolved_at",
-      "resolved_by", "created_at", "deleted_at"]),
+     ["id", "session_id", "firm_id", "author_id", "body",
+      "anchor_type", "anchor_ref", "parent_comment_id",
+      "resolved_at", "resolved_by", "created_at", "deleted_at"]),
     ("engagement_memberships", "engagement_memberships",
      ["id", "engagement_id", "user_id", "role", "added_by",
       "added_at", "removed_at"]),
@@ -351,6 +356,32 @@ _RESTORE_ORDER = [
 ]
 
 
+_TIMESTAMP_COLUMNS = {
+    "created_at", "updated_at", "added_at", "removed_at",
+    "resolved_at", "deleted_at", "uploaded_at", "retired_at",
+    "exported_at", "purged_at", "retention_flagged_at",
+    "retention_grace_expires_at",
+}
+
+
+def _coerce_for_insert(col: str, value: Any) -> Any:
+    """Inverse of :func:`_to_jsonable` for restore — asyncpg expects
+    real datetime objects for TIMESTAMPTZ columns, not ISO strings.
+    JSON columns get dumped back to TEXT for the JSONB cast."""
+    if isinstance(value, (dict, list)):
+        return json.dumps(value)
+    if (
+        col in _TIMESTAMP_COLUMNS
+        and isinstance(value, str)
+        and value
+    ):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return value
+    return value
+
+
 async def restore_firm(archive: BackupArchive) -> dict[str, int]:
     """Re-insert the archive's rows into the current DB. Returns
     counts-per-table. Idempotent via ``ON CONFLICT (id) DO
@@ -370,14 +401,9 @@ async def restore_firm(archive: BackupArchive) -> dict[str, int]:
                     f"${i+1}" for i in range(len(cols))
                 )
                 col_list = ", ".join(cols)
-                values: list[Any] = []
-                for c in cols:
-                    v = row.get(c)
-                    # asyncpg needs JSON columns serialised when
-                    # the value is a dict/list.
-                    if isinstance(v, (dict, list)):
-                        v = json.dumps(v)
-                    values.append(v)
+                values: list[Any] = [
+                    _coerce_for_insert(c, row.get(c)) for c in cols
+                ]
                 sql = (
                     f"INSERT INTO {table} ({col_list}) "
                     f"VALUES ({placeholders}) "
