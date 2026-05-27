@@ -48,26 +48,39 @@ from eval.red_team.run_red_team import run_red_team, triage  # noqa: E402
 # ---------------------------------------------------------------------------
 
 
-# Quality floors — TIGHTENED by the W22/D3 reason-then-verdict
-# fix. The pre-fix W21 floor was FP=0.60 (60% catastrophic-error
-# rate on the heuristic baseline). The W22/D3 prompt rework
-# dropped this to FP=0.4375 while preserving recall_on_insufficient
-# and accepting a small red-team trade-off (one new temporal-drift
-# escape; recall-on-supported metric in calibration unchanged).
+# Quality floors — two tiers since W22 Fix-Day.
+#
+# The HEURISTIC floors below are the cheap-CI floors. They run on
+# every PR (~2s) against the cached heuristic-mode raw scores. They
+# catch silent regressions in the aggregator / lexical / prompt
+# logic without burning LLM money on every push.
+#
+# The REAL-LLM floors (see test_real_ensemble_quality_full_run
+# below) are the truth tier — gated behind
+# ARGUS_RUN_FULL_LLM_REGRESSION=1. They reflect the W22 Fix-Day
+# measurement on the real cross-family ensemble (Claude + GPT-4o +
+# DeBERTa-v3 + lexical) which produced 0% FP / 100% recall /
+# 100% red-team catch on the W21/D1 synthetic golden set + W21/D4
+# adversarial red-team set.
+#
 # Future quality work raises these floors; never lowers them.
 BASELINE_FP_RATE_ON_SUPPORTED = 0.4375    # W22/D3 — was 0.60 W21
 BASELINE_RECALL_ON_INSUFFICIENT = 0.9333  # preserved across W21/D2 + W22/D3
 
-# Red-team catch rate after W22/D3. Two documented escapes:
+# Red-team catch rate on the HEURISTIC verifier after W22/D3. Two
+# documented escapes:
 #   rt_007 (misattribution — pre-existing, W21/D4 known limitation)
-#   rt_012 (temporal_drift — new W22/D3 escape; documented in the
-#           W22/D3 wrap-up as a known semantic edge-case where
-#           evidence carries both the actual + original periods)
-# Down from W21/D4's 97.1%. The decrease is the spec-acknowledged
-# "trade-off to surface, not silently accept" — the FP-rate-on-
-# supported gain (-16.25pp) more than offsets the catch-rate cost
-# (-3pp) under the asymmetric-trust objective.
+#   rt_012 (temporal_drift — new W22/D3 escape)
+# NOTE: both escapes are CAUGHT by the real cross-family ensemble
+# (W22 Fix-Day red-team: 34/34 caught, zero escapes). The 0.94 floor
+# here is the heuristic-mode floor only.
 RED_TEAM_CATCH_RATE_FLOOR = 0.94
+
+# Real-LLM floors — applied by the gated full-LLM test below.
+# Source: backend/eval_runs/week22_fix/verdict.json (W22 Fix-Day).
+REAL_LLM_FP_RATE_ON_SUPPORTED = 0.05      # measured 0.00; 0.05 cushion
+REAL_LLM_RECALL_ON_INSUFFICIENT = 0.95    # measured 1.00; 0.05 cushion
+REAL_LLM_RED_TEAM_CATCH_RATE = 0.95       # measured 1.00; 0.05 cushion
 
 
 CACHED_RAW = (
@@ -219,8 +232,7 @@ def test_baseline_floors_match_committed_reports() -> None:
 def test_real_ensemble_quality_full_run() -> None:
     """Reserved for on-demand quality re-measurement with API
     keys + DeBERTa available. Calls the real verifier path and
-    re-checks the headline metrics against the same floors as the
-    cached path. Skipped by default."""
+    asserts the W22 Fix-Day real-LLM floors hold."""
     from eval.calibration.runner import RealEnsembleVerifier
 
     config = load_threshold_config()
@@ -231,5 +243,14 @@ def test_real_ensemble_quality_full_run() -> None:
         threshold_config=config,
     )
     metrics = compute_metrics(pairs)
-    assert metrics.fp_rate_on_supported <= BASELINE_FP_RATE_ON_SUPPORTED + 0.01
-    assert metrics.recall_on_insufficient >= BASELINE_RECALL_ON_INSUFFICIENT - 0.01
+    # W22 Fix-Day floors — tighter than the heuristic floors.
+    assert metrics.fp_rate_on_supported <= REAL_LLM_FP_RATE_ON_SUPPORTED, (
+        f"REAL-LLM FP regressed to {metrics.fp_rate_on_supported:.3%}; "
+        f"floor is {REAL_LLM_FP_RATE_ON_SUPPORTED:.3%}. The W22 Fix-Day "
+        "established 0% FP on synthetic — this should hold."
+    )
+    assert metrics.recall_on_insufficient >= REAL_LLM_RECALL_ON_INSUFFICIENT, (
+        f"REAL-LLM recall regressed to "
+        f"{metrics.recall_on_insufficient:.3%}; floor is "
+        f"{REAL_LLM_RECALL_ON_INSUFFICIENT:.3%}."
+    )
