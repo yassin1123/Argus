@@ -31,6 +31,8 @@ class NotificationType(str, Enum):
     REVIEW_APPROVED = "review_approved"
     # W19 — version history
     VERSION_RESTORED = "version_restored"
+    # W23/D2 — retention policy (purge scheduled with grace)
+    RETENTION_PURGE_SCHEDULED = "retention_purge_scheduled"
 
 
 # Higher number = higher priority. Used by ``dispatch_batch`` to pick
@@ -42,6 +44,7 @@ TYPE_PRIORITY: dict[NotificationType, int] = {
     NotificationType.REVIEW_REQUESTED:      85,  # reviewer's queue
     NotificationType.REVIEW_APPROVED:       80,
     NotificationType.VERSION_RESTORED:      75,  # discards approved state — load-bearing
+    NotificationType.RETENTION_PURGE_SCHEDULED: 95,  # hard-delete countdown — urgent
     NotificationType.SECTION_NEEDS_REVIEW:  70,
     NotificationType.ENGAGEMENT_ASSIGNED:   60,
     NotificationType.SECTION_ASSIGNED:      50,
