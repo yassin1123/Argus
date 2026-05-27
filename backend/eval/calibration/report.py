@@ -38,10 +38,16 @@ DEFAULT_RAW = (
 
 
 def select_verifier(name: str | None) -> VerifierProtocol:
-    """Pick the verifier by name. Defaults to heuristic so a run
-    without API keys still produces an honest baseline."""
+    """Pick the verifier by name. W23/D4: in strict mode the
+    heuristic substitute is forbidden — even an explicit
+    ``--verifier heuristic_no_keys`` is denied so a CLI typo
+    can't reintroduce the W22 silent-fallback bug. Test mode
+    permits the heuristic explicitly."""
     if name == "real_ensemble":
         return RealEnsembleVerifier()
+    # heuristic_no_keys path — only legal in test mode.
+    from core.config import assert_real_verifier_required
+    assert_real_verifier_required()
     return HeuristicVerifier()
 
 

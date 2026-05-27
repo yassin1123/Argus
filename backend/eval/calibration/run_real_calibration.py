@@ -208,15 +208,16 @@ def _load_real_batch() -> GoldenSet:
 
 
 def _select_verifier(name: str | None) -> VerifierProtocol:
-    """Returns the real ensemble when explicitly requested + when
-    keys appear configured; otherwise the heuristic fallback. The
-    verifier_source label is preserved on the output so the
-    operator can tell which path produced the numbers."""
+    """Returns the real ensemble when explicitly requested. The
+    W23/D4 fix-loud policy: the heuristic fallback is FORBIDDEN
+    in strict mode — even ``--verifier heuristic_no_keys`` is
+    denied. Test mode permits it explicitly (results are
+    labelled non-pilot-quality)."""
     if name == "real_ensemble":
-        # Don't import the real path unless asked — it pulls heavy
-        # litellm / DeBERTa modules.
         from eval.calibration.runner import RealEnsembleVerifier
         return RealEnsembleVerifier()
+    from core.config import assert_real_verifier_required
+    assert_real_verifier_required()
     return HeuristicVerifier()
 
 
