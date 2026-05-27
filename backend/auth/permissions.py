@@ -51,6 +51,28 @@ async def get_engagement_role(engagement_id: str, user_id: str) -> EngagementRol
     return row["role"] if row else None  # type: ignore[return-value]
 
 
+async def _engagement_firm_matches_user(
+    engagement_id: str, user: dict,
+) -> bool:
+    """W23/D1 defense-in-depth: confirm the engagement's firm
+    matches the requesting user's default firm. Returns False on
+    any lookup failure (fail closed)."""
+    user_firm = user.get("default_firm_id")
+    if not user_firm:
+        return False
+    try:
+        async with acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT firm_id FROM sessions WHERE id = $1::uuid",
+                engagement_id,
+            )
+    except Exception:  # noqa: BLE001
+        return False
+    if not row or not row["firm_id"]:
+        return False
+    return str(row["firm_id"]) == str(user_firm)
+
+
 async def is_demo_engagement(engagement_id: str) -> bool:
     """Demo seeds (metadata.demo=true) are read-only public for any authenticated user."""
     async with acquire() as conn:
@@ -71,13 +93,27 @@ async def is_demo_engagement(engagement_id: str) -> bool:
 
 
 async def has_capability(engagement_id: str, user: dict, cap: Capability) -> bool:
-    """True if the user can perform `cap` on the engagement."""
-    # Firm admin bypasses all engagement checks.
+    """True if the user can perform `cap` on the engagement.
+
+    W23/D1 defense-in-depth: even when the engagement_memberships
+    row grants a capability, we additionally require that the
+    user's default firm matches the engagement's firm — so a
+    stray cross-firm membership row (introduced by a bug or a
+    future feature regression) can never grant cross-firm access
+    on its own. The :func:`core.collaboration.membership.assign_member`
+    write path already blocks cross-firm assignment; this read-
+    side check is the second line of defence.
+    """
+    # System admin (users.role='admin') bypasses every engagement
+    # check intentionally — admin tooling reads cross-firm.
     if user.get("role") == "admin":
         return True
 
     role = await get_engagement_role(engagement_id, user["user_id"])
     if role is not None:
+        # W23/D1 defense-in-depth firm-match check.
+        if not await _engagement_firm_matches_user(engagement_id, user):
+            return False
         return cap in _CAPABILITY_FOR_ROLE.get(role, set())
 
     # Non-member: only demo engagements are publicly readable.
