@@ -1,0 +1,297 @@
+{
+  "run_at": "2026-05-27T01:10:31.662575+00:00",
+  "all_ok": true,
+  "ship_decision": "ship",
+  "scenarios": [
+    {
+      "name": "isolation",
+      "ok": true,
+      "reason": "7/7 cross-firm attempts blocked; same-firm read allowed=True",
+      "evidence": {
+        "attempts": 7,
+        "blocked_404": 7,
+        "denials": [
+          {
+            "kind": "session",
+            "outcome": "denied_404"
+          },
+          {
+            "kind": "session",
+            "outcome": "denied_404"
+          },
+          {
+            "kind": "session",
+            "outcome": "denied_404"
+          },
+          {
+            "kind": "comment",
+            "outcome": "denied_404"
+          },
+          {
+            "kind": "payload_version",
+            "outcome": "denied_404"
+          },
+          {
+            "kind": "artifact",
+            "outcome": "denied_404"
+          },
+          {
+            "kind": "engagement_membership",
+            "outcome": "denied_404"
+          }
+        ],
+        "same_firm_read_allowed": true
+      }
+    },
+    {
+      "name": "deletion",
+      "ok": true,
+      "reason": "residual_tables=none; audit_row_id=7; file_existed_before=True, file_gone_after=True; leaked_payload_keys=none",
+      "evidence": {
+        "session_id": "62940673-ad74-466d-9a1c-ee8066f55277",
+        "purge_report": {
+          "session_id": "62940673-ad74-466d-9a1c-ee8066f55277",
+          "firm_id": "01edceb8-72b8-4fb2-9aa0-f3e9354bd9a6",
+          "actor_user_id": "5bbde280-8566-4232-89a1-9d3d432c3db5",
+          "purge_reason": "firm_admin_request",
+          "rows_deleted": {
+            "evidence_objects": 3,
+            "comments": 1,
+            "payload_versions": 1,
+            "export_artifacts": 1
+          },
+          "files_deleted": 1,
+          "files_failed": 0,
+          "audit_log_id": 7
+        },
+        "residual_rows": {},
+        "audit_log_row": {
+          "id": 7,
+          "purge_reason": "firm_admin_request",
+          "files_deleted": 1,
+          "rows_deleted": {
+            "comments": 1,
+            "evidence_objects": 3,
+            "export_artifacts": 1,
+            "payload_versions": 1
+          }
+        },
+        "artifact_existed_before": true,
+        "artifact_gone_after": true,
+        "leaked_payload_keys": []
+      }
+    },
+    {
+      "name": "retention",
+      "ok": true,
+      "reason": "flag stage notified 1 admin(s); after grace, purge approved + executed (1 rows)",
+      "evidence": {
+        "flag_decision": {
+          "session_id": "bcc66075-1b7f-42e3-9d18-35426c7e2659",
+          "firm_id": "01edceb8-72b8-4fb2-9aa0-f3e9354bd9a6",
+          "action": "flag",
+          "reason": "age 100.0d >= retention window 30d; flag + 14d grace",
+          "age_days": 100.0,
+          "retention_days": 30,
+          "grace_expires_at": "2026-06-10T01:10:09.129972+00:00"
+        },
+        "notifications_dispatched": 1,
+        "notification_types": [
+          "retention_purge_scheduled"
+        ],
+        "purge_decision": {
+          "session_id": "bcc66075-1b7f-42e3-9d18-35426c7e2659",
+          "firm_id": "01edceb8-72b8-4fb2-9aa0-f3e9354bd9a6",
+          "action": "purge",
+          "reason": "flagged + grace expired; purge approved (reason=retention_sweep)",
+          "age_days": 115.0,
+          "retention_days": 30,
+          "grace_expires_at": "2026-06-10T01:10:09.129972+00:00"
+        },
+        "purge_report": {
+          "session_id": "bcc66075-1b7f-42e3-9d18-35426c7e2659",
+          "firm_id": "01edceb8-72b8-4fb2-9aa0-f3e9354bd9a6",
+          "actor_user_id": null,
+          "purge_reason": "retention_sweep",
+          "rows_deleted": {
+            "notifications": 1
+          },
+          "files_deleted": 0,
+          "files_failed": 0,
+          "audit_log_id": 8
+        }
+      }
+    },
+    {
+      "name": "audit_export",
+      "ok": true,
+      "reason": "firm_a_rows=2, firm_b_rows=0 (must be 0), text_leak_a=False, text_leak_b=False, csv_lines=3, ndjson_lines=2",
+      "evidence": {
+        "row_count": 2,
+        "firm_a_session_rows": 2,
+        "firm_b_session_rows": 0,
+        "claim_text_leak_into_export": false,
+        "csv_lines": 3,
+        "ndjson_lines": 2,
+        "strip_payload_drops_claim_text": true,
+        "strip_payload_keeps_session_id": true
+      }
+    },
+    {
+      "name": "budget",
+      "ok": true,
+      "reason": "80%_fired=True, 100%_fired=True, blocks_new_engagements=True, per_session_ceiling_tripped=True (10.50 > 5.00), in_flight_session_killed=False",
+      "evidence": {
+        "fired_thresholds": {
+          "80_pass": [
+            80
+          ],
+          "100_pass": [
+            100
+          ]
+        },
+        "status": {
+          "firm_id": "01edceb8-72b8-4fb2-9aa0-f3e9354bd9a6",
+          "month_bucket": "2026-05",
+          "monthly_budget_usd": 10.0,
+          "month_to_date_usd": 10.5,
+          "used_pct": 105.0,
+          "blocks_new_engagements": true,
+          "next_notification_threshold": null
+        },
+        "engagement_gate_blocked": true,
+        "engagement_gate_reason": "Firm month-to-date spend $10.50 has reached 105.0% of the $10.00 monthly budget. New engagements are blocked until the admin raises the budget or the month resets. In-flight engagements continue to completion.",
+        "session_ceiling": {
+          "over": true,
+          "spend": 10.5,
+          "ceiling": 5.0
+        },
+        "in_flight_session_status": "ready",
+        "notification_summaries": [
+          "Firm budget 80% used: $8.00 of $10.00 for 2026-05",
+          "Firm budget 100% used: $10.50 of $10.00 for 2026-05 \u2014 new engagements blocked"
+        ]
+      }
+    },
+    {
+      "name": "rate_limit",
+      "ok": true,
+      "reason": "inserted=60; limit=60/hour; current=63; blocked=True; retry_after_s=3600",
+      "evidence": {
+        "inserted_in_window": 60,
+        "decision": {
+          "blocked": true,
+          "limit_name": "engagement_creation",
+          "current_count": 63,
+          "limit": 60,
+          "window_seconds": 3600,
+          "retry_after_seconds": 3600,
+          "reason": "Firm has created 63 engagements in the last hour; limit is 60/hour. Wait until the rolling window clears."
+        }
+      }
+    },
+    {
+      "name": "config",
+      "ok": true,
+      "reason": "mode=pilot, strict=True, degraded=True, can_run_real_verifier=False, VerifierUnavailable raised=True",
+      "evidence": {
+        "report": {
+          "mode": "pilot",
+          "strict": true,
+          "can_run_real_verifier": false,
+          "all_critical_ok": false,
+          "degraded": true,
+          "checks": [
+            {
+              "name": "anthropic_api_key",
+              "ok": false,
+              "detail": "MISSING \u2014 required for cross-family verification",
+              "severity": "critical"
+            },
+            {
+              "name": "openai_api_key",
+              "ok": false,
+              "detail": "MISSING \u2014 required for cross-family verification",
+              "severity": "critical"
+            },
+            {
+              "name": "deberta_module",
+              "ok": true,
+              "detail": "sentence-transformers importable",
+              "severity": "critical"
+            },
+            {
+              "name": "database_url",
+              "ok": true,
+              "detail": "present",
+              "severity": "critical"
+            },
+            {
+              "name": "model_pricing",
+              "ok": true,
+              "detail": "litellm import OK (bundled pricing table)",
+              "severity": "optional"
+            },
+            {
+              "name": "email_adapter",
+              "ok": true,
+              "detail": "capture adapter (in-memory; no SMTP needed)",
+              "severity": "optional"
+            }
+          ]
+        },
+        "verifier_unavailable_raised": true,
+        "verifier_unavailable_message_excerpt": "verification unavailable: cross-family verifier cannot run (anthropic_api_key, openai_api_key). The heuristic substitute is forbidden in strict mode (ARGUS_MODE=pilot). Set the required keys / install sentence-transformers, then restart. To run in test mode anyway, set ARGUS_MODE"
+      }
+    },
+    {
+      "name": "backup_restore",
+      "ok": true,
+      "reason": "archive_rows=13; firm_b_leaks=none; deleted_then_restored=4; comments_back=1/1; evidence_back=3/3; second_restore_is_noop=True; json_roundtrip=True",
+      "evidence": {
+        "archive_version": 1,
+        "archive_total_rows": 13,
+        "archive_firm_id": "01edceb8-72b8-4fb2-9aa0-f3e9354bd9a6",
+        "leaks": [],
+        "deleted_before_restore": 4,
+        "rows_restored": {
+          "firms": 0,
+          "users": 0,
+          "firm_memberships": 0,
+          "sessions": 0,
+          "reports": 0,
+          "evidence_objects": 3,
+          "comments": 1,
+          "engagement_memberships": 0,
+          "section_assignments": 0,
+          "engagement_tasks": 0,
+          "review_records": 0,
+          "payload_versions": 0,
+          "notifications": 0,
+          "export_artifacts": 0,
+          "firm_library_documents": 0,
+          "purge_audit_log": 0
+        },
+        "rows_restored_idempotent_call": {
+          "firms": 0,
+          "users": 0,
+          "firm_memberships": 0,
+          "sessions": 0,
+          "reports": 0,
+          "evidence_objects": 0,
+          "comments": 0,
+          "engagement_memberships": 0,
+          "section_assignments": 0,
+          "engagement_tasks": 0,
+          "review_records": 0,
+          "payload_versions": 0,
+          "notifications": 0,
+          "export_artifacts": 0,
+          "firm_library_documents": 0,
+          "purge_audit_log": 0
+        },
+        "json_roundtrip_total_rows_match": true
+      }
+    }
+  ]
+}
