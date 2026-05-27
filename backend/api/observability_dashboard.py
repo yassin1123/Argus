@@ -234,6 +234,29 @@ async def get_dashboard(
     # because the calibration was run against a shared golden set.
     quality = _load_quality_panel()
 
+    # W23/D3: firm budget + rate-limit panel. Only meaningful for
+    # firm-scoped requests (the cap is per-firm); the system-wide
+    # view skips it.
+    budget_panel: dict[str, Any] | None = None
+    rate_limit_panel: dict[str, Any] | None = None
+    if scoped_firm is not None:
+        try:
+            from core.cost_governance import (
+                check_engagement_creation_limit,
+                check_expensive_endpoint_limit,
+                compute_budget_status,
+            )
+            budget = await compute_budget_status(scoped_firm)
+            budget_panel = budget.to_dict()
+            eng_limit = await check_engagement_creation_limit(scoped_firm)
+            exp_limit = await check_expensive_endpoint_limit(scoped_firm)
+            rate_limit_panel = {
+                "engagement_creation": eng_limit.to_dict(),
+                "expensive_endpoint": exp_limit.to_dict(),
+            }
+        except Exception as e:  # noqa: BLE001
+            logger.debug("dashboard: budget/rate panel skipped: %s", e)
+
     return {
         "hours": int(hours),
         "from": from_ts.isoformat(),
@@ -244,6 +267,8 @@ async def get_dashboard(
         "verification": verdicts,
         "verification_quality": quality,
         "cost": cost_panel,
+        "budget": budget_panel,
+        "rate_limits": rate_limit_panel,
         "recent_failures": failures,
     }
 
