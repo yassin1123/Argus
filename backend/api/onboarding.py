@@ -22,8 +22,6 @@ directly.
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -33,14 +31,13 @@ from auth.dependencies import get_current_user
 from auth.firm_permissions import require_firm_admin, require_firm_member
 from db.connection import acquire
 
-# Reuse the operator-CLI functions so wizard + CLI share one path.
-_REPO = Path(__file__).resolve().parents[2]
-if str(_REPO) not in sys.path:
-    sys.path.insert(0, str(_REPO))
-from tools.pilot_setup import (  # noqa: E402
+# Shared setup logic lives in backend/core (NOT tools/) so the wizard +
+# the operator CLI run the same path AND it ships inside the backend
+# image. The CLI in tools/ is a thin wrapper over this module.
+from core.pilot_onboarding import (
     add_user, create_engagement, create_firm, valid_modes,
 )
-from eval.pilot_briefs import load_pilot_briefs  # noqa: E402
+from eval.pilot_briefs import load_pilot_briefs
 
 router = APIRouter()
 
