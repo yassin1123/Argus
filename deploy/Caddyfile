@@ -1,0 +1,30 @@
+# Argus production reverse proxy — automatic TLS (Let's Encrypt).
+# Phase 5 / Week 25 / Day 1.
+#
+# All in-transit traffic is HTTPS; Caddy redirects HTTP->HTTPS and
+# obtains + auto-renews the certificate for {$ARGUS_DOMAIN}. The API is
+# served under /api and /health; everything else is the Next.js frontend.
+
+{$ARGUS_DOMAIN} {
+	encode gzip
+
+	# Backend API + health/observability surfaces.
+	@api path /api/* /health /health/*
+	handle @api {
+		reverse_proxy backend:8000
+	}
+
+	# Everything else -> the Next.js frontend.
+	handle {
+		reverse_proxy frontend:3000
+	}
+
+	# Security headers (HSTS etc.). max-age 1 year, include subdomains.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}

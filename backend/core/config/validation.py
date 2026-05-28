@@ -324,6 +324,41 @@ def assert_real_verifier_required() -> None:
     )
 
 
+def enforce_boot_or_exit(report: ConfigReport | None = None) -> None:
+    """Production hard-stop: in ``production`` mode, REFUSE TO START when
+    the config is degraded (can't run the real cross-family verifier).
+
+    The W23 fail-loud guard (:func:`assert_real_verifier_required`) makes
+    a degraded *engagement* impossible; this makes a degraded *boot*
+    impossible in production. A prod container that's missing an LLM key
+    or DeBERTa crash-loops with a loud error rather than coming up and
+    silently serving a verifier that can't actually verify.
+
+    Pilot mode logs the degradation but still boots (a pilot operator may
+    intentionally run a read-only / partially-configured instance);
+    production does not get that latitude. Test mode is exempt.
+    """
+    report = report or get_boot_report() or validate_at_boot()
+    if get_mode() != MODE_PRODUCTION:
+        return
+    if report.can_run_real_verifier and not report.degraded:
+        return
+    failed = [
+        c.name for c in report.checks
+        if c.severity == "critical" and not c.ok
+    ]
+    raise SystemExit(
+        "FATAL: ARGUS_MODE=production but the config is degraded — refusing "
+        "to start. The real cross-family verifier is unavailable "
+        f"(can_run_real_verifier={report.can_run_real_verifier}; "
+        f"failed critical checks={failed}). Production NEVER runs the "
+        "heuristic substitute (the W22 bug class). Provide both LLM "
+        "provider keys + install sentence-transformers (DeBERTa), then "
+        "restart. To run a deliberately-degraded instance, use "
+        "ARGUS_MODE=pilot (boots degraded) or ARGUS_MODE=test."
+    )
+
+
 __all__ = [
     "ConfigCheck",
     "ConfigReport",
@@ -332,6 +367,7 @@ __all__ = [
     "MODE_TEST",
     "VerifierUnavailable",
     "assert_real_verifier_required",
+    "enforce_boot_or_exit",
     "get_boot_report",
     "get_mode",
     "is_strict_mode",

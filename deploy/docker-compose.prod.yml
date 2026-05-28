@@ -1,0 +1,155 @@
+# Argus — production compose. Phase 5 / Week 25 / Day 1.
+#
+# Target-agnostic: runs on any host with Docker + a domain. The
+# pilot-blocking security controls are satisfied by the DEPLOY, not
+# bundled toys:
+#
+#   - Postgres is MANAGED + encryption-at-rest (RDS / Cloud SQL / etc.).
+#     This file does NOT bundle a db service — DATABASE_URL points at the
+#     managed instance with sslmode=require (W24 deploy requirements #1,#4).
+#   - Object storage is real S3 with default bucket encryption
+#     (ARGUS_S3_* point at the bucket); the on-disk artifact dir is an
+#     encrypted volume mounted at /app/artifacts (#2).
+#   - Caddy terminates TLS automatically (Let's Encrypt) for ARGUS_DOMAIN
+#     and reverse-proxies the backend + frontend (#3).
+#   - Secrets come from the environment / secret store — there are NO
+#     insecure defaults here (unset => the var is empty => fail-loud).
+#   - ARGUS_MODE=production: the W25/D1 boot guard crash-loops the
+#     container if the real cross-family verifier is unavailable. No
+#     silent heuristic, ever.
+#
+# Usage:
+#   cp deploy/.env.production.example deploy/.env.production   # fill it in
+#   docker compose --env-file deploy/.env.production \
+#       -f deploy/docker-compose.prod.yml up -d --build
+# See deploy/README.md for the full procedure.
+
+x-backend-env: &backend-env
+  DATABASE_URL: ${DATABASE_URL:?managed Postgres DSN required (sslmode=require)}
+  REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+  ENVIRONMENT: production
+  ARGUS_MODE: production
+  OPENAI_API_KEY: ${OPENAI_API_KEY:?required}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?required}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+  SERPAPI_KEY: ${SERPAPI_KEY:-}
+  BRAVE_API_KEY: ${BRAVE_API_KEY:-}
+  COHERE_API_KEY: ${COHERE_API_KEY:-}
+  SECRET_KEY: ${SECRET_KEY:?required — generate a strong random value}
+  ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:?e.g. https://app.yourfirm.com}
+  ARGUS_EMAIL_ADAPTER: ${ARGUS_EMAIL_ADAPTER:-smtp}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  # Object storage — real S3 (encrypted-at-rest bucket).
+  ARGUS_S3_ENDPOINT: ${ARGUS_S3_ENDPOINT:-}
+  ARGUS_S3_PUBLIC_ENDPOINT: ${ARGUS_S3_PUBLIC_ENDPOINT:-}
+  ARGUS_S3_REGION: ${ARGUS_S3_REGION:-us-east-1}
+  ARGUS_S3_BUCKET: ${ARGUS_S3_BUCKET:?required}
+  ARGUS_S3_ACCESS_KEY: ${ARGUS_S3_ACCESS_KEY:?required}
+  ARGUS_S3_SECRET_KEY: ${ARGUS_S3_SECRET_KEY:?required}
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      <<: *backend-env
+    volumes:
+      # Encrypted host volume for generated artifact files (W24 #2).
+      - ${ARGUS_ARTIFACTS_HOST_DIR:-artifacts}:/app/artifacts
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    expose:
+      - "8000"
+
+  worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: always
+    command: >-
+      celery -A tasks.pipeline:celery_app worker --loglevel=info
+      --concurrency=2 --max-memory-per-child=400000
+    environment:
+      <<: *backend-env
+    volumes:
+      - ${ARGUS_ARTIFACTS_HOST_DIR:-artifacts}:/app/artifacts
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  nli_worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    restart: always
+    command: >-
+      celery -A tasks.pipeline:celery_app worker --loglevel=info
+      --concurrency=1 --queues=nli --hostname=nli@%h
+      --max-tasks-per-child=1000000
+    environment:
+      <<: *backend-env
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:?e.g. https://app.yourfirm.com}
+    restart: always
+    expose:
+      - "3000"
+    depends_on:
+      - backend
+
+  # Automatic TLS (Let's Encrypt) + reverse proxy. All in-transit
+  # traffic is HTTPS; HTTP is redirected. Caddy obtains + renews the
+  # cert for ARGUS_DOMAIN with no manual cert handling.
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ARGUS_DOMAIN: ${ARGUS_DOMAIN:?your public domain, e.g. app.yourfirm.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  redisdata:
+  caddydata:
+  caddyconfig:
+  # Default named volume for artifacts when ARGUS_ARTIFACTS_HOST_DIR is
+  # not overridden with an explicit encrypted host path.
+  artifacts:
