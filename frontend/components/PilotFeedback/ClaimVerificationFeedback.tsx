@@ -83,7 +83,7 @@ export default function ClaimVerificationFeedback({ claimId, verdict, compact }:
       {open && (
         <span className="absolute left-0 top-5 z-10 w-56 rounded-argus border border-argus-border-subtle bg-surface p-2 shadow-lg">
           <span className="mb-1 block text-[11px] font-medium text-argus-secondary">
-            What's wrong?
+            What&apos;s wrong?
           </span>
           <span className="flex flex-col gap-1">
             <button
@@ -92,7 +92,7 @@ export default function ClaimVerificationFeedback({ claimId, verdict, compact }:
               onClick={() => send("wrong_supported")}
               className="rounded px-2 py-1 text-left text-xs hover:bg-elevated"
             >
-              Marked supported but isn't (false positive)
+              Marked supported but isn&apos;t (false positive)
             </button>
             <button
               type="button"

@@ -50,7 +50,7 @@ export default function PilotCheckInForm({ onSubmitted }: { onSubmitted?: () => 
   if (done) {
     return (
       <p className="p-4 text-sm text-emerald-700">
-        Thanks — this week's check-in is recorded.
+        Thanks — this week&apos;s check-in is recorded.
       </p>
     );
   }
@@ -60,7 +60,7 @@ export default function PilotCheckInForm({ onSubmitted }: { onSubmitted?: () => 
       <header>
         <h2 className="text-base font-semibold text-argus-primary">Weekly pilot check-in</h2>
         <p className="text-sm text-argus-secondary">
-          Two minutes. It's how the product gets better for you.
+          Two minutes. It&apos;s how the product gets better for you.
         </p>
       </header>
       {questions.map((q) => (
