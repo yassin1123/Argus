@@ -6,6 +6,7 @@ import {
   type DashboardData,
   getDashboard,
 } from "@/lib/api/observability";
+import PilotHealthPanel from "@/components/PilotFeedback/PilotHealthPanel";
 
 interface Props {
   /** Window to scope the dashboard to. Default 24h. */
@@ -91,6 +92,11 @@ export default function AdminDashboard({
 
   return (
     <div className="argus-dashboard" data-testid="admin-dashboard">
+      {data.pilot_health ? (
+        <div className="argus-dashboard__section">
+          <PilotHealthPanel data={data.pilot_health} />
+        </div>
+      ) : null}
       <header className="argus-dashboard__header">
         <h2>System health — last {data.hours}h</h2>
         <div className="argus-dashboard__scope">

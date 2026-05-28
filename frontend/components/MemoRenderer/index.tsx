@@ -22,6 +22,7 @@
 
 import { isDeepenable } from "@/lib/api/sectionDeepening";
 import SectionWrapper from "@/components/SectionDeepening/SectionWrapper";
+import { PilotFeedbackProvider } from "@/components/PilotFeedback/PilotFeedbackContext";
 
 import FrameworksSection, { type FrameworksData } from "./Frameworks";
 import IntegrationTimeline from "./M_and_A/IntegrationTimeline";
@@ -87,6 +88,10 @@ export interface MemoRendererProps {
   /** W17/D4: when supplied, each section gets an owner avatar +
    * status badge in the top-right corner. */
   ownership?: OwnershipHook;
+  /** W24/D3: when supplied, each claim gets a one-click
+   * "is this verified correctly?" feedback affordance scoped to this
+   * session. Absent → the affordance hides. */
+  sessionId?: string;
 }
 
 /** Wrap a rendered section in :class:`SectionWrapper` iff the host
@@ -221,11 +226,12 @@ export default function MemoRenderer({
   deepening,
   comments,
   ownership,
+  sessionId,
 }: MemoRendererProps) {
   const isMandA = modeName === "m_and_a_diligence";
   const ordered = orderedKeys(payload, modeName);
 
-  return (
+  const body = (
     <div data-testid="memo-renderer" data-mode={modeName} className="mx-auto max-w-[900px] px-4 py-6">
       <header className="mb-4 flex items-baseline justify-between">
         <h2 className="font-serif text-[24px] font-semibold text-argus-primary">
@@ -291,6 +297,14 @@ export default function MemoRenderer({
         deepening={deepening}
       />
     </div>
+  );
+
+  // W24/D3: when a sessionId is supplied, provide it to the per-claim
+  // verification-feedback affordances nested in the rendered sections.
+  return sessionId ? (
+    <PilotFeedbackProvider sessionId={sessionId}>{body}</PilotFeedbackProvider>
+  ) : (
+    body
   );
 }
 
