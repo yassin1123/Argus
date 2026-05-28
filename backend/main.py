@@ -22,7 +22,7 @@ from db.connection import close_db, init_db
 from core.logging_config import configure_json_logging
 from core.observability.logging import configure_event_logging
 from core.observability.middleware import trace_middleware
-from core.config import get_mode, validate_at_boot
+from core.config import enforce_boot_or_exit, get_mode, validate_at_boot
 
 configure_json_logging()
 configure_event_logging()
@@ -33,6 +33,12 @@ configure_event_logging()
 # heuristic substitute is allowed but the health endpoint
 # surfaces the mode so an operator can't mistake it for pilot.
 _BOOT_CONFIG = validate_at_boot()
+
+# W25/D1: production hard-stop. In ARGUS_MODE=production a degraded
+# config (missing LLM key / DeBERTa) crash-loops the container with a
+# loud error rather than booting a verifier that can't verify. Pilot
+# mode boots degraded (operator's call); production never does.
+enforce_boot_or_exit(_BOOT_CONFIG)
 
 # Cross-family verification wedge: the analyst (synthesis) and verifier (judge)
 # must resolve to different provider families (see backend/core/provider_family.py).
