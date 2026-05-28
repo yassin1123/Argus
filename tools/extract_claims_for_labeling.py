@@ -85,6 +85,78 @@ def _stratify(rows: list[dict[str, Any]], per_verdict: int) -> list[dict[str, An
     return picked
 
 
+async def _fetch_claim_rows(
+    firm_slug: str | None,
+    session_id: str | None,
+    limit: int,
+) -> list[dict[str, Any]]:
+    """Query ``claim_support_rows`` joined to ``evidence_objects``
+    for (analyst-claim, supporting-quote) pairs.
+
+    This is the production-relevant labelling surface (W24/D1): the
+    rows here are real analyst claims the pipeline emitted, each
+    paired with the supporting evidence quote the verifier actually
+    judged, and carrying that verifier's ``ensemble_verdict``. Unlike
+    the ``evidence_objects``-only path (which also contains raw
+    retrieval-branch chunks whose "claim" is a placeholder), every
+    row here is a genuine claim a partner would recognise.
+
+    We resolve the FIRST evidence_object_id to its quote — the
+    primary supporting passage. Branch-artifact claim texts
+    (``[branch:...]``) are excluded.
+    """
+    from db.connection import acquire
+
+    where_clauses = [
+        "c.claim_text IS NOT NULL AND length(c.claim_text) > 0",
+        "c.claim_text NOT LIKE '[branch:%'",
+        "e.quote IS NOT NULL AND length(e.quote) > 0",
+        "c.evidence_object_ids IS NOT NULL",
+        "array_length(c.evidence_object_ids, 1) > 0",
+    ]
+    params: list[Any] = []
+    if session_id:
+        params.append(session_id)
+        where_clauses.append(f"c.session_id = ${len(params)}::uuid")
+    if firm_slug:
+        params.append(firm_slug)
+        where_clauses.append(
+            f"s.firm_id = (SELECT id FROM firms WHERE slug = ${len(params)}::text)"
+        )
+    where = " AND ".join(where_clauses)
+
+    sql = (
+        "SELECT c.session_id, c.claim_id, c.claim_text, "
+        "       COALESCE(c.ensemble_verdict, c.verifier_verdict) AS verdict, "
+        "       e.id AS evidence_id, e.quote, e.source_type "
+        "  FROM claim_support_rows c "
+        "  JOIN evidence_objects e ON e.id = c.evidence_object_ids[1] "
+        "  JOIN sessions s ON s.id = c.session_id "
+        f" WHERE {where} "
+        f" ORDER BY c.created_at DESC LIMIT {int(limit)}"
+    )
+    async with acquire() as conn:
+        rows = await conn.fetch(sql, *params)
+
+    out: list[dict[str, Any]] = []
+    for i, r in enumerate(rows):
+        out.append({
+            "id": f"wks_{i+1:04d}",
+            "session_id": str(r["session_id"]),
+            "claim_id": str(r["claim_id"]) if r["claim_id"] else None,
+            "claim": r["claim_text"],
+            "evidence": r["quote"],
+            "verifier_verdict": r["verdict"],
+            "evidence_source_type": r["source_type"],
+            "evidence_object_id": str(r["evidence_id"]),
+            "chunk_text_present": True,
+            "label": None,
+            "label_rationale": None,
+            "category": None,
+        })
+    return out
+
+
 async def _fetch_pairs(
     firm_slug: str | None,
     session_id: str | None,
@@ -263,11 +335,18 @@ async def _main_async(args: argparse.Namespace) -> int:
 
         await init_db()
         try:
-            rows = await _fetch_pairs(
-                firm_slug=args.firm_slug,
-                session_id=args.session_id,
-                limit=args.limit,
-            )
+            if args.source == "claim_rows":
+                rows = await _fetch_claim_rows(
+                    firm_slug=args.firm_slug,
+                    session_id=args.session_id,
+                    limit=args.limit,
+                )
+            else:
+                rows = await _fetch_pairs(
+                    firm_slug=args.firm_slug,
+                    session_id=args.session_id,
+                    limit=args.limit,
+                )
         finally:
             await close_db()
 
@@ -295,14 +374,16 @@ async def _main_async(args: argparse.Namespace) -> int:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
-        "--source", choices=["db", "eval_runs"], default="db",
+        "--source", choices=["db", "claim_rows", "eval_runs"], default="db",
         help=(
-            "Where to pull claim-evidence pairs from. 'db' queries "
-            "evidence_objects (requires Postgres). 'eval_runs' walks "
-            "the committed backend/eval_runs/**/*.json files and "
-            "extracts captured.claim_rows + captured.evidence — no DB "
-            "required. The W22/D1 workflow uses 'eval_runs' to seed "
-            "Yassin's first labelling batch."
+            "Where to pull claim-evidence pairs from. 'claim_rows' "
+            "(W24/D1, recommended) queries claim_support_rows joined "
+            "to evidence_objects — real analyst claims + the verifier's "
+            "ensemble_verdict, stratifiable across verdicts. 'db' "
+            "queries evidence_objects directly (includes raw retrieval "
+            "chunks). 'eval_runs' walks committed JSON files (no DB, but "
+            "no chunk text). The W24/D1 calibration gate uses "
+            "'claim_rows'."
         ),
     )
     ap.add_argument(
@@ -334,6 +415,21 @@ def main(argv: list[str] | None = None) -> int:
     if args.source == "db" and not args.firm_slug and not args.session_id:
         ap.error("--source=db needs --firm-slug or --session-id.")
     return asyncio.run(_main_async(args))
+
+
+# Verdict buckets the stratifier collapses the verifier's fine-grained
+# labels into, so a worksheet isn't dominated by 'weak'. Exposed for
+# the caller; _stratify keys on the raw verdict so this is advisory.
+_VERDICT_BUCKETS = {
+    "supported": "supported",
+    "supported_high": "supported",
+    "supported_low": "supported",
+    "weak": "weak",
+    "partial": "weak",
+    "insufficient": "weak",
+    "contradicted": "contradicted",
+    "unsupported": "contradicted",
+}
 
 
 if __name__ == "__main__":

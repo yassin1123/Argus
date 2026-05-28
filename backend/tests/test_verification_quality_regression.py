@@ -78,9 +78,37 @@ RED_TEAM_CATCH_RATE_FLOOR = 0.94
 
 # Real-LLM floors — applied by the gated full-LLM test below.
 # Source: backend/eval_runs/week22_fix/verdict.json (W22 Fix-Day).
+# These measured the SYNTHETIC golden set on the real ensemble.
 REAL_LLM_FP_RATE_ON_SUPPORTED = 0.05      # measured 0.00; 0.05 cushion
 REAL_LLM_RECALL_ON_INSUFFICIENT = 0.95    # measured 1.00; 0.05 cushion
 REAL_LLM_RED_TEAM_CATCH_RATE = 0.95       # measured 1.00; 0.05 cushion
+
+# ---------------------------------------------------------------------------
+# W24/D1 — REAL-CLAIM production floors. THE production-relevant truth.
+#
+# These supersede the synthetic-on-real-LLM floors above as the number
+# the pilot trust claim actually rests on: 61 human-labelled real
+# engagement claims (Yassin, 2026-05-28) scored through the cross-
+# family ensemble (Claude + GPT-4o + DeBERTa-v3 + lexical).
+#
+# Headline: of every claim the verifier called "supported", ZERO were
+# wrong (0/7) — a clean catastrophic-error rate on real claims — and
+# it caught 100% of the genuinely-insufficient claims (4/4). The
+# verifier is conservative (recall-on-supported 27%: it down-grades
+# many genuinely-supported claims to "partial"), which is the SAFE
+# direction — it never wrongly blesses, it under-credits.
+#
+# Pilot verdict: GREEN. Source:
+# backend/eval_runs/week24_real_calibration/pilot_verdict.json
+#
+# The MEASURED values are frozen here (the gate test asserts they
+# match the committed verdict). The CEILING/FLOOR add a cushion for
+# the gated real-claim regression check below.
+REAL_CLAIM_FP_RATE_ON_SUPPORTED = 0.0      # measured 0/7 supported preds wrong
+REAL_CLAIM_RECALL_ON_INSUFFICIENT = 1.0    # measured 4/4 insufficient caught
+REAL_CLAIM_PAIR_COUNT = 61
+REAL_CLAIM_FP_CEILING = 0.05               # CI ceiling (≤5% keeps the GREEN band)
+REAL_CLAIM_RECALL_FLOOR = 0.85             # safety floor (catch rate must hold)
 
 
 CACHED_RAW = (
@@ -253,4 +281,56 @@ def test_real_ensemble_quality_full_run() -> None:
         f"REAL-LLM recall regressed to "
         f"{metrics.recall_on_insufficient:.3%}; floor is "
         f"{REAL_LLM_RECALL_ON_INSUFFICIENT:.3%}."
+    )
+
+
+# ---------------------------------------------------------------------------
+# W24/D1 — REAL-CLAIM regression floor (committed-verdict check).
+# ---------------------------------------------------------------------------
+
+
+_W24_VERDICT = (
+    _REPO / "eval_runs" / "week24_real_calibration" / "pilot_verdict.json"
+)
+
+
+@pytest.mark.skipif(
+    not _W24_VERDICT.exists(),
+    reason=(
+        "week24 pilot_verdict.json missing — run "
+        "backend/eval/calibration/run_calibration.py --set real "
+        "--verifier cross_family_llm first."
+    ),
+)
+def test_real_claim_floors_hold_against_committed_verdict() -> None:
+    """The production-relevant truth: the committed real-claim
+    verdict must stay within the W24/D1 ceiling/floor. A future
+    re-run that regresses past these trips CI.
+
+    This reads the committed artifact (no LLM spend) so it runs in
+    ordinary CI — unlike the gated full-LLM test above."""
+    import json
+
+    verdict = json.loads(_W24_VERDICT.read_text(encoding="utf-8"))
+    fp = float(verdict["real_fp_rate_on_supported"])
+    recall = float(verdict["real_recall_on_insufficient"])
+    count = int(verdict["real_pair_count"])
+
+    assert count >= REAL_CLAIM_PAIR_COUNT, (
+        f"real-claim batch shrank to {count}; the gate floor is "
+        f"{REAL_CLAIM_PAIR_COUNT}."
+    )
+    assert fp <= REAL_CLAIM_FP_CEILING, (
+        f"REAL-CLAIM FP regressed to {fp:.3%}; ceiling is "
+        f"{REAL_CLAIM_FP_CEILING:.3%}. This is the catastrophic-error "
+        "rate on real claims — the pilot trust claim rests on it."
+    )
+    assert recall >= REAL_CLAIM_RECALL_FLOOR, (
+        f"REAL-CLAIM recall-on-insufficient regressed to {recall:.3%}; "
+        f"safety floor is {REAL_CLAIM_RECALL_FLOOR:.3%}."
+    )
+    # The committed verdict must be a pilot-proceed band.
+    assert verdict["band"] in ("GREEN", "YELLOW"), (
+        f"committed verdict band is {verdict['band']!r}; the pilot does "
+        "not proceed on RED."
     )

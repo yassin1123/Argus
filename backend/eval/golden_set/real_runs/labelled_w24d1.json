@@ -1,0 +1,982 @@
+{
+  "version": 1,
+  "labelled_at": "2026-05-28T19:23:35.843685+00:00",
+  "entries": [
+    {
+      "id": "wks_0062",
+      "claim": "TargetCo achieved \u00a3180.0m revenue in FY24 with 4.0% YoY growth, following \u00a3173.1m in FY23 (+6.6% YoY) and \u00a3162.4m in FY22 (+6.0% YoY), demonstrating consistent but decelerating top-line expansion from a \u00a3153.2m FY21 base.",
+      "evidence": "UK 91% (England 78%, Scotland 8%, Wales 4%, NI 1%); Republic of\nIreland 9%. Three of TargetCo's 12 operational sites are in\nthe UK; one is in Cork. The ROI footprint is sub-scale and has\nhistorically been EBITDA-negative; FY24 was the first profitable\nyear (\u00a30.4m EBITDA on \u00a316.2m revenue). The buyer can either invest\nto scale ROI (estimated \u00a33-5m capex over 24 months) or divest the\nROI book; the segment has had two informal indicative bids in the\npast 18 months at 0.6-0.8x revenue.\n## 5. Financial trajectory\n### Revenue, \u00a3m\n| Period | Revenue (\u00a3m) | YoY growth | Source                      |\n|--------|--------------|------------|-----------------------------|\n| FY21   | 153.2        | -4.8%      | TargetCo audited accounts   |\n| FY22   | 162.4        | +6.0%      | TargetCo audited accounts   |\n| FY23   | 173.1        | +6.6%      | TargetCo audited accounts   |\n| FY24   | 180.0        | +4.0%      | TargetCo audited accounts   |\n| LTM Q1 | 182.1        | +3.5%      | TargetCo management accounts|\n### EBITDA, \u00a3m",
+      "evidence_source": "real_run",
+      "ground_truth": "contradicted",
+      "label_rationale": "Revenue numbers match evidence, but \u201cdecelerating\u201d is contradicted because growth rises from +6.0% in FY22 to +6.6% in FY23 before falling to +4.0% in FY24.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "65d3e370-8fe2-4525-8ed1-ee8b0fc912d1",
+      "real_run_claim_id": "claim_001",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0065",
+      "claim": "Supplier renegotiations targeting 80-120bps COGS improvement are board-approved for Q1 FY25 but lack contracted terms or documented supplier commitment, representing a load-bearing assumption for Food and Home margin recovery.",
+      "evidence": "- Group COGS rate moved from 61.8% (FY22) to 63.6% (FY24), a\n  180bps deterioration driven by Food (220bps) and Home\n  (280bps). Premium and Online held rate within \u00b130bps.\n- Group opex rate held at 25.7% (FY22) \u2192 25.8% (FY24); the\n  apparent stability masks a 90bps rise in marketing offset by\n  a 120bps fall in store payroll (post-rationalisation).\n- Working capital cycle: 38 days (FY22) \u2192 51 days (FY24). Food\n  and Home together explain 12 of the 13 day deterioration \u2014\n  inventory builds in both, partly cyclical, partly the\n  symptom of slowing turn.\n## Implementation constraints\n- The board has signed off on supplier-side renegotiations Q1 FY25\n  but has explicitly excluded SKU rationalisation from the H1 plan\n  on customer-experience concerns.\n- Marketing budget is fixed at FY24 levels (\u00a38.4m) for FY25;\n  no additional pricing-test budget approved.\n- The sponsor's exit window (24 months) caps the realistic payback\n  horizon at 18 months \u2014 actions requiring 24m+ payback are out\n  of scope.\n- Albright operates a single ERP (SAP S/4HANA, deployed FY22) so\n  segment-level price changes are technically feasible within a\n  3-week change cycle.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Board approval for Q1 FY25 supplier renegotiations is supported, but the 80\u2013120bps target and absence of contracted supplier commitments are not evidenced.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c14",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0066",
+      "claim": "Implementation costs for segment-level pricing strategy estimated at \u00a3180k-\u00a3240k, comprising SAP configuration (\u00a360k-\u00a380k), staff training across 142 stores (\u00a380k-\u00a3100k), customer communication materials (\u00a325k-\u00a335k), and real-time monitoring dashboard setup (\u00a315k-\u00a325k).",
+      "evidence": "- Group COGS rate moved from 61.8% (FY22) to 63.6% (FY24), a\n  180bps deterioration driven by Food (220bps) and Home\n  (280bps). Premium and Online held rate within \u00b130bps.\n- Group opex rate held at 25.7% (FY22) \u2192 25.8% (FY24); the\n  apparent stability masks a 90bps rise in marketing offset by\n  a 120bps fall in store payroll (post-rationalisation).\n- Working capital cycle: 38 days (FY22) \u2192 51 days (FY24). Food\n  and Home together explain 12 of the 13 day deterioration \u2014\n  inventory builds in both, partly cyclical, partly the\n  symptom of slowing turn.\n## Implementation constraints\n- The board has signed off on supplier-side renegotiations Q1 FY25\n  but has explicitly excluded SKU rationalisation from the H1 plan\n  on customer-experience concerns.\n- Marketing budget is fixed at FY24 levels (\u00a38.4m) for FY25;\n  no additional pricing-test budget approved.\n- The sponsor's exit window (24 months) caps the realistic payback\n  horizon at 18 months \u2014 actions requiring 24m+ payback are out\n  of scope.\n- Albright operates a single ERP (SAP S/4HANA, deployed FY22) so\n  segment-level price changes are technically feasible within a\n  3-week change cycle.",
+      "evidence_source": "real_run",
+      "ground_truth": "insufficient",
+      "label_rationale": "Evidence only supports that segment-level pricing changes are technically feasible in SAP within 3 weeks; it does not evidence the \u00a3180k\u2013\u00a3240k implementation cost, cost breakdown, 142 stores, training, materials, or dashboard setup.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c13",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0071",
+      "claim": "Premium customers cite 'consistency of stocking' and 'in-store experience' above price as decision drivers in 64% of category responses, with price elasticity of -0.8 confirming low price sensitivity.",
+      "evidence": "- **Premium customers** show price elasticity of -0.8 on the\n  category basket \u2014 willingness to absorb a 5-7% price uplift\n  on differentiated SKUs without measurable defection. Anchor\n  insight: Premium customers cite \"consistency of stocking\" and\n  \"in-store experience\" above price as decision drivers in 64%\n  of category responses.\n- **Food shoppers** show elasticity of -1.6 on staples and -0.9\n  on private label \u2014 staple-pricing increases trigger immediate\n  basket-mix shifts to discounters; private-label increases are\n  better absorbed.\n- **Home customers** show elasticity of -2.1 on big-ticket items\n  (>\u00a340 ASP) and -1.4 on the long tail. The high big-ticket\n  elasticity confirms the LFL data: Home is structurally\n  price-sensitive at the SKU level Albright competes on.\n- **Online customers** show the lowest blended elasticity (-0.6)\n  but the highest trial-rate response (+18% trial uplift on\n  promotional pricing) \u2014 the channel's pricing power is\n  promotional rather than structural.\n## Cost structure decomposition\nFY24 P&L decomposed by segment with FY22 baseline for the\ntwo-year walk:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports the 64% decision-driver figure, price elasticity of -0.8, and low price sensitivity through stated willingness to absorb 5\u20137% price uplift without measurable defection.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c8",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0073",
+      "claim": "Home segment prices index 112.7 vs out-of-town value players (The Range, B&M, Dunelm)\u201413% above comparators\u2014with customer elasticity of -2.1 on big-ticket items (>\u00a340 ASP), the principal explanatory factor for negative LFL.",
+      "evidence": "Premium retention is healthy; Food retention is at the sector\nmedian; Home retention is the structural concern (well below the\nsector 60% benchmark for non-grocery formats).\n## Competitor pricing positioning (FY24 H2 audit)\nAudit conducted on a sample basket of 412 SKUs across the four\nsegments, benchmarked against the four most relevant comparators\nin each. Index = 100 means parity with the comparator basket on\nmatched items.\n| Segment  | Comparator set                              | Index vs comp | Headroom |\n|----------|---------------------------------------------|---------------|----------|\n| Food     | Aldi, Lidl, Sainsbury's basics, Asda        | 108.4         | 4-6% down|\n| Premium  | Waitrose, Whole Foods Market, Selfridges    | 96.2          | 3-5% up  |\n| Home     | The Range, B&M, Dunelm                      | 112.7         | 8-10% down|\n| Online   | Amazon, Argos online, John Lewis online     | 102.1         | n/a      |",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Home pricing index of 112.7 vs The Range, B&M, and Dunelm, roughly 13% above comparators, but does not evidence elasticity of -2.1 or prove it is the principal cause of negative LFL.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c6",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0078",
+      "claim": "Premium segment generated \u00a338.7m revenue at 47.3% gross margin with +2.8% LFL growth and 71.8% customer retention (highest across all segments), indicating strong underlying health and pricing power.",
+      "evidence": "| Segment  | Revenue (\u00a3m) | Gross margin | EBITDA (\u00a3m) | LFL growth | Stores |\n|----------|--------------|--------------|-------------|------------|--------|\n| Food     | 102.4        | 22.1%        | 8.1         | +1.4%      | 84     |\n| Premium  | 38.7         | 47.3%        | 6.9         | +2.8%      | 32     |\n| Home     | 37.6         | 39.8%        | 3.2         | -3.4%      | 26     |\n| Online   | 24.3         | 33.2%        | 3.5         | +6.8%      | n/a    |\n| **Group**| **203.0**    | **36.4%**    | **21.7**    | **+2.1%**  | **142**|\nFood carries the lowest gross margin but the highest revenue base\nand the most pricing volume to defend. Premium is the highest-\nmargin segment; Home is the only segment in absolute decline; Online\nis the highest-growth segment and the only one with structurally\nexpanding contribution margin.\nCustomer cohort retention by segment (12-month repeat purchase rate\nfor the FY23 acquisition cohort, observed through end-FY24):\n- Food:    62.4%\n- Premium: 71.8%\n- Home:    44.2%\n- Online:  58.7%",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Premium revenue, gross margin, LFL growth, and highest retention, but \u201cpricing power\u201d is an inferred conclusion not directly evidenced here.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c1",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0085",
+      "claim": "Home segment shows -3.4% LFL growth (only segment in absolute decline) with 44.2% customer retention (20 points below sector 60% benchmark), generating \u00a337.6m revenue at 39.8% gross margin.",
+      "evidence": "| Segment  | Revenue (\u00a3m) | Gross margin | EBITDA (\u00a3m) | LFL growth | Stores |\n|----------|--------------|--------------|-------------|------------|--------|\n| Food     | 102.4        | 22.1%        | 8.1         | +1.4%      | 84     |\n| Premium  | 38.7         | 47.3%        | 6.9         | +2.8%      | 32     |\n| Home     | 37.6         | 39.8%        | 3.2         | -3.4%      | 26     |\n| Online   | 24.3         | 33.2%        | 3.5         | +6.8%      | n/a    |\n| **Group**| **203.0**    | **36.4%**    | **21.7**    | **+2.1%**  | **142**|\nFood carries the lowest gross margin but the highest revenue base\nand the most pricing volume to defend. Premium is the highest-\nmargin segment; Home is the only segment in absolute decline; Online\nis the highest-growth segment and the only one with structurally\nexpanding contribution margin.\nCustomer cohort retention by segment (12-month repeat purchase rate\nfor the FY23 acquisition cohort, observed through end-FY24):\n- Food:    62.4%\n- Premium: 71.8%\n- Home:    44.2%\n- Online:  58.7%",
+      "evidence_source": "real_run",
+      "ground_truth": "contradicted",
+      "label_rationale": "Evidence supports Home revenue, gross margin, -3.4% LFL, only segment in decline, and 44.2% retention, but 44.2% is 15.8pp, not 20pp, below a 60% benchmark, and the sector benchmark itself is not evidenced here.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "home_decline",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0088",
+      "claim": "Food segment represents \u00a3102.4m revenue (50.4% of group total) at 22.1% gross margin with +1.4% LFL growth and 62.4% retention, carrying the highest pricing volume to defend across all segments.",
+      "evidence": "| Segment  | Revenue (\u00a3m) | Gross margin | EBITDA (\u00a3m) | LFL growth | Stores |\n|----------|--------------|--------------|-------------|------------|--------|\n| Food     | 102.4        | 22.1%        | 8.1         | +1.4%      | 84     |\n| Premium  | 38.7         | 47.3%        | 6.9         | +2.8%      | 32     |\n| Home     | 37.6         | 39.8%        | 3.2         | -3.4%      | 26     |\n| Online   | 24.3         | 33.2%        | 3.5         | +6.8%      | n/a    |\n| **Group**| **203.0**    | **36.4%**    | **21.7**    | **+2.1%**  | **142**|\nFood carries the lowest gross margin but the highest revenue base\nand the most pricing volume to defend. Premium is the highest-\nmargin segment; Home is the only segment in absolute decline; Online\nis the highest-growth segment and the only one with structurally\nexpanding contribution margin.\nCustomer cohort retention by segment (12-month repeat purchase rate\nfor the FY23 acquisition cohort, observed through end-FY24):\n- Food:    62.4%\n- Premium: 71.8%\n- Home:    44.2%\n- Online:  58.7%",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence supports Food revenue of \u00a3102.4m, 22.1% gross margin, +1.4% LFL growth, 62.4% retention, and explicitly states Food has the highest revenue base and most pricing volume to defend.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "food_revenue",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0091",
+      "claim": "Premium segment generated \u00a338.7m FY24 revenue at 47.3% gross margin with +2.8% LFL growth and 71.8% customer retention (highest across all segments), providing a stable base for price increases.",
+      "evidence": "| Segment  | Revenue (\u00a3m) | Gross margin | EBITDA (\u00a3m) | LFL growth | Stores |\n|----------|--------------|--------------|-------------|------------|--------|\n| Food     | 102.4        | 22.1%        | 8.1         | +1.4%      | 84     |\n| Premium  | 38.7         | 47.3%        | 6.9         | +2.8%      | 32     |\n| Home     | 37.6         | 39.8%        | 3.2         | -3.4%      | 26     |\n| Online   | 24.3         | 33.2%        | 3.5         | +6.8%      | n/a    |\n| **Group**| **203.0**    | **36.4%**    | **21.7**    | **+2.1%**  | **142**|\nFood carries the lowest gross margin but the highest revenue base\nand the most pricing volume to defend. Premium is the highest-\nmargin segment; Home is the only segment in absolute decline; Online\nis the highest-growth segment and the only one with structurally\nexpanding contribution margin.\nCustomer cohort retention by segment (12-month repeat purchase rate\nfor the FY23 acquisition cohort, observed through end-FY24):\n- Food:    62.4%\n- Premium: 71.8%\n- Home:    44.2%\n- Online:  58.7%",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Premium revenue, gross margin, LFL growth, and highest retention, but \u201cstable base for price increases\u201d is an inference not directly evidenced by price elasticity, customer survey, or pricing-test data.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "prem_revenue",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0097",
+      "claim": "Current state of the subject \u00a3200M business remains unvalidated: specific price points by segment, current private label penetration, promotional intensity (% of sales on promotion), and existing cohort retention by segment are unknown, creating material uncertainty in strategy viability.",
+      "evidence": "# Retail Sector Primer (UK + US, Boutique View)\nThis primer codifies the firm's working view of the consumer-retail\nsector across the UK and US \u2014 the structural shape, the players we\nactually track, the KPIs that matter on diligence, and the trends we\nexpect partners to refer to in client meetings without re-reading the\ntrade press. It is fully synthetic and produced for fixture use only;\nno real client data is reproduced.\n## Market structure\nThe retail market in both the UK and the US is bifurcating along\nroughly the same axis: scaled omnichannel operators on one side and\nspecialist single-channel operators on the other, with the squeezed\nmiddle (regional chains, mid-market department stores, second-tier\ngrocers) shedding share each year.\nIn the UK the three structural realities a partner should be able to\nstate in any client conversation are:",
+      "evidence_source": "real_run",
+      "ground_truth": "insufficient",
+      "label_rationale": "Evidence is a general synthetic retail sector primer and does not validate the subject \u00a3200m business, the listed unknowns, or the conclusion that these gaps create material uncertainty in strategy viability.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "ba1f28db-6a0a-48b6-84d2-cdfca1c93e19",
+      "real_run_claim_id": "c17",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0121",
+      "claim": "The discounter pair (Aldi and Lidl) has taken roughly 18% combined share in UK grocery over the last decade, establishing aggressive pricing as the competitive baseline for value segments. Any grocery-exposed segment must price relative to this benchmark or differentiate clearly. FALSIFIABLE IF: This business's segments are non-grocery (DIY, fashion, specialty) where discounter dynamics do not apply, rendering grocery pricing benchmarks irrelevant.",
+      "evidence": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and Lidl) and the\n   discounter pair has taken roughly 18% combined share over the last\n   decade. Anything below that top tier \u2014 Iceland, Co-op, Waitrose,\n   Ocado-as-pureplay \u2014 competes on a clearly differentiated proposition\n   or it doesn't survive the next cycle.\n2. High-street non-food retail has been hollowed out. The viable\n   non-grocery formats today are out-of-town value (B&M, Home Bargains,\n   The Range), branded specialty (JD Sports, Greggs, Pret), and the\n   premium-experiential end (Selfridges, Liberty, John Lewis as a\n   wounded but persistent format). Mid-market high-street fashion\n   below \u00a340 ASP has effectively migrated online or bankrupt.\n3. The DIY / homewares segment is structurally smaller than its US\n   equivalent and dominated by Kingfisher (B&Q + Screwfix) and Wickes,\n   with the Travis Perkins B2B route distinct from consumer-facing\n   sheds.\nIn the US, the analogous structural facts:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Aldi/Lidl taking roughly 18% combined UK grocery share and links this to the need for grocery/value segments to compete on price or clear differentiation.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "ad3e8a5e-d833-4efd-a8ea-fef94a835d47",
+      "real_run_claim_id": "discounter_baseline",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0122",
+      "claim": "The UK retail market is bifurcating between scaled omnichannel operators and specialist single-channel operators, with the squeezed middle (regional chains, mid-market department stores, second-tier grocers) shedding share each year. This structural pattern determines viable pricing architectures: omnichannel players optimize cost-to-serve, specialists compete on differentiation, and mid-market players face structural disadvantage. FALSIFIABLE IF: This business's segments span both omnichannel and single-channel formats, requiring hybrid pricing approach not covered by bifurcation framework.",
+      "evidence": "# Retail Sector Primer (UK + US, Boutique View)\nThis primer codifies the firm's working view of the consumer-retail\nsector across the UK and US \u2014 the structural shape, the players we\nactually track, the KPIs that matter on diligence, and the trends we\nexpect partners to refer to in client meetings without re-reading the\ntrade press. It is fully synthetic and produced for fixture use only;\nno real client data is reproduced.\n## Market structure\nThe retail market in both the UK and the US is bifurcating along\nroughly the same axis: scaled omnichannel operators on one side and\nspecialist single-channel operators on the other, with the squeezed\nmiddle (regional chains, mid-market department stores, second-tier\ngrocers) shedding share each year.\nIn the UK the three structural realities a partner should be able to\nstate in any client conversation are:",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports the retail bifurcation and squeezed-middle share loss, but does not directly evidence the specific pricing architecture conclusions for omnichannel players, specialists, and mid-market players.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "ad3e8a5e-d833-4efd-a8ea-fef94a835d47",
+      "real_run_claim_id": "market_bifurcation",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0126",
+      "claim": "Key risks for UK retailers entering the US include the fragmented grocery sector where no single national player dominates, the bifurcating retail landscape with a clear divide between scaled omnichannel operators and specialist single-channel operators, and the critical necessity for robust omnichannel capabilities.",
+      "evidence": "# Retail Sector Primer (UK + US, Boutique View)\nThis primer codifies the firm's working view of the consumer-retail\nsector across the UK and US \u2014 the structural shape, the players we\nactually track, the KPIs that matter on diligence, and the trends we\nexpect partners to refer to in client meetings without re-reading the\ntrade press. It is fully synthetic and produced for fixture use only;\nno real client data is reproduced.\n## Market structure\nThe retail market in both the UK and the US is bifurcating along\nroughly the same axis: scaled omnichannel operators on one side and\nspecialist single-channel operators on the other, with the squeezed\nmiddle (regional chains, mid-market department stores, second-tier\ngrocers) shedding share each year.\nIn the UK the three structural realities a partner should be able to\nstate in any client conversation are:",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports UK/US retail bifurcation between scaled omnichannel and specialist single-channel operators, but does not evidence US grocery fragmentation, no dominant national player, or the specific risks for UK retailers entering the US.",
+      "category": "attribution",
+      "adversarial": false,
+      "real_run_session_id": "848df84e-b49e-4ed2-b367-815d80c05802",
+      "real_run_claim_id": "claim_010",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0127",
+      "claim": "Decision criteria for entry mode selection include strategic and financial filters: geography, size, ownership, integration risk, gross margin thresholds, revenue growth rates, and customer concentration, ensuring the financial profile supports deal mechanics without excessive assumptions.",
+      "evidence": "The first cut on candidates filters by the four hard constraints\nbefore any deeper analysis. A miss on any one knocks the candidate\nout of the screen entirely.\n1. **Geography.** UK and Western Europe primary, with case-by-case\n   inclusion of Nordic and DACH. We avoid US-only targets unless the\n   buyer has an existing US tax structure and US-side legal counsel\n   already engaged.\n2. **Size band.** EV in the \u00a3100m\u2013\u00a3500m corridor; revenue typically\n   \u00a340m\u2013\u00a3250m; EBITDA \u00a315m\u2013\u00a380m. Below \u00a315m EBITDA the deal economics\n   rarely support the diligence cost. Above \u00a380m EBITDA the auction\n   dynamics are different and screening adds less value.\n3. **Ownership.** Founder-owned or PE-backed (single-sponsor); we\n   exclude family-trust holdings unless succession is the explicit\n   trigger. Listed targets fall outside this playbook \u2014 different\n   rules apply (see the public-markets playbook).\n4. **Sector momentum.** The target operates in a sector with clear\n   unit economics, growing or stable demand, and an identifiable\n   value-creation lever the buyer can execute against.\nCandidates that survive the first cut go through the second-pass\nfinancial filter below.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports geography, size, ownership, and sector momentum as screening criteria, but does not evidence integration risk, gross margin thresholds, revenue growth rates, customer concentration, or that these are specifically for entry mode selection.",
+      "category": "attribution",
+      "adversarial": false,
+      "real_run_session_id": "848df84e-b49e-4ed2-b367-815d80c05802",
+      "real_run_claim_id": "claim_009",
+      "extra": {
+        "verifier_verdict_at_label_time": "contradicted",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0332",
+      "claim": "Pilot-first entry strategies reduce commitment risk: sequenced single-market entry at constrained headcount (per evidence on 47 expansions) outperforms parallel approaches, and two-quarter validation programs can inform full-scale entry decisions, though the 80%+ accuracy claim from internal patterns requires independent verification and may not generalize to Germany/France B2B SaaS specifically.",
+      "evidence": "At 12-headcount caps, sequenced entry to a single anchor market produced 2.3x the qualified pipeline in 18 months vs split parallel entries (n=47 expansions).",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports sequenced single-market entry outperforming split parallel entry by 2.3x qualified pipeline across 47 expansions, but does not evidence reduced commitment risk, two-quarter validation programs, 80%+ accuracy, or Germany/France B2B SaaS generalizability.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "pilot_validation",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0333",
+      "claim": "Net revenue retention in German Mittelstand B2B SaaS averages 117% versus 109% in French mid-market, indicating slower initial sales but materially higher long-term account value and expansion potential.",
+      "evidence": "Net revenue retention in German Mittelstand B2B SaaS averages 117% vs 109% in French mid-market \u2014 slow to land but stickier.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports German NRR of 117% vs French mid-market NRR of 109% and \u201cslow to land but stickier,\u201d but does not directly evidence materially higher long-term account value or expansion potential.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "nrr_germany",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0334",
+      "claim": "At 12-headcount scale, sequenced single-market entry produced 2.3x the qualified pipeline in 18 months compared to parallel split entries across 47 observed expansions, indicating focus is critical at this team size.",
+      "evidence": "At 12-headcount caps, sequenced entry to a single anchor market produced 2.3x the qualified pipeline in 18 months vs split parallel entries (n=47 expansions).",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports the 12-headcount condition, sequenced single-market entry producing 2.3x qualified pipeline over 18 months versus split parallel entries, across 47 expansions.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "sequenced_entry",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0335",
+      "claim": "A 6-person early-stage GTM team costs approximately \u20ac1.05M annually in Paris versus \u20ac1.32M in Munich at comparable seniority, a \u20ac270K (26%) cost advantage for France that may be partially or fully offset by German data-residency infrastructure requirements (cost delta unquantified in evidence).",
+      "evidence": "Fully-loaded cost for a 6-person early-stage GTM team is approximately \u20ac1.05M/yr in Paris vs \u20ac1.32M/yr in Munich at comparable seniority.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports \u20ac1.05m Paris vs \u20ac1.32m Munich at comparable seniority, implying a \u20ac270k cost gap, but does not evidence German data-residency infrastructure costs or whether they offset the France advantage.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "team_costs",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0336",
+      "claim": "France's UGAP SaaS Public Cloud framework streamlined \u20ac340M in public-sector SaaS purchases in 2024, offering an accelerated procurement path unavailable in Germany for vendors who qualify.",
+      "evidence": "UGAP and the SaaS Public Cloud framework streamline public-sector SaaS purchases, with \u20ac340M flowing through the framework in 2024.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports UGAP/SaaS Public Cloud streamlining public-sector SaaS purchases with \u20ac340m flowing through in 2024, but does not evidence that no equivalent accelerated path is available in Germany or the vendor qualification condition.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "france_public_sector",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0337",
+      "claim": "German enterprise buyers require in-country data residency in 68% of RFPs versus 41% in France, adding infrastructure complexity and unquantified cost even where GDPR does not mandate it.",
+      "evidence": "German enterprise buyers more frequently require in-country data residency (68% of RFPs vs 41% in France), even where GDPR alone does not mandate it.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Germany requiring in-country data residency more often than France, 68% vs 41%, including where GDPR does not mandate it, but does not directly evidence added infrastructure complexity or cost.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "data_residency",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0338",
+      "claim": "North Rhine-Westphalia and Bavaria together host 41% of Germany's mid-market logistics employers, providing high-density ICP coverage within two contiguous states (assumes logistics is the target vertical; no comparable France data available in evidence).",
+      "evidence": "North Rhine-Westphalia and Bavaria together host 41% of Germany's mid-market logistics employers, providing dense ICP coverage.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports NRW and Bavaria hosting 41% of Germany\u2019s mid-market logistics employers and dense ICP coverage, but does not support \u201ctwo contiguous states\u201d or the absence of comparable France data.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "icp_concentration",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0339",
+      "claim": "German Mittelstand procurement cycles average 7.2 months for B2B SaaS versus 4.8 months in France for comparable deal sizes, a 2.4-month delta that consumes 13% of the 18-month horizon and creates timing risk when combined with a 6-month pilot (first revenue at month 13).",
+      "evidence": "Average B2B SaaS procurement cycle in German Mittelstand: 7.2 months, vs 4.8 months in France for comparable deal sizes.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports the 7.2-month German vs 4.8-month French procurement cycle and 2.4-month delta, but does not evidence the 18-month horizon, 6-month pilot, first revenue at month 13, or timing-risk conclusion.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "procurement_cycles",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0340",
+      "claim": "France's B2B SaaS market grew 22% year-over-year in 2024, outpacing Germany's 14% growth, driven by public-sector digitization mandates.",
+      "evidence": "France posted 22% YoY growth in B2B SaaS spend in 2024, outpacing Germany's 14% \u2014 driven by public-sector digitization mandates.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports France\u2019s 22% YoY B2B SaaS growth, Germany\u2019s 14% growth, France outpacing Germany, and the stated driver of public-sector digitization mandates.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "growth_france",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0341",
+      "claim": "Germany's B2B SaaS market reached approximately \u20ac18.4B in 2024, making it the largest in continental Europe and roughly 1.6x the size of France's market.",
+      "evidence": "Germany's B2B SaaS market reached approximately \u20ac18.4B in 2024, the largest in continental Europe and roughly 1.6x the size of France.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Germany\u2019s 2024 B2B SaaS market size of approximately \u20ac18.4bn, its position as the largest in continental Europe, and its scale at roughly 1.6x France\u2019s market.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "12cd5282-2ecb-4f14-ae52-8c67a99a8d3f",
+      "real_run_claim_id": "market_size_germany",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0342",
+      "claim": "Two-quarter pilot programs in target accounts produced go/no-go decisions with 80%+ accuracy on full-scale entry economics in 11 of 12 benchmark cases. This pattern suggests pilots can de-risk full-scale commitments, but the pilot must have explicit success criteria: \u20ac150K qualified pipeline, 15% trial-to-paid conversion, and validation of 7.2-month procurement cycle by month 6.",
+      "evidence": "Two-quarter pilot programs in target accounts produced a go/no-go decision with 80%+ accuracy on full-scale entry economics in 11 of 12 cases reviewed.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports two-quarter pilots producing 80%+ accurate go/no-go decisions in 11 of 12 cases, but does not evidence the required success criteria of \u20ac150k qualified pipeline, 15% trial-to-paid conversion, or procurement-cycle validation by month 6.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "45daad0d-416a-44f0-abcb-acd7f3fa674c",
+      "real_run_claim_id": "pilot_accuracy",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "knowledge"
+      }
+    },
+    {
+      "id": "wks_0343",
+      "claim": "Net revenue retention in German Mittelstand B2B SaaS averages 117% versus 109% in French mid-market, an 8-point spread indicating higher customer lifetime value. This offsets slower initial sales cycles if the company can achieve comparable retention rates\u2014cohort landed in months 7-12 generates 17% expansion revenue by month 24 versus 9% in France.",
+      "evidence": "Net revenue retention in German Mittelstand B2B SaaS averages 117% vs 109% in French mid-market \u2014 slow to land but stickier.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports German NRR of 117% vs French NRR of 109% and the 8-point spread, but does not evidence higher CLTV, offsetting slower sales cycles, or the 17% vs 9% month-24 expansion revenue figures.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "45daad0d-416a-44f0-abcb-acd7f3fa674c",
+      "real_run_claim_id": "nrr_delta",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0344",
+      "claim": "At 12-headcount caps, sequenced entry to a single anchor market produced 2.3x the qualified pipeline in 18 months versus split parallel entries across 47 expansion cases. Generalizability depends on comparability of those cases to this company's ICP, product maturity, and team structure.",
+      "evidence": "At 12-headcount caps, sequenced entry to a single anchor market produced 2.3x the qualified pipeline in 18 months vs split parallel entries (n=47 expansions).",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports the 2.3x qualified-pipeline outperformance over 18 months across 47 expansion cases, but does not evidence the ICP, product maturity, or team-structure comparability conditions for generalizability.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "45daad0d-416a-44f0-abcb-acd7f3fa674c",
+      "real_run_claim_id": "sequenced_entry_advantage",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0345",
+      "claim": "Fully-loaded cost for a 6-person early-stage GTM team is \u20ac1.05M/year in Paris versus \u20ac1.32M/year in Munich at comparable seniority, a 26% cost advantage (\u20ac270K/year) that compounds to \u20ac405K saved over 18 months. This could fund 2-3 additional headcount or extend runway by 4-6 months, creating material optionality.",
+      "evidence": "Fully-loaded cost for a 6-person early-stage GTM team is approximately \u20ac1.05M/yr in Paris vs \u20ac1.32M/yr in Munich at comparable seniority.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Paris \u20ac1.05m vs Munich \u20ac1.32m, the \u20ac270k annual gap, and the \u20ac405k 18-month arithmetic, but does not evidence that this funds 2\u20133 extra headcount, extends runway by 4\u20136 months, or creates material optionality.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "45daad0d-416a-44f0-abcb-acd7f3fa674c",
+      "real_run_claim_id": "cost_advantage_france",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0059",
+      "claim": "Industrial Cleaning segment (24% of revenue) decelerated sharply from 6.0% growth in FY22 to 2.0% in FY24, generating \u00a343.2m revenue and \u00a34.8m EBITDA (11.1% margin), pressured by cyclical industrial customer cost constraints and two new regional competitors in the Midlands.",
+      "evidence": "### 2.2 Industrial Cleaning (24% of revenue)\nManufacturing, food-production, and pharmaceutical-grade industrial\ncleaning. FY24 revenue \u00a343.2m, EBITDA \u00a34.8m (11.1% margin), +2.0%\nYoY. Largely transactional revenue (52% one-off jobs, 48% rolling\nquarterly contracts). Pharmaceutical-grade cleaning carries the\nhighest margin (~17%) but is a smaller share of the segment;\nmanufacturing-grade is competitive and price-led.\nThe segment's growth has decelerated from 6.0% in FY22 to 2.0% in\nFY24 \u2014 partly cyclical (industrial customers under cost pressure),\npartly competitive (two new regional players in the Midlands).\n### 2.3 Mechanical Services (16% of revenue)\nProject-based mechanical engineering: chiller installation,\npressurised systems, ventilation refurbishment. FY24 revenue \u00a328.8m,\nEBITDA \u00a35.2m (18.1% margin), +6.0% YoY. The highest-margin segment\non a project basis but lumpy: 65% of the segment's annual revenue\ntypically lands in two pricing windows (May/June, October/November)\ntied to customer capex cycles.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Industrial Cleaning at 24% of revenue, \u00a343.2m revenue, \u00a34.8m EBITDA, 11.1% margin, growth deceleration from 6.0% to 2.0%, and pressure from industrial cost constraints plus two new Midlands competitors.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "65d3e370-8fe2-4525-8ed1-ee8b0fc912d1",
+      "real_run_claim_id": "claim_004",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0069",
+      "claim": "Albright operates SAP S/4HANA (deployed FY22) enabling segment-level price changes within a 3-week change cycle, with sponsor exit window of 24 months capping realistic payback horizon at 18 months.",
+      "evidence": "- Group COGS rate moved from 61.8% (FY22) to 63.6% (FY24), a\n  180bps deterioration driven by Food (220bps) and Home\n  (280bps). Premium and Online held rate within \u00b130bps.\n- Group opex rate held at 25.7% (FY22) \u2192 25.8% (FY24); the\n  apparent stability masks a 90bps rise in marketing offset by\n  a 120bps fall in store payroll (post-rationalisation).\n- Working capital cycle: 38 days (FY22) \u2192 51 days (FY24). Food\n  and Home together explain 12 of the 13 day deterioration \u2014\n  inventory builds in both, partly cyclical, partly the\n  symptom of slowing turn.\n## Implementation constraints\n- The board has signed off on supplier-side renegotiations Q1 FY25\n  but has explicitly excluded SKU rationalisation from the H1 plan\n  on customer-experience concerns.\n- Marketing budget is fixed at FY24 levels (\u00a38.4m) for FY25;\n  no additional pricing-test budget approved.\n- The sponsor's exit window (24 months) caps the realistic payback\n  horizon at 18 months \u2014 actions requiring 24m+ payback are out\n  of scope.\n- Albright operates a single ERP (SAP S/4HANA, deployed FY22) so\n  segment-level price changes are technically feasible within a\n  3-week change cycle.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports SAP S/4HANA deployment in FY22, segment-level price changes within a 3-week cycle, and the 24-month sponsor exit window capping realistic payback at 18 months.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c10",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0075",
+      "claim": "Food shoppers exhibit -1.6 price elasticity on staples and -0.9 on private label; staple price increases trigger immediate basket-mix shifts to discounters, while private-label increases are better absorbed.",
+      "evidence": "- **Premium customers** show price elasticity of -0.8 on the\n  category basket \u2014 willingness to absorb a 5-7% price uplift\n  on differentiated SKUs without measurable defection. Anchor\n  insight: Premium customers cite \"consistency of stocking\" and\n  \"in-store experience\" above price as decision drivers in 64%\n  of category responses.\n- **Food shoppers** show elasticity of -1.6 on staples and -0.9\n  on private label \u2014 staple-pricing increases trigger immediate\n  basket-mix shifts to discounters; private-label increases are\n  better absorbed.\n- **Home customers** show elasticity of -2.1 on big-ticket items\n  (>\u00a340 ASP) and -1.4 on the long tail. The high big-ticket\n  elasticity confirms the LFL data: Home is structurally\n  price-sensitive at the SKU level Albright competes on.\n- **Online customers** show the lowest blended elasticity (-0.6)\n  but the highest trial-rate response (+18% trial uplift on\n  promotional pricing) \u2014 the channel's pricing power is\n  promotional rather than structural.\n## Cost structure decomposition\nFY24 P&L decomposed by segment with FY22 baseline for the\ntwo-year walk:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Food elasticity of -1.6 on staples and -0.9 on private label, plus the causal claim that staple price increases trigger basket shifts to discounters while private-label increases are better absorbed.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c4",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0076",
+      "claim": "Premium segment prices index 96.2 vs comparators (Waitrose, Whole Foods, Selfridges)\u2014trading 4 points BELOW the premium basket\u2014with willingness-to-pay study showing -0.8 price elasticity and ability to absorb 5-7% uplift without measurable defection.",
+      "evidence": "Premium retention is healthy; Food retention is at the sector\nmedian; Home retention is the structural concern (well below the\nsector 60% benchmark for non-grocery formats).\n## Competitor pricing positioning (FY24 H2 audit)\nAudit conducted on a sample basket of 412 SKUs across the four\nsegments, benchmarked against the four most relevant comparators\nin each. Index = 100 means parity with the comparator basket on\nmatched items.\n| Segment  | Comparator set                              | Index vs comp | Headroom |\n|----------|---------------------------------------------|---------------|----------|\n| Food     | Aldi, Lidl, Sainsbury's basics, Asda        | 108.4         | 4-6% down|\n| Premium  | Waitrose, Whole Foods Market, Selfridges    | 96.2          | 3-5% up  |\n| Home     | The Range, B&M, Dunelm                      | 112.7         | 8-10% down|\n| Online   | Amazon, Argos online, John Lewis online     | 102.1         | n/a      |",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Premium index of 96.2 vs Waitrose, Whole Foods, and Selfridges, roughly 4 points below comparator parity with 3\u20135% uplift headroom, but does not evidence -0.8 elasticity or 5\u20137% uplift without defection.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "7c67e694-28e0-4d43-8dfc-e56048acef60",
+      "real_run_claim_id": "c3",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0082",
+      "claim": "Partner requests 90-day implementation roadmap with named owners (Pricing Director, CFO, Head of Category per segment) and gating decisions at week-2 alignment, week-6 system change, and week-12 LFL read.",
+      "evidence": "## Specific actions requested by the partner\n1. Identify segment-specific pricing actions with quantified \u00a3\n   revenue impact at conservative, base, and aggressive sensitivity.\n2. Specify the customer-segment-by-action 2x2 matrix (price action\n   on one axis, willingness-to-pay confidence on the other) so\n   the partner can read the recommendation in 30 seconds.\n3. Produce a 90-day implementation roadmap with named owners\n   (Pricing Director, CFO, Head of Category for each segment) and\n   gating decisions (week-2 alignment, week-6 system change, week-\n   12 LFL read).\n4. Flag any actions that cannot survive the 18-month exit-window\n   constraint and recommend an alternative within scope.\nThese are the four deliverable constraints the engagement memo\nmust address. They are non-negotiable for sign-off.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly states the partner requested a 90-day implementation roadmap with named owners and gating decisions at week 2, week 6, and week 12.",
+      "category": "attribution",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "roadmap_structure",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0110",
+      "claim": "Understanding the customer profile requires identifying who the business serves best and why they choose the business, validated through customer interviews, win-loss analysis, and competitive teardown rather than demographic labels.",
+      "evidence": "1. **Who is the customer the business serves best, and why?**\n   Cohort-level revenue concentration, NPS by segment, product\n   penetration by segment. The answer must be a description, not a\n   demographic \u2014 \"logistics director at a 200-person 3PL\" beats\n   \"35-55 year old male decision maker\".\n2. **What is the single biggest reason the customer chooses us?**\n   This must be testable: customer interviews, win-loss analysis,\n   competitive teardown. If three different team members answer\n   this question three different ways, the engagement isn't ready\n   to move past week 1.\n3. **What is the unit-economic shape of the business today?**\n   Contribution margin per customer per year, payback period on\n   acquisition, lifetime value, retention curve. Growth strategy\n   built on shaky unit economics produces growth that is value-\n   destructive.\n4. **What is the addressable market the business actually competes\n   in, sized bottom-up?** Top-down market sizing is a sanity check\n   on the bottom-up number; the bottom-up sizing is the analytic\n   primary.\n5. **What capacity does the business have to absorb growth?**\n   Operational, financial, talent. Growth that exceeds absorbable\n   capacity produces system failures (stockouts, NPS collapse, key\n   person attrition) that wipe out the financial gain.\n6. **What does the next-12-months counterfactual look like with no\n   intervention?** This is the baseline against which the growth\n   strategy will be judged.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports identifying the best-served customer and reason for choosing the business, using interviews, win-loss analysis, and competitive teardown rather than demographic labels.",
+      "category": "attribution",
+      "adversarial": false,
+      "real_run_session_id": "ba1f28db-6a0a-48b6-84d2-cdfca1c93e19",
+      "real_run_claim_id": "c4",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0112",
+      "claim": "In UK grocery, discounters Aldi and Lidl have taken roughly 18% combined market share over the last decade, with anything below the top five players competing on clearly differentiated propositions or failing to survive the next cycle.",
+      "evidence": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and Lidl) and the\n   discounter pair has taken roughly 18% combined share over the last\n   decade. Anything below that top tier \u2014 Iceland, Co-op, Waitrose,\n   Ocado-as-pureplay \u2014 competes on a clearly differentiated proposition\n   or it doesn't survive the next cycle.\n2. High-street non-food retail has been hollowed out. The viable\n   non-grocery formats today are out-of-town value (B&M, Home Bargains,\n   The Range), branded specialty (JD Sports, Greggs, Pret), and the\n   premium-experiential end (Selfridges, Liberty, John Lewis as a\n   wounded but persistent format). Mid-market high-street fashion\n   below \u00a340 ASP has effectively migrated online or bankrupt.\n3. The DIY / homewares segment is structurally smaller than its US\n   equivalent and dominated by Kingfisher (B&Q + Screwfix) and Wickes,\n   with the Travis Perkins B2B route distinct from consumer-facing\n   sheds.\nIn the US, the analogous structural facts:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Aldi/Lidl taking roughly 18% combined share over the last decade and states that players below the top tier need clear differentiation or risk not surviving the next cycle.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "ba1f28db-6a0a-48b6-84d2-cdfca1c93e19",
+      "real_run_claim_id": "c2",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0113",
+      "claim": "The UK retail market is bifurcating between scaled omnichannel operators and specialist single-channel operators, with the squeezed middle (regional chains, mid-market department stores, second-tier grocers) shedding share each year.",
+      "evidence": "# Retail Sector Primer (UK + US, Boutique View)\nThis primer codifies the firm's working view of the consumer-retail\nsector across the UK and US \u2014 the structural shape, the players we\nactually track, the KPIs that matter on diligence, and the trends we\nexpect partners to refer to in client meetings without re-reading the\ntrade press. It is fully synthetic and produced for fixture use only;\nno real client data is reproduced.\n## Market structure\nThe retail market in both the UK and the US is bifurcating along\nroughly the same axis: scaled omnichannel operators on one side and\nspecialist single-channel operators on the other, with the squeezed\nmiddle (regional chains, mid-market department stores, second-tier\ngrocers) shedding share each year.\nIn the UK the three structural realities a partner should be able to\nstate in any client conversation are:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports UK/US retail bifurcation between scaled omnichannel and specialist single-channel operators, with the squeezed middle shedding share each year.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "ba1f28db-6a0a-48b6-84d2-cdfca1c93e19",
+      "real_run_claim_id": "c1",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0131",
+      "claim": "Buyers must articulate strategic rationale in one sentence (consolidation, geographic fill, channel acquisition, or data asset acquisition) and commit to a clear position on physical estate (shrink, hold, or grow the store base) before engagement; without these conditions the work spirals into a broad market scan.",
+      "evidence": "## What we ask buyers to commit to before the engagement\nFor a sector-screen or growth-strategy mandate in retail the firm\nexpects the buyer to articulate:\n- The strategic rationale in one sentence (consolidation? geographic\n  fill? channel acquisition? data asset acquisition?).\n- The exit horizon and the named comparable buyer set.\n- The acceptable level of post-close transformation \u2014 heavy turnaround\n  cases require a different team than bolt-on consolidation.\n- A clear position on physical estate: shrink, hold, or grow the\n  store base. A buyer who is undecided on this dimension will not\n  be able to act on the screen output.\nThese conditions are non-negotiable for retail engagements; without\nthem the work spirals into a \"broad market scan\" that is not what\nthe firm is paid to deliver.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports the required pre-engagement commitments, including one-sentence strategic rationale, physical estate position, and the claim that without these conditions the work becomes a broad market scan.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "848df84e-b49e-4ed2-b367-815d80c05802",
+      "real_run_claim_id": "claim_005",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0135",
+      "claim": "The US grocery sector is regional with no national-scale grocer comparable to Tesco in the UK; Walmart and Costco approximate national footprint but operate hybrid format models, while Kroger plus Albertsons covers the heartland, making regional strength more important than national share for any acquisition thesis.",
+      "evidence": "1. Grocery is regional. There is no national-scale grocer in the US in\n   the way Tesco is national in the UK. Walmart and Costco approximate\n   a national footprint but operate hybrid format models, Kroger plus\n   Albertsons (post-merger or not) covers the heartland, and regional\n   strength matters more than national share for any acquisition\n   thesis.\n2. The mall channel is still the relevant unit of analysis for\n   apparel-and-accessories diligence: A-class malls are stable to\n   growing, B-class are flat to declining, C and D class are in\n   secular decline. Tenant mix and anchor health matter more than\n   the headline footfall figure.\n3. The off-price channel (TJX, Ross Stores, Burlington) absorbs a\n   meaningful share of inventory liquidity from full-price retail and\n   a healthy off-price relationship is a feature of a target's brand\n   ecosystem, not a sell signal.\n## KPIs on diligence\nThe five KPIs the firm consistently re-derives from raw data on a\nretail target:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports US grocery being regional, lacking a Tesco-like national-scale grocer, Walmart/Costco as hybrid national-footprint exceptions, Kroger/Albertsons heartland coverage, and regional strength mattering more than national share.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "848df84e-b49e-4ed2-b367-815d80c05802",
+      "real_run_claim_id": "claim_001",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0139",
+      "claim": "Customer cohort retention\u2014at minimum 12-month repeat purchase rate by acquisition cohort\u2014is essential. Retail brands frequently show flat or growing top-line while underlying cohort retention is collapsing; cohort decomposition is the only way to detect this terminal pattern.",
+      "evidence": "- **Like-for-like (LFL) sales growth** decomposed into traffic, basket\n  size, and price/mix. A LFL number presented in isolation is half\n  evidence; insist on the decomposition before forming a view.\n- **Gross margin walk** showing rate vs cost-of-goods inflation and\n  promo intensity. A flat gross margin in an inflationary year is\n  often a worse sign than a 50bp drop, because it implies promo cuts\n  are masking input cost pressure.\n- **Stock turn** measured by category rather than blended. Category\n  weighted-average stock turn buries the long-tail SKUs where\n  obsolescence write-downs hide.\n- **Customer cohort retention** \u2014 at minimum 12-month repeat purchase\n  rate by acquisition cohort, not blended. Retail brands frequently\n  show flat or growing top-line while underlying cohort retention is\n  collapsing; cohort decomposition is the only way to see it.\n- **Store-level four-wall EBITDA** with a per-store distribution\n  rather than a chain mean. The mean hides the bottom-decile stores\n  whose closure economics dominate the post-close case.\n## Recent trends (2024\u20132026 horizon)\nThe structural moves the firm tracks for client conversations:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports 12-month cohort retention as essential and states that flat or growing top-line can mask collapsing retention, with cohort decomposition needed to detect it.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "71160fcc-0ddc-47d6-9ee7-552a67743847",
+      "real_run_claim_id": "claim_009",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0144",
+      "claim": "The UK grocery sector is dominated by five key players (Tesco, Sainsbury's, Asda, Morrisons, plus Aldi and Lidl), with the discounter pair taking roughly 18% combined share over the last decade. Anything below the top tier competes on clearly differentiated propositions or does not survive the next cycle.",
+      "evidence": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and Lidl) and the\n   discounter pair has taken roughly 18% combined share over the last\n   decade. Anything below that top tier \u2014 Iceland, Co-op, Waitrose,\n   Ocado-as-pureplay \u2014 competes on a clearly differentiated proposition\n   or it doesn't survive the next cycle.\n2. High-street non-food retail has been hollowed out. The viable\n   non-grocery formats today are out-of-town value (B&M, Home Bargains,\n   The Range), branded specialty (JD Sports, Greggs, Pret), and the\n   premium-experiential end (Selfridges, Liberty, John Lewis as a\n   wounded but persistent format). Mid-market high-street fashion\n   below \u00a340 ASP has effectively migrated online or bankrupt.\n3. The DIY / homewares segment is structurally smaller than its US\n   equivalent and dominated by Kingfisher (B&Q + Screwfix) and Wickes,\n   with the Travis Perkins B2B route distinct from consumer-facing\n   sheds.\nIn the US, the analogous structural facts:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports the UK grocery structure, Aldi/Lidl\u2019s roughly 18% combined share, and the claim that sub-top-tier players need clear differentiation to survive.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "71160fcc-0ddc-47d6-9ee7-552a67743847",
+      "real_run_claim_id": "claim_004",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0195",
+      "claim": "Apple operates on a geographic segment basis: Americas (North and South America), Europe (including India, Middle East, Africa), Greater China (China mainland, Hong Kong, Taiwan), Japan, and Rest of Asia Pacific (Australia, New Zealand, other Asian countries).",
+      "evidence": "AppleCare The Company offers a portfolio of fee-based service and support products under the AppleCare \u00ae brand. The offerings provide priority access to Apple technical support, access to the global Apple authorized service network for repair and replacement services, and in many cases additional coverage for instances of accidental damage or theft and loss, depending on the country and type of product. Cloud Services The Company\u2019s cloud services store and keep customers\u2019 content up-to-date and available across multiple Apple devices and Windows personal computers. Digital Content The Company operates various platforms, including the App Store \u00ae , that allow customers to discover and download applications and digital content, such as books, music, video, games and podcasts. The Company also offers digital content through subscription-based services, including Apple Arcade \u00ae , a game service; Apple Fitness+ \u00ae , a personalized fitness service; Apple Music \u00ae , which offers users a curated listening experience with on-demand radio stations; Apple News+ \u00ae , a news and magazine service; and Apple TV \u00ae , which offers exclusive original content and live sports. Payment Services The Company offers payment services, including Apple Card \u00ae , a co-branded credit card, and Apple Pay \u00ae , a cashless payment service. Segments The Company manages its business primarily on a geographic basis. The Company\u2019s reportable segments consist of the Americas, Europe, Greater China, Japan and Rest of Asia Pacific. Americas includes both North and South America. Europe includes European countries, as well as India, the Middle East and Africa. Greater China includes China mainland, Hong Kong and Taiwan. Rest of Asia Pacific includes Australia, New Zealand and those Asian countries not included in the Company\u2019s other reportable segments.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Apple managing/reporting on a geographic segment basis and matches the listed segment definitions for Americas, Europe, Greater China, Japan, and Rest of Asia Pacific.",
+      "category": "attribution",
+      "adversarial": false,
+      "real_run_session_id": "d2ef8688-6816-4d8d-a72c-af4056628e77",
+      "real_run_claim_id": "claim-010",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "document"
+      }
+    },
+    {
+      "id": "wks_0203",
+      "claim": "The company experiences seasonal revenue concentration in Q1 (fiscal year) due to holiday demand, with product launch timing significantly impacting net sales, cost of sales, and channel inventory dynamics.",
+      "evidence": "The following discussion should be read in conjunction with the 2025 Form 10-K filed with the U.S. Securities and Exchange Commission (\u201cSEC\u201d) and the condensed consolidated financial statements and accompanying notes included in Part I, Item 1 of this Form 10-Q. Available Information The Company periodically provides certain information for investors on its corporate website, www.apple.com, and its investor relations website, investor.apple.com. This includes press releases and other information about financial performance, information on corporate governance, and details related to the Company\u2019s annual meeting of shareholders. The information contained on the websites referenced in this Form 10-Q is not incorporated by reference into this filing. Further, the Company\u2019s references to website URLs are intended to be inactive textual references only. Business Seasonality and Product Introductions The Company has historically experienced higher net sales in its first quarter compared to other quarters in its fiscal year due in part to seasonal holiday demand. Additionally, new product and service introductions can significantly impact net sales, cost of sales and operating expenses. The timing of product introductions can also impact the Company\u2019s net sales to its indirect distribution channels as these channels are filled with new inventory following a product launch, and channel inventory of an older product often declines as the launch of a newer product approaches. Net sales can also be affected when consumers and distributors anticipate a product introduction.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports higher Q1 net sales due to holiday demand and states that product introduction timing significantly affects net sales, cost of sales, and channel inventory dynamics.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "d2ef8688-6816-4d8d-a72c-af4056628e77",
+      "real_run_claim_id": "claim-002",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_high",
+        "evidence_source_type": "document"
+      }
+    },
+    {
+      "id": "wks_0086",
+      "claim": "Home segment prices index at 112.7 vs. out-of-town value players (The Range, B&M, Dunelm), 13% above comparators with 8-10% downward headroom, identified as the principal explanatory factor for negative LFL.",
+      "evidence": "Premium retention is healthy; Food retention is at the sector\nmedian; Home retention is the structural concern (well below the\nsector 60% benchmark for non-grocery formats).\n## Competitor pricing positioning (FY24 H2 audit)\nAudit conducted on a sample basket of 412 SKUs across the four\nsegments, benchmarked against the four most relevant comparators\nin each. Index = 100 means parity with the comparator basket on\nmatched items.\n| Segment  | Comparator set                              | Index vs comp | Headroom |\n|----------|---------------------------------------------|---------------|----------|\n| Food     | Aldi, Lidl, Sainsbury's basics, Asda        | 108.4         | 4-6% down|\n| Premium  | Waitrose, Whole Foods Market, Selfridges    | 96.2          | 3-5% up  |\n| Home     | The Range, B&M, Dunelm                      | 112.7         | 8-10% down|\n| Online   | Amazon, Argos online, John Lewis online     | 102.1         | n/a      |",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Home index of 112.7 vs The Range, B&M, and Dunelm, roughly 13% above comparators with 8\u201310% downward headroom, but does not evidence this as the principal cause of negative LFL.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "home_index",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_low",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0087",
+      "claim": "Home customers show -2.1 elasticity on big-ticket items (>\u00a340 ASP) and -1.4 on the long tail, confirming structural price sensitivity at the SKU level where Albright competes.",
+      "evidence": "- **Premium customers** show price elasticity of -0.8 on the\n  category basket \u2014 willingness to absorb a 5-7% price uplift\n  on differentiated SKUs without measurable defection. Anchor\n  insight: Premium customers cite \"consistency of stocking\" and\n  \"in-store experience\" above price as decision drivers in 64%\n  of category responses.\n- **Food shoppers** show elasticity of -1.6 on staples and -0.9\n  on private label \u2014 staple-pricing increases trigger immediate\n  basket-mix shifts to discounters; private-label increases are\n  better absorbed.\n- **Home customers** show elasticity of -2.1 on big-ticket items\n  (>\u00a340 ASP) and -1.4 on the long tail. The high big-ticket\n  elasticity confirms the LFL data: Home is structurally\n  price-sensitive at the SKU level Albright competes on.\n- **Online customers** show the lowest blended elasticity (-0.6)\n  but the highest trial-rate response (+18% trial uplift on\n  promotional pricing) \u2014 the channel's pricing power is\n  promotional rather than structural.\n## Cost structure decomposition\nFY24 P&L decomposed by segment with FY22 baseline for the\ntwo-year walk:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Home elasticity of -2.1 on big-ticket items and -1.4 on the long tail, and states this confirms structural SKU-level price sensitivity.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "home_elasticity",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_low",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0090",
+      "claim": "Food segment prices index at 108.4 vs. key competitors (Aldi, Lidl, Sainsbury's basics, Asda), approximately 8% above discounters and 4% above mid-tier grocers, with 4-6% downward headroom identified.",
+      "evidence": "Premium retention is healthy; Food retention is at the sector\nmedian; Home retention is the structural concern (well below the\nsector 60% benchmark for non-grocery formats).\n## Competitor pricing positioning (FY24 H2 audit)\nAudit conducted on a sample basket of 412 SKUs across the four\nsegments, benchmarked against the four most relevant comparators\nin each. Index = 100 means parity with the comparator basket on\nmatched items.\n| Segment  | Comparator set                              | Index vs comp | Headroom |\n|----------|---------------------------------------------|---------------|----------|\n| Food     | Aldi, Lidl, Sainsbury's basics, Asda        | 108.4         | 4-6% down|\n| Premium  | Waitrose, Whole Foods Market, Selfridges    | 96.2          | 3-5% up  |\n| Home     | The Range, B&M, Dunelm                      | 112.7         | 8-10% down|\n| Online   | Amazon, Argos online, John Lewis online     | 102.1         | n/a      |",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Food index of 108.4 vs the listed competitor basket and 4\u20136% downward headroom, but does not separately evidence being 8% above discounters and 4% above mid-tier grocers.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "a559172a-3ed4-4e63-8c5c-f9b3b50230ae",
+      "real_run_claim_id": "food_index",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_low",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0330",
+      "claim": "France posted 22% year-over-year growth in B2B SaaS spend in 2024, outpacing Germany's 14%, driven by public-sector digitization mandates (Numeum 2024).",
+      "evidence": "France posted 22% YoY growth in B2B SaaS spend in 2024, outpacing Germany's 14% \u2014 driven by public-sector digitization mandates.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports France\u2019s 22% YoY growth, Germany\u2019s 14%, France outpacing Germany, and the public-sector digitization driver, but does not evidence the source attribution to Numeum 2024.",
+      "category": "attribution",
+      "adversarial": false,
+      "real_run_session_id": "24573bc6-9f90-4d22-803a-04ecdafa9804",
+      "real_run_claim_id": "ba645874-b1e8-4b55-a77b-0a735ace9a5f",
+      "extra": {
+        "verifier_verdict_at_label_time": "supported_low",
+        "evidence_source_type": "web"
+      }
+    },
+    {
+      "id": "wks_0015",
+      "claim": "The acquisition could leverage TargetCo's strong service-quality NPS of 4.6/5 to enhance profitability.",
+      "evidence": "| Target            | Acquirer                  | Year | EV (\u00a3m) | EV/EBITDA | Source                        |\n|-------------------|---------------------------|------|---------|-----------|-------------------------------|\n| Crestwood Group   | Sentinel Capital Partners | 2023 | 215     | 9.5x      | UK mid-cap Mergermarket DB    |\n| Brighton FM Ltd   | Quantum Industrial        | 2023 | 142     | 8.1x      | Press release + intermediary  |\n| Aldwych Compliance| Apex Holdings             | 2022 | 95      | 7.2x      | Industry analyst note Q3 FY23 |\nMedian EV/EBITDA: 8.1x (range 7.2-9.5x). The range is\nsensitive to segment mix \u2014 Aldwych Compliance traded at the lower\nend despite the highest growth profile, reflecting concentration risk\n(top-3 customers 58% of revenue).\nFor TargetCo, applying the median to FY24 Adj EBITDA (\u00a325.6m)\nimplies a base case EV of \u00a3207m. Adjusting for TargetCo's\ndiversification advantage (4 segments vs Aldwych's 1), Compliance\nsegment growth premium, and the Halo renewal risk \u2014 the buyer\nshould expect a defensible range of \u00a3205-235m.\n## 9. Process",
+      "evidence_source": "real_run",
+      "ground_truth": "insufficient",
+      "label_rationale": "Evidence discusses valuation comparables and TargetCo EV range, but does not evidence TargetCo\u2019s 4.6/5 NPS or that service quality could enhance profitability post-acquisition.",
+      "category": "forecast",
+      "adversarial": false,
+      "real_run_session_id": "568ba70f-f95c-4a7b-8428-cdbe168417c3",
+      "real_run_claim_id": "claim_6",
+      "extra": {
+        "verifier_verdict_at_label_time": "unsupported",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0001",
+      "claim": "Comparable UK industrial-services transactions (Crestwood Group, Brighton FM, Aldwych Compliance) traded at 7.2-9.5x EV/EBITDA (median 8.1x) in 2022-2023, implying \u00a3207m base-case valuation for TargetCo at FY24 adjusted EBITDA of \u00a325.6m, with defensible range \u00a3205-235m adjusting for diversification and contract concentration risk.",
+      "evidence": "| Target            | Acquirer                  | Year | EV (\u00a3m) | EV/EBITDA | Source                        |\n|-------------------|---------------------------|------|---------|-----------|-------------------------------|\n| Crestwood Group   | Sentinel Capital Partners | 2023 | 215     | 9.5x      | UK mid-cap Mergermarket DB    |\n| Brighton FM Ltd   | Quantum Industrial        | 2023 | 142     | 8.1x      | Press release + intermediary  |\n| Aldwych Compliance| Apex Holdings             | 2022 | 95      | 7.2x      | Industry analyst note Q3 FY23 |\nMedian EV/EBITDA: 8.1x (range 7.2-9.5x). The range is\nsensitive to segment mix \u2014 Aldwych Compliance traded at the lower\nend despite the highest growth profile, reflecting concentration risk\n(top-3 customers 58% of revenue).\nFor TargetCo, applying the median to FY24 Adj EBITDA (\u00a325.6m)\nimplies a base case EV of \u00a3207m. Adjusting for TargetCo's\ndiversification advantage (4 segments vs Aldwych's 1), Compliance\nsegment growth premium, and the Halo renewal risk \u2014 the buyer\nshould expect a defensible range of \u00a3205-235m.\n## 9. Process",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports the comparable transaction set, 7.2\u20139.5x EV/EBITDA range, 8.1x median, \u00a325.6m FY24 adjusted EBITDA, \u00a3207m base-case EV, and \u00a3205\u2013235m defensible valuation range after stated adjustments.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_014",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0002",
+      "claim": "Marylebone Partners III LP holds 71% controlling stake (acquired March 2020) with stated exit window opening at 24 months and closing at 36 months; sponsor timeline pressure may constrain transformation investment horizon and favor harvest-and-exit over multi-year repositioning.",
+      "evidence": "The business operates under a tight central-overhead model\n(corporate cost stack of 3.4% of revenue) with each segment carrying\nits own P&L responsibility under a Group Operations Director.\nFounder family ownership is now 22%; Marylebone Partners III LP took\na 71% controlling stake in March 2020 with the residual 7% held by\nthe present management team under an EMI option pool. The sponsor's\nstated exit window opens at 24 months and closes at 36 months.\n## 2. Business segments\nTargetCo reports across four operating segments. Inter-segment\nrevenue is immaterial (under 1% of group), so segment numbers below\nsum to within rounding of the group total.\n### 2.1 Facilities Maintenance (52% of revenue)\nThe largest segment by revenue. Multi-year master service agreements\nwith corporate occupiers and building owners covering planned and\nreactive maintenance: HVAC, plumbing, electrical, fire suppression,\nfabric repair. FY24 revenue \u00a393.6m, EBITDA \u00a313.1m (14.0% margin),\n+8.0% YoY. Average contract length 4.7 years, 91% recurring revenue.\nTop-10 customer set is stable; the segment lost one \u00a34m contract to\nan in-housing trend in FY23 but won \u00a36m of net new in FY24.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Marylebone\u2019s 71% stake, March 2020 acquisition, and 24\u201336 month exit window, but does not directly evidence that timeline pressure constrains transformation investment or favors harvest-and-exit over multi-year repositioning.",
+      "category": "forecast",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_013",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0003",
+      "claim": "CEO Ian Cartwright (age 64) intends to step back to non-executive Chairman within 12-18 months, with Group Operations Director Anita Devereaux (47, with TargetCo since 2015) as internal candidate; leadership transition during transformation represents material execution risk.",
+      "evidence": "**Q6: Capex plans \u2014 committed vs discretionary?**\n*Management:* \"Committed: \u00a34.0m IT (Dynamics 365 migration), \u00a31.6m\nfleet replacement, \u00a30.8m HQ refit, \u00a30.4m HSE upgrades \u2014 total \u00a36.8m\nacross FY25-FY27. Discretionary: \u00a33-5m if ROI scale-up proceeds.\nNo segment-level expansion capex committed.\"\n**Q7: Succession \u2014 CEO Ian Cartwright is 64. What's the plan?**\n*Management:* \"Ian intends to step back to non-executive Chairman\nwithin 12-18 months. The Group Operations Director (Anita\nDevereaux, 47, with TargetCo since 2015) is the internal\ncandidate. The board has not yet run an external search but is\nwilling to.\"\n**Q8: Pension exposure \u2014 defined-benefit liabilities?**\n*Management:* \"Closed DB scheme, last open accrual 2009. IAS 19\ndeficit \u00a38.0m at last triennial valuation (March 2023); recovery\nplan running at \u00a31.2m/year contribution to FY32. Not a material\ndeal-economics issue but the buyer should diligence the actuarial\nassumptions independently.\"\n## 8. Comparable transactions\nThree plausible UK industrial-services comparables for valuation\ntriangulation. All synthetic \u2014 figures plausible but not real\ndeals.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Ian Cartwright\u2019s age, planned 12\u201318 month transition, Anita Devereaux as internal candidate, and lack of external search, but does not directly evidence that the transition creates material execution risk during transformation.",
+      "category": "forecast",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_012",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0004",
+      "claim": "TargetCo achieved FY24 revenue of \u00a3180.0m (+4.0% YoY) with adjusted EBITDA of \u00a325.6m (14.2% margin) and free cash flow of \u00a314.8m (61.7% conversion), demonstrating stable financial performance but decelerating growth trajectory.",
+      "evidence": "# TargetCo Holdings Ltd \u2014 Confidential Information Memorandum\n**Project Lighthouse \u2014 Strictly Confidential**\n**Prepared for management review \u00b7 Sponsor: Marylebone Partners III LP**\nThis memorandum is fully synthetic \u2014 written for fixture use only.\nTargetCo Holdings is a fictional entity; any resemblance to real\nbusinesses is coincidental. No real company IP appears here.\n## 1. Executive summary\nTargetCo Holdings Ltd is a UK-headquartered industrial services group\ndelivering facilities maintenance, industrial cleaning, mechanical\nservices, and compliance auditing across a four-segment portfolio.\nFounded in Bristol in 1987 by the late Maurice Hambleton, the\nbusiness has grown organically and through three small bolt-ons\nsince 2014 to its present scale.\n**Headline financials (FY24, year-ended 31 March 2024):**\n- Revenue: \u00a3180.0m (+4.0% YoY)\n- EBITDA: \u00a324.0m (13.3% margin)\n- Adjusted EBITDA (post-management adjustments): \u00a325.6m (14.2% margin)\n- Free cash flow: \u00a314.8m (61.7% conversion of EBITDA)\n- Headcount: 950 (FTE basis), 88% UK-based\n- HQ: Bristol; 12 operational sites across the UK and ROI",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports FY24 revenue, YoY growth, adjusted EBITDA, margin, and FCF conversion, but does not evidence stable financial performance or a decelerating growth trajectory beyond FY24.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_011",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0005",
+      "claim": "Non-food retail in the UK has been hollowed out, with only out-of-town value formats (B&M, Home Bargains, The Range), branded specialty, and premium-experiential formats remaining viable; mid-market high-street retail below \u00a340 ASP has migrated online or into bankruptcy.",
+      "evidence": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and Lidl) and the\n   discounter pair has taken roughly 18% combined share over the last\n   decade. Anything below that top tier \u2014 Iceland, Co-op, Waitrose,\n   Ocado-as-pureplay \u2014 competes on a clearly differentiated proposition\n   or it doesn't survive the next cycle.\n2. High-street non-food retail has been hollowed out. The viable\n   non-grocery formats today are out-of-town value (B&M, Home Bargains,\n   The Range), branded specialty (JD Sports, Greggs, Pret), and the\n   premium-experiential end (Selfridges, Liberty, John Lewis as a\n   wounded but persistent format). Mid-market high-street fashion\n   below \u00a340 ASP has effectively migrated online or bankrupt.\n3. The DIY / homewares segment is structurally smaller than its US\n   equivalent and dominated by Kingfisher (B&Q + Screwfix) and Wickes,\n   with the Travis Perkins B2B route distinct from consumer-facing\n   sheds.\nIn the US, the analogous structural facts:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports UK high-street non-food retail being hollowed out, with viable formats limited to out-of-town value, branded specialty, and premium-experiential, while sub-\u00a340 ASP mid-market fashion has migrated online or gone bankrupt.",
+      "category": "comparative",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_010",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0006",
+      "claim": "TargetCo has committed \u00a36.8m capex across FY25-FY27 for IT (\u00a34.0m Dynamics 365 migration), fleet replacement (\u00a31.6m), HQ refit (\u00a30.8m), and HSE upgrades (\u00a30.4m), with discretionary \u00a33-5m available if ROI scale-up proceeds.",
+      "evidence": "**Q6: Capex plans \u2014 committed vs discretionary?**\n*Management:* \"Committed: \u00a34.0m IT (Dynamics 365 migration), \u00a31.6m\nfleet replacement, \u00a30.8m HQ refit, \u00a30.4m HSE upgrades \u2014 total \u00a36.8m\nacross FY25-FY27. Discretionary: \u00a33-5m if ROI scale-up proceeds.\nNo segment-level expansion capex committed.\"\n**Q7: Succession \u2014 CEO Ian Cartwright is 64. What's the plan?**\n*Management:* \"Ian intends to step back to non-executive Chairman\nwithin 12-18 months. The Group Operations Director (Anita\nDevereaux, 47, with TargetCo since 2015) is the internal\ncandidate. The board has not yet run an external search but is\nwilling to.\"\n**Q8: Pension exposure \u2014 defined-benefit liabilities?**\n*Management:* \"Closed DB scheme, last open accrual 2009. IAS 19\ndeficit \u00a38.0m at last triennial valuation (March 2023); recovery\nplan running at \u00a31.2m/year contribution to FY32. Not a material\ndeal-economics issue but the buyer should diligence the actuarial\nassumptions independently.\"\n## 8. Comparable transactions\nThree plausible UK industrial-services comparables for valuation\ntriangulation. All synthetic \u2014 figures plausible but not real\ndeals.",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports the \u00a36.8m committed FY25\u2013FY27 capex breakdown and the discretionary \u00a33\u20135m capex if ROI scale-up proceeds.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_009",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0007",
+      "claim": "Private-label offerings have seen resurgence in UK grocery and US off-price sectors; retailers without competitive private-label portfolios face margin disadvantages against discounters who derive 80-90% of sales from own-brand products.",
+      "evidence": "- **Omnichannel maturity is now table stakes.** The premium for\n  best-in-class omnichannel execution has compressed; the discount\n  for poor execution has widened. Diligence should focus less on\n  \"do they have omnichannel\" and more on \"what is their cost-to-serve\n  per channel and how does it move as mix shifts\".\n- **Private label has re-accelerated** in UK grocery and US off-price,\n  driven by the post-2022 inflation cycle. Targets without a credible\n  private-label programme face structural margin disadvantage.\n- **Loyalty as a media business**: the retail-media-network playbook\n  (Tesco-Dunnhumby, Sainsbury's-Nectar360, Walmart Connect, Kroger\n  Precision) has materially changed grocery economics. The retail\n  media line is now an acquirable asset class within a larger retail\n  thesis.\n- **Returns economics on apparel ecommerce** has tightened: returns\n  rates above 30% on premium fashion and 45% on contemporary fashion\n  signal a logistics liability. Ask explicitly for returns rate by\n  category and post-return resaleability.\n- **Generative AI in merchandising** is real but narrow: assortment\n  optimisation, copy generation, pricing dispersion. The firm's\n  default position is that AI accelerates merchandising productivity\n  by 10\u201315% in a 24-month window for operators with clean data; it\n  does not change the underlying competitive structure of the sector.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports private-label re-acceleration in UK grocery and US off-price plus margin disadvantage for retailers without credible private-label programs, but does not evidence discounters deriving 80\u201390% of sales from own-brand products.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_008",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0008",
+      "claim": "Omnichannel maturity has become essential for retail competitiveness, with retailers lacking integrated online-offline capabilities facing structural disadvantage against both discounters and pure-play online entrants.",
+      "evidence": "1. Grocery is regional. There is no national-scale grocer in the US in\n   the way Tesco is national in the UK. Walmart and Costco approximate\n   a national footprint but operate hybrid format models, Kroger plus\n   Albertsons (post-merger or not) covers the heartland, and regional\n   strength matters more than national share for any acquisition\n   thesis.\n2. The mall channel is still the relevant unit of analysis for\n   apparel-and-accessories diligence: A-class malls are stable to\n   growing, B-class are flat to declining, C and D class are in\n   secular decline. Tenant mix and anchor health matter more than\n   the headline footfall figure.\n3. The off-price channel (TJX, Ross Stores, Burlington) absorbs a\n   meaningful share of inventory liquidity from full-price retail and\n   a healthy off-price relationship is a feature of a target's brand\n   ecosystem, not a sell signal.\n## KPIs on diligence\nThe five KPIs the firm consistently re-derives from raw data on a\nretail target:",
+      "evidence_source": "real_run",
+      "ground_truth": "insufficient",
+      "label_rationale": "Evidence discusses US grocery regionality, mall-channel diligence, and off-price inventory dynamics, but does not evidence omnichannel maturity or structural disadvantage from lacking integrated online-offline capabilities.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_007",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0009",
+      "claim": "The Facilities Maintenance segment (52% of revenue, \u00a393.6m FY24) relies on a \u00a318m/year contract with a UK retail bank; loss of this contract would materially impact revenue (19% of segment revenue) and EBITDA, creating concentration risk in the core segment.",
+      "evidence": "The business operates under a tight central-overhead model\n(corporate cost stack of 3.4% of revenue) with each segment carrying\nits own P&L responsibility under a Group Operations Director.\nFounder family ownership is now 22%; Marylebone Partners III LP took\na 71% controlling stake in March 2020 with the residual 7% held by\nthe present management team under an EMI option pool. The sponsor's\nstated exit window opens at 24 months and closes at 36 months.\n## 2. Business segments\nTargetCo reports across four operating segments. Inter-segment\nrevenue is immaterial (under 1% of group), so segment numbers below\nsum to within rounding of the group total.\n### 2.1 Facilities Maintenance (52% of revenue)\nThe largest segment by revenue. Multi-year master service agreements\nwith corporate occupiers and building owners covering planned and\nreactive maintenance: HVAC, plumbing, electrical, fire suppression,\nfabric repair. FY24 revenue \u00a393.6m, EBITDA \u00a313.1m (14.0% margin),\n+8.0% YoY. Average contract length 4.7 years, 91% recurring revenue.\nTop-10 customer set is stable; the segment lost one \u00a34m contract to\nan in-housing trend in FY23 but won \u00a36m of net new in FY24.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Facilities Maintenance at 52% of revenue and \u00a393.6m FY24 revenue, but does not evidence the \u00a318m/year UK retail bank contract, 19% exposure, EBITDA impact, or concentration risk.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_006",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0010",
+      "claim": "TargetCo maintains a 4.6/5 service-quality NPS and operates under a tight central-overhead model with corporate costs at only 3.4% of revenue, demonstrating operational efficiency that can support strategic investment.",
+      "evidence": "The business operates under a tight central-overhead model\n(corporate cost stack of 3.4% of revenue) with each segment carrying\nits own P&L responsibility under a Group Operations Director.\nFounder family ownership is now 22%; Marylebone Partners III LP took\na 71% controlling stake in March 2020 with the residual 7% held by\nthe present management team under an EMI option pool. The sponsor's\nstated exit window opens at 24 months and closes at 36 months.\n## 2. Business segments\nTargetCo reports across four operating segments. Inter-segment\nrevenue is immaterial (under 1% of group), so segment numbers below\nsum to within rounding of the group total.\n### 2.1 Facilities Maintenance (52% of revenue)\nThe largest segment by revenue. Multi-year master service agreements\nwith corporate occupiers and building owners covering planned and\nreactive maintenance: HVAC, plumbing, electrical, fire suppression,\nfabric repair. FY24 revenue \u00a393.6m, EBITDA \u00a313.1m (14.0% margin),\n+8.0% YoY. Average contract length 4.7 years, 91% recurring revenue.\nTop-10 customer set is stable; the segment lost one \u00a34m contract to\nan in-housing trend in FY23 but won \u00a36m of net new in FY24.",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports the tight central-overhead model and corporate costs at 3.4% of revenue, but does not evidence the 4.6/5 service-quality NPS or that this operational efficiency can support strategic investment.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_005",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0011",
+      "claim": "TargetCo's Home segment shows retention rates well below the sector benchmark, indicating structural decline, while Food and premium segments demonstrate healthy retention and growth. Specific retention rate quantification (actual vs. benchmark) and revenue at risk are not provided in available evidence.",
+      "evidence": "Premium retention is healthy; Food retention is at the sector\nmedian; Home retention is the structural concern (well below the\nsector 60% benchmark for non-grocery formats).\n## Competitor pricing positioning (FY24 H2 audit)\nAudit conducted on a sample basket of 412 SKUs across the four\nsegments, benchmarked against the four most relevant comparators\nin each. Index = 100 means parity with the comparator basket on\nmatched items.\n| Segment  | Comparator set                              | Index vs comp | Headroom |\n|----------|---------------------------------------------|---------------|----------|\n| Food     | Aldi, Lidl, Sainsbury's basics, Asda        | 108.4         | 4-6% down|\n| Premium  | Waitrose, Whole Foods Market, Selfridges    | 96.2          | 3-5% up  |\n| Home     | The Range, B&M, Dunelm                      | 112.7         | 8-10% down|\n| Online   | Amazon, Argos online, John Lewis online     | 102.1         | n/a      |",
+      "evidence_source": "real_run",
+      "ground_truth": "partial",
+      "label_rationale": "Evidence supports Home retention being well below the 60% sector benchmark and a structural concern, plus Premium healthy and Food sector-median retention, but does not evidence Food/Premium growth or quantify actual retention rates and revenue at risk.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_004",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0012",
+      "claim": "The Republic of Ireland footprint is sub-scale at 9% of revenue (\u00a316.2m) and was historically EBITDA-negative until FY24's first profitable year (\u00a30.4m EBITDA); the segment has received two informal indicative bids in the past 18 months at 0.6-0.8x revenue, implying \u00a310-13m divestiture proceeds.",
+      "evidence": "UK 91% (England 78%, Scotland 8%, Wales 4%, NI 1%); Republic of\nIreland 9%. Three of TargetCo's 12 operational sites are in\nthe UK; one is in Cork. The ROI footprint is sub-scale and has\nhistorically been EBITDA-negative; FY24 was the first profitable\nyear (\u00a30.4m EBITDA on \u00a316.2m revenue). The buyer can either invest\nto scale ROI (estimated \u00a33-5m capex over 24 months) or divest the\nROI book; the segment has had two informal indicative bids in the\npast 18 months at 0.6-0.8x revenue.\n## 5. Financial trajectory\n### Revenue, \u00a3m\n| Period | Revenue (\u00a3m) | YoY growth | Source                      |\n|--------|--------------|------------|-----------------------------|\n| FY21   | 153.2        | -4.8%      | TargetCo audited accounts   |\n| FY22   | 162.4        | +6.0%      | TargetCo audited accounts   |\n| FY23   | 173.1        | +6.6%      | TargetCo audited accounts   |\n| FY24   | 180.0        | +4.0%      | TargetCo audited accounts   |\n| LTM Q1 | 182.1        | +3.5%      | TargetCo management accounts|\n### EBITDA, \u00a3m",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports ROI at 9% revenue, \u00a316.2m revenue, sub-scale and historically EBITDA-negative status, FY24 first profitability at \u00a30.4m EBITDA, two indicative bids at 0.6\u20130.8x revenue, implying roughly \u00a310\u201313m proceeds.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_003",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0013",
+      "claim": "TargetCo generates 91% of revenue from UK operations (England 78%, Scotland 8%, Wales 4%, NI 1%), with three of 12 operational sites in the UK, providing concentrated exposure to UK competitive dynamics.",
+      "evidence": "UK 91% (England 78%, Scotland 8%, Wales 4%, NI 1%); Republic of\nIreland 9%. Three of TargetCo's 12 operational sites are in\nthe UK; one is in Cork. The ROI footprint is sub-scale and has\nhistorically been EBITDA-negative; FY24 was the first profitable\nyear (\u00a30.4m EBITDA on \u00a316.2m revenue). The buyer can either invest\nto scale ROI (estimated \u00a33-5m capex over 24 months) or divest the\nROI book; the segment has had two informal indicative bids in the\npast 18 months at 0.6-0.8x revenue.\n## 5. Financial trajectory\n### Revenue, \u00a3m\n| Period | Revenue (\u00a3m) | YoY growth | Source                      |\n|--------|--------------|------------|-----------------------------|\n| FY21   | 153.2        | -4.8%      | TargetCo audited accounts   |\n| FY22   | 162.4        | +6.0%      | TargetCo audited accounts   |\n| FY23   | 173.1        | +6.6%      | TargetCo audited accounts   |\n| FY24   | 180.0        | +4.0%      | TargetCo audited accounts   |\n| LTM Q1 | 182.1        | +3.5%      | TargetCo management accounts|\n### EBITDA, \u00a3m",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports 91% UK revenue with the regional breakdown and three of 12 operational sites in the UK; concentrated UK exposure follows from the revenue mix.",
+      "category": "numeric_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_002",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    },
+    {
+      "id": "wks_0014",
+      "claim": "Discounters Aldi and Lidl have captured approximately 18% combined market share in UK grocery over the past decade, forcing retailers below the top five (Tesco, Sainsbury's, Asda, Morrisons, plus the discounter pair) to compete on clearly differentiated propositions or face exit in the next cycle.",
+      "evidence": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and Lidl) and the\n   discounter pair has taken roughly 18% combined share over the last\n   decade. Anything below that top tier \u2014 Iceland, Co-op, Waitrose,\n   Ocado-as-pureplay \u2014 competes on a clearly differentiated proposition\n   or it doesn't survive the next cycle.\n2. High-street non-food retail has been hollowed out. The viable\n   non-grocery formats today are out-of-town value (B&M, Home Bargains,\n   The Range), branded specialty (JD Sports, Greggs, Pret), and the\n   premium-experiential end (Selfridges, Liberty, John Lewis as a\n   wounded but persistent format). Mid-market high-street fashion\n   below \u00a340 ASP has effectively migrated online or bankrupt.\n3. The DIY / homewares segment is structurally smaller than its US\n   equivalent and dominated by Kingfisher (B&Q + Screwfix) and Wickes,\n   with the Travis Perkins B2B route distinct from consumer-facing\n   sheds.\nIn the US, the analogous structural facts:",
+      "evidence_source": "real_run",
+      "ground_truth": "supported",
+      "label_rationale": "Evidence directly supports Aldi/Lidl taking roughly 18% combined UK grocery share over the last decade and states that players below the top tier need clear differentiation or risk not surviving the next cycle.",
+      "category": "causal_claim",
+      "adversarial": false,
+      "real_run_session_id": "a44923a8-22a0-4702-851a-f759e63b43bb",
+      "real_run_claim_id": "claim_001",
+      "extra": {
+        "verifier_verdict_at_label_time": "weak",
+        "evidence_source_type": "firm_library"
+      }
+    }
+  ]
+}

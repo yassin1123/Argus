@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-05-28T19:31:30.051067+00:00",
+  "band": "GREEN",
+  "proceeds": true,
+  "posture": "verified",
+  "real_fp_rate_on_supported": 0.0,
+  "real_recall_on_insufficient": 1.0,
+  "recall_safety_ok": true,
+  "real_pair_count": 61,
+  "verifier_source": "cross_family_llm",
+  "rationale": "Real FP-rate-on-supported = 0.0%, \u2264 the 5% GREEN threshold, AND recall-on-insufficient = 100.0% \u2265 the 85% safety floor. The verifier is pilot-grade on real claims.",
+  "drives_week_24": "Pilot proceeds with the full 'verified' posture. Days 2-5 run the pilot-readiness track (onboarding, runbooks, dry run).",
+  "thresholds": {
+    "green_fp_ceiling": 0.05,
+    "yellow_fp_ceiling": 0.15,
+    "recall_on_insufficient_floor": 0.85,
+    "min_labelled_pairs": 40
+  },
+  "supporting_metrics": {
+    "recall_on_supported": 0.2692307692307692,
+    "accuracy": 0.6557377049180327,
+    "supported_predictions": 7,
+    "fp_count_on_supported": 0,
+    "insufficient_total": 4,
+    "insufficient_caught": 4
+  }
+}
