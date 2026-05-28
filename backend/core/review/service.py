@@ -571,6 +571,23 @@ async def transition_review(
                 "auto_revert: create_version failed (non-fatal): %s", exc,
             )
 
+    # W24/D3: edit telemetry on approval. Compute how much the
+    # consultant rewrote the auto-generated draft before approving +
+    # persist the FRACTION (never the prose — W20 privacy line).
+    # Best-effort: a telemetry failure must never roll back the
+    # committed approval.
+    if action_enum == ReviewAction.APPROVE:
+        try:
+            from core.pilot_feedback import compute_and_record_edit_telemetry
+            await compute_and_record_edit_telemetry(
+                session_id, firm_id, approved_by=actor_id,
+            )
+        except Exception as exc:  # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning(
+                "approve: edit telemetry failed (non-fatal): %s", exc,
+            )
+
     # W18/D2: notification dispatch for the actions with a real
     # surface (submit_for_review / request_changes / approve). The
     # wiring helper swallows + logs exceptions per W18/D2 hard rule:

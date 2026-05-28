@@ -11,7 +11,7 @@ from slowapi.middleware import SlowAPIMiddleware
 load_dotenv()
 
 from api import auth as auth_router
-from api import admin, artifacts, audit_export as audit_export_router, chat, collaboration, comments, cost as cost_router, engagements, evaluations, exports, firm_library, firm_modes, health as health_router, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, observability_dashboard as dashboard_router, onboarding as onboarding_router, reports, retention as retention_router, review, section_deepening, session_exports, sessions, sources, trace as trace_router, users, versioning as versioning_router, workspace
+from api import admin, artifacts, audit_export as audit_export_router, chat, collaboration, comments, cost as cost_router, engagements, evaluations, exports, firm_library, firm_modes, health as health_router, inputs, metrics as metrics_router, notification_preferences, notifications as notifications_router, observability_dashboard as dashboard_router, onboarding as onboarding_router, pilot_feedback as pilot_feedback_router, reports, retention as retention_router, review, section_deepening, session_exports, sessions, sources, trace as trace_router, users, versioning as versioning_router, workspace
 from audit.middleware import audit_middleware
 from auth.dependencies import get_current_user
 from core.limits import limiter
@@ -138,6 +138,10 @@ app.include_router(retention_router.router, prefix="/api/admin", tags=["admin", 
 app.include_router(audit_export_router.router, prefix="/api/admin", tags=["admin", "audit-export"], dependencies=PROTECTED)
 # W24/D2 pilot onboarding — firm-admin-scoped wizard backend.
 app.include_router(onboarding_router.router, prefix="/api", tags=["onboarding"], dependencies=PROTECTED)
+# W24/D3 pilot feedback — per-claim feedback + artifact rating on /api/sessions;
+# weekly check-in + pilot-health dashboard on /api/pilot.
+app.include_router(pilot_feedback_router.session_router, prefix="/api/sessions", tags=["pilot-feedback"], dependencies=PROTECTED)
+app.include_router(pilot_feedback_router.router, prefix="/api", tags=["pilot-feedback"], dependencies=PROTECTED)
 # W23/D4 health — public; surfaces boot-time config status.
 app.include_router(health_router.router, tags=["health"])
 

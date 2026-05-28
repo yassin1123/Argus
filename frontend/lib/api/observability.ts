@@ -76,6 +76,8 @@ export interface DashboardData {
   verification: VerificationBlock;
   verification_quality?: VerificationQualityBlock;
   cost: CostBlock;
+  // W24/D3: firm-scoped pilot-health aggregate (null for system-wide).
+  pilot_health?: import("./pilotFeedback").PilotHealth | null;
   recent_failures: DashboardFailureRow[];
 }
 

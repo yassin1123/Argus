@@ -257,6 +257,18 @@ async def get_dashboard(
         except Exception as e:  # noqa: BLE001
             logger.debug("dashboard: budget/rate panel skipped: %s", e)
 
+    # W24/D3: pilot-health panel. Firm-scoped only (the pilot is a
+    # per-firm engagement); the system-wide view skips it. Visible to
+    # the operator (system_admin scoping to the firm) + the pilot
+    # firm_admin (forced to their own firm by _scope_firm_id).
+    pilot_panel: dict[str, Any] | None = None
+    if scoped_firm is not None:
+        try:
+            from core.pilot_feedback import pilot_health_panel
+            pilot_panel = await pilot_health_panel(scoped_firm)
+        except Exception as e:  # noqa: BLE001
+            logger.debug("dashboard: pilot-health panel skipped: %s", e)
+
     return {
         "hours": int(hours),
         "from": from_ts.isoformat(),
@@ -269,6 +281,7 @@ async def get_dashboard(
         "cost": cost_panel,
         "budget": budget_panel,
         "rate_limits": rate_limit_panel,
+        "pilot_health": pilot_panel,
         "recent_failures": failures,
     }
 

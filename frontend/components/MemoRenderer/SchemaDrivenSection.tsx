@@ -24,6 +24,7 @@
 import { Fragment } from "react";
 
 import ClaimCommentAffordance from "../Comments/ClaimCommentAffordance";
+import ClaimVerificationFeedback from "../PilotFeedback/ClaimVerificationFeedback";
 
 export type JsonValue =
   | string
@@ -177,6 +178,7 @@ function SchemaValue({ value, depth }: { value: JsonValue; depth: number }) {
                         {isClaimColumn && typeof cellValue === "string" && cellValue ? (
                           <span className="ml-1">
                             <ClaimCommentAffordance claimId={cellValue} compact />
+                            <ClaimVerificationFeedback claimId={cellValue} compact />
                           </span>
                         ) : null}
                       </td>

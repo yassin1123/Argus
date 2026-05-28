@@ -6,6 +6,7 @@ import { createArtifact, exportArtifactDocx, listArtifacts } from "@/lib/api";
 import type { Artifact, ArtifactStatus, ArtifactType, SessionDetail } from "@/lib/types";
 
 import ArtifactCommentAffordance from "../Comments/ArtifactCommentAffordance";
+import ArtifactRatingPrompt from "../PilotFeedback/ArtifactRatingPrompt";
 
 type Tab = "memos" | "decks" | "models" | "charts";
 
@@ -70,6 +71,8 @@ export default function ArtifactsRail({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
+  // W24/D3: after a successful download, prompt a quick quality rating.
+  const [ratingFor, setRatingFor] = useState<{ id: string; type: string } | null>(null);
 
   const refresh = async () => {
     try {
@@ -98,6 +101,7 @@ export default function ArtifactsRail({
       link.download = `${a.title.replace(/[^\w\s.-]/g, "_").slice(0, 60)}.docx`;
       link.click();
       URL.revokeObjectURL(url);
+      setRatingFor({ id: a.id, type: a.type });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Export failed");
     } finally {
@@ -121,6 +125,16 @@ export default function ArtifactsRail({
 
   return (
     <aside className="argus-pane-artifacts flex flex-col">
+      {ratingFor ? (
+        <div className="border-b border-argus-border-subtle p-2">
+          <ArtifactRatingPrompt
+            sessionId={session.id}
+            artifactId={ratingFor.id}
+            artifactType={ratingFor.type}
+            onClose={() => setRatingFor(null)}
+          />
+        </div>
+      ) : null}
       <div className="sticky top-0 z-10 border-b border-argus-border-subtle bg-[var(--bg-rail)] px-3 pt-3 pb-2">
         <div className="argus-label mb-2 flex items-center justify-between">
           <span>Artifacts</span>
