@@ -1,0 +1,301 @@
+{
+  "run_at": "2026-05-28T23:24:26.681451+00:00",
+  "all_ok": true,
+  "outcome": "pass",
+  "phases": [
+    {
+      "name": "onboarding",
+      "ok": true,
+      "detail": "firm + 3 users created (firm_id=a08a3888\u2026)",
+      "data": {
+        "firm": {
+          "firm_id": "a08a3888-11fb-4841-9771-da3063b76186",
+          "slug": "pilot-dress-rehearsal",
+          "created": false,
+          "branding": {
+            "footer_text": "Pilot Dress Rehearsal Inc \u2014 Private & Confidential",
+            "primary_color": "#143C8C"
+          }
+        },
+        "users": {
+          "firm_id": "a08a3888-11fb-4841-9771-da3063b76186",
+          "partner": "195df527-154f-490d-9f9d-f5198060b4e9",
+          "senior": "e310edf3-287f-42e1-af50-e8641ba92023",
+          "analyst": "1b0070b5-614c-4d45-b8e8-02b23b3d252f"
+        }
+      }
+    },
+    {
+      "name": "library",
+      "ok": true,
+      "detail": "7/7 docs ingested (ready)",
+      "data": {
+        "summary": {
+          "total_files": 7,
+          "by_status": {
+            "ready": 7,
+            "dedup_skipped": 0,
+            "failed": 0
+          },
+          "chunks_created": 7,
+          "failures": []
+        },
+        "doc_count": 7
+      }
+    },
+    {
+      "name": "engagements",
+      "ok": true,
+      "detail": "M&A=898d4dd9\u2026 growth=15e6e79d\u2026",
+      "data": {
+        "engagements": [
+          {
+            "label": "m_and_a",
+            "session_id": "898d4dd9-99f0-490a-ae36-0734711daacf",
+            "brief": "Assess whether our client (a logistics-focused PE fund) should proceed to a binding offer for Harbor Logistics Group, the UK 3PL, and at what EV range. The decision turns on: the real standalone EBITDA once the questionable FY24 warehouse-relocation add-backs are challenged; the durability of revenue given top-5 customer concentration; the operational risk of the in-flight ERP migration and subcontracted-driver model; and a defensible valuation triangulated from comparable 3PL transactions. Flag where the evidence is thin rather than guessing.",
+            "pipeline_status": "complete",
+            "claim_count": 10,
+            "has_report": true,
+            "approved": true
+          },
+          {
+            "label": "growth",
+            "session_id": "15e6e79d-0f27-48b4-82ea-c25b87033d35",
+            "brief": "Recommend the highest-confidence growth strategy for Harbor Logistics Group over the next 18 months. Compare the three vectors in our library \u2014 Returns Management cross-sell, Republic of Ireland expansion, and automation retrofit of the manual sites \u2014 on confidence, capital intensity, and margin impact. Pick one as the near-term priority and name the single assumption that would change the recommendation.",
+            "pipeline_status": "complete",
+            "claim_count": 20,
+            "has_report": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "pipeline",
+      "ok": true,
+      "detail": "m_and_a: status=complete claims=10 report=True (286.1s); growth: status=complete claims=20 report=True (459.3s)",
+      "data": {
+        "runs": [
+          {
+            "label": "m_and_a",
+            "status": "complete",
+            "claim_count": 10,
+            "has_report": true,
+            "elapsed_s": 286.1,
+            "error": ""
+          },
+          {
+            "label": "growth",
+            "status": "complete",
+            "claim_count": 20,
+            "has_report": true,
+            "elapsed_s": 459.3,
+            "error": ""
+          }
+        ]
+      }
+    },
+    {
+      "name": "artifacts",
+      "ok": true,
+      "detail": "m_and_a: 6/6 deliverables; growth: 6/6 deliverables",
+      "data": {
+        "per_engagement": [
+          {
+            "label": "m_and_a",
+            "memo_present": true,
+            "exporters_ready": 5,
+            "deliverables": 6,
+            "details": [
+              {
+                "type": "one_pager",
+                "format": "html",
+                "status": "ready"
+              },
+              {
+                "type": "deck",
+                "format": "pptx",
+                "status": "ready"
+              },
+              {
+                "type": "excel_model",
+                "format": "xlsx",
+                "status": "ready"
+              },
+              {
+                "type": "email",
+                "format": "md",
+                "status": "ready"
+              },
+              {
+                "type": "interview_guide",
+                "format": "md",
+                "status": "ready"
+              }
+            ]
+          },
+          {
+            "label": "growth",
+            "memo_present": true,
+            "exporters_ready": 5,
+            "deliverables": 6,
+            "details": [
+              {
+                "type": "one_pager",
+                "format": "html",
+                "status": "ready"
+              },
+              {
+                "type": "deck",
+                "format": "pptx",
+                "status": "ready"
+              },
+              {
+                "type": "excel_model",
+                "format": "xlsx",
+                "status": "ready"
+              },
+              {
+                "type": "email",
+                "format": "md",
+                "status": "ready"
+              },
+              {
+                "type": "interview_guide",
+                "format": "md",
+                "status": "ready"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "review",
+      "ok": true,
+      "detail": "cycle: submit_for_review\u2713 -> request_changes\u2713 -> resubmit\u2713 -> approve\u2713",
+      "data": {
+        "steps": [
+          {
+            "action": "submit_for_review",
+            "ok": true,
+            "from": "draft",
+            "to": "in_review",
+            "status_code": 200,
+            "reason": ""
+          },
+          {
+            "action": "request_changes",
+            "ok": true,
+            "from": "in_review",
+            "to": "changes_requested",
+            "status_code": 200,
+            "reason": ""
+          },
+          {
+            "action": "resubmit",
+            "ok": true,
+            "from": "changes_requested",
+            "to": "in_review",
+            "status_code": 200,
+            "reason": ""
+          },
+          {
+            "action": "approve",
+            "ok": true,
+            "from": "in_review",
+            "to": "approved",
+            "status_code": 200,
+            "reason": ""
+          }
+        ],
+        "session_id": "898d4dd9-99f0-490a-ae36-0734711daacf"
+      }
+    },
+    {
+      "name": "feedback",
+      "ok": true,
+      "detail": "claim_fb=6 ratings=2 avg_edit_pct=0.0 checkins=1",
+      "data": {
+        "pilot_health": {
+          "firm_id": "a08a3888-11fb-4841-9771-da3063b76186",
+          "claim_feedback": {
+            "total": 6,
+            "counts": {
+              "correct": 4,
+              "wrong_supported": 0,
+              "wrong_flagged": 2,
+              "unsure": 0
+            },
+            "pct": {
+              "correct": 66.7,
+              "wrong_supported": 0.0,
+              "wrong_flagged": 33.3,
+              "unsure": 0.0
+            }
+          },
+          "artifact_ratings": {
+            "average_rating": 4.0,
+            "rating_count": 2,
+            "by_type": [
+              {
+                "artifact_type": "deck",
+                "average_rating": 4.0,
+                "count": 1
+              },
+              {
+                "artifact_type": "memo",
+                "average_rating": 4.0,
+                "count": 1
+              }
+            ]
+          },
+          "edit_rate": {
+            "average_edit_fraction": 0.0,
+            "average_edit_pct": 0.0,
+            "engagement_count": 1
+          },
+          "checkin_trend": [
+            {
+              "week_bucket": "2026-W22",
+              "responses": {
+                "what_worked": "End-to-end run produced a usable first draft.",
+                "trust_rating": 4,
+                "would_keep_using": "yes"
+              },
+              "updated_at": "2026-05-28T23:24:23.611785+00:00"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "enterprise",
+      "ok": true,
+      "detail": "isolation 2/2 blocked; purge residual=0; audit rows=5 leak=False",
+      "data": {
+        "isolation": {
+          "attempts": 2,
+          "blocked_404": 2
+        },
+        "deletion": {
+          "residual_rows": 0,
+          "audit_row_present": true,
+          "rows_deleted": 1
+        },
+        "audit_export": {
+          "rows": 5,
+          "content_leak": false
+        }
+      }
+    },
+    {
+      "name": "cost",
+      "ok": true,
+      "detail": "LLM spend this run: $0.69 across 53 calls",
+      "data": {
+        "total_usd": 0.6882,
+        "call_count": 53
+      }
+    }
+  ]
+}
