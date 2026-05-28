@@ -33,6 +33,10 @@ backend/eval_runs/**/raw/
 # keep the cache local. The labelled fixture + summary.json ARE committed.
 backend/eval/calibration/raw_scores_*_real.json
 
+# Dress-rehearsal transient synthetic library source (regenerated each
+# run). Only summary.json is committed.
+backend/eval_runs/week24_dress_rehearsal/_library_src/
+
 # Week 3 / Day 5 e2e raw per-ticker captures (memos can hit ~1MB each, reproducible).
 # Only summary.json is committed.
 backend/eval_runs/week3_e2e/AAPL.json
