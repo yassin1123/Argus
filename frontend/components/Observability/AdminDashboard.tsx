@@ -92,6 +92,28 @@ export default function AdminDashboard({
 
   return (
     <div className="argus-dashboard" data-testid="admin-dashboard">
+      {data.cost_alerts && data.cost_alerts.length > 0 ? (
+        <div className="argus-dashboard__section" data-testid="cost-alerts">
+          {data.cost_alerts.map((a) => (
+            <div
+              key={`${a.firm_id}-${a.alert_level}`}
+              className={`mb-1 rounded-argus px-3 py-2 text-sm ${
+                a.alert_level === "critical"
+                  ? "bg-red-50 text-red-800"
+                  : "bg-amber-50 text-amber-800"
+              }`}
+            >
+              {a.alert_level === "critical" ? "⛔" : "⚠️"} Firm{" "}
+              {a.firm_id.slice(0, 8)}… at {a.used_pct.toFixed(0)}% of budget ($
+              {a.month_to_date_usd.toFixed(2)} / ${a.monthly_budget_usd.toFixed(2)},{" "}
+              {a.month_bucket})
+              {a.alert_level === "critical"
+                ? " — soft-stop active on new engagements"
+                : " — approaching cap"}
+            </div>
+          ))}
+        </div>
+      ) : null}
       {data.pilot_health ? (
         <div className="argus-dashboard__section">
           <PilotHealthPanel data={data.pilot_health} />

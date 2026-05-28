@@ -27,6 +27,11 @@ The W23/D3 hard rules baked in:
     the ceiling is the per-engagement backstop.
 """
 
+from .alerts import (
+    WARN_THRESHOLD_PCT,
+    active_cost_alerts,
+    scan_cost_alerts,
+)
 from .budgets import (
     BudgetStatus,
     DEFAULT_SESSION_CEILING_USD,
@@ -49,10 +54,13 @@ __all__ = [
     "DEFAULT_EXPENSIVE_RATE_PER_MINUTE",
     "DEFAULT_SESSION_CEILING_USD",
     "RateLimitDecision",
+    "WARN_THRESHOLD_PCT",
+    "active_cost_alerts",
     "check_engagement_blocked",
     "check_engagement_creation_limit",
     "check_expensive_endpoint_limit",
     "check_session_ceiling",
     "compute_budget_status",
     "maybe_notify_threshold_crossing",
+    "scan_cost_alerts",
 ]

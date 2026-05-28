@@ -269,6 +269,20 @@ async def get_dashboard(
         except Exception as e:  # noqa: BLE001
             logger.debug("dashboard: pilot-health panel skipped: %s", e)
 
+    # W24/D4: cost-burn alerts. The operator's cross-firm view re-scans
+    # (cheap at pilot scale) so a firm approaching its cap is visible
+    # before the soft-stop fires; a firm-admin sees only their own
+    # firm's alert (read from the cached table — no cross-firm scan).
+    cost_alerts: list[dict[str, Any]] = []
+    try:
+        from core.cost_governance import active_cost_alerts, scan_cost_alerts
+        if _is_system_admin(user) and scoped_firm is None:
+            cost_alerts = await scan_cost_alerts()
+        else:
+            cost_alerts = await active_cost_alerts(scoped_firm)
+    except Exception as e:  # noqa: BLE001
+        logger.debug("dashboard: cost-alert panel skipped: %s", e)
+
     return {
         "hours": int(hours),
         "from": from_ts.isoformat(),
@@ -282,6 +296,7 @@ async def get_dashboard(
         "budget": budget_panel,
         "rate_limits": rate_limit_panel,
         "pilot_health": pilot_panel,
+        "cost_alerts": cost_alerts,
         "recent_failures": failures,
     }
 

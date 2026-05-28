@@ -78,7 +78,19 @@ export interface DashboardData {
   cost: CostBlock;
   // W24/D3: firm-scoped pilot-health aggregate (null for system-wide).
   pilot_health?: import("./pilotFeedback").PilotHealth | null;
+  // W24/D4: firms approaching/over budget — operator cost-burn alerts.
+  cost_alerts?: CostAlertRow[];
   recent_failures: DashboardFailureRow[];
+}
+
+export interface CostAlertRow {
+  firm_id: string;
+  alert_level: "warn" | "critical";
+  used_pct: number;
+  month_to_date_usd: number;
+  monthly_budget_usd: number;
+  month_bucket: string;
+  updated_at: string | null;
 }
 
 export async function getDashboard(
