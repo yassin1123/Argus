@@ -1,0 +1,469 @@
+{
+  "generated_at": "2026-05-28T19:31:30.050062+00:00",
+  "gate_status": "complete",
+  "verifier_source": "cross_family_llm",
+  "real_pair_count": 61,
+  "real_metrics": {
+    "pair_count": 61,
+    "correct": 40,
+    "accuracy": 0.6557377049180327,
+    "confusion": {
+      "supported": {
+        "supported": 7,
+        "partial": 0,
+        "insufficient": 0,
+        "contradicted": 0
+      },
+      "partial": {
+        "supported": 18,
+        "partial": 29,
+        "insufficient": 0,
+        "contradicted": 2
+      },
+      "insufficient": {
+        "supported": 0,
+        "partial": 0,
+        "insufficient": 4,
+        "contradicted": 0
+      },
+      "contradicted": {
+        "supported": 1,
+        "partial": 0,
+        "insufficient": 0,
+        "contradicted": 0
+      }
+    },
+    "per_class": [
+      {
+        "label": "supported",
+        "precision": 1.0,
+        "recall": 0.2692307692307692,
+        "f1": 0.42424242424242425,
+        "support": 26,
+        "tp": 7,
+        "fp": 0,
+        "fn": 19
+      },
+      {
+        "label": "partial",
+        "precision": 0.5918367346938775,
+        "recall": 1.0,
+        "f1": 0.7435897435897436,
+        "support": 29,
+        "tp": 29,
+        "fp": 20,
+        "fn": 0
+      },
+      {
+        "label": "insufficient",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4,
+        "tp": 4,
+        "fp": 0,
+        "fn": 0
+      },
+      {
+        "label": "contradicted",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2,
+        "tp": 0,
+        "fp": 1,
+        "fn": 2
+      }
+    ],
+    "per_category_accuracy": {
+      "numeric_claim": 0.5294117647058824,
+      "causal_claim": 0.6,
+      "comparative": 0.75,
+      "attribution": 0.6666666666666666,
+      "forecast": 1.0
+    },
+    "per_category_pair_count": {
+      "numeric_claim": 17,
+      "causal_claim": 15,
+      "comparative": 20,
+      "attribution": 6,
+      "forecast": 3
+    },
+    "fp_rate_on_supported": 0.0,
+    "fp_count_on_supported": 0,
+    "supported_predictions": 7,
+    "recall_on_insufficient": 1.0,
+    "insufficient_caught": 4,
+    "insufficient_total": 4,
+    "adversarial_accuracy": 0.0,
+    "adversarial_count": 0
+  },
+  "headline": {
+    "fp_rate_on_supported": 0.0,
+    "recall_on_insufficient": 1.0,
+    "recall_on_supported": 0.2692307692307692,
+    "accuracy": 0.6557377049180327
+  },
+  "confusion_matrix": {
+    "supported": {
+      "supported": 7,
+      "partial": 0,
+      "insufficient": 0,
+      "contradicted": 0
+    },
+    "partial": {
+      "supported": 18,
+      "partial": 29,
+      "insufficient": 0,
+      "contradicted": 2
+    },
+    "insufficient": {
+      "supported": 0,
+      "partial": 0,
+      "insufficient": 4,
+      "contradicted": 0
+    },
+    "contradicted": {
+      "supported": 1,
+      "partial": 0,
+      "insufficient": 0,
+      "contradicted": 0
+    }
+  },
+  "per_category_accuracy": {
+    "numeric_claim": 0.5294117647058824,
+    "causal_claim": 0.6,
+    "comparative": 0.75,
+    "attribution": 0.6666666666666666,
+    "forecast": 1.0
+  },
+  "per_category_pair_count": {
+    "numeric_claim": 17,
+    "causal_claim": 15,
+    "comparative": 20,
+    "attribution": 6,
+    "forecast": 3
+  },
+  "failure_cases": {
+    "false_positives": [],
+    "false_negatives": [
+      {
+        "id": "wks_0001",
+        "category": "comparative",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Comparable UK industrial-services transactions (Crestwood Group, Brighton FM, Aldwych Compliance) traded at 7.2-9.5x EV/",
+        "evidence_head": "| Target            | Acquirer                  | Year | EV (\u00a3m) | EV/EBITDA | Source                        |\n|--------",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.987,
+        "raw_lexical_numeric_score": 0.833
+      },
+      {
+        "id": "wks_0005",
+        "category": "comparative",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Non-food retail in the UK has been hollowed out, with only out-of-town value formats (B&M, Home Bargains, The Range), br",
+        "evidence_head": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and L",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.99,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0006",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "TargetCo has committed \u00a36.8m capex across FY25-FY27 for IT (\u00a34.0m Dynamics 365 migration), fleet replacement (\u00a31.6m), HQ",
+        "evidence_head": "**Q6: Capex plans \u2014 committed vs discretionary?**\n*Management:* \"Committed: \u00a34.0m IT (Dynamics 365 migration), \u00a31.6m\nfle",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.958,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0012",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "The Republic of Ireland footprint is sub-scale at 9% of revenue (\u00a316.2m) and was historically EBITDA-negative until FY24",
+        "evidence_head": "UK 91% (England 78%, Scotland 8%, Wales 4%, NI 1%); Republic of\nIreland 9%. Three of TargetCo's 12 operational sites are",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.904,
+        "raw_lexical_numeric_score": 0.667
+      },
+      {
+        "id": "wks_0013",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "TargetCo generates 91% of revenue from UK operations (England 78%, Scotland 8%, Wales 4%, NI 1%), with three of 12 opera",
+        "evidence_head": "UK 91% (England 78%, Scotland 8%, Wales 4%, NI 1%); Republic of\nIreland 9%. Three of TargetCo's 12 operational sites are",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "neutral",
+        "raw_deberta_confidence": 0.995,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0014",
+        "category": "causal_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Discounters Aldi and Lidl have captured approximately 18% combined market share in UK grocery over the past decade, forc",
+        "evidence_head": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and L",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.984,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0059",
+        "category": "causal_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Industrial Cleaning segment (24% of revenue) decelerated sharply from 6.0% growth in FY22 to 2.0% in FY24, generating \u00a34",
+        "evidence_head": "### 2.2 Industrial Cleaning (24% of revenue)\nManufacturing, food-production, and pharmaceutical-grade industrial\ncleanin",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.996,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0069",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Albright operates SAP S/4HANA (deployed FY22) enabling segment-level price changes within a 3-week change cycle, with sp",
+        "evidence_head": "- Group COGS rate moved from 61.8% (FY22) to 63.6% (FY24), a\n  180bps deterioration driven by Food (220bps) and Home\n  (",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.929,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0071",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "contradicted",
+        "ensemble_verdict_collapsed": "contradicted",
+        "reason": "DeBERTa contradicts (0.98): see chunk",
+        "claim_head": "Premium customers cite 'consistency of stocking' and 'in-store experience' above price as decision drivers in 64% of cat",
+        "evidence_head": "- **Premium customers** show price elasticity of -0.8 on the\n  category basket \u2014 willingness to absorb a 5-7% price upli",
+        "raw_llm_verdict": "supported",
+        "raw_deberta_label": "contradiction",
+        "raw_deberta_confidence": 0.978,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0088",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Food segment represents \u00a3102.4m revenue (50.4% of group total) at 22.1% gross margin with +1.4% LFL growth and 62.4% ret",
+        "evidence_head": "| Segment  | Revenue (\u00a3m) | Gross margin | EBITDA (\u00a3m) | LFL growth | Stores |\n|----------|--------------|--------------",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "contradiction",
+        "raw_deberta_confidence": 0.459,
+        "raw_lexical_numeric_score": 0.6
+      },
+      {
+        "id": "wks_0110",
+        "category": "attribution",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Understanding the customer profile requires identifying who the business serves best and why they choose the business, v",
+        "evidence_head": "1. **Who is the customer the business serves best, and why?**\n   Cohort-level revenue concentration, NPS by segment, pro",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.996,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0113",
+        "category": "comparative",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "The UK retail market is bifurcating between scaled omnichannel operators and specialist single-channel operators, with t",
+        "evidence_head": "# Retail Sector Primer (UK + US, Boutique View)\nThis primer codifies the firm's working view of the consumer-retail\nsect",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "contradiction",
+        "raw_deberta_confidence": 0.999,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0121",
+        "category": "causal_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "The discounter pair (Aldi and Lidl) has taken roughly 18% combined share in UK grocery over the last decade, establishin",
+        "evidence_head": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and L",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "contradiction",
+        "raw_deberta_confidence": 0.998,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0131",
+        "category": "causal_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Buyers must articulate strategic rationale in one sentence (consolidation, geographic fill, channel acquisition, or data",
+        "evidence_head": "## What we ask buyers to commit to before the engagement\nFor a sector-screen or growth-strategy mandate in retail the fi",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.997,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0139",
+        "category": "causal_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "DeBERTa neutral; LLM may have anchored on gist",
+        "claim_head": "Customer cohort retention\u2014at minimum 12-month repeat purchase rate by acquisition cohort\u2014is essential. Retail brands fre",
+        "evidence_head": "- **Like-for-like (LFL) sales growth** decomposed into traffic, basket\n  size, and price/mix. A LFL number presented in ",
+        "raw_llm_verdict": "supported",
+        "raw_deberta_label": "neutral",
+        "raw_deberta_confidence": 0.985,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0144",
+        "category": "comparative",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "The UK grocery sector is dominated by five key players (Tesco, Sainsbury's, Asda, Morrisons, plus Aldi and Lidl), with t",
+        "evidence_head": "1. The grocery sector is a five-player game (Tesco, Sainsbury's, Asda,\n   Morrisons, plus the discounter pair Aldi and L",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.995,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0195",
+        "category": "attribution",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Apple operates on a geographic segment basis: Americas (North and South America), Europe (including India, Middle East, ",
+        "evidence_head": "AppleCare The Company offers a portfolio of fee-based service and support products under the AppleCare \u00ae brand. The offe",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.965,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0203",
+        "category": "causal_claim",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "The company experiences seasonal revenue concentration in Q1 (fiscal year) due to holiday demand, with product launch ti",
+        "evidence_head": "The following discussion should be read in conjunction with the 2025 Form 10-K filed with the U.S. Securities and Exchan",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "entailment",
+        "raw_deberta_confidence": 0.995,
+        "raw_lexical_numeric_score": 1.0
+      },
+      {
+        "id": "wks_0334",
+        "category": "comparative",
+        "adversarial": false,
+        "ground_truth": "supported",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "At 12-headcount scale, sequenced single-market entry produced 2.3x the qualified pipeline in 18 months compared to paral",
+        "evidence_head": "At 12-headcount caps, sequenced entry to a single anchor market produced 2.3x the qualified pipeline in 18 months vs spl",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "neutral",
+        "raw_deberta_confidence": 0.999,
+        "raw_lexical_numeric_score": 1.0
+      }
+    ],
+    "other_disagreements": [
+      {
+        "id": "wks_0062",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "contradicted",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "TargetCo achieved \u00a3180.0m revenue in FY24 with 4.0% YoY growth, following \u00a3173.1m in FY23 (+6.6% YoY) and \u00a3162.4m in FY2",
+        "evidence_head": "UK 91% (England 78%, Scotland 8%, Wales 4%, NI 1%); Republic of\nIreland 9%. Three of TargetCo's 12 operational sites are",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "contradiction",
+        "raw_deberta_confidence": 0.867,
+        "raw_lexical_numeric_score": 0.429
+      },
+      {
+        "id": "wks_0085",
+        "category": "numeric_claim",
+        "adversarial": false,
+        "ground_truth": "contradicted",
+        "ensemble_verdict": "weak",
+        "ensemble_verdict_collapsed": "partial",
+        "reason": "LLM weak (sticky)",
+        "claim_head": "Home segment shows -3.4% LFL growth (only segment in absolute decline) with 44.2% customer retention (20 points below se",
+        "evidence_head": "| Segment  | Revenue (\u00a3m) | Gross margin | EBITDA (\u00a3m) | LFL growth | Stores |\n|----------|--------------|--------------",
+        "raw_llm_verdict": "weak",
+        "raw_deberta_label": "contradiction",
+        "raw_deberta_confidence": 0.68,
+        "raw_lexical_numeric_score": 0.5
+      }
+    ]
+  }
+}

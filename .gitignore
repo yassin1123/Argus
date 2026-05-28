@@ -28,6 +28,11 @@ backend/eval_runs/**/run_*.json
 backend/eval_runs/**/run_*.md
 backend/eval_runs/**/raw/
 
+# Real-claim raw score caches embed full claim/evidence text from real
+# engagement runs — re-runnable from the labelled golden fixture, so we
+# keep the cache local. The labelled fixture + summary.json ARE committed.
+backend/eval/calibration/raw_scores_*_real.json
+
 # Week 3 / Day 5 e2e raw per-ticker captures (memos can hit ~1MB each, reproducible).
 # Only summary.json is committed.
 backend/eval_runs/week3_e2e/AAPL.json
