@@ -1,0 +1,27 @@
+Argus v1.0.0 — first pilot
+
+v1.0 is earned, not declared: a real boutique firm is using Argus in a
+live pilot, within documented bounds (docs/v1.0/scope.md).
+
+What 1.0 means:
+- A cross-family verification spine (Anthropic synthesis x OpenAI gpt-4o
+  judge + DeBERTa-v3 + lexical), enforced at boot — no silent heuristic.
+- The measured guarantee: 0% false-positives-on-supported, 100%
+  recall-on-insufficient on 61 human-labelled real claims (GREEN gate).
+  Posture: "verified (conservative)" — never wrongly blesses, over-flags,
+  human reviews flagged claims.
+- Six-artifact deliverable suite, firm knowledge + layered modes, the
+  full collaboration layer, observability, and the four enterprise
+  pillars (isolation, retention, audit export, cost governance).
+
+What 1.0 is NOT: SSO, app-level field encryption, external pen-test,
+Companies House OCR, multi-instance/HA, notification digests/push,
+element-level commenting, verifier-recall improvement — all named as
+post-1.0 in docs/v1.0/scope.md.
+
+The pilot is launched and running. Whether it's successful is the
+retrospective's call, not this tag's.
+
+# To create the tag on Day 5 (after final verification):
+#   git tag -a v1.0.0 -F docs/v1.0/TAG_MESSAGE.txt
+#   git push origin v1.0.0
