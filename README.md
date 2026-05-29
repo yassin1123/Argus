@@ -2,11 +2,13 @@
 
 > Verification-grounded consulting deliverables for boutique firms.
 
-![version](https://img.shields.io/badge/version-1.0.0-0F6E56) ![pilot](https://img.shields.io/badge/pilot-launched-0F6E56) ![verifier](https://img.shields.io/badge/verifier-GREEN%20(conservative)-0F6E56)
+![version](https://img.shields.io/badge/version-1.0.0-0F6E56) ![deployed](https://img.shields.io/badge/deployed-180%20Degrees%20Consulting-0F6E56) ![verifier](https://img.shields.io/badge/verifier-GREEN%20(conservative)-0F6E56)
 
 Argus is the consulting platform where every claim in every deliverable links back to its source, every memo runs through cross-family verification, and your firm's own playbooks shape the output. Built for boutique consulting firms — 10 to 100 consultants — who compete on quality and senior expertise, not headcount.
 
-**v1.0 status (honest):** Argus is at v1.0 because **a real boutique firm is using it in a live pilot** — not because every imaginable feature is built. It ships with documented bounds: the verification layer is **GREEN-gated but deliberately conservative**, several enterprise features are explicitly deferred to post-1.0, and the pilot is *launched and running* — whether it's *successful* is the retrospective's call, not this README's. See [`docs/v1.0/scope.md`](docs/v1.0/scope.md) for the exact in/out line.
+**Deployed and in use:** Argus is running with **~150 users at 180 Degrees Consulting, University of Southampton**, and is in talks to expand to other 180 Degrees branches and to **Blackmont Consulting**.
+
+**v1.0 status (honest):** Argus is at v1.0 because **a real firm is using it** — not because every imaginable feature is built. It ships with documented bounds: the verification layer is **GREEN-gated but deliberately conservative**, several enterprise features are explicitly deferred to post-1.0, and real-world use is *underway* — whether the deployment is a *measured success* is the retrospective's call (see [`docs/pilot/retro_framework.md`](docs/pilot/retro_framework.md)), not this README's. The exact in/out line is in [`docs/v1.0/scope.md`](docs/v1.0/scope.md).
 
 ---
 
@@ -126,9 +128,13 @@ The seeded demo workspace runs in `DEMO_MODE` without API keys — useful for ev
 
 ---
 
-## Pilot status
+## Deployment status
 
-Launched and running with one boutique firm. **"Launched and running" is not "successful"** — success is measured by the live signals (edit rate, claim-feedback agreement, artifact ratings) and is the retrospective's call. The pilot's learning lives in [`docs/pilot/learnings.md`](docs/pilot/learnings.md).
+Argus is deployed to **~150 users at 180 Degrees Consulting, University of Southampton** — the student-led consultancy where it was built and put into real use. It is in talks to expand to **other 180 Degrees branches** and to **Blackmont Consulting**.
+
+Its creator, **Yassin**, has since left the University of Southampton chapter to pursue **Substrate**, his startup.
+
+**"Deployed and in use" is not the same as a measured success.** That verdict comes from the live signals (edit rate, claim-feedback agreement, artifact ratings, would-they-keep-using-it) against the [pilot retro framework](docs/pilot/retro_framework.md); the learning lives in [`docs/pilot/learnings.md`](docs/pilot/learnings.md). The 25-week build retrospective is in [`docs/v1.0/the_build.md`](docs/v1.0/the_build.md).
 
 **Out of scope (by design):** replacing the consultant. Argus accelerates research-and-deliverable work; the judgment, the client relationship, and the recommendation stay with the human.
 

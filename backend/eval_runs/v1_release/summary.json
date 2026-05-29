@@ -1,0 +1,57 @@
+{
+  "run_at": "2026-05-29T00:59:38.455191+00:00",
+  "all_ok": true,
+  "release_gate": "PASS \u2014 clear to tag v1.0.0",
+  "checks": [
+    {
+      "name": "verifier_green_gate",
+      "ok": true,
+      "detail": "band=GREEN, FP=0.0%, recall_insufficient=100%, verifier_source=cross_family_llm",
+      "data": {
+        "band": "GREEN",
+        "fp": 0.0,
+        "recall": 1.0
+      }
+    },
+    {
+      "name": "quality_regression",
+      "ok": true,
+      "detail": "10 passed, 1 skipped, 1 warning in 4.88s",
+      "data": {
+        "returncode": 0
+      }
+    },
+    {
+      "name": "pipeline_e2e",
+      "ok": true,
+      "detail": "status=complete claims=10 report=True (216s)",
+      "data": {
+        "claims": 10
+      }
+    },
+    {
+      "name": "six_artifacts",
+      "ok": true,
+      "detail": "6/6 deliverables (memo + 5 exporters)",
+      "data": {}
+    },
+    {
+      "name": "collaboration_cycle",
+      "ok": true,
+      "detail": "submit_for_reviewok->request_changesok->resubmitok->approveok; versions=1 edit_telemetry=1",
+      "data": {}
+    },
+    {
+      "name": "observability",
+      "ok": true,
+      "detail": "metric_events=127 cost_rows=8 spend=$0.23",
+      "data": {}
+    },
+    {
+      "name": "enterprise",
+      "ok": true,
+      "detail": "isolation_404=True purge_residual=0 audit_rows=5 leak=False",
+      "data": {}
+    }
+  ]
+}
