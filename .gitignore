@@ -37,6 +37,10 @@ backend/eval/calibration/raw_scores_*_real.json
 # run). Only summary.json is committed.
 backend/eval_runs/week24_dress_rehearsal/_library_src/
 
+# v1.0 release-verification transient synthetic library (regenerated each
+# run). Only summary.json is committed.
+backend/eval_runs/v1_release/_lib/
+
 # Week 3 / Day 5 e2e raw per-ticker captures (memos can hit ~1MB each, reproducible).
 # Only summary.json is committed.
 backend/eval_runs/week3_e2e/AAPL.json
