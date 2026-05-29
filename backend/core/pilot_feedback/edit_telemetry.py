@@ -21,7 +21,7 @@ engagement view renders "approved with N% edits".
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any
 from uuid import UUID
 
@@ -40,6 +40,9 @@ class EditTelemetry:
     claims_baseline: int
     claims_added: int
     claims_removed: int
+    # W25/D3: per-section churn — { section_path: {same, added, removed,
+    # edit_fraction} }. No prose; just how much changed + where.
+    section_edits: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -91,34 +94,48 @@ async def compute_edit_telemetry(
         # (zero edits measured rather than a misleading number).
         baseline = final or {}
 
+    import difflib
+
     same = added = removed = 0
-    # Count baseline words across every top-level section.
     baseline_words = 0
+    section_edits: dict[str, Any] = {}
     for k in set(baseline.keys()) | set((final or {}).keys()):
         old_text = _stringify(baseline.get(k))
         new_text = _stringify((final or {}).get(k))
-        baseline_words += len(
-            [w for w in _WORD_RE.findall(old_text) if w.strip()]
-        )
+        s_base = len([w for w in _WORD_RE.findall(old_text) if w.strip()])
+        baseline_words += s_base
+        s_same = s_added = s_removed = 0
         if old_text == new_text:
-            same += len([w for w in _WORD_RE.findall(old_text) if w.strip()])
-            continue
-        import difflib
-        a = _WORD_RE.findall(old_text)
-        b = _WORD_RE.findall(new_text)
-        matcher = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
-        for tag, i1, i2, j1, j2 in matcher.get_opcodes():
-            n_a = len([w for w in a[i1:i2] if w.strip()])
-            n_b = len([w for w in b[j1:j2] if w.strip()])
-            if tag == "equal":
-                same += n_a
-            elif tag == "delete":
-                removed += n_a
-            elif tag == "insert":
-                added += n_b
-            elif tag == "replace":
-                removed += n_a
-                added += n_b
+            s_same = s_base
+        else:
+            a = _WORD_RE.findall(old_text)
+            b = _WORD_RE.findall(new_text)
+            matcher = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
+            for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+                n_a = len([w for w in a[i1:i2] if w.strip()])
+                n_b = len([w for w in b[j1:j2] if w.strip()])
+                if tag == "equal":
+                    s_same += n_a
+                elif tag == "delete":
+                    s_removed += n_a
+                elif tag == "insert":
+                    s_added += n_b
+                elif tag == "replace":
+                    s_removed += n_a
+                    s_added += n_b
+        same += s_same
+        added += s_added
+        removed += s_removed
+        s_total = s_same + s_added + s_removed
+        # Only record sections that actually changed — an untouched
+        # section is noise in the "which sections get edited most" view.
+        if s_added or s_removed:
+            section_edits[k] = {
+                "same": s_same, "added": s_added, "removed": s_removed,
+                "edit_fraction": round(
+                    (s_added + s_removed) / s_total, 4
+                ) if s_total else 0.0,
+            }
 
     total = same + added + removed
     edit_fraction = (added + removed) / total if total else 0.0
@@ -137,6 +154,7 @@ async def compute_edit_telemetry(
         claims_baseline=len(claims_base),
         claims_added=len(claims_final - claims_base),
         claims_removed=len(claims_base - claims_final),
+        section_edits=section_edits,
     )
 
 
@@ -148,6 +166,7 @@ async def compute_and_record_edit_telemetry(
     """Compute the telemetry and upsert it. One row per engagement;
     a re-approval refreshes it. Best-effort at the call site — the
     approval must not roll back if telemetry fails."""
+    import json
     t = await compute_edit_telemetry(session_id, firm_id)
     async with acquire() as conn:
         await conn.execute(
@@ -155,8 +174,10 @@ async def compute_and_record_edit_telemetry(
             INSERT INTO engagement_edit_telemetry
                 (session_id, firm_id, words_baseline, words_same,
                  words_added, words_removed, edit_fraction,
-                 claims_baseline, claims_added, claims_removed, approved_by)
-            VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                 claims_baseline, claims_added, claims_removed,
+                 section_edits, approved_by)
+            VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, $8, $9, $10,
+                    $11::jsonb, $12)
             ON CONFLICT (session_id) DO UPDATE SET
                 words_baseline = EXCLUDED.words_baseline,
                 words_same = EXCLUDED.words_same,
@@ -166,12 +187,14 @@ async def compute_and_record_edit_telemetry(
                 claims_baseline = EXCLUDED.claims_baseline,
                 claims_added = EXCLUDED.claims_added,
                 claims_removed = EXCLUDED.claims_removed,
+                section_edits = EXCLUDED.section_edits,
                 approved_by = EXCLUDED.approved_by,
                 created_at = NOW()
             """,
             str(session_id), str(firm_id), t.words_baseline, t.words_same,
             t.words_added, t.words_removed, t.edit_fraction,
             t.claims_baseline, t.claims_added, t.claims_removed,
+            json.dumps(t.section_edits),
             str(approved_by) if approved_by else None,
         )
     return t

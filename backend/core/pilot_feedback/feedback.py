@@ -272,14 +272,25 @@ async def _edit_rate_summary(firm_id: UUID | str) -> dict[str, Any]:
 
 
 async def pilot_health_panel(firm_id: UUID | str) -> dict[str, Any]:
-    """The W24/D3 pilot dashboard panel — everything firm-scoped to
-    ``firm_id``. The operator's (and the pilot firm_admin's)
-    daily-driver view."""
+    """The pilot dashboard panel — everything firm-scoped to ``firm_id``.
+    The operator's (and the pilot firm_admin's) daily-driver view.
+
+    W25/D3 enriches it with the live product-fit signals: the edit-rate
+    distribution + which sections get edited most, the claim-feedback
+    agreement rate, and the artifact quality (highest/lowest) signal."""
+    from .aggregates import (
+        artifact_quality_signal, claim_feedback_agreement,
+        edit_rate_by_section, edit_rate_summary,
+    )
     return {
         "firm_id": str(firm_id),
         "claim_feedback": await claim_feedback_distribution(firm_id),
+        "claim_feedback_agreement": await claim_feedback_agreement(firm_id),
         "artifact_ratings": await artifact_rating_summary(firm_id),
+        "artifact_quality": await artifact_quality_signal(firm_id),
         "edit_rate": await _edit_rate_summary(firm_id),
+        "edit_rate_summary": await edit_rate_summary(firm_id),
+        "edit_rate_by_section": await edit_rate_by_section(firm_id),
         "checkin_trend": await checkin_trend(firm_id),
     }
 
