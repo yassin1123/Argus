@@ -1,0 +1,8 @@
+<svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <rect width="72" height="72" rx="16" fill="#0F6E56"/>
+  <!-- stylised eye / verification mark -->
+  <path d="M16 36 C24 24, 48 24, 56 36 C48 48, 24 48, 16 36 Z" fill="none" stroke="#F5F3EC" stroke-width="3.5" stroke-linejoin="round"/>
+  <circle cx="36" cy="36" r="8.5" fill="none" stroke="#F5F3EC" stroke-width="3.5"/>
+  <!-- check inside the iris: verified -->
+  <path d="M32 36.5 L35 39.5 L41 32.5" fill="none" stroke="#F5F3EC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
