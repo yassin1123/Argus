@@ -301,4 +301,29 @@ async def get_dashboard(
     }
 
 
+@router.get("/observability/live-pilot")
+async def get_live_pilot(
+    firm_id: str | None = Query(
+        None, description="(system-admin only) scope to one firm",
+    ),
+    window_minutes: int = Query(30, ge=5, le=240),
+    user: dict = Depends(get_current_user),
+) -> dict[str, Any]:
+    """W25/D2 live-pilot watch view — tuned for active-pilot monitoring
+    (short-poll). Active engagements, live cost burn, firing alerts,
+    verification mix + anomaly, and feedback as it arrives. Firm-scoped:
+    a firm_admin is forced to their own firm; the operator (system_admin)
+    scopes to the pilot firm via ?firm_id."""
+    if not (_is_system_admin(user) or _is_firm_admin(user)):
+        raise HTTPException(status_code=403, detail="Admin role required")
+    scoped_firm = _scope_firm_id(user, firm_id)
+    if scoped_firm is None:
+        raise HTTPException(
+            status_code=400,
+            detail="live-pilot is firm-scoped; system-admin must pass ?firm_id",
+        )
+    from core.pilot_monitoring import live_pilot_view
+    return await live_pilot_view(scoped_firm, window_minutes=window_minutes)
+
+
 __all__ = ["router"]

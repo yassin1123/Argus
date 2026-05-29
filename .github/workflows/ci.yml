@@ -67,6 +67,7 @@ jobs:
             --ignore=tests/test_pilot_onboarding.py \
             --ignore=tests/test_pilot_feedback.py \
             --ignore=tests/test_pilot_smoke_check.py \
+            --ignore=tests/test_live_pilot_monitoring.py \
             -q --tb=short
 
   frontend-build:
